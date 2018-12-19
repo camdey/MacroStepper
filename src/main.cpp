@@ -3,6 +3,17 @@
 #include <Adafruit_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
+#include <Fonts/Arimo_Regular_10.h>
+#include <Fonts/Arimo_Regular_16.h>
+#include <Fonts/Arimo_Regular_18.h>
+#include <Fonts/Arimo_Regular_20.h>
+#include <Fonts/Arimo_Regular_22.h>
+#include <Fonts/Arimo_Regular_24.h>
+#include <Fonts/Arimo_Bold_24.h>
+#include <Fonts/Arimo_Regular_30.h>
+#include <Fonts/Arimo_Bold_30.h>
+#include <Fonts/Syncopate_Bold_36.h>
+#include <Fonts/Permanent_Marker_Regular_36.h>
 
 MCUFRIEND_kbv tft;
 
@@ -18,7 +29,6 @@ MCUFRIEND_kbv tft;
 
 #define TS_MINX 100
 #define TS_MAXX 920
-
 #define TS_MINY 70
 #define TS_MAXY 900
 
@@ -42,16 +52,22 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 50);
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
+#define GRAY    0xE73C
+#define iZettleGreenLite  0x9736
+#define iZettleGreen      0x6ED3
+#define iZettleRed        0xFBCC
+#define iZettleRedLite    0xFCD1
+#define iZettleBlue       0x4EDE
 
 #define BOXSIZE 40
 #define PENRADIUS 3
 #define MINPRESSURE 10
 #define MAXPRESSURE 1000
-int oldcolor, currentcolor;
 
-void draw(TSPoint& point);
 void startScreen();
 void drawArrows();
+void drawGrid();
+void manualScreen();
 
 void setup(void) {
   Serial.begin(9600);
@@ -64,92 +80,116 @@ void setup(void) {
     Serial.print(F("No driver found"));
   }
 
+  tft.setFont(&Arimo_Regular_24);
   tft.begin(identifier);
-  tft.setRotation(0);
-  tft.fillScreen(WHITE);
-
-// led
-//  pinMode(13, OUTPUT);
-
+  tft.fillScreen(GRAY);
   tft.setRotation(1);
+
   startScreen();
+  delay(3000);
+  manualScreen();
 }
 
 void loop() {
-  unsigned long timer = millis();
   TSPoint point = ts.getPoint();
 
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
-
-  if (point.z > MINPRESSURE && point.z < MAXPRESSURE) {
-    draw(point);
-  }
 }
 
 void startScreen() {
-  tft.fillScreen(WHITE);
+  tft.fillScreen(GRAY);
   tft.setTextColor(BLACK);
 
-  // drawArrows
-  drawArrows();
+  // grid patterns
+  // drawGrid();
 
-  // step distance
-  tft.setCursor(25,25);
-  tft.setTextSize(2);
+  tft.setCursor(30, 40);
+  tft.setFont(&Permanent_Marker_Regular_36);
+  tft.println("MacroStepper");
+
+  // Manual option
+  tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
+  tft.setCursor(30,130);
+  tft.setFont(&Arimo_Bold_30);
+  tft.println("Manual");
+
+  // Auto option
+  tft.fillRoundRect(170, 90, 130, 60, 8, iZettleGreen);
+  tft.setCursor(200,130);
+  tft.setFont(&Arimo_Bold_30);
+  tft.println("Auto");
+
+  // Homing option
+  tft.fillRect(0, 200, 320, 40, iZettleBlue);
+  tft.setCursor(20,225);
+  tft.setFont(&Arimo_Regular_20);
+  tft.println("Re-home");
+
+  // Move-to option
+  // tft.fillRoundRect(0, 200, 320, 40, 8, iZettleBlue);
+  tft.setCursor(220,225);
+  tft.setFont(&Arimo_Regular_20);
+  tft.println("Move-to");
+}
+
+void manualScreen() {
+  tft.fillScreen(GRAY);
+  tft.setTextColor(BLACK);
+
+  // grid patterns
+  drawGrid();
+
+  // Step Number
+  // tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
+  // tft.drawRect(20, 20, 120, 70, BLACK);
+  tft.setCursor(20,30);
+  tft.setFont(&Arimo_Regular_24);
+  tft.println("Step Nr.");
+  tft.setCursor(50,65);
+  tft.setFont(&Arimo_Bold_30);
+  tft.println("38");
+
+  // Step Distance
+  // tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
+  // tft.drawRect(20, 90, 120, 70, BLACK);
+  tft.setCursor(20,115);
+  tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
-  tft.drawFastHLine(25, 25+(10*2), (10*6*2), BLACK);
-  tft.setTextSize(3);
-  tft.setCursor(25, 25 + (10*2) + 5);
-  tft.println("0.025mm");
-  // tft.drawRect(25-8, 25-8, (7*6*3)+10, (10*5)+10, BLACK);
+  tft.setCursor(20,145);
+  tft.setFont(&Arimo_Bold_30);
+  tft.println("0.0375");
 
-  // rail position
-  tft.setCursor(25,100);
-  tft.setTextSize(2);
+  // Rail Posoition
+  // tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
+  // tft.drawRect(20, 180, 120, 70, BLACK);
+  tft.setCursor(20,195);
+  tft.setFont(&Arimo_Regular_24);
   tft.println("Rail Pos.");
-  tft.drawFastHLine(25, 100+(10*2), (9*6*2), BLACK);
-  tft.setTextSize(3);
-  tft.setCursor(25, 100 + (10*2) + 5);
-  tft.println("35.625mm");
-  // tft.drawRect(25-8, 100-8, (8*6*3)+10, (10*5)+10, BLACK);
+  tft.setCursor(20,225);
+  tft.setFont(&Arimo_Bold_30);
+  tft.println("78.545");
+}
 
-  // step progress
-  tft.setCursor(25,175);
-  tft.setTextSize(2);
-  tft.println("Progress");
-  tft.drawFastHLine(25, 175+(10*2), (8*6*2), BLACK);
-  tft.setTextSize(3);
-  tft.setCursor(25, 175 + (10*2) + 5);
-  tft.println("19/72");
-  // tft.drawRect(25-8, 175-8, (5*6*3)+10, (10*5)+10, BLACK);
+void drawGrid() {
+  for (int i = 1; i < 240/40; i++) {
+    tft.drawFastHLine(0, 40*i, 320, BLACK);
+  }
+  for (int i = 1; i < 320/40; i++) {
+    tft.drawFastVLine(40*i, 0, 240, BLACK);
+  }
 }
 
 void drawArrows() {
-  tft.fillTriangle(230, 50, 255, 15, 280, 50, BLACK);
-  tft.fillRect(245, 50, 20, 30, BLACK);
+  tft.fillTriangle(230, 50, 255, 15, 280, 50, iZettleGreen);
+  tft.fillRect(245, 50, 20, 30, iZettleGreen);
 
-  tft.drawRect(225, 90, 60, 40, BLACK);
-  tft.setTextSize(2);
-  tft.setCursor(231, 105);
-  tft.println("AUTO");
+  // tft.drawRect(225, 100, 60, 40, BLACK);
+  tft.setFont(&Arimo_Bold_24);
+  tft.setCursor(225, 130);
+  tft.println("Mode");
 
-  tft.fillRect(245, 140, 20, 30, BLACK);
-  tft.fillTriangle(230, 170, 255, 205, 280, 170, BLACK);
+  tft.fillRect(245, 160, 20, 30, iZettleRed);
+  tft.fillTriangle(230, 190, 255, 225, 280, 190, iZettleRed);
 
-}
-
-void draw(TSPoint& point) {
-  tft.fillScreen(BLACK);
-
-  // scale from 0->1023 to tft.width
-  point.x = map(point.x, TS_MINX, TS_MAXX, tft.width(), 0);
-  point.y = (tft.height()-map(point.y, TS_MINY, TS_MAXY, tft.height(), 0));
-
-   currentcolor = RED;
-//   tft.drawRect(0, 0, BOXSIZE, BOXSIZE, WHITE);
-
-  if (((point.y-PENRADIUS) > BOXSIZE) && ((point.y+PENRADIUS) < tft.height())) {
-    tft.fillCircle(point.x, point.y, PENRADIUS, currentcolor);
-  }
 }
