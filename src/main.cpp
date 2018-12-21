@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
+// #include <Adafruit_TFTLCD.h> // Hardware-specific library
+// #include <ILI9341_t3.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
 #include <Fonts/Arimo_Regular_10.h>
@@ -58,6 +59,8 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 50);
 #define iZettleRed        0xFBCC
 #define iZettleRedLite    0xFCD1
 #define iZettleBlue       0x4EDE
+#define iZettleGrey       0xCE7A
+#define iZettleGreyLite   0xDEFB
 
 #define BOXSIZE 40
 #define PENRADIUS 3
@@ -82,11 +85,11 @@ void setup(void) {
 
   tft.setFont(&Arimo_Regular_24);
   tft.begin(identifier);
-  tft.fillScreen(GRAY);
+  tft.fillScreen(BLACK);
   tft.setRotation(1);
 
   startScreen();
-  delay(3000);
+  delay(1000);
   manualScreen();
 }
 
@@ -98,7 +101,7 @@ void loop() {
 }
 
 void startScreen() {
-  tft.fillScreen(GRAY);
+  // tft.fillScreen(GRAY);
   tft.setTextColor(BLACK);
 
   // grid patterns
@@ -134,62 +137,79 @@ void startScreen() {
 }
 
 void manualScreen() {
-  tft.fillScreen(GRAY);
+  tft.fillScreen(BLACK);
   tft.setTextColor(BLACK);
 
   // grid patterns
-  drawGrid();
+  // drawGrid();
 
   // Step Number
-  // tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
-  // tft.drawRect(20, 20, 120, 70, BLACK);
+  tft.fillRoundRect(5, 5, 125, 65, 14, iZettleGrey);
   tft.setCursor(20,30);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Nr.");
-  tft.setCursor(50,65);
+  // tft.drawFastHLine(20,30,95,RED); // middle is 48 pixels
+  tft.setCursor(68-18,60);
   tft.setFont(&Arimo_Bold_30);
   tft.println("38");
+  // tft.drawFastHLine(50,65,35,RED); // middle is 18 pixels
 
   // Step Distance
-  // tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
-  // tft.drawRect(20, 90, 120, 70, BLACK);
-  tft.setCursor(20,115);
+  tft.fillRoundRect(5, 85, 125, 65, 14, iZettleGrey);
+  tft.setCursor(68-58, 110);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
-  tft.setCursor(20,145);
+  // tft.drawFastHLine(20,115,115,RED); // middle is 58 pixels
+  tft.setCursor(68-50, 140);
   tft.setFont(&Arimo_Bold_30);
   tft.println("0.0375");
+  // tft.drawFastHLine(20,145,100,RED); // middle is 50 pixels
 
   // Rail Posoition
-  // tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
-  // tft.drawRect(20, 180, 120, 70, BLACK);
-  tft.setCursor(20,195);
+  tft.fillRoundRect(5, 165, 125, 65, 14, iZettleGrey);
+  tft.setCursor(68-50,190);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Rail Pos.");
-  tft.setCursor(20,225);
+  // tft.drawFastHLine(20,195,100,RED); // middle is 50 pixels
+  tft.setCursor(68-50,220);
   tft.setFont(&Arimo_Bold_30);
   tft.println("78.545");
+  // tft.drawFastHLine(20,225,100,RED); // middle is 50 pixels
+
+  // auto shutter
+  tft.setCursor(150, 40);
+  tft.setFont(&Arimo_Regular_20);
+  tft.setTextColor(WHITE);
+  tft.println("Shutter");
+
+  // reset steps
+  tft.setCursor(150, 120);
+  tft.setFont(&Arimo_Regular_20);
+  tft.setTextColor(WHITE);
+  tft.println("Reset");
+
+  // back to main screen
+  tft.setCursor(150, 200);
+  tft.setFont(&Arimo_Regular_20);
+  tft.setTextColor(WHITE);
+  tft.println("Back");
+
+  drawArrows();
 }
 
 void drawGrid() {
   for (int i = 1; i < 240/40; i++) {
-    tft.drawFastHLine(0, 40*i, 320, BLACK);
+    tft.drawFastHLine(0, 40*i, 320, WHITE);
   }
   for (int i = 1; i < 320/40; i++) {
-    tft.drawFastVLine(40*i, 0, 240, BLACK);
+    tft.drawFastVLine(40*i, 0, 240, WHITE);
   }
 }
 
 void drawArrows() {
-  tft.fillTriangle(230, 50, 255, 15, 280, 50, iZettleGreen);
-  tft.fillRect(245, 50, 20, 30, iZettleGreen);
+  tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
+  tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
 
-  // tft.drawRect(225, 100, 60, 40, BLACK);
-  tft.setFont(&Arimo_Bold_24);
-  tft.setCursor(225, 130);
-  tft.println("Mode");
-
-  tft.fillRect(245, 160, 20, 30, iZettleRed);
-  tft.fillTriangle(230, 190, 255, 225, 280, 190, iZettleRed);
-
+  tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
+  tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
 }
