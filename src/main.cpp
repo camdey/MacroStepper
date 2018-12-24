@@ -59,11 +59,12 @@ MCUFRIEND_kbv tft;
 
 #define BOXSIZE 40
 #define PENRADIUS 3
-#define MINPRESSURE 10
-#define MAXPRESSURE 1000
+#define MINPRESSURE 5
+#define MAXPRESSURE 2000
 
 void drawArrows();
 void drawGrid();
+void touchScreen();
 void startScreen();
 void startScreenTouch(TSPoint&);
 void manualScreen();
@@ -72,9 +73,17 @@ void autoScreen();
 void autoScreenTouch(TSPoint&);
 void autoConfigScreen();
 void autoConfigScreenTouch(TSPoint&);
+void homeRail();
+void toggleJoystick();
+void toggleShutter();
+int arrowsTouch(TSPoint&, int val);
 
-// String activeScreen = "startScreen";
 int activeScreen = 1;
+bool joystickState = 1;
+bool shutterState = 1;
+int shutterDelay = 3;
+bool arrowsActive = 0;
+unsigned long Timer = 0;
 
 void setup(void) {
   Serial.begin(9600);
@@ -93,16 +102,20 @@ void setup(void) {
   tft.setRotation(1);
 
   startScreen();
-  // delay(1000);
-  // manualScreen();
-  // delay(1000);
-  // autoScreen();
-  // delay(1000);
-  // autoConfigScreen();
 }
 
 void loop() {
+  Timer = millis();
+
+  // take touch reading
+  if (Timer % 50 == 0) {
+    touchScreen();
+  }
+}
+
+void touchScreen() {
   TSPoint point = ts.getPoint();
+
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
 
@@ -122,15 +135,13 @@ void loop() {
 void startScreen() {
   activeScreen = 1;
   tft.fillScreen(BLACK);
-  tft.setTextColor(BLACK);
 
-  // grid patterns
-  // drawGrid();
-
-  tft.setCursor(30, 40);
+  tft.setTextColor(WHITE);
+  tft.setCursor(30, 45);
   tft.setFont(&Permanent_Marker_Regular_36);
   tft.println("MacroStepper");
 
+  tft.setTextColor(BLACK);
   // Manual option
   tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
   tft.setCursor(30,130);
@@ -144,15 +155,21 @@ void startScreen() {
   tft.println("Auto");
 
   // Homing option
-  tft.fillRect(0, 200, 320, 40, iZettleBlue);
+  // tft.fillRect(0, 200, 320, 40, iZettleBlue);
   tft.setCursor(20,225);
   tft.setFont(&Arimo_Bold_20);
+  tft.setTextColor(iZettleGreen, BLACK);
   tft.println("Re-home");
 
   // Move-to option
   tft.setCursor(220,225);
   tft.setFont(&Arimo_Bold_20);
-  tft.println("Move-to");
+  if (joystickState == 1) {
+    tft.setTextColor(iZettleGreen, BLACK);
+  } else if (joystickState == 0) {
+    tft.setTextColor(iZettleRed, BLACK);
+  }
+  tft.println("Joystick");
 }
 
 void startScreenTouch(TSPoint &point) {
@@ -167,6 +184,32 @@ void startScreenTouch(TSPoint &point) {
   // auto box - tft.fillRoundRect(170, 90, 130, 60, 8, iZettleGreen);
   if ((xPos >= 170 && xPos <= 300) && (yPos >= 90 && yPos <= 150)) {
     autoScreen();
+  }
+
+  // homing func - tft.setCursor(20,225);
+  if ((xPos >= 20 && xPos <= 120) && (yPos >= 200 && yPos <= 240)) {
+    tft.setFont(&Arimo_Bold_20);
+    tft.setCursor(20,225);
+    tft.setTextColor(iZettleRed, BLACK);
+    tft.println("Re-home");
+    homeRail();
+    tft.setCursor(20,225);
+    tft.setTextColor(iZettleGreen, BLACK);
+    tft.println("Re-home");
+  }
+
+  // joystick on/off - tft.setCursor(20,225);
+  if ((xPos >= 220 && xPos <= 320) && (yPos >= 200 && yPos <= 240)) {
+    toggleJoystick();
+    tft.setCursor(220,225);
+    tft.setFont(&Arimo_Bold_20);
+    if (joystickState == 1) {
+      tft.setTextColor(iZettleGreen, BLACK);
+    } else if (joystickState == 0) {
+      tft.setTextColor(iZettleRed, BLACK);
+    }
+    tft.println("Joystick");
+    delay(300);
   }
 }
 
@@ -212,6 +255,11 @@ void manualScreen() {
   tft.setCursor(150, 45);
   tft.setFont(&Arimo_Bold_20);
   tft.setTextColor(iZettleRed);
+  if (shutterState == 1) {
+    tft.setTextColor(iZettleGreen, BLACK);
+  } else if (shutterState == 0) {
+    tft.setTextColor(iZettleRed, BLACK);
+  }
   tft.println("Shutter");
 
   // reset steps
@@ -234,8 +282,22 @@ void manualScreenTouch(TSPoint &point) {
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
+  // shutter toggle - tft.setCursor(150, 45);
+  if ((xPos >= 150 && xPos <= 230) && (yPos >= 32 && yPos <= 48)) {
+    toggleShutter();
+    tft.setCursor(150, 45);
+    tft.setFont(&Arimo_Bold_20);
+    if (shutterState == 1) {
+      tft.setTextColor(iZettleGreen, BLACK);
+    } else if (shutterState == 0) {
+      tft.setTextColor(iZettleRed, BLACK);
+    }
+    tft.println("Shutter");
+    delay(100);
+  }
+
   // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 180) && (yPos >= 195 && yPos <= 205)) {
+  if ((xPos >= 150 && xPos <= 200) && (yPos >= 192 && yPos <= 208)) {
     startScreen();
   }
 }
@@ -281,7 +343,11 @@ void autoScreen() {
   // auto shutter
   tft.setCursor(150, 45);
   tft.setFont(&Arimo_Bold_20);
-  tft.setTextColor(iZettleRed);
+  if (shutterState == 1) {
+    tft.setTextColor(iZettleGreen, BLACK);
+  } else if (shutterState == 0) {
+    tft.setTextColor(iZettleRed, BLACK);
+  }
   tft.println("Shutter");
 
   // enter auto config
@@ -304,13 +370,26 @@ void autoScreenTouch(TSPoint &point) {
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
-  // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 180) && (yPos >= 195 && yPos <= 205)) {
-    startScreen();
+  // shutter toggle - tft.setCursor(150, 45);
+  if ((xPos >= 150 && xPos <= 230) && (yPos >= 32 && yPos <= 48)) {
+    toggleShutter();
+    tft.setCursor(150, 45);
+    tft.setFont(&Arimo_Bold_20);
+    if (shutterState == 1) {
+      tft.setTextColor(iZettleGreen, BLACK);
+    } else if (shutterState == 0) {
+      tft.setTextColor(iZettleRed, BLACK);
+    }
+    tft.println("Shutter");
+    delay(100);
   }
   // config button - tft.setCursor(150, 125);
-  if ((xPos >= 150 && xPos <= 180) && (yPos >= 115 && yPos <= 125)) {
+  if ((xPos >= 150 && xPos <= 220) && (yPos >= 112 && yPos <= 128)) {
     autoConfigScreen();
+  }
+  // back button - tft.setCursor(150, 205);
+  if ((xPos >= 150 && xPos <= 200) && (yPos >= 192 && yPos <= 208)) {
+    startScreen();
   }
 }
 
@@ -348,14 +427,16 @@ void autoConfigScreen() {
   tft.println("RUN");
 
   // set delay
-  tft.setCursor(150, 105);
+  tft.setCursor(150, 125);
   tft.setFont(&Arimo_Bold_24);
   tft.setTextColor(WHITE);
   tft.println("Delay");
-  tft.setCursor(155, 123);
+  tft.setCursor(155, 143);
   tft.setFont(&Arimo_Regular_20);
-  tft.setTextColor(WHITE);
-  tft.println("3 sec");
+  tft.setTextColor(WHITE, BLACK);
+  tft.println(shutterDelay);
+  tft.setCursor(165, 143);
+  tft.println(" sec");
 
   // back to auto screen
   tft.setCursor(150, 205);
@@ -371,10 +452,69 @@ void autoConfigScreenTouch(TSPoint &point) {
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
+  // delay button - tft.setCursor(150, 125);
+  if ((xPos >= 150 && xPos <= 220) && (yPos >= 110 && yPos <= 145)) {
+    if(Timer % 120 == 0) {
+      arrowsActive = !arrowsActive;
+    }
+  }
+
+  if (arrowsActive == 1) {
+    tft.drawRoundRect(145, 100, 78, 50, 4, YELLOW);
+    shutterDelay = arrowsTouch(point, shutterDelay);
+
+    if (shutterDelay < 0) {
+      shutterDelay = 0;
+    } else if (shutterDelay > 9) {
+      shutterDelay = 9;
+    }
+
+    // show delay
+    tft.fillRect(155, 127, 12, 20, BLACK);
+    tft.setCursor(155, 143);
+    tft.setFont(&Arimo_Regular_20);
+    tft.setTextColor(WHITE, BLACK);
+    tft.println(shutterDelay);
+  } else if (arrowsActive == 0) {
+    tft.drawRoundRect(145, 100, 78, 50, 4, BLACK);
+  }
+
   // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 180) && (yPos >= 195 && yPos <= 205)) {
+  if ((xPos >= 150 && xPos <= 200) && (yPos >= 192 && yPos <= 208)) {
     autoScreen();
   }
+}
+
+int arrowsTouch(TSPoint &point, int val) {
+  // scale from 0->1023 to tft dimension and swap coordinates
+  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
+  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+
+  // top arrow - tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
+  // tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
+  if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
+    val++;
+  }
+
+  // top arrow - tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
+  // tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
+  if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
+    val--;
+  }
+
+  return val;
+}
+
+void homeRail() {
+  delay(1000);
+}
+
+void toggleJoystick() {
+  joystickState = !joystickState;
+}
+
+void toggleShutter() {
+  shutterState = !shutterState;
 }
 
 void drawGrid() {
