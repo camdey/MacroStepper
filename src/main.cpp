@@ -76,14 +76,20 @@ void autoConfigScreenTouch(TSPoint&);
 void homeRail();
 void toggleJoystick();
 void toggleShutter();
+void setShutterDelay();
+void dryRun();
 int arrowsTouch(TSPoint&, int val);
 
+unsigned long Timer = 0;
 int activeScreen = 1;
 bool joystickState = 1;
 bool shutterState = 1;
-int shutterDelay = 3;
 bool arrowsActive = 0;
-unsigned long Timer = 0;
+int shutterDelay = 3;
+int prevDelay = 3;
+bool editDelay = 0;
+bool editStart = 0;
+bool editEnd = 0;
 
 void setup(void) {
   Serial.begin(9600);
@@ -452,36 +458,81 @@ void autoConfigScreenTouch(TSPoint &point) {
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
-  // delay button - tft.setCursor(150, 125);
-  if ((xPos >= 150 && xPos <= 220) && (yPos >= 110 && yPos <= 145)) {
-    if(Timer % 120 == 0) {
+  if(Timer % 75 == 0) {
+    // start button - tft.setCursor(20, 50);
+    if ((xPos >= 10 && xPos <= 140) && (yPos >= 10 && yPos <= 70) && editDelay == 0) {
       arrowsActive = !arrowsActive;
+      editStart = !editStart;
+
+      if (arrowsActive == 0 && editStart == 0) {
+        // tft.drawRoundRect(15, 15, 125, 60, 4, BLACK);
+        tft.fillRoundRect(10, 24, 5, 40, 4, BLACK);
+      }
+      if (arrowsActive == 1 && editStart == 1) {
+        // tft.drawRoundRect(15, 15, 125, 60, 4, YELLOW);
+        tft.fillRoundRect(10, 24, 5, 40, 4, YELLOW);
+      }
     }
-  }
 
-  if (arrowsActive == 1) {
-    tft.drawRoundRect(145, 100, 78, 50, 4, YELLOW);
-    shutterDelay = arrowsTouch(point, shutterDelay);
+    // end button - tft.setCursor(20, 130);
+    if ((xPos >= 10 && xPos <= 120) && (yPos >= 90 && yPos <= 160) && editDelay == 0) {
+      arrowsActive = !arrowsActive;
+      editEnd = !editEnd;
 
-    if (shutterDelay < 0) {
-      shutterDelay = 0;
-    } else if (shutterDelay > 9) {
-      shutterDelay = 9;
+      if (arrowsActive == 0 && editEnd == 0) {
+        // tft.drawRoundRect(15, 15, 125, 60, 4, BLACK);
+        tft.fillRoundRect(10, 104, 5, 40, 4, BLACK);
+      }
+      if (arrowsActive == 1 && editEnd == 1) {
+        // tft.drawRoundRect(15, 15, 125, 60, 4, YELLOW);
+        tft.fillRoundRect(10, 104, 5, 40, 4, YELLOW);
+      }
     }
 
-    // show delay
-    tft.fillRect(155, 127, 12, 20, BLACK);
-    tft.setCursor(155, 143);
-    tft.setFont(&Arimo_Regular_20);
-    tft.setTextColor(WHITE, BLACK);
-    tft.println(shutterDelay);
-  } else if (arrowsActive == 0) {
-    tft.drawRoundRect(145, 100, 78, 50, 4, BLACK);
-  }
+    // run button - tft.setCursor(20, 210);
+    if ((xPos >= 10 && xPos <= 120) && (yPos >= 170 && yPos <= 240) && editDelay == 0) {
+      tft.fillRoundRect(10, 184, 5, 27, 4, YELLOW);
+      dryRun();
+      tft.fillRoundRect(10, 184, 5, 27, 4, BLACK);
+    }
 
-  // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 200) && (yPos >= 192 && yPos <= 208)) {
-    autoScreen();
+    // delay button - tft.setCursor(150, 125);
+    if ((xPos >= 150 && xPos <= 220) && (yPos >= 110 && yPos <= 145) && editStart == 0) {
+      arrowsActive = !arrowsActive;
+      editDelay = !editDelay;
+
+      if (arrowsActive == 0 && editDelay == 0) {
+        // tft.drawRoundRect(145, 100, 78, 50, 4, BLACK);
+        tft.fillRoundRect(140, 108, 5, 35, 4, BLACK);
+      }
+      if (arrowsActive == 1 && editDelay == 1) {
+        // tft.drawRoundRect(145, 100, 78, 50, 4, YELLOW);
+        tft.fillRoundRect(140, 108, 5, 35, 4, YELLOW);
+      }
+    }
+
+    // set shutter delay
+    if (arrowsActive == 1 && editDelay == 1) {
+      if (prevDelay != shutterDelay) {
+        prevDelay = shutterDelay;
+      }
+      shutterDelay = arrowsTouch(point, shutterDelay);
+      Serial.println(shutterDelay);
+      setShutterDelay();
+    }
+
+    // back button - tft.setCursor(150, 205);
+    if ((xPos >= 150 && xPos <= 200) && (yPos >= 192 && yPos <= 208) && arrowsActive == 0) {
+      autoScreen();
+    }
+
+    // Serial.print("arrows: ");
+    // Serial.println(arrowsActive);
+    // Serial.print("start: ");
+    // Serial.println(editStart);
+    // Serial.print("shutter: ");
+    // Serial.println(editDelay);
+    // Serial.println("----------");
   }
 }
 
@@ -490,16 +541,17 @@ int arrowsTouch(TSPoint &point, int val) {
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
-  // top arrow - tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
-  // tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
-  if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
-    val++;
-  }
-
-  // top arrow - tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
-  // tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
-  if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
-    val--;
+  if (Timer % 75 == 0) {
+    // top arrow - tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
+    // tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
+    if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
+      val++;
+    }
+    // top arrow - tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
+    // tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
+    if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
+      val--;
+    }
   }
 
   return val;
@@ -515,6 +567,30 @@ void toggleJoystick() {
 
 void toggleShutter() {
   shutterState = !shutterState;
+}
+
+void setShutterDelay() {
+
+  if (shutterDelay < 0) {
+    shutterDelay = 0;
+  } else if (shutterDelay > 9) {
+    shutterDelay = 9;
+  }
+
+  if (prevDelay != shutterDelay) {
+    // print new delay value
+    tft.setCursor(155, 143);
+    tft.setFont(&Arimo_Regular_20);
+    tft.setTextColor(BLACK, BLACK);
+    tft.println(prevDelay);
+    tft.setCursor(155, 143);
+    tft.setTextColor(WHITE, BLACK);
+    tft.println(shutterDelay);
+  }
+}
+
+void dryRun() {
+  delay(500);
 }
 
 void drawGrid() {
