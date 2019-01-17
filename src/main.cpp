@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
+#include <AccelStepper.h>
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
 #include <Fonts/Arimo_Regular_18.h>
@@ -21,6 +22,7 @@
 #define YM 9   // can be a digital pin
 #define XP 8   // can be a digital pin
 
+// touch screen orientation definitions
 #define TS_MINX 100
 #define TS_MAXX 920
 #define TS_MINY 70
@@ -32,13 +34,14 @@
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 MCUFRIEND_kbv tft;
 
+// tft definitions
 #define LCD_CS A3
 #define LCD_CD A2
 #define LCD_WR A1
 #define LCD_RD A0
 #define LCD_RESET A4
 
-// Assign human-readable names to some common 16-bit color values:
+// Definitions for some common 16-bit color values:
 #define	BLACK   0x0000
 #define	BLUE    0x001F
 #define	RED     0xF800
@@ -49,7 +52,6 @@ MCUFRIEND_kbv tft;
 #define WHITE   0xFFFF
 #define GRAY    0xE73C
 #define iZettleGreenLite  0x9736
-// #define iZettleGreen      0x6ED3
 #define iZettleGreen      0x4ECC
 #define iZettleRed        0xFBCC
 #define iZettleRedLite    0xFCD1
@@ -57,10 +59,25 @@ MCUFRIEND_kbv tft;
 #define iZettleGrey       0xCE7A
 #define iZettleGreyLite   0xDEFB
 
+// touch definitions
 #define BOXSIZE 40
 #define PENRADIUS 3
 #define MINPRESSURE 5
 #define MAXPRESSURE 2000
+
+// The X Stepper pins
+#define stepperDirPin 27
+#define stepperStepPin 29
+#define stepperSleepPin 30
+#define stepperEnablePin 41
+AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
+
+#define rearLimitPin 51
+#define forwardLimitPin 49
+#define xStickPin A12 // analog pin connected to X output
+#define yStickPin A13
+#define zStickPin 68
+#define readInterval 100
 
 void drawArrows();
 void drawGrid();
@@ -73,29 +90,51 @@ void autoScreen();
 void autoScreenTouch(TSPoint&);
 void autoConfigScreen();
 void autoConfigScreenTouch(TSPoint&);
-void homeRail();
 void toggleJoystick();
+void joyStick();
 void toggleShutter();
 void setShutterDelay();
 void dryRun();
+void homeRail();
+void limitSwitch();
 int arrowsTouch(TSPoint&, int val);
 
-unsigned long Timer = 0;
-int activeScreen = 1;
-bool joystickState = 1;
-bool shutterState = 1;
-bool arrowsActive = 0;
-int shutterDelay = 3;
-int prevDelay = 3;
-bool editDelay = 0;
-bool editStart = 0;
-bool editEnd = 0;
+unsigned long Timer = 0; // timer for staggering readings
+int activeScreen = 1; // currently displayed screen
+bool joystickState = 1; // enabled/disabled
+bool shutterState = 1; // enabled/disabled
+bool arrowsActive = 0; // take arrow touch readings
+int shutterDelay = 3; // delay between step and shutter trigger
+int prevDelay = 3; // previous delay value
+bool editDelay = 0; // set delay time
+bool editStart = 0; // set start point for auto mode
+bool editEnd = 0; // set end point for auto mode
+
+long rearLimitPos = 0;
+long forwardLimitPos = 10000;
+unsigned long lastRead = 0;
+int xStickPos = 0;
+bool bootFlag = 0;
+bool targetFlag = 0;
 
 void setup(void) {
   Serial.begin(9600);
   tft.reset();
 
+  pinMode(rearLimitPin, INPUT);
+  pinMode(forwardLimitPin, INPUT);
+  pinMode(zStickPin, INPUT);
+
+  pinMode(stepperSleepPin, OUTPUT);
+  digitalWrite(stepperSleepPin, HIGH);
+  pinMode(stepperEnablePin, OUTPUT);
+  digitalWrite(stepperEnablePin, LOW);
+
+  stepper.setMaxSpeed(1400);
+  stepper.setAcceleration(1000);
+
   uint16_t identifier = tft.readID();
+
   if (identifier == 0x9341) {
     Serial.println(F("Found ILI9341 LCD driver"));
   } else {
@@ -116,6 +155,39 @@ void loop() {
   // take touch reading
   if (Timer % 50 == 0) {
     touchScreen();
+  }
+  // take touch reading
+  if (Timer % 100 == 0) {
+    xStickPos = analogRead(xStickPin); // joystick
+    if (xStickPos >= 600 or xStickPos <= 400) {
+      // wake stepper from sleep
+      if(digitalRead(stepperSleepPin) == LOW) {
+        digitalWrite(stepperSleepPin, HIGH);
+      }
+      joyStick();
+    }
+
+    if (digitalRead(rearLimitPin) + digitalRead(forwardLimitPin) < 2) {
+      limitSwitch(); // run function if limits are reached
+    }
+  }
+  // if joystick has run previously, or limit switch triggered
+  // reset target to currentPosition
+  if (targetFlag == 1) {
+    stepper.move(0);
+    stepper.setSpeed(0);
+    targetFlag = 0;
+  }
+  // run homing sequence if first loop
+  if (bootFlag == 0) {
+    bootFlag = 1;
+    // homeRail();
+  }
+  // needs to be called every loop
+  stepper.run();
+  // sleep if stepper inactive
+  if(stepper.isRunning() == 0 && digitalRead(stepperSleepPin) == HIGH) {
+    digitalWrite(stepperSleepPin, LOW);
   }
 }
 
@@ -536,21 +608,41 @@ void autoConfigScreenTouch(TSPoint &point) {
   }
 }
 
+void drawArrows() {
+  tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
+  tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
+
+  tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
+  tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
+}
+
 int arrowsTouch(TSPoint &point, int val) {
   // scale from 0->1023 to tft dimension and swap coordinates
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
   if (Timer % 75 == 0) {
+    // wake stepper from sleep
+    if(digitalRead(stepperSleepPin) == LOW) {
+      digitalWrite(stepperSleepPin, HIGH);
+    }
     // top arrow - tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
     // tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
     if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
       val++;
+      stepper.move(1);
+      stepper.runSpeed();
+      // reset stepper target
+      targetFlag = 1;
     }
     // top arrow - tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
     // tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
     if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
       val--;
+      stepper.move(-1);
+      stepper.runSpeed();
+      // reset stepper target
+      targetFlag = 1;
     }
   }
 
@@ -558,7 +650,55 @@ int arrowsTouch(TSPoint &point, int val) {
 }
 
 void homeRail() {
-  delay(1000);
+  // wake stepper from sleep
+  if(digitalRead(stepperSleepPin) == LOW) {
+    digitalWrite(stepperSleepPin, HIGH);
+  }
+
+  while (digitalRead(rearLimitPin) == 1) { // start in reverse
+    stepper.moveTo(-100000);
+    stepper.run();
+  }
+  // stops motor instantly
+  stepper.setSpeed(0);
+
+  rearLimitPos = 0;
+  stepper.setCurrentPosition(0); // set position
+
+  while (digitalRead(forwardLimitPin) == 1) { // move to forward limit
+    stepper.moveTo(100000);
+    stepper.run();
+  }
+  // stops motor instantly
+  stepper.setSpeed(0);
+
+  forwardLimitPos = stepper.currentPosition(); // set position
+  stepper.moveTo(forwardLimitPos / 2); // return to the middle
+  stepper.runToPosition();
+}
+
+void joyStick() {
+  while(xStickPos >= 600 or xStickPos <= 400) {
+    // move either -1, 0, or 1
+    stepper.move(map(xStickPos, 0, 1023, -1, 1));
+    stepper.runSpeed();
+    // check stick position again
+    xStickPos = analogRead(xStickPin);
+    // reset stepper target
+    targetFlag = 1;
+    // check limit switches
+    if (digitalRead(rearLimitPin) + digitalRead(forwardLimitPin) < 2) {
+      stepper.stop();
+      break;
+    }
+    // set speed direction
+    if (xStickPos <= 400) {
+      stepper.setSpeed(-600);
+    }
+    if (xStickPos >= 600) {
+      stepper.setSpeed(600);
+    }
+  }
 }
 
 void toggleJoystick() {
@@ -593,6 +733,28 @@ void dryRun() {
   delay(500);
 }
 
+void limitSwitch() {
+  while (digitalRead(rearLimitPin) == 0) { // switch closest to motor
+    rearLimitPos = stepper.currentPosition();
+    // move by 1 step until limit no longer triggered
+    stepper.move(1);
+    stepper.setSpeed(600);
+    stepper.runSpeed();
+    // reset stepper target
+    targetFlag = 1;
+  }
+
+  while (digitalRead(forwardLimitPin) == 0) { //switch furtherest from motor
+    forwardLimitPos = stepper.currentPosition();
+    // move by -1 step until limit no longer triggered
+    stepper.move(-1);
+    stepper.setSpeed(-600);
+    stepper.runSpeed();
+    // reset stepper target
+    targetFlag = 1;
+  }
+}
+
 void drawGrid() {
   for (int i = 1; i < 240/40; i++) {
     tft.drawFastHLine(0, 40*i, 320, WHITE);
@@ -600,12 +762,4 @@ void drawGrid() {
   for (int i = 1; i < 320/40; i++) {
     tft.drawFastVLine(40*i, 0, 240, WHITE);
   }
-}
-
-void drawArrows() {
-  tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
-  tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
-
-  tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
-  tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
 }
