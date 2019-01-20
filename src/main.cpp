@@ -148,8 +148,8 @@ void setup(void) {
   pinMode(stepperEnablePin, OUTPUT);
   digitalWrite(stepperEnablePin, LOW);
 
-  stepper.setMaxSpeed(1400);
-  stepper.setAcceleration(1000);
+  stepper.setMaxSpeed(1600);
+  stepper.setAcceleration(1400);
 
   uint16_t identifier = tft.readID();
 
@@ -169,10 +169,8 @@ void setup(void) {
 
 void loop() {
   Timer = millis();
-
   // needs to be called every loop
   stepper.run();
-
   // take touch reading
   if (Timer % 50 == 0) {
     touchScreen();
@@ -938,7 +936,7 @@ void dryRun() {
   }
   // stops motor instantly
   stepper.setSpeed(0);
-
+  targetFlag = 1;
   displayPosition();
 }
 
