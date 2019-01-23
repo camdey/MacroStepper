@@ -1,3 +1,7 @@
+// STEP = one full step of the stepper stepper motor
+// MOVEMENT = one full movement of linear rail by specified distance, consisting of multiple steps
+// PROECDURE = one completed stack procedure, consisting of multiple movements
+
 #include <Arduino.h>
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <TouchScreen.h>
@@ -84,7 +88,7 @@ void startScreen();
 void manualScreen();
 void autoScreen();
 void autoConfigScreen();
-void drawPlayPause();
+void drawPlayPause(bool greyPlay, bool greyPause);
 void drawArrows();
 void displayPosition();
 // void drawGrid();
@@ -105,7 +109,7 @@ void toggleJoystick();
 void toggleShutter();
 // --- Inputs and Outputs --- //
 void joyStick();
-void triggerShutter();
+void triggerShutter(bool lowHigh);
 void limitSwitch();
 // --- Set value functions --- //
 void setStepDistance();
@@ -116,6 +120,7 @@ void setAutoStackPositions(bool setStart, bool setEnd);
 // --- Timers and elapsed times --- //
 unsigned long Timer = 0; // timer for staggering readings
 unsigned long prevStepTimer = 0; // previous Timer reading
+unsigned long prevShutterTimer = 0; // previous time shutter triggered
 
 // --- Screen flags --- //
 int activeScreen = 1; // currently displayed screen
@@ -147,14 +152,19 @@ int prevStartPosition = 0;
 int endPosition = 0; // end position for stack procedure
 int prevEndPosition = 0;
 int prevStepperPosition = 1; // used for showing position of stepper if changed
+int manualMovementCount = 0; // count of manual movements
+int prevManualMovementCount = 0;
 // --- Stepper motor variables --- //
 int stepsPerMovement = 1; // number of steps required for a given distance
 int numMovements = 0; // equals total distance / step multiplier
+int prevNumMovements = 0; // previous numMovements value
 int stepCount = 0; // number of steps taken in a given movement
 double distancePerMovement = 2.50; // distance in micrometres travelled per movement
 double prevDistance = 2.50; // previous step distance in micrometres
 int movementProgress = 0; // number of completed movements
 int prevMovementProgress = 0; // used for overwriting prev movement progress
+// --- Shutter variables --- //
+
 
 
 void setup(void) {
@@ -213,9 +223,12 @@ void loop() {
     if (digitalRead(rearLimitPin) + digitalRead(forwardLimitPin) < 2) {
       limitSwitch();
     }
-    // sleep if stepper inactive
-    if(stepper.isRunning() == 0 && digitalRead(stepperSleepPin) == HIGH) {
+    // sleep if stepper inactive, update position on manual screen
+    if (stepper.isRunning() == 0 && (autoStackFlag == 0 || pauseAutoStack == 1) && digitalRead(stepperSleepPin) == HIGH) {
       digitalWrite(stepperSleepPin, LOW);
+      if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
+        displayPosition();
+      }
     }
     // only increment per button click
     if (digitalRead(zStickPin) == HIGH) {
@@ -251,11 +264,11 @@ void touchScreen() {
   if (point.z > MINPRESSURE && point.z < MAXPRESSURE) {
     if (activeScreen == 1) { // startScreen
       startScreenTouch(point);
-    } else if (activeScreen == 2) { // manualScreen
+    } else if (activeScreen == 2 && Timer % 25 == 0) { // manualScreen
       manualScreenTouch(point);
     } else if (activeScreen == 3) { // autoScreen
       autoScreenTouch(point);
-    } else if (activeScreen == 4 && Timer % 50 == 0) { // autoConfigScreen
+    } else if (activeScreen == 4 && Timer % 25 == 0) { // autoConfigScreen
       autoConfigScreenTouch(point);
     }
   }
@@ -354,9 +367,9 @@ void manualScreen() {
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
 
-  tft.setCursor(23, 60);
+  tft.setCursor(10, 60);
   tft.setFont(&Arimo_Bold_30);
-  tft.println(distancePerMovement);
+  tft.println(String(distancePerMovement/1000, 4));
 
   // Step Number
   // tft.fillRoundRect(5, 85, 125, 65, 14, iZettleGrey);
@@ -365,9 +378,9 @@ void manualScreen() {
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Nr.");
 
-  tft.setCursor(45, 140);
+  tft.setCursor(30, 140);
   tft.setFont(&Arimo_Bold_30);
-  tft.println("38");
+  tft.println(manualMovementCount);
 
   // Rail Posoition
   // tft.fillRoundRect(5, 165, 125, 65, 14, iZettleGrey);
@@ -393,7 +406,7 @@ void manualScreen() {
   // reset steps
   tft.setCursor(150, 125);
   tft.setFont(&Arimo_Bold_20);
-  tft.setTextColor(WHITE);
+  tft.setTextColor(iZettleRed);
   tft.println("Reset");
 
   // back to main screen
@@ -410,19 +423,36 @@ void manualScreenTouch(TSPoint &point) {
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
-  if ((xPos >= 150 && xPos <= 230) && (yPos >= 32 && yPos <= 48)) {
-    toggleShutter();
-    tft.setCursor(150, 45);
-    tft.setFont(&Arimo_Bold_20);
-    if (shutterState == 1) {
-      tft.setTextColor(iZettleGreen, BLACK);
-    } else if (shutterState == 0) {
-      tft.setTextColor(iZettleRed, BLACK);
+  // shutter/reset touch delay
+  if (Timer % 50 == 0) {
+    // toggle shutter on/off
+    if ((xPos >= 145 && xPos <= 230) && (yPos >= 30 && yPos <= 50)) {
+      toggleShutter();
+      tft.setCursor(150, 45);
+      tft.setFont(&Arimo_Bold_20);
+      if (shutterState == 1) {
+        tft.setTextColor(iZettleGreen, BLACK);
+      } else if (shutterState == 0) {
+        tft.setTextColor(iZettleRed, BLACK);
+      }
+      tft.println("Shutter");
     }
-    tft.println("Shutter");
-    delay(100);
+    // reset manual movement count
+    if ((xPos >= 145 && xPos <= 225) && (yPos >= 120 && yPos <= 140)) {
+      int16_t x1, y1;
+      uint16_t w, h;
+      tft.setFont(&Arimo_Bold_30);
+      tft.getTextBounds(String(manualMovementCount), 30, 140, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, iZettleBlue);
+
+      manualMovementCount = 0;
+      prevManualMovementCount = 0;
+      tft.setTextColor(WHITE);
+      tft.setCursor(30, 140);
+      tft.println(manualMovementCount);
+    }
   }
-  // step distance button - tft.fillRoundRect(5, 5, 125, 65, 14, iZettleGrey);
+  // step distance button
   if ((xPos >= 5 && xPos <= 130) && (yPos >= 5 && yPos <= 70)) {
     arrowsActive = !arrowsActive;
     editMovementDistance = !editMovementDistance;
@@ -432,18 +462,18 @@ void manualScreenTouch(TSPoint &point) {
       tft.setCursor(5, 30);
       tft.setFont(&Arimo_Regular_24);
       tft.println("Step Dist.");
-      tft.setCursor(23, 60);
+      tft.setCursor(10, 60);
       tft.setFont(&Arimo_Bold_30);
-      tft.println(distancePerMovement);
+      tft.println(String(distancePerMovement/1000, 4));
     }
     if (arrowsActive == 1 && editMovementDistance == 1) {
       tft.setTextColor(YELLOW);
       tft.setCursor(5, 30);
       tft.setFont(&Arimo_Regular_24);
       tft.println("Step Dist.");
-      tft.setCursor(23, 60);
+      tft.setCursor(10, 60);
       tft.setFont(&Arimo_Bold_30);
-      tft.println(distancePerMovement);
+      tft.println(String(distancePerMovement/1000, 4));
     }
   }
   // set step size
@@ -460,11 +490,8 @@ void manualScreenTouch(TSPoint &point) {
     int val = arrowsTouch(point, 1, 0);
   }
 
-  // show current position of stepper
-  displayPosition();
-
-  // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 200) && (yPos >= 192 && yPos <= 208) && arrowsActive == 0) {
+  // back button
+  if ((xPos >= 145 && xPos <= 200) && (yPos >= 190 && yPos <= 210) && arrowsActive == 0) {
     startScreen();
   }
 }
@@ -480,9 +507,9 @@ void autoScreen() {
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
 
-  tft.setCursor(23, 60);
+  tft.setCursor(10, 60);
   tft.setFont(&Arimo_Bold_30);
-  tft.println(distancePerMovement);
+  tft.println(String(distancePerMovement/1000, 4));
 
   // Estimated time remaining
   tft.fillRoundRect(-10, 85, 135, 65, 15, iZettleBlue);
@@ -503,7 +530,9 @@ void autoScreen() {
   tft.setCursor(20, 220);
   tft.setFont(&Arimo_Bold_24);
   tft.println(movementProgress);
-  tft.setCursor(65, 220);
+  tft.setCursor(60, 220);
+  tft.println("/");
+  tft.setCursor(70, 220);
   tft.setFont(&Arimo_Bold_24);
   tft.println(numMovements);
 
@@ -529,8 +558,13 @@ void autoScreen() {
   tft.setTextColor(WHITE);
   tft.println("Back");
 
-  // drawArrows();
-  drawPlayPause();
+  if (pauseAutoStack == 1 && autoStackFlag == 1) {
+    drawPlayPause(0, 1);
+  } else if (pauseAutoStack == 0 && autoStackFlag == 1) {
+    drawPlayPause(1, 0);
+  } else if (pauseAutoStack == 0 && autoStackFlag == 0) {
+    drawPlayPause(0, 0);
+  }
 }
 
 void autoScreenTouch(TSPoint &point) {
@@ -549,7 +583,6 @@ void autoScreenTouch(TSPoint &point) {
       tft.setTextColor(iZettleRed, BLACK);
     }
     tft.println("Shutter");
-    delay(100);
   }
   // config button - tft.setCursor(150, 125);
   if ((xPos >= 150 && xPos <= 220) && (yPos >= 112 && yPos <= 128)) {
@@ -565,18 +598,18 @@ void autoScreenTouch(TSPoint &point) {
       tft.setCursor(5, 30);
       tft.setFont(&Arimo_Regular_24);
       tft.println("Step Dist.");
-      tft.setCursor(23, 60);
+      tft.setCursor(10, 60);
       tft.setFont(&Arimo_Bold_30);
-      tft.println(distancePerMovement);
+      tft.println(String(distancePerMovement/1000, 4));
     }
     if (arrowsActive == 1 && editMovementDistance == 1) {
       tft.setTextColor(YELLOW);
       tft.setCursor(5, 30);
       tft.setFont(&Arimo_Regular_24);
       tft.println("Step Dist.");
-      tft.setCursor(23, 60);
+      tft.setCursor(10, 60);
       tft.setFont(&Arimo_Bold_30);
-      tft.println(distancePerMovement);
+      tft.println(String(distancePerMovement/1000, 4));
     }
   }
   // set step size
@@ -589,13 +622,16 @@ void autoScreenTouch(TSPoint &point) {
     setStepDistance();
   }
 
-  // run MacroStepper sequence
+  // run AutoStack sequence
   if (arrowsActive == 0 && (xPos >= 230 && xPos <= 310) && (yPos >= 30 && yPos <= 120)) {
-      autoStackFlag = 1;
+    autoStackFlag = 1;
+    pauseAutoStack = 0; // re-enable autoStack + pause button
+    drawPlayPause(1, 0); // grey out play, recolour pause button
   }
-  // pause/resume MacroStepper
-  if (arrowsActive == 0 && (xPos >= 230 && xPos <= 310) && (yPos >= 135 && yPos <= 225)) {
-    pauseAutoStack = !pauseAutoStack;
+  // pause/resume AutoStack sequence
+  if (arrowsActive == 0 && pauseAutoStack == 0 && (xPos >= 230 && xPos <= 310) && (yPos >= 135 && yPos <= 225)) {
+    pauseAutoStack = 1;
+    drawPlayPause(0, 1); // recolour play, grey out pause button
   }
 
   // back button - tft.setCursor(150, 205);
@@ -750,67 +786,6 @@ void autoConfigScreenTouch(TSPoint &point) {
   }
 }
 
-void autoStack() {
-  // wake stepper from sleep
-  if (digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
-  }
-  // move stepper to start if not already there
-  if (goToStart == 1) {
-    while (stepper.currentPosition() != startPosition) {
-      // move to start
-      stepper.setSpeed(-600);
-      stepper.moveTo(startPosition);
-      stepper.runSpeedToPosition();
-
-      goToStart = 0;
-      stepCount = 0;
-      stepDue = 1;
-      movementProgress = 0;
-    }
-  }
-  // take photo and increment progress for first step of each movement
-  if (stepCount == 0 && stepDue == 1) {
-    triggerShutter();
-    movementProgress++;
-
-    // make sure correct screen is displaying
-    if (activeScreen == 3) { // auto screen
-      int16_t x1, y1;
-      uint16_t w, h;
-      tft.setFont(&Arimo_Bold_24);
-      tft.getTextBounds(String(prevMovementProgress), 10, 220, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, iZettleBlue);
-      tft.setTextColor(WHITE, iZettleBlue);
-      tft.setCursor(10, 220);
-      tft.println(movementProgress);
-    }
-    // prev step progress value
-    prevMovementProgress = movementProgress;
-  }
-  // keep stepping if not at end and haven't travelled a full step
-  // (e.g. if one step now equals 40 single steps)
-  if (movementProgress <= numMovements && stepDue == 1 && stepCount <= stepsPerMovement) {
-    stepCount++;
-    stepperStep(1, 0); // 1 step, no delay in ms
-  }
-  // reset stepCount for next full-step
-  if (stepCount > stepsPerMovement) {
-    stepCount = 0;
-    stepDue = 0;
-  }
-  // wait delay period before re-enabling stepping
-  if (stepDue == 0) {
-    stepperStep(0, shutterDelay*1000); // don't step and wait for delay
-  }
-  // stop MacroStepper sequence if end reached
-  if (movementProgress >= numMovements) {
-    autoStackFlag = 0;
-    goToStart = 1;
-    movementProgress = 0;
-  }
-}
-
 void drawArrows() {
   tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
   tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
@@ -819,15 +794,24 @@ void drawArrows() {
   tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
 }
 
-void drawPlayPause() {
-  tft.fillCircle(270, 75, 35, iZettleGreen);
-  tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
+void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
+  if (greyPlay == 1) {
+    tft.fillCircle(270, 75, 35, iZettleGreyLite);
+    tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
+  } else {
+    tft.fillCircle(270, 75, 35, iZettleGreen);
+    tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
+  }
 
-  // tft.fillRoundRect(235, 150, 20, 55, 5, iZettleBlue);
-  // tft.fillRoundRect(265, 150, 20, 55, 5, iZettleBlue);
-  tft.fillCircle(270, 180, 35, iZettleBlue);
-  tft.fillRoundRect(250, 155, 15, 50, 4, WHITE);
-  tft.fillRoundRect(275, 155, 15, 50, 4, WHITE);
+  if (greyPause == 1) {
+    tft.fillCircle(270, 180, 35, iZettleGreyLite);
+    tft.fillRoundRect(250, 155, 15, 50, 4, WHITE);
+    tft.fillRoundRect(275, 155, 15, 50, 4, WHITE);
+  } else {
+    tft.fillCircle(270, 180, 35, iZettleBlue);
+    tft.fillRoundRect(250, 155, 15, 50, 4, WHITE);
+    tft.fillRoundRect(275, 155, 15, 50, 4, WHITE);
+  }
 }
 
 int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
@@ -850,6 +834,81 @@ int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
   }
 
   return val;
+}
+
+void autoStack() {
+  // wake stepper from sleep
+  if (digitalRead(stepperSleepPin) == LOW) {
+    digitalWrite(stepperSleepPin, HIGH);
+  }
+  // move stepper to start if not already there
+  if (goToStart == 1) {
+    // Serial.println("moving to start");
+    while (stepper.currentPosition() != startPosition) {
+      // move to start
+      stepper.setSpeed(-600);
+      stepper.moveTo(startPosition);
+      stepper.runSpeedToPosition();
+
+      goToStart = 0;
+      stepCount = 0;
+      stepDue = 1;
+      movementProgress = 0;
+    }
+    stepper.move(0);
+    stepper.setSpeed(0);
+    // Serial.println("arrived at start");
+  }
+  // take photo and increment progress for first step of each movement
+  if (stepCount == 0 && stepDue == 1) {
+    triggerShutter(1); // set trigger to high
+    delay(500);
+    movementProgress++;
+
+    // make sure correct screen is displaying
+    if (activeScreen == 3) { // auto screen
+      int16_t x1, y1;
+      uint16_t w, h;
+      tft.setFont(&Arimo_Bold_24);
+      tft.getTextBounds(String(prevMovementProgress), 20, 220, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, iZettleBlue);
+      tft.setTextColor(WHITE, iZettleBlue);
+      tft.setCursor(20, 220);
+      tft.println(movementProgress);
+    }
+    // prev movement progress value
+    prevMovementProgress = movementProgress;
+  }
+  // keep stepping if not at end and haven't travelled a full movement
+  if (movementProgress <= numMovements && stepDue == 1 && stepCount <= stepsPerMovement) {
+    stepCount++;
+    stepperStep(1, 0); // forward direction, no delay in ms
+  }
+  // reset stepCount for next movement
+  if (stepCount > stepsPerMovement) {
+    // only reset after 500ms to give time for shutter release unless shutter disabled
+    if (shutterState == 1 && int(Timer - prevShutterTimer) >= 400) {
+      stepCount = 0;
+      stepDue = 0;
+      prevShutterTimer = Timer;
+      // reset trigger by setting low
+      triggerShutter(0);
+    } else if (shutterState == 0) {
+      stepCount = 0;
+      stepDue = 0;
+    }
+  }
+  // wait delay period before re-enabling stepping
+  if (stepDue == 0) {
+    stepperStep(0, shutterDelay*1000); // don't step and wait for delay
+  }
+  // stop AutoStack sequence if end reached
+  if (movementProgress >= numMovements) {
+    autoStackFlag = 0;
+    goToStart = 1;
+    movementProgress = 0;
+    triggerShutter(0); // reset trigger by setting low
+  }
 }
 
 void homeRail() {
@@ -878,6 +937,63 @@ void homeRail() {
   forwardLimitPos = stepper.currentPosition(); // set position
   stepper.moveTo(forwardLimitPos / 2); // return to the middle
   stepper.runToPosition();
+}
+
+void dryRun() {
+  // wake stepper from sleep
+  if (digitalRead(stepperSleepPin) == LOW) {
+    digitalWrite(stepperSleepPin, HIGH);
+  }
+
+  while (stepper.currentPosition() > startPosition) {
+    stepper.setSpeed(-600);
+    stepper.moveTo(startPosition);
+    stepper.runSpeedToPosition();
+  }
+
+  displayPosition();
+
+  while (stepper.currentPosition() < endPosition) {
+    stepper.setSpeed(300);
+    stepper.moveTo(endPosition);
+    stepper.runSpeedToPosition();
+  }
+
+  displayPosition();
+
+  while (stepper.currentPosition() > startPosition) {
+    stepper.setSpeed(-600);
+    stepper.moveTo(startPosition);
+    stepper.runSpeedToPosition();
+  }
+
+  // stops motor instantly
+  stepper.setSpeed(0);
+  targetFlag = 1;
+  movementProgress = 0;
+  displayPosition();
+}
+
+void stepperStep(int stepDirection, int delay) {
+  Timer = millis();
+  // step after elapsed amount of time
+  if (int(Timer - prevStepTimer) > delay) {
+    // wake stepper from sleep
+    if (digitalRead(stepperSleepPin) == LOW) {
+      digitalWrite(stepperSleepPin, HIGH);
+    }
+
+    int stepVelocity = stepDirection * stepsPerMovement;
+
+    stepper.move(stepVelocity);
+    stepper.setSpeed(40);
+    stepper.runSpeed();
+    // reset stepper target
+    // targetFlag = 1;
+
+    stepDue = 1;
+    prevStepTimer = Timer;
+  }
 }
 
 void joyStick() {
@@ -949,18 +1065,13 @@ void toggleJoystick() {
 
 void toggleShutter() {
   shutterState = !shutterState;
-  if(shutterState == 1){
-    digitalWrite(shutterPin, HIGH);
-  } else if (shutterState == 0) {
-    digitalWrite(shutterPin, LOW);
-  }
-}
-
-void triggerShutter() {
-  if(shutterState == 1){
-    digitalWrite(shutterPin, HIGH);
-    delay(200); // wait 200ms, change this to elapsed time in the future
-    digitalWrite(shutterPin, LOW);
+  // special trigger for non-auto mode
+  if (activeScreen == 2) { // manual screen
+    if (shutterState == 1) {
+      digitalWrite(shutterPin, HIGH);
+    } else if (shutterState == 0) {
+      digitalWrite(shutterPin, LOW);
+    }
   }
 }
 
@@ -984,6 +1095,14 @@ void setShutterDelay() {
   }
 }
 
+void triggerShutter(bool lowHigh) {
+  if (shutterState == 1 && lowHigh == 1) {
+    digitalWrite(shutterPin, HIGH);
+  } else if (lowHigh == 0) {
+    digitalWrite(shutterPin, LOW);
+  }
+}
+
 void setStepDistance() {
 
   // constrain multiplier range
@@ -1002,19 +1121,25 @@ void setStepDistance() {
     int16_t x1, y1;
     uint16_t w, h;
     tft.setFont(&Arimo_Bold_30);
-    tft.getTextBounds(String(prevDistance, 2), 23, 60, &x1, &y1, &w, &h);
+    tft.getTextBounds(String(prevDistance/1000, 4), 10, 60, &x1, &y1, &w, &h);
     tft.fillRect(x1, y1, w, h, iZettleBlue);
-    tft.setCursor(23, 60);
+    tft.setCursor(10, 60);
     tft.setTextColor(YELLOW, iZettleBlue);
-    tft.println(distancePerMovement);
+    tft.println(String(distancePerMovement/1000, 4));
 
     // calculate number of steps required to cover range
     numMovements = ceil((endPosition - startPosition)*1.00/stepsPerMovement);
-    tft.setTextColor(WHITE, iZettleBlue);
-    tft.fillRect(65, 195, 45, 25, iZettleBlue);
-    tft.setCursor(65, 220);
-    tft.setFont(&Arimo_Bold_24);
-    tft.println(numMovements);
+
+    if (activeScreen == 3) {
+      tft.setFont(&Arimo_Bold_24);
+      tft.getTextBounds(String(prevNumMovements), 70, 220, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, iZettleBlue);
+      tft.setTextColor(WHITE, iZettleBlue);
+      tft.setCursor(70, 220);
+      tft.println(numMovements);
+    }
+
+    prevNumMovements = numMovements;
   }
 }
 
@@ -1065,38 +1190,45 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
   numMovements = ceil((endPosition - startPosition)/stepsPerMovement);
 }
 
-void dryRun() {
-  // wake stepper from sleep
-  if (digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
+void displayPosition() {
+  // update for new values
+  if (prevStepperPosition != stepper.currentPosition()) {
+    int16_t x1, y1;
+    uint16_t w, h;
+
+    if (activeScreen == 2) { // 2 = manual screen
+      // update rail position value
+      tft.setFont(&Arimo_Bold_30);
+      tft.getTextBounds(String(prevStepperPosition*0.0025, 4), 5, 220, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, iZettleBlue);
+      tft.setCursor(5, 220);
+      tft.setTextColor(WHITE, iZettleBlue);
+      tft.println(String(stepper.currentPosition()*0.0025, 4));
+
+      // update movement count for manual screen
+      manualMovementCount++;
+
+      tft.setFont(&Arimo_Bold_30);
+      tft.getTextBounds(String(prevManualMovementCount), 30, 140, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, iZettleBlue);
+      tft.setTextColor(WHITE);
+      tft.setCursor(30, 140);
+      tft.println(manualMovementCount);
+
+      prevManualMovementCount = manualMovementCount;
+    }
+
+    if (activeScreen == 4) { // 4 = autoConfigScreen
+      tft.setFont(&Arimo_Regular_16);
+      tft.getTextBounds(String(prevStepperPosition), 35, 225, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, BLACK);
+      tft.setCursor(35, 225);
+      tft.setTextColor(WHITE, BLACK);
+      tft.println(stepper.currentPosition());
+    }
+
+    prevStepperPosition = stepper.currentPosition();
   }
-
-  while (stepper.currentPosition() > startPosition) {
-    stepper.setSpeed(-600);
-    stepper.moveTo(startPosition);
-    stepper.runSpeedToPosition();
-  }
-
-  displayPosition();
-
-  while (stepper.currentPosition() < endPosition) {
-    stepper.setSpeed(300);
-    stepper.moveTo(endPosition);
-    stepper.runSpeedToPosition();
-  }
-
-  displayPosition();
-
-  while (stepper.currentPosition() > startPosition) {
-    stepper.setSpeed(-600);
-    stepper.moveTo(startPosition);
-    stepper.runSpeedToPosition();
-  }
-
-  // stops motor instantly
-  stepper.setSpeed(0);
-  targetFlag = 1;
-  displayPosition();
 }
 
 void limitSwitch() {
@@ -1123,55 +1255,6 @@ void limitSwitch() {
     stepper.runSpeed();
     // reset stepper target
     targetFlag = 1;
-  }
-}
-
-void stepperStep(int stepDirection, int delay) {
-  Timer = millis();
-  // step after elapsed amount of time
-  if (int(Timer - prevStepTimer) > delay) {
-    // wake stepper from sleep
-    if(digitalRead(stepperSleepPin) == LOW) {
-      digitalWrite(stepperSleepPin, HIGH);
-    }
-
-    int stepVelocity = stepDirection * stepsPerMovement;
-
-    stepper.move(stepVelocity);
-    stepper.setSpeed(40);
-    stepper.runSpeed();
-    // reset stepper target
-    // targetFlag = 1;
-
-    stepDue = 1;
-    prevStepTimer = Timer;
-  }
-}
-
-void displayPosition() {
-  if (prevStepperPosition != stepper.currentPosition()) {
-    int16_t x1, y1;
-    uint16_t w, h;
-
-    if (activeScreen == 2) { // 2 = manual screen
-      tft.setFont(&Arimo_Bold_30);
-      tft.getTextBounds(String(prevStepperPosition*0.0025, 4), 5, 220, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, iZettleBlue);
-      tft.setCursor(5, 220);
-      tft.setTextColor(WHITE, iZettleBlue);
-      tft.println(String(stepper.currentPosition()*0.0025, 4));
-    }
-
-    if (activeScreen == 4) { // 4 = autoConfigScreen
-      tft.setFont(&Arimo_Regular_16);
-      tft.getTextBounds(String(prevStepperPosition), 35, 225, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, BLACK);
-      tft.setCursor(35, 225);
-      tft.setTextColor(WHITE, BLACK);
-      tft.println(stepper.currentPosition());
-    }
-
-    prevStepperPosition = stepper.currentPosition();
   }
 }
 
