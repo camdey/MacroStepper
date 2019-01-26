@@ -102,7 +102,7 @@ int arrowsTouch(TSPoint&, bool stepMotor, int val);
 void autoStack();
 void homeRail();
 void dryRun();
-void stepperStep(int direction, int delay);
+void stepperStep(int direction, unsigned long delay);
 // --- Enable/Disable functions --- //
 void toggleJoystick();
 void toggleShutter();
@@ -122,9 +122,8 @@ unsigned long subRoutine1Time = 0;    // time subroutine1 last ran
 unsigned long subRoutine2Time = 0;    // time subroutine2 last ran
 unsigned long prevStepTime = 0;       // previous step time reading
 unsigned long prevShutterTime = 0;    // previous time shutter triggered
-unsigned long prevTouchTime = 0;      // previous time touch registered
 unsigned long prevGenericTime = 0;    // generic timer for toggles and such
-int genericTouchDelay = 200;          // 200ms touch delay for toggles
+unsigned long genericTouchDelay = 200; // 200ms touch delay for toggles
 int prevMinutes = 1;                  // duration of autoStack
 int prevSeconds = 1;                  // duration of autoStack
 
@@ -289,8 +288,6 @@ void touchScreen() {
         autoConfigScreenTouch(point); // autoStack config
         break;
     }
-    // reset timer
-    prevTouchTime = millis();
   }
 }
 
@@ -442,7 +439,7 @@ void manualScreenTouch(TSPoint &point) {
 
   // toggle shutter on/off
   if ((xPos >= 145 && xPos <= 230) && (yPos >= 30 && yPos <= 50)) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       toggleShutter();
       tft.setCursor(150, 45);
       tft.setFont(&Arimo_Bold_20);
@@ -472,7 +469,7 @@ void manualScreenTouch(TSPoint &point) {
   }
   // step distance button
   if ((xPos >= 5 && xPos <= 130) && (yPos >= 5 && yPos <= 70)) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       arrowsActive = !arrowsActive;
       editMovementDistance = !editMovementDistance;
 
@@ -596,7 +593,7 @@ void autoScreenTouch(TSPoint &point) {
 
   // shutter toggle
   if ((xPos >= 150 && xPos <= 230) && (yPos >= 32 && yPos <= 48)) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       toggleShutter();
       tft.setCursor(150, 45);
       tft.setFont(&Arimo_Bold_20);
@@ -615,7 +612,7 @@ void autoScreenTouch(TSPoint &point) {
   }
   // step distance button
   if ((xPos >= 5 && xPos <= 130) && (yPos >= 5 && yPos <= 70)) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       arrowsActive = !arrowsActive;
       editMovementDistance = !editMovementDistance;
 
@@ -732,7 +729,7 @@ void autoConfigScreenTouch(TSPoint &point) {
 
   // start button
   if ((xPos >= 10 && xPos <= 140) && (yPos >= 10 && yPos <= 80) && (editShutterDelay + editEndPosition) == 0) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       arrowsActive = !arrowsActive;
       editStartPosition = !editStartPosition;
 
@@ -758,7 +755,7 @@ void autoConfigScreenTouch(TSPoint &point) {
   }
   // end button
   if ((xPos >= 10 && xPos <= 120) && (yPos >= 90 && yPos <= 160) && (editShutterDelay + editStartPosition) == 0) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       arrowsActive = !arrowsActive;
       editEndPosition = !editEndPosition;
 
@@ -791,7 +788,7 @@ void autoConfigScreenTouch(TSPoint &point) {
   }
   // delay button
   if ((xPos >= 150 && xPos <= 220) && (yPos >= 110 && yPos <= 145) && (editStartPosition + editEndPosition) == 0) {
-    if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       arrowsActive = !arrowsActive;
       editShutterDelay = !editShutterDelay;
 
@@ -893,7 +890,6 @@ void autoStack() {
   }
   // move stepper to start if not already there
   if (goToStart == 1) {
-    // Serial.println("moving to start");
     while (stepper.currentPosition() != startPosition) {
       // move to start
       stepper.setSpeed(-600);
@@ -907,14 +903,12 @@ void autoStack() {
     }
     stepper.move(0);
     stepper.setSpeed(0);
-    // Serial.println("arrived at start");
   }
   // take photo and increment progress for first step of each movement
   if (stepCount == 0 && stepDue == 1) {
     triggerShutter(1); // set trigger to high
     // delay(300);
     movementProgress++;
-
     // make sure correct screen is displaying
     if (activeScreen == 3) { // auto screen
       int16_t x1, y1;
@@ -930,15 +924,15 @@ void autoStack() {
     prevMovementProgress = movementProgress;
   }
   // keep stepping if not at end and haven't travelled a full movement
-  if (movementProgress <= numMovements && stepDue == 1 && stepCount <= stepsPerMovement) {
+  if (movementProgress <= numMovements && stepDue == 1 && stepCount < stepsPerMovement) {
+    stepperStep(1, 1); // forward direction, 1ms delay
     stepCount++;
-    stepperStep(1, 0); // forward direction, no delay in ms
   }
-  // reset stepCount for next movement
-  if (stepCount > stepsPerMovement) {
+  // reset stepCount for next movement, estimate duration
+  if (stepCount >= stepsPerMovement) {
     estimateDuration();
     // only reset after 400ms to give time for shutter release unless shutter disabled
-    if (shutterState == 1 && int(currentTime - prevShutterTime) >= 1000) {
+    if (shutterState == 1 && currentTime - prevShutterTime >= 400) {
       stepCount = 0;
       stepDue = 0;
       prevShutterTime = millis();
@@ -1025,10 +1019,10 @@ void dryRun() {
   displayPosition();
 }
 
-void stepperStep(int stepDirection, int delay) {
+void stepperStep(int stepDirection, unsigned long delay) {
   currentTime = millis();
   // step after elapsed amount of time
-  if (int(currentTime - prevStepTime) > delay) {
+  if (currentTime - prevStepTime > delay) {
     // wake stepper from sleep
     if (digitalRead(stepperSleepPin) == LOW) {
       digitalWrite(stepperSleepPin, HIGH);
@@ -1108,10 +1102,12 @@ void joyStick() {
   if (activeScreen == 2 or activeScreen == 4) {
     displayPosition();
   }
+  // update prev position
+  prevStepperPosition = stepper.currentPosition();
 }
 
 void toggleJoystick() {
-  if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+  if ((currentTime - prevGenericTime) >= genericTouchDelay) {
     joystickState = !joystickState;
 
     prevGenericTime = millis();
@@ -1119,7 +1115,7 @@ void toggleJoystick() {
 }
 
 void toggleShutter() {
-  if (int(currentTime - prevGenericTime) >= genericTouchDelay) {
+  if ((currentTime - prevGenericTime) >= genericTouchDelay) {
     shutterState = !shutterState;
     prevGenericTime = millis();
   }
