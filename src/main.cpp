@@ -73,13 +73,13 @@ MCUFRIEND_kbv tft;
 #define WHITE   0xFFFF
 #define GRAY    0xE73C
 #define DARKGRAY 0x39E8
-#define iZettleGreenLite  0x9736
-#define iZettleGreen      0x4ECC
-#define iZettleRed        0xFBCC
-#define iZettleRedLite    0xFCD1
-#define iZettleBlue       0x4EDE
-#define iZettleGrey       0xCE7A
-#define iZettleGreyLite   0xDEFB
+#define customGreenLite  0x9736
+#define customGreen      0x4ECC
+#define customRed        0xFBCC
+#define customRedLite    0xFCD1
+#define customBlue       0x4EDE
+#define customGrey       0xCE7A
+#define customGreyLite   0xDEFB
 
 // touch definitions
 #define minPressure 5
@@ -470,6 +470,47 @@ const unsigned char logo [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+// 'delete', 50x50px
+const unsigned char reset [] PROGMEM = {
+	0x00, 0x00, 0x0f, 0xfc, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x03,
+	0xff, 0xff, 0xf0, 0x00, 0x00, 0x00, 0x0f, 0xff, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x1f, 0xff, 0xff,
+	0xfe, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xc0,
+	0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xe0, 0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x03,
+	0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x07, 0xff, 0xff, 0xff, 0xff, 0xf8, 0x00, 0x0f, 0xff, 0xff,
+	0xff, 0xff, 0xfc, 0x00, 0x1f, 0xfe, 0x3f, 0xff, 0x1f, 0xfc, 0x00, 0x1f, 0xfc, 0x1f, 0xfe, 0x0f,
+	0xfe, 0x00, 0x3f, 0xf8, 0x0f, 0xfc, 0x07, 0xff, 0x00, 0x3f, 0xf0, 0x07, 0xf8, 0x03, 0xff, 0x00,
+	0x3f, 0xf0, 0x03, 0xf0, 0x01, 0xff, 0x00, 0x7f, 0xf0, 0x01, 0xe0, 0x03, 0xff, 0x80, 0x7f, 0xf8,
+	0x00, 0xc0, 0x07, 0xff, 0x80, 0x7f, 0xfc, 0x00, 0x00, 0x0f, 0xff, 0x80, 0xff, 0xfe, 0x00, 0x00,
+	0x1f, 0xff, 0xc0, 0xff, 0xff, 0x00, 0x00, 0x3f, 0xff, 0xc0, 0xff, 0xff, 0x80, 0x00, 0x7f, 0xff,
+	0xc0, 0xff, 0xff, 0xc0, 0x00, 0xff, 0xff, 0xc0, 0xff, 0xff, 0xe0, 0x01, 0xff, 0xff, 0xc0, 0xff,
+	0xff, 0xe0, 0x01, 0xff, 0xff, 0xc0, 0xff, 0xff, 0xc0, 0x00, 0xff, 0xff, 0xc0, 0xff, 0xff, 0x80,
+	0x00, 0x7f, 0xff, 0xc0, 0xff, 0xff, 0x00, 0x00, 0x3f, 0xff, 0xc0, 0xff, 0xfe, 0x00, 0x00, 0x1f,
+	0xff, 0xc0, 0x7f, 0xfc, 0x00, 0x00, 0x0f, 0xff, 0x80, 0x7f, 0xf8, 0x00, 0xc0, 0x07, 0xff, 0x80,
+	0x7f, 0xf0, 0x01, 0xe0, 0x03, 0xff, 0x80, 0x3f, 0xf0, 0x03, 0xf0, 0x01, 0xff, 0x00, 0x3f, 0xf0,
+	0x07, 0xf8, 0x03, 0xff, 0x00, 0x3f, 0xf8, 0x0f, 0xfc, 0x07, 0xff, 0x00, 0x1f, 0xfc, 0x1f, 0xfe,
+	0x0f, 0xfe, 0x00, 0x1f, 0xfe, 0x3f, 0xff, 0x1f, 0xfc, 0x00, 0x0f, 0xff, 0x7f, 0xff, 0xbf, 0xfc,
+	0x00, 0x07, 0xff, 0xff, 0xff, 0xff, 0xf8, 0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x03,
+	0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xe0, 0x00, 0x00, 0xff, 0xff,
+	0xff, 0xff, 0xc0, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x1f, 0xff, 0xff, 0xfe,
+	0x00, 0x00, 0x00, 0x0f, 0xff, 0xff, 0xf8, 0x00, 0x00, 0x00, 0x03, 0xff, 0xff, 0xf0, 0x00, 0x00,
+	0x00, 0x00, 0x7f, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x0f, 0xfc, 0x00, 0x00, 0x00
+};
+// 'delete', 40x40px
+const unsigned char reset40 [] PROGMEM = {
+	0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x07, 0xff, 0xe0, 0x00, 0x00, 0x1f, 0xff, 0xf8, 0x00, 0x00,
+	0x7f, 0xff, 0xfe, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x03, 0xff, 0xff, 0xff, 0xc0, 0x07, 0xff,
+	0xff, 0xff, 0xe0, 0x07, 0xff, 0xff, 0xff, 0xe0, 0x0f, 0xff, 0xff, 0xff, 0xf0, 0x1f, 0xf3, 0xff,
+	0xcf, 0xf8, 0x1f, 0xe1, 0xff, 0x87, 0xf8, 0x3f, 0xc0, 0xff, 0x03, 0xfc, 0x3f, 0x80, 0x7e, 0x01,
+	0xfc, 0x7f, 0x80, 0x3c, 0x01, 0xfe, 0x7f, 0xc0, 0x18, 0x03, 0xfe, 0x7f, 0xe0, 0x00, 0x07, 0xfe,
+	0xff, 0xf0, 0x00, 0x0f, 0xff, 0xff, 0xf8, 0x00, 0x1f, 0xff, 0xff, 0xfc, 0x00, 0x3f, 0xff, 0xff,
+	0xfe, 0x00, 0x7f, 0xff, 0xff, 0xfe, 0x00, 0x7f, 0xff, 0xff, 0xfc, 0x00, 0x3f, 0xff, 0xff, 0xf8,
+	0x00, 0x1f, 0xff, 0xff, 0xf0, 0x00, 0x0f, 0xff, 0x7f, 0xe0, 0x00, 0x07, 0xfe, 0x7f, 0xc0, 0x18,
+	0x03, 0xfe, 0x7f, 0x80, 0x3c, 0x01, 0xfe, 0x3f, 0x80, 0x7e, 0x01, 0xfc, 0x3f, 0xc0, 0xff, 0x03,
+	0xfc, 0x1f, 0xe1, 0xff, 0x87, 0xf8, 0x1f, 0xf3, 0xff, 0xcf, 0xf8, 0x0f, 0xff, 0xff, 0xff, 0xf0,
+	0x07, 0xff, 0xff, 0xff, 0xe0, 0x07, 0xff, 0xff, 0xff, 0xe0, 0x03, 0xff, 0xff, 0xff, 0xc0, 0x00,
+	0xff, 0xff, 0xff, 0x00, 0x00, 0x7f, 0xff, 0xfe, 0x00, 0x00, 0x1f, 0xff, 0xf8, 0x00, 0x00, 0x07,
+	0xff, 0xe0, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00
+};
 
 
 // ***** --- PROGRAM --- ***** //
@@ -563,7 +604,7 @@ void loop() {
   // run homing sequence if first loop
   if (bootFlag == 0) {
     bootFlag = 1;
-    // homeRail();
+    homeRail();
   }
 }
 
@@ -596,38 +637,31 @@ void startScreen() {
   activeScreen = 1;
   tft.fillScreen(BLACK);
 
-  // tft.setTextColor(WHITE);
-  // tft.setCursor(30, 45);
-  // tft.setFont(&Permanent_Marker_Regular_36);
-  // tft.println("MacroStepper");
   tft.drawBitmap(40, 0, logo, 240, 82, WHITE);
 
   tft.setTextColor(BLACK);
   // Manual option
-  tft.fillRoundRect(20, 90, 130, 60, 8, iZettleRed);
-  tft.setCursor(30,130);
+  tft.fillRoundRect(20, 100, 130, 60, 8, customBlue);
+  tft.setCursor(30, 140);
   tft.setFont(&Arimo_Bold_30);
   tft.println("Manual");
 
   // Auto option
-  tft.fillRoundRect(170, 90, 130, 60, 8, iZettleGreen);
-  tft.setCursor(200,130);
+  tft.fillRoundRect(170, 100, 130, 60, 8, customGreen);
+  tft.setCursor(200,140);
   tft.setFont(&Arimo_Bold_30);
   tft.println("Auto");
 
   // Homing option
-  // tft.fillRect(0, 200, 320, 40, iZettleBlue);
-  tft.drawBitmap(30, 190, house, 50, 42, iZettleGreen);
+  // tft.fillRect(0, 200, 320, 40, customBlue);
+  tft.drawBitmap(30, 190, house, 50, 42, WHITE);
 
   // Clear autoStack
-  tft.setCursor(235,225);
-  tft.setFont(&Arimo_Bold_20);
   if (autoStackFlag == 0) {
-    tft.setTextColor(iZettleGreen, BLACK);
+    tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
   } else if (autoStackFlag == 1) {
-    tft.setTextColor(iZettleRed, BLACK);
+    tft.drawBitmap(250, 190, reset40, 40, 40, customRed);
   }
-  tft.println("Reset");
 }
 
 void startScreenTouch(TSPoint &point) {
@@ -636,18 +670,18 @@ void startScreenTouch(TSPoint &point) {
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
   // manual box
-  if ((xPos >= 20 && xPos <= 150) && (yPos >= 90 && yPos <= 150)) {
+  if ((xPos >= 20 && xPos <= 150) && (yPos >= 90 && yPos <= 160)) {
     manualScreen();
   }
   // auto box
-  if ((xPos >= 170 && xPos <= 300) && (yPos >= 90 && yPos <= 150)) {
+  if ((xPos >= 170 && xPos <= 300) && (yPos >= 90 && yPos <= 160)) {
     autoScreen();
   }
   // homing func
   if ((xPos >= 20 && xPos <= 100) && (yPos >= 190 && yPos <= 240)) {
-    tft.drawBitmap(30, 190, house, 50, 42, iZettleRed);
+    tft.drawBitmap(30, 190, house, 50, 42, customRed);
     homeRail();
-    tft.drawBitmap(30, 190, house, 50, 42, iZettleGreen);
+    tft.drawBitmap(30, 190, house, 50, 42, WHITE);
   }
   // clear autoStack run
   if ((xPos >= 230 && xPos <= 320) && (yPos >= 200 && yPos <= 240) && autoStackFlag == 1) {
@@ -661,8 +695,8 @@ void manualScreen() {
   tft.setTextColor(WHITE);
 
   // Step Distance
-  // tft.fillRoundRect(5, 5, 125, 65, 14, iZettleGrey);
-  tft.fillRoundRect(-10, 5, 135, 65, 15, iZettleBlue);
+  // tft.fillRoundRect(5, 5, 125, 65, 14, customGrey);
+  tft.fillRoundRect(-10, 5, 135, 65, 15, customBlue);
   tft.setCursor(5, 30);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
@@ -672,38 +706,35 @@ void manualScreen() {
   tft.println(String(distancePerMovement/1000, 4));
 
   // Step Number
-  // tft.fillRoundRect(5, 85, 125, 65, 14, iZettleGrey);
-  tft.fillRoundRect(-10, 85, 135, 65, 15, iZettleBlue);
+  // tft.fillRoundRect(5, 85, 125, 65, 14, customGrey);
+  tft.fillRoundRect(-10, 85, 135, 65, 15, customBlue);
   tft.setCursor(5, 110);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Nr.");
 
-  tft.setCursor(30, 140);
+  tft.setCursor(45, 140);
   tft.setFont(&Arimo_Bold_30);
   tft.println(manualMovementCount);
 
   // Rail Posoition
-  // tft.fillRoundRect(5, 165, 125, 65, 14, iZettleGrey);
-  tft.fillRoundRect(-10, 165, 135, 65, 15, iZettleBlue);
+  // tft.fillRoundRect(5, 165, 125, 65, 14, customGrey);
+  tft.fillRoundRect(-10, 165, 135, 65, 15, customBlue);
   tft.setCursor(5, 190);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Rail Pos.");
-  tft.setCursor(5, 220);
+  tft.setCursor(9, 220);
   tft.setFont(&Arimo_Bold_30);
   tft.println(String(stepper.currentPosition()*0.0025, 4));
 
   // auto shutter
   if (shutterState == 1) {
-    tft.drawBitmap(155, 15, aperture, 50, 50, iZettleGreen);
+    tft.drawBitmap(155, 15, aperture, 50, 50, customGreen);
   } else if (shutterState == 0) {
-    tft.drawBitmap(155, 15, aperture, 50, 50, iZettleRed);
+    tft.drawBitmap(155, 15, aperture, 50, 50, customRed);
   }
 
   // reset steps
-  tft.setCursor(150, 125);
-  tft.setFont(&Arimo_Bold_20);
-  tft.setTextColor(iZettleRed);
-  tft.println("Reset");
+  tft.drawBitmap(155, 95, reset, 50, 50, WHITE);
 
   // back to main screen
   tft.drawBitmap(155, 175, backArrow, 50, 50, WHITE);
@@ -721,26 +752,26 @@ void manualScreenTouch(TSPoint &point) {
     if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       toggleShutter();
       if (shutterState == 1) {
-        tft.drawBitmap(155, 15, aperture, 50, 50, iZettleGreen);
+        tft.drawBitmap(155, 15, aperture, 50, 50, customGreen);
       } else if (shutterState == 0) {
-        tft.drawBitmap(155, 15, aperture, 50, 50, iZettleRed);
+        tft.drawBitmap(155, 15, aperture, 50, 50, customRed);
       }
 
       prevGenericTime = millis();
     }
   }
   // reset manual movement count
-  if ((xPos >= 145 && xPos <= 225) && (yPos >= 120 && yPos <= 140)) {
+  if ((xPos >= 145 && xPos <= 220) && (yPos >= 90 && yPos <= 150)) {
     int16_t x1, y1;
     uint16_t w, h;
     tft.setFont(&Arimo_Bold_30);
-    tft.getTextBounds(String(manualMovementCount), 30, 140, &x1, &y1, &w, &h);
-    tft.fillRect(x1, y1, w, h, iZettleBlue);
+    tft.getTextBounds(String(manualMovementCount), 45, 140, &x1, &y1, &w, &h);
+    tft.fillRect(x1, y1, w, h, customBlue);
 
     manualMovementCount = 0;
     prevManualMovementCount = 0;
     tft.setTextColor(WHITE);
-    tft.setCursor(30, 140);
+    tft.setCursor(45, 140);
     tft.println(manualMovementCount);
   }
   // step distance button
@@ -796,7 +827,7 @@ void autoScreen() {
   tft.setTextColor(WHITE);
 
   // Step Distance
-  tft.fillRoundRect(-10, 5, 135, 65, 15, iZettleBlue);
+  tft.fillRoundRect(-10, 5, 135, 65, 15, customBlue);
   tft.setCursor(5, 30);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
@@ -805,7 +836,7 @@ void autoScreen() {
   tft.println(String(distancePerMovement/1000, 4));
 
   // Estimated time remaining
-  tft.fillRoundRect(-10, 85, 135, 65, 15, iZettleBlue);
+  tft.fillRoundRect(-10, 85, 135, 65, 15, customBlue);
   tft.setCursor(5, 110);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Est. Time");
@@ -813,7 +844,7 @@ void autoScreen() {
   estimateDuration(1);
 
   // Step progress
-  tft.fillRoundRect(-10, 165, 135, 65, 15, iZettleBlue);
+  tft.fillRoundRect(-10, 165, 135, 65, 15, customBlue);
   tft.setCursor(5, 190);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Progress");
@@ -822,13 +853,13 @@ void autoScreen() {
 
   // auto shutter
   if (shutterState == 1) {
-    tft.drawBitmap(155, 15, aperture, 50, 50, iZettleGreen);
+    tft.drawBitmap(155, 15, aperture, 50, 50, customGreen);
   } else if (shutterState == 0) {
-    tft.drawBitmap(155, 15, aperture, 50, 50, iZettleRed);
+    tft.drawBitmap(155, 15, aperture, 50, 50, customRed);
   }
 
   // enter auto config
-  tft.drawBitmap(155, 95, cogWheel, 50, 50, YELLOW);
+  tft.drawBitmap(155, 95, cogWheel, 50, 50, GRAY);
   // back to main screen
   tft.drawBitmap(155, 175, backArrow, 50, 50, WHITE);
 
@@ -851,9 +882,9 @@ void autoScreenTouch(TSPoint &point) {
     if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       toggleShutter();
       if (shutterState == 1) {
-        tft.drawBitmap(155, 15, aperture, 50, 50, iZettleGreen);
+        tft.drawBitmap(155, 15, aperture, 50, 50, customGreen);
       } else if (shutterState == 0) {
-        tft.drawBitmap(155, 15, aperture, 50, 50, iZettleRed);
+        tft.drawBitmap(155, 15, aperture, 50, 50, customRed);
       }
       prevGenericTime = millis();
     }
@@ -924,7 +955,7 @@ void autoConfigScreen() {
   // set start point
   tft.setCursor(20, 50);
   tft.setFont(&Lato_Black_34);
-  tft.setTextColor(iZettleGreen);
+  tft.setTextColor(customGreen);
   tft.println("START");
   tft.setCursor(35, 65);
   tft.setFont(&Arimo_Regular_16);
@@ -934,7 +965,7 @@ void autoConfigScreen() {
   // Set end point
   tft.setCursor(20, 130);
   tft.setFont(&Lato_Black_34);
-  tft.setTextColor(iZettleRed);
+  tft.setTextColor(customRed);
   tft.println("END");
   tft.setCursor(35, 145);
   tft.setFont(&Arimo_Regular_16);
@@ -946,7 +977,7 @@ void autoConfigScreen() {
   // then run from start to end with no accel
   tft.setCursor(20, 210);
   tft.setFont(&Lato_Black_34);
-  tft.setTextColor(iZettleBlue);
+  tft.setTextColor(customBlue);
   tft.println("RUN");
   tft.setCursor(35, 225);
   tft.setFont(&Arimo_Regular_16);
@@ -1074,28 +1105,28 @@ void autoConfigScreenTouch(TSPoint &point) {
 }
 
 void drawArrows() {
-  tft.fillTriangle(230, 65, 260, 15, 290, 65, iZettleGreen);
-  tft.fillRoundRect(245, 69, 30, 36, 4, iZettleGreen);
+  tft.fillTriangle(230, 65, 260, 15, 290, 65, customGreen);
+  tft.fillRoundRect(245, 69, 30, 36, 4, customGreen);
 
-  tft.fillTriangle(230, 175, 260, 225, 290, 175, iZettleRed);
-  tft.fillRoundRect(245, 135, 30, 36, 4, iZettleRed);
+  tft.fillTriangle(230, 175, 260, 225, 290, 175, customRed);
+  tft.fillRoundRect(245, 135, 30, 36, 4, customRed);
 }
 
 void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
   if (greyPlay == 1) {
-    tft.fillCircle(270, 75, 35, iZettleGreyLite);
+    tft.fillCircle(270, 75, 37, customGreyLite);
     tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
   } else {
-    tft.fillCircle(270, 75, 35, iZettleGreen);
+    tft.fillCircle(270, 75, 37, customGreen);
     tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
   }
 
   if (greyPause == 1) {
-    tft.fillCircle(270, 180, 35, iZettleGreyLite);
+    tft.fillCircle(270, 180, 37, customGreyLite);
     tft.fillRoundRect(250, 155, 15, 50, 4, WHITE);
     tft.fillRoundRect(275, 155, 15, 50, 4, WHITE);
   } else {
-    tft.fillCircle(270, 180, 35, iZettleBlue);
+    tft.fillCircle(270, 180, 37, customBlue);
     tft.fillRoundRect(250, 155, 15, 50, 4, WHITE);
     tft.fillRoundRect(275, 155, 15, 50, 4, WHITE);
   }
@@ -1379,10 +1410,7 @@ void resetAutoStack() {
     numMovements = 0;
     startPosition = 0;
     endPosition = 0;
-    tft.setCursor(235,225);
-    tft.setFont(&Arimo_Bold_20);
-    tft.setTextColor(iZettleGreen, BLACK);
-    tft.println("Reset");
+    tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
 
     prevGenericTime = millis();
   }
@@ -1435,9 +1463,9 @@ void setStepDistance() {
     uint16_t w, h;
     tft.setFont(&Arimo_Bold_30);
     tft.getTextBounds(String(prevDistance/1000, 4), 10, 60, &x1, &y1, &w, &h);
-    tft.fillRect(x1, y1, w, h, iZettleBlue);
+    tft.fillRect(x1, y1, w, h, customBlue);
     tft.setCursor(10, 60);
-    tft.setTextColor(YELLOW, iZettleBlue);
+    tft.setTextColor(YELLOW, customBlue);
     tft.println(String(distancePerMovement/1000, 4));
 
     // calculate number of steps required to cover range
@@ -1511,20 +1539,20 @@ void displayPosition() {
     if (activeScreen == 2) { // 2 = manual screen
       // update rail position value
       tft.setFont(&Arimo_Bold_30);
-      tft.getTextBounds(String(prevStepperPosition*0.0025, 4), 5, 220, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, iZettleBlue);
-      tft.setCursor(5, 220);
-      tft.setTextColor(WHITE, iZettleBlue);
+      tft.getTextBounds(String(prevStepperPosition*0.0025, 4), 9, 220, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, customBlue);
+      tft.setCursor(9, 220);
+      tft.setTextColor(WHITE, customBlue);
       tft.println(String(stepper.currentPosition()*0.0025, 4));
 
       // update movement count for manual screen
       manualMovementCount++;
 
       tft.setFont(&Arimo_Bold_30);
-      tft.getTextBounds(String(prevManualMovementCount), 30, 140, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, iZettleBlue);
+      tft.getTextBounds(String(prevManualMovementCount), 45, 140, &x1, &y1, &w, &h);
+      tft.fillRect(x1, y1, w, h, customBlue);
       tft.setTextColor(WHITE);
-      tft.setCursor(30, 140);
+      tft.setCursor(45, 140);
       tft.println(manualMovementCount);
 
       prevManualMovementCount = manualMovementCount;
@@ -1559,7 +1587,7 @@ void estimateDuration(bool screenRefresh) {
 
   if ((minutes != prevMinutes || seconds != prevSeconds || screenRefresh == 1) && activeScreen == 3) {
     tft.getTextBounds(String(prevTimeMinutesSeconds), 15, 140, &x, &y, &w, &h);
-    tft.fillRect(x, y, w, h, iZettleBlue);
+    tft.fillRect(x, y, w, h, customBlue);
     tft.setCursor(15, 140);
     tft.println(timeMinutesSeconds);
 
@@ -1579,7 +1607,7 @@ void updateProgress(bool screenRefresh) {
 
   if ((movementProgress != prevMovementProgress) || numMovements != prevNumMovements || screenRefresh == 1) {
     tft.getTextBounds(String(prevProgressMovements), 20, 220, &x, &y, &w, &h);
-    tft.fillRect(x, y, w, h, iZettleBlue);
+    tft.fillRect(x, y, w, h, customBlue);
     tft.setFont(&Arimo_Bold_24);
     tft.setTextColor(WHITE);
     tft.setCursor(20, 220);
