@@ -1,41 +1,54 @@
-# macroStack v1.0
-- Author: Cam Dey
-- Created: 2018-12-18
-- Last Revised: 2019-02-12
+# MacroStepper v1.0
+Author: Cam Dey
+Created: 2018-12-18
+Last Revised: 2019-02-12
 
-The macroStack is a fully automated macrophotography rig designed to enable a camera to take photos at precisely incremented steps. The macroStack can work with or without an automated shutter and also in manual mode if the user prefers to control the stepping themselves.
+The MacroStepper is a fully automated macrophotography rig designed to enable a camera to take photos at precisely incremented steps. The macroStack can work with or without an automated shutter and also in manual mode if the user prefers to control the stepping themselves.
 
-# Functionality
+# Interface
 **Home Screen**
- - House icon: run homing sequence for the rail, finds min and max positions of the rail
- - X icon: clears the settings from the auto mode
+ - House icon: _run homing sequence for the rail, finds min and max positions of the rail_
+ - X icon: _clears the settings from the auto mode_
  
 **Manual Screen**
- - Step Dist: press to set distance per movement of the motor
-	 - value is the distance per movement covered by the rail in millimetres
- - Step Nr: number of movements taken in manual mode
- - Rail Pos: current position of the camera on the rail
- - Aperture icon: press to enable/disable automated shutter
- - X icon: press to clear step count
- - Arrows: for increment/decrementing the Step Dist. if enabled or moving the rail forward/back otherwise
+ - Step Dist: _press to set distance per movement of the motor_
+	 - _value is the distance per movement covered by the rail in millimetres_
+ - Step Nr: _number of movements taken in manual mode_
+ - Rail Pos: _current position of the camera on the rail_
+ - Aperture icon: _press to enable/disable automated shutter_
+ - X icon: _press to clear step count_
+ - Arrows: _for increment/decrementing the Step Dist. if enabled or moving the rail forward/back otherwise_
 
 **Auto Screen**
- - Step Dist: press to set distance per movement of the motor
-	 - value is the distance per movement covered by the rail in millimetres
- - Est. Time: estimated time remaining in autoStack procedure. Takes into account shutter delay and the recycle time of the flash unit
- - Progress: number of movements completed out of total number of movements in procedure
- - Aperture icon: press to enable/disable automated shutter
- - Cog icon: opens the config menu for the auto mode
- - Play symbol: used to increment Step Dist. if enabled, otherwise used for starting the autoStack procedure
- - Pause symbol: used to decrement Step Dist. if enabled, otherwise used for pausing the autoStack procedure
+ - Step Dist: _press to set distance per movement of the motor_
+	 - _value is the distance per movement covered by the rail in millimetres_
+ - Est. Time: _estimated time remaining in autoStack procedure. Takes into account shutter delay and the recycle time of the flash unit_
+ - Progress: _number of movements completed out of total number of movements in procedure_
+ - Aperture icon: _press to enable/disable automated shutter_
+ - Cog icon: _opens the config menu for the auto mode_
+ - Play symbol: _used to increment Step Dist. if enabled, otherwise used for starting the autoStack procedure_
+ - Pause symbol: _used to decrement Step Dist. if enabled, otherwise used for pausing the autoStack procedure_
 
 **Config Screen**
 
- - START: press to set the start position for the autoStack procedure. Will automatically change to current position when enabled, use joystick or arrows to move rail into correct position
- - END: press to set the end position for the autoStack procedure. Will automatically change to current position when enabled, use joystick or arrows to move rail into correct position
- - RUN: will move the camera rail to the START position, slowly increment through the autoStack range until it reaches the END, and then move back to the START position
- - Clock symbol: press to change the shutter delay between taking photos after each movement of the stepper motor
- - Arrows: used to increment/decrement shutter delay or move the position of the rail
+ - START: _press to set the start position for the autoStack procedure. Will automatically change to current position when enabled, use joystick or arrows to move rail into correct position_
+ - END: _press to set the end position for the autoStack procedure. Will automatically change to current position when enabled, use joystick or arrows to move rail into correct position_
+ - RUN: _will move the camera rail to the START position, slowly increment through the autoStack range until it reaches the END, and then move back to the START position_
+ - Clock symbol: _press to change the shutter delay between taking photos after each movement of the stepper motor_
+ - Arrows: _used to increment/decrement shutter delay or move the position of the rail_
+
+
+# Functionality
+**Flash/Shutter Control**
+The camera shutter is controlled by the Arduino via cable where a HIGH signal is sent to a transistor to short the Shutter and Focus pins of the Sony A6000 to ground. The duration of this signal is determined by an output signal from a PC sync cable. This cable is connected to the output of a Godox X1T-S transmitter. This transmitter sends a LOW signal for several milliseconds when the flash is ready to trigger. When the low signal is received by the Arduino, the shutter line goes LOW and the Shutter and Focus pins are returned to nominal state.
+
+**Distance settings**
+The step distance setting refers to the distance travelled by the rail per movement. A movement is the sequence of steps required by the stepper motor to travel the set distance. The default distance per step in my case was 25μm, calculated by the following: screw pitch / steps per revolution / gear reduction. My rail had a 1mm pitch and 1:2 gear reduction, while the motor takes 200 steps per revolution.
+
+If the step dist. is set to 100μm, this equates to four steps at 25μm each. The sequence of these four steps is termed a movement in this project.
+
+**AutoStack Procedure**
+The autoStack procedure will increment a range by a given number of movements, determined by the step distance and the start and end positions determined by the user. With a 100μm step distance and 180 steps required to go from the start position to the end position, 45 (180/4) movements are required and thus 45 photos will be taken. The procedure can be paused or reset at any stage and after completion the procedure can be restarted. Both step distance and the end position can be changed during the procedure once paused.
 
 # Macrophotography
 
