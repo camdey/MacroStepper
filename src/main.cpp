@@ -95,9 +95,10 @@ AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
 #define rearLimitPin 51
 #define forwardLimitPin 49
 #define xStickPin A12 // analog pin connected to X output
-#define yStickPin A13
+#define yStickPin A13 // not used
 #define zStickPin A14 //68
 #define shutterPin 45
+#define godoxPin A15 // pin for pc sync cable from godox transmitter
 
 // --- Printing screen functions --- //
 void startScreen();
@@ -128,7 +129,7 @@ void toggleShutter();
 void resetAutoStack();
 // --- Inputs and Outputs --- //
 void joyStick();
-void triggerShutter(bool lowHigh);
+void triggerShutter();
 void limitSwitch();
 // --- Set value functions --- //
 void setStepDistance();
@@ -141,7 +142,7 @@ unsigned long currentTime = 0;        // current time in millis()
 unsigned long subRoutine1Time = 0;    // time subroutine1 last ran
 unsigned long subRoutine2Time = 0;    // time subroutine2 last ran
 unsigned long prevStepTime = 0;       // previous step time reading
-unsigned long prevShutterTime = 0;    // previous time shutter triggered
+unsigned long recycleTime = 0;    		// duration to take photo
 unsigned long prevGenericTime = 0;    // generic timer for toggles and such
 unsigned long genericTouchDelay = 200; // 200ms touch delay for toggles
 int prevMinutes = 1;                  // duration of autoStack
@@ -1093,15 +1094,7 @@ void autoConfigScreenTouch(TSPoint &point) {
   if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == 0) {
     autoScreen();
   }
-
-  Serial.print("editStartPosition: ");
-  Serial.println(editStartPosition);
-  Serial.print("editEndPosition: ");
-  Serial.println(editEndPosition);
-  Serial.print("editShutterDelay: ");
-  Serial.println(editShutterDelay);
-  Serial.print("arrowsActive: ");
-  Serial.println(arrowsActive);
+	
 }
 
 void drawArrows() {
@@ -1139,22 +1132,16 @@ int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
 
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
     val++;
-    if (stepMotor == 1) { // if stepping required, move motor
+    if (stepMotor == 1) { // if stepping required, trigger shutter, move step
       if (shutterState == 1 && activeScreen == 2) {
-        triggerShutter(1);
-        delay(300);
-        triggerShutter(0);
+        triggerShutter();
       }
-      Serial.print("forward: ");
-      Serial.println(stepper.targetPosition());
       stepperStep(1, 500); // forward
     }
   }
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
     val--;
     if (stepMotor == 1) { // if stepping required, move motor
-      Serial.print("backward: ");
-      Serial.println(stepper.targetPosition());
       stepperStep(-1, 500); // reverse
     }
   }
@@ -1186,8 +1173,7 @@ void autoStack() {
   }
   // take photo and increment progress for first step of each movement
   if (stepCount == 0 && stepDue == 1) {
-    triggerShutter(1); // set trigger to high
-    // delay(300);
+    triggerShutter(); // take photo
     movementProgress++;
     // make sure correct screen is displaying
     if (activeScreen == 3) { // auto screen
@@ -1204,17 +1190,8 @@ void autoStack() {
   // reset stepCount for next movement, estimate duration
   if (stepCount >= stepsPerMovement) {
     estimateDuration(0); // don't force refresh
-    // only reset after 400ms to give time for shutter release unless shutter disabled
-    if (shutterState == 1 && currentTime - prevShutterTime >= 400) {
-      stepCount = 0;
-      stepDue = 0;
-      prevShutterTime = millis();
-      // reset trigger by setting low
-      triggerShutter(0);
-    } else if (shutterState == 0) {
-      stepCount = 0;
-      stepDue = 0;
-    }
+    stepCount = 0;
+    stepDue = 0;
   }
   // wait delay period before re-enabling stepping
   if (stepDue == 0) {
@@ -1222,12 +1199,12 @@ void autoStack() {
   }
   // stop AutoStack sequence if end reached
   if (movementProgress >= numMovements) {
+		estimateDuration(1); // force refresh
     autoStackFlag = 0;
     goToStart = 1;
     movementProgress = 0;
     joystickState = 1;
     drawPlayPause(0, 0); // reset play to green
-    triggerShutter(0); // reset trigger by setting low
   }
 }
 
@@ -1306,8 +1283,6 @@ void stepperStep(int stepDirection, unsigned long delay) {
     }
 
     int stepVelocity = stepDirection * stepsPerMovement;
-    Serial.println(stepVelocity);
-    Serial.println(40*stepDirection);
 
     stepper.move(stepVelocity);
     stepper.setSpeed(40*stepDirection);
@@ -1436,12 +1411,29 @@ void setShutterDelay() {
   }
 }
 
-void triggerShutter(bool lowHigh) {
-  if (shutterState == 1 && lowHigh == 1) {
+void triggerShutter() {
+  if (shutterState == 1) {
+		bool shotTaken = 0;
+		unsigned long triggerTime = millis();
     digitalWrite(shutterPin, HIGH);
-  } else if (lowHigh == 0) {
+		while (shotTaken == 0) {
+			// if signal missed or shot never taken, break
+			if (millis() - triggerTime > 10000) {
+				break;
+			}
+			// if signal received, exit and reset shutter
+			if (analogRead(godoxPin) == 0) {
+				shotTaken = 1;
+				delay(250); // pause for 250ms
+			}
+		}
+		recycleTime = (millis() - triggerTime);
+		Serial.print("Recycle time: ");
+		Serial.println(recycleTime);
+
+		// reset shutter signal
     digitalWrite(shutterPin, LOW);
-  }
+	}
 }
 
 void setStepDistance() {
@@ -1572,11 +1564,11 @@ void displayPosition() {
 }
 
 void estimateDuration(bool screenRefresh) {
-  int duration = numMovements * shutterDelay;
-  int elapsed = movementProgress * shutterDelay;
-  int remaining = duration - elapsed;
-  int minutes = remaining / 60;
-  int seconds = remaining % 60;
+  float duration = numMovements * (shutterDelay + (recycleTime/1000));
+  float elapsed = movementProgress * (shutterDelay + (recycleTime/1000));
+  float remaining = duration - elapsed;
+  int minutes = floor(remaining / 60);
+  int seconds = int(remaining) % 60;
   char timeMinutesSeconds[5];
 
   int16_t x, y;
