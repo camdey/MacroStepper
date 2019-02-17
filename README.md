@@ -1,9 +1,52 @@
 # MacroStepper v1.0
 Author: Cam Dey
+
 Created: 2018-12-18
-Last Revised: 2019-02-12
+
+Last Revised: 2019-02-17
 
 The MacroStepper is a fully automated macrophotography rig designed to enable a camera to take photos at precisely incremented steps. The macroStack can work with or without an automated shutter and also in manual mode if the user prefers to control the stepping themselves.
+
+# Schematic
+## Fritzing Mockup
+![Schematic](https://raw.githubusercontent.com/camdey/MacroStepper/master/MacroStepper_schematic.png)
+
+## Pinouts
+**2.8" TFT Touch Screen Display**
+
+ - Connected via shield to Proto Shield (16bit parallel)
+
+**DRV8825 Stepper Driver**
+
+ - VMOT - Arduino VIN
+ - GND - Arduino GND
+ - B2 - Stepper green wire
+ - B1 - Stepper black wire
+ - A2 - Stepper red wire
+ - A1 - Stepper blue wire
+ - FAULT - Arduino 5V
+ - GND - Arduino GND
+ - DIR - Arduino D27
+ - STEP - Arduino D29
+ - SLEEP - Arduino D30
+ - RST - Arduino 5V
+ - M2|M1|M0 - unconnected jumper pins
+ - ENABLE - Arduino D41
+
+**Joystick**
+
+ - X Axis - Arduino A12
+ - Y Axis - Arduino A13
+ - Z Axis - Arduino A14
+
+**Limit Switches**
+- Forward Limit Switch - Arduino D49
+- Rear Limit Switch - Arduino D51
+
+**Camera**
+- Shutter Output - Arduino D45
+- Flash Input - Arduino A15
+
 
 # Interface
 **Home Screen**
@@ -64,7 +107,7 @@ While you can create a focus stack just with handheld photos taken at different 
 For this project, you will need a macro rail that can be attached to a stepper motor. Many commercially available macro rails can be retrofitted with a pinion gear to accept a belt, which is in turn attached to a pinion gear on a stepper motor. Other macro rails are designed to interface directly with a stepper motor, especially those designed to be used for CNC machines or 3D printing.
 
 **Stepper Motor**
-A stepper motor is required to move the macro rail automatically. You can do this manually, and many do, but after awhile you get sick of the repetitive process of "move camera rail slightly, take photo, move camera rail, take photo".
+A stepper motor is required to move the macro rail automatically. You can do this manually, and many do, but after awhile you get sick of the repetitive process of "move camera rail, take photo, move camera rail, take photo".
 
 There are many types of stepper motors available but for this project I would recommend one in the NEMA 17 form factor with either 200 (1.8°) or 400 (0.9°) steps per revolution and between 1A and 2A current rating. The current rating is important for the load the stepper motor can move and hold but it is not the only determiner of this. A motor with a holding torque of at least 3kg-cm should be adequate.
 
