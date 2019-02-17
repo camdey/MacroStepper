@@ -38,160 +38,6 @@
 #include <Fonts/Permanent_Marker_Regular_36.h>
 #include <Fonts/Lato_Black_34.h>
 
-#define YP A3  // must be an analog pin, use "An" notation!
-#define XM A2  // must be an analog pin, use "An" notation!
-#define YM 9   // can be a digital pin
-#define XP 8   // can be a digital pin
-
-// touch screen orientation definitions
-#define TS_MINX 100
-#define TS_MAXX 920
-#define TS_MINY 70
-#define TS_MAXY 920
-
-// For better pressure precision, we need to know the resistance
-// between X+ and X- Use any multimeter to read it
-// For the one we're using, its 300 ohms across the X plate
-TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
-MCUFRIEND_kbv tft;
-
-// tft definitions
-#define LCD_CS A3
-#define LCD_CD A2
-#define LCD_WR A1
-#define LCD_RD A0
-#define LCD_RESET A4
-
-// Definitions for some common 16-bit color values:
-#define	BLACK   0x0000
-#define	BLUE    0x001F
-#define	RED     0xF800
-#define	GREEN   0x07E0
-#define CYAN    0x07FF
-#define MAGENTA 0xF81F
-#define YELLOW  0xFFE0
-#define WHITE   0xFFFF
-#define GRAY    0xE73C
-#define DARKGRAY 0x39E8
-#define customGreenLite  0x9736
-#define customGreen      0x4ECC
-#define customRed        0xFBCC
-#define customRedLite    0xFCD1
-#define customBlue       0x4EDE
-#define customGrey       0xCE7A
-#define customGreyLite   0xDEFB
-
-// touch definitions
-#define minPressure 5
-#define maxPressure 2000
-
-// The X Stepper pins
-#define stepperDirPin 27
-#define stepperStepPin 29
-#define stepperSleepPin 30
-#define stepperEnablePin 41
-AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
-
-#define rearLimitPin 51
-#define forwardLimitPin 49
-#define xStickPin A12 // analog pin connected to X output
-#define yStickPin A13 // not used
-#define zStickPin A14 //68
-#define shutterPin 45
-#define godoxPin A15 // pin for pc sync cable from godox transmitter
-
-// --- Printing screen functions --- //
-void startScreen();
-void manualScreen();
-void autoScreen();
-void autoConfigScreen();
-void drawPlayPause(bool greyPlay, bool greyPause);
-void drawArrows();
-void displayPosition();
-void updateProgress(bool screenRefresh);
-void estimateDuration(bool screenRefresh);
-// void drawGrid();
-// --- Touch screen functions --- //
-void touchScreen();
-void startScreenTouch(TSPoint&);
-void manualScreenTouch(TSPoint&);
-void autoScreenTouch(TSPoint&);
-void autoConfigScreenTouch(TSPoint&);
-int arrowsTouch(TSPoint&, bool stepMotor, int val);
-// --- Stepper motion functions --- //
-void autoStack();
-void homeRail();
-void dryRun();
-void stepperStep(int direction, unsigned long delay);
-// --- Enable/Disable functions --- //
-void toggleJoystick();
-void toggleShutter();
-void resetAutoStack();
-// --- Inputs and Outputs --- //
-void joyStick();
-void triggerShutter();
-void limitSwitch();
-// --- Set value functions --- //
-void setStepDistance();
-void setShutterDelay();
-void setAutoStackPositions(bool setStart, bool setEnd);
-
-
-// --- currentTimes and elapsed times --- //
-unsigned long currentTime = 0;        // current time in millis()
-unsigned long subRoutine1Time = 0;    // time subroutine1 last ran
-unsigned long subRoutine2Time = 0;    // time subroutine2 last ran
-unsigned long prevStepTime = 0;       // previous step time reading
-unsigned long recycleTime = 0;    		// duration to take photo
-unsigned long prevGenericTime = 0;    // generic timer for toggles and such
-unsigned long genericTouchDelay = 200; // 200ms touch delay for toggles
-int prevMinutes = 1;                  // duration of autoStack
-int prevSeconds = 1;                  // duration of autoStack
-char prevTimeMinutesSeconds[6] = "00:00";       // previous duration time
-
-// --- Screen flags --- //
-int activeScreen = 1;           // currently displayed screen
-bool arrowsActive = 0;          // take arrow touch readings
-bool editShutterDelay = 0;      // set shutter delay time
-bool editStartPosition = 0;     // set start point for auto mode
-bool editEndPosition = 0;       // set end point for auto mode
-bool editMovementDistance = 0;  // set step distance in any mode
-// --- Input and Output values --- //
-int xStickPos = 0;              // ADC value of x-axis joystick
-int zStickVal = 1;              // increment count of z-axis button press
-int prevZStickVal = 1;          // only increment per button press
-int shutterDelay = 3;           // delay between step and shutter trigger
-int prevDelay = 3;              // previous delay value
-// --- Enable/Disable functionality --- //
-bool bootFlag = 0;              // runs rehoming sequence
-bool goToStart = 1;             // move to start for autoStack procedure
-bool joystickState = 1;         // enabled/disabled
-bool autoStackFlag = 0;         // enables function for stack procedure
-bool pauseAutoStack = 0;        // pause stack procedure
-bool shutterState = 0;          // disabled/enabled
-bool stepDue = 0;               // step is due when movement complete
-bool targetFlag = 0;            // resets stepper target
-// --- Position values --- //
-long rearLimitPos = 0;          // limit switch nearest stepper
-long forwardLimitPos = 10000;   // limit switch furtherest from stepper
-int startPosition = 0;          // start position for stack procedure
-int prevStartPosition = 0;
-int endPosition = 0;            // end position for stack procedure
-int prevEndPosition = 0;
-int prevStepperPosition = 1;    // used for showing position of stepper if changed
-int manualMovementCount = 0;    // count of manual movements
-int prevManualMovementCount = 0;
-// --- Stepper motor variables --- //
-int stepsPerMovement = 1;       // number of steps required for a given distance
-int numMovements = 0;           // equals total distance / step multiplier
-int prevNumMovements = 1;       // previous numMovements value
-int stepCount = 0;              // number of steps taken in a given movement
-double distancePerMovement = 2.50; // distance in micrometres travelled per movement
-double prevDistance = 2.50;     // previous step distance in micrometres
-int movementProgress = 0;       // number of completed movements
-int prevMovementProgress = 1;   // used for overwriting prev movement progress
-char prevProgressMovements[10] = "0/0"; // used for overwriting prev movement progress
-
 // 'cog', 50x50px
 const unsigned char cogWheel [] PROGMEM = {
 	0x00, 0x00, 0x01, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -512,6 +358,158 @@ const unsigned char reset40 [] PROGMEM = {
 	0xff, 0xff, 0xff, 0x00, 0x00, 0x7f, 0xff, 0xfe, 0x00, 0x00, 0x1f, 0xff, 0xf8, 0x00, 0x00, 0x07,
 	0xff, 0xe0, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00
 };
+
+// definitions for touch inputs
+#define YP A3  // must be an analog pin, use "An" notation!
+#define XM A2  // must be an analog pin, use "An" notation!
+#define YM 9   // can be a digital pin
+#define XP 8   // can be a digital pin
+
+// definitions for touch screen orientation
+#define TS_MINX 100
+#define TS_MAXX 920
+#define TS_MINY 70
+#define TS_MAXY 920
+
+TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
+MCUFRIEND_kbv tft;
+
+// tft screen definitions
+#define LCD_CS A3
+#define LCD_CD A2
+#define LCD_WR A1
+#define LCD_RD A0
+#define LCD_RESET A4
+
+// Definitions for some common 16-bit color values:
+#define	BLACK   0x0000
+#define	BLUE    0x001F
+#define	RED     0xF800
+#define	GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
+#define GRAY    0xE73C
+#define DARKGRAY 0x39E8
+#define customGreenLite  0x9736
+#define customGreen      0x4ECC
+#define customRed        0xFBCC
+#define customRedLite    0xFCD1
+#define customBlue       0x4EDE
+#define customGrey       0xCE7A
+#define customGreyLite   0xDEFB
+
+// touch definitions
+#define minPressure 5
+#define maxPressure 2000
+
+// The X Stepper pins
+#define stepperDirPin 27
+#define stepperStepPin 29
+#define stepperSleepPin 30
+#define stepperEnablePin 41
+AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
+
+#define rearLimitPin 51
+#define forwardLimitPin 49
+#define xStickPin A12 // analog pin connected to X output
+#define yStickPin A13 // not used
+#define zStickPin A14 //68
+#define shutterPin 45
+#define godoxPin A15 // pin for pc sync cable from godox transmitter
+
+// --- Printing screen functions --- //
+void startScreen();
+void manualScreen();
+void autoScreen();
+void autoConfigScreen();
+void drawPlayPause(bool greyPlay, bool greyPause);
+void drawArrows();
+void displayPosition();
+void updateProgress(bool screenRefresh);
+void estimateDuration(bool screenRefresh);
+// void drawGrid();
+// --- Touch screen functions --- //
+void touchScreen();
+void startScreenTouch(TSPoint&);
+void manualScreenTouch(TSPoint&);
+void autoScreenTouch(TSPoint&);
+void autoConfigScreenTouch(TSPoint&);
+int arrowsTouch(TSPoint&, bool stepMotor, int val);
+// --- Stepper motion functions --- //
+void autoStack();
+void homeRail();
+void dryRun();
+void stepperStep(int direction, unsigned long delay);
+// --- Enable/Disable functions --- //
+void toggleJoystick();
+void toggleShutter();
+void resetAutoStack();
+// --- Inputs and Outputs --- //
+void joyStick();
+void triggerShutter();
+void limitSwitch();
+// --- Set value functions --- //
+void setStepDistance();
+void setShutterDelay();
+void setAutoStackPositions(bool setStart, bool setEnd);
+
+
+// --- currentTimes and elapsed times --- //
+unsigned long currentTime = 0;        // current time in millis()
+unsigned long subRoutine1Time = 0;    // time subroutine1 last ran
+unsigned long subRoutine2Time = 0;    // time subroutine2 last ran
+unsigned long prevStepTime = 0;       // previous step time reading
+unsigned long recycleTime = 0;    		// duration to take photo
+unsigned long prevGenericTime = 0;    // generic timer for toggles and such
+unsigned long genericTouchDelay = 200; // 200ms touch delay for toggles
+int prevMinutes = 1;                  // duration of autoStack
+int prevSeconds = 1;                  // duration of autoStack
+char prevTimeMinutesSeconds[6] = "00:00";       // previous duration time
+
+// --- Screen flags --- //
+int activeScreen = 1;           // currently displayed screen
+bool arrowsActive = 0;          // take arrow touch readings
+bool editShutterDelay = 0;      // set shutter delay time
+bool editStartPosition = 0;     // set start point for auto mode
+bool editEndPosition = 0;       // set end point for auto mode
+bool editMovementDistance = 0;  // set step distance in any mode
+// --- Input and Output values --- //
+int xStickPos = 0;              // ADC value of x-axis joystick
+int zStickVal = 1;              // increment count of z-axis button press
+int prevZStickVal = 1;          // only increment per button press
+int shutterDelay = 3;           // delay between step and shutter trigger
+int prevDelay = 3;              // previous delay value
+// --- Enable/Disable functionality --- //
+bool bootFlag = 0;              // runs rehoming sequence
+bool goToStart = 1;             // move to start for autoStack procedure
+bool joystickState = 1;         // enabled/disabled
+bool autoStackFlag = 0;         // enables function for stack procedure
+bool pauseAutoStack = 0;        // pause stack procedure
+bool shutterState = 0;          // disabled/enabled
+bool stepDue = 0;               // step is due when movement complete
+bool targetFlag = 0;            // resets stepper target
+// --- Position values --- //
+long rearLimitPos = 0;          // limit switch nearest stepper
+long forwardLimitPos = 10000;   // limit switch furtherest from stepper
+int startPosition = 0;          // start position for stack procedure
+int prevStartPosition = 0;
+int endPosition = 0;            // end position for stack procedure
+int prevEndPosition = 0;
+int prevStepperPosition = 1;    // used for showing position of stepper if changed
+int manualMovementCount = 0;    // count of manual movements
+int prevManualMovementCount = 0;
+// --- Stepper motor variables --- //
+int stepsPerMovement = 1;       // number of steps required for a given distance
+int numMovements = 0;           // equals total distance / step multiplier
+int prevNumMovements = 1;       // previous numMovements value
+int stepCount = 0;              // number of steps taken in a given movement
+double distancePerMovement = 2.50; // distance in micrometres travelled per movement
+double prevDistance = 2.50;     // previous step distance in micrometres
+int movementProgress = 0;       // number of completed movements
+int prevMovementProgress = 1;   // used for overwriting prev movement progress
+char prevProgressMovements[10] = "0/0"; // used for overwriting prev movement progress
 
 
 // ***** --- PROGRAM --- ***** //
@@ -1094,7 +1092,7 @@ void autoConfigScreenTouch(TSPoint &point) {
   if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == 0) {
     autoScreen();
   }
-	
+
 }
 
 void drawArrows() {
