@@ -20,10 +20,12 @@
 // AUTOSTACK = automatic mode, stepper completes procedure without further input
 
 #include <Arduino.h>
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <TouchScreen.h>
-#include <MCUFRIEND_kbv.h>
-#include <AccelStepper.h>
+#include <Adafruit_GFX.h>    					// core graphics library
+#include <TouchScreen.h>							// touchscreen library
+#include <MCUFRIEND_kbv.h>						// display driver for IL9481
+#include <AccelStepper.h>							// software stepping implementation
+#include <TMC2130Stepper.h> 					// stepper driver library
+#include <TMC2130Stepper_REGDEFS.h>	  // stepper driver registry definitions
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
 #include <Fonts/Arimo_Regular_18.h>
@@ -371,9 +373,6 @@ const unsigned char reset40 [] PROGMEM = {
 #define TS_MINY 70
 #define TS_MAXY 920
 
-TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
-MCUFRIEND_kbv tft;
-
 // tft screen definitions
 #define LCD_CS A3
 #define LCD_CD A2
@@ -382,23 +381,23 @@ MCUFRIEND_kbv tft;
 #define LCD_RESET A4
 
 // Definitions for some common 16-bit color values:
-#define	BLACK   0x0000
-#define	BLUE    0x001F
-#define	RED     0xF800
-#define	GREEN   0x07E0
-#define CYAN    0x07FF
-#define MAGENTA 0xF81F
-#define YELLOW  0xFFE0
-#define WHITE   0xFFFF
-#define GRAY    0xE73C
-#define DARKGRAY 0x39E8
-#define customGreenLite  0x9736
-#define customGreen      0x4ECC
-#define customRed        0xFBCC
-#define customRedLite    0xFCD1
-#define customBlue       0x4EDE
-#define customGrey       0xCE7A
-#define customGreyLite   0xDEFB
+#define	BLACK   					0x0000
+#define	BLUE    					0x001F
+#define	RED     					0xF800
+#define	GREEN   					0x07E0
+#define CYAN    					0x07FF
+#define MAGENTA 					0xF81F
+#define YELLOW  					0xFFE0
+#define WHITE   					0xFFFF
+#define GRAY    					0xE73C
+#define DARKGRAY					0x39E8
+#define customGreenLite		0x9736
+#define customGreen				0x4ECC
+#define customRed					0xFBCC
+#define customRedLite			0xFCD1
+#define customBlue				0x4EDE
+#define customGrey				0xCE7A
+#define customGreyLite		0xDEFB
 
 // touch definitions
 #define minPressure 5
@@ -409,8 +408,8 @@ MCUFRIEND_kbv tft;
 #define stepperStepPin 29
 #define stepperSleepPin 30
 #define stepperEnablePin 41
-AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
 
+// misc hardware pins
 #define rearLimitPin 51
 #define forwardLimitPin 49
 #define xStickPin A12 // analog pin connected to X output
@@ -418,6 +417,21 @@ AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
 #define zStickPin A14 //68
 #define shutterPin 45
 #define godoxPin A15 // pin for pc sync cable from godox transmitter
+
+// TMC2130 pins and variables
+#define STALL_VALUE 0 // [-64..63]
+#define EN_PIN    40
+#define DIR_PIN   55
+#define STEP_PIN  54
+#define CS_PIN    53
+#define MOSI_PIN  51
+#define MISO_PIN  50
+#define SCK_PIN   52
+
+TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
+TMC2130Stepper driver = TMC2130Stepper(CS_PIN);
+AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
+MCUFRIEND_kbv tft;
 
 // --- Printing screen functions --- //
 void startScreen();
