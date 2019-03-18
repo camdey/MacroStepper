@@ -404,7 +404,7 @@ MCUFRIEND_kbv tft;
 #define minPressure 5
 #define maxPressure 2000
 
-// The X Stepper pins
+// stepper pins
 #define stepperDirPin 27
 #define stepperStepPin 29
 #define stepperSleepPin 30
@@ -441,14 +441,15 @@ int arrowsTouch(TSPoint&, bool stepMotor, int val);
 void autoStack();
 void homeRail();
 void dryRun();
-void stepperStep(int direction, unsigned long delay);
+bool stepperStep(int direction, unsigned long stepperDelay);
 // --- Enable/Disable functions --- //
 void toggleJoystick();
 void toggleShutter();
 void resetAutoStack();
+void toggleStepper(bool enable);
 // --- Inputs and Outputs --- //
 void joyStick();
-void triggerShutter();
+bool triggerShutter();
 void limitSwitch();
 // --- Set value functions --- //
 void setStepDistance();
@@ -479,8 +480,8 @@ bool editMovementDistance = 0;  // set step distance in any mode
 int xStickPos = 0;              // ADC value of x-axis joystick
 int zStickVal = 1;              // increment count of z-axis button press
 int prevZStickVal = 1;          // only increment per button press
-int shutterDelay = 3;           // delay between step and shutter trigger
-int prevDelay = 3;              // previous delay value
+int shutterDelay = 1;           // delay between step and shutter trigger
+int prevDelay = 1;              // previous delay value
 // --- Enable/Disable functionality --- //
 bool bootFlag = 0;              // runs rehoming sequence
 bool goToStart = 1;             // move to start for autoStack procedure
@@ -510,7 +511,8 @@ double prevDistance = 2.50;     // previous step distance in micrometres
 int movementProgress = 0;       // number of completed movements
 int prevMovementProgress = 1;   // used for overwriting prev movement progress
 char prevProgressMovements[10] = "0/0"; // used for overwriting prev movement progress
-
+bool stepperMoved = false; 			// did stepperStep actually step or not
+bool shutterTriggered = false;	// did the shutter trigger or not
 
 // ***** --- PROGRAM --- ***** //
 
@@ -544,17 +546,20 @@ void setup(void) {
   tft.fillScreen(BLACK);
   tft.setRotation(1);
   startScreen();
+
+	// if holding down rear limit switch, don't home rail
+	if (digitalRead(rearLimitPin) == LOW) {
+		bootFlag = 1;
+	}
 }
 
 void loop() {
-  currentTime = millis();
+	currentTime = millis();
 
   // run AutoStack sequence if enabled
   if (autoStackFlag == 1 && pauseAutoStack == 0) {
     autoStack();
   }
-  // needs to be called every loop
-  stepper.run();
   // take touch reading
   if (currentTime - subRoutine1Time >= 50) {
     touchScreen();
@@ -565,7 +570,7 @@ void loop() {
     // check joystick for movement
     xStickPos = analogRead(xStickPin);
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= 600 || xStickPos <= 400) && autoStackFlag == 0) {
+    if ((xStickPos >= 550 || xStickPos <= 450) && autoStackFlag == 0) {
       joyStick();
     }
     // check limit switches
@@ -573,8 +578,8 @@ void loop() {
       limitSwitch();
     }
     // sleep if stepper inactive, update position on manual screen
-    if (stepper.isRunning() == 0 && (autoStackFlag == 0 || pauseAutoStack == 1) && digitalRead(stepperSleepPin) == HIGH) {
-      digitalWrite(stepperSleepPin, LOW);
+    if (stepper.distanceToGo() == 0 && (autoStackFlag == 0 || pauseAutoStack == 1) && digitalRead(stepperEnablePin) == LOW) {
+      toggleStepper(0); // disable stepper
       // refresh position on manual screen after stepping completed
       if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
         displayPosition();
@@ -604,6 +609,7 @@ void loop() {
   if (bootFlag == 0) {
     bootFlag = 1;
     homeRail();
+		setAutoStackPositions(1, 1);
   }
 }
 
@@ -1132,15 +1138,15 @@ int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
     val++;
     if (stepMotor == 1) { // if stepping required, trigger shutter, move step
       if (shutterState == 1 && activeScreen == 2) {
-        triggerShutter();
+        shutterTriggered = triggerShutter();
       }
-      stepperStep(1, 500); // forward
+      stepperMoved = stepperStep(1, 500); // forward
     }
   }
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
     val--;
     if (stepMotor == 1) { // if stepping required, move motor
-      stepperStep(-1, 500); // reverse
+      stepperMoved = stepperStep(-1, 500); // reverse
     }
   }
 
@@ -1149,8 +1155,8 @@ int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
 
 void autoStack() {
   // wake stepper from sleep
-  if (digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
+  if (digitalRead(stepperEnablePin) == HIGH) {
+    toggleStepper(1);
   }
   // move stepper to start if not already there
   if (goToStart == 1) {
@@ -1159,41 +1165,35 @@ void autoStack() {
       stepper.setSpeed(-600);
       stepper.moveTo(startPosition);
       stepper.runSpeedToPosition();
-
-      goToStart = 0;
-      stepCount = 0;
-      stepDue = 1;
-      movementProgress = 0;
-      joystickState = 0;
     }
-    stepper.move(0);
-    stepper.setSpeed(0);
+		goToStart = 0;
+		movementProgress = 0;
+		joystickState = 0;
+		stepperMoved = false;
+		shutterTriggered = false;
+    // stepper.move(0);
+    // stepper.setSpeed(0);
   }
   // take photo and increment progress for first step of each movement
-  if (stepCount == 0 && stepDue == 1) {
-    triggerShutter(); // take photo
-    movementProgress++;
-    // make sure correct screen is displaying
-    if (activeScreen == 3) { // auto screen
-      updateProgress(0); // don't force refresh
-    }
-    // prev movement progress value
-    prevMovementProgress = movementProgress;
-  }
-  // keep stepping if not at end and haven't travelled a full movement
-  if (movementProgress <= numMovements && stepDue == 1 && stepCount < stepsPerMovement) {
-    stepperStep(1, 1); // forward direction, 1ms delay
-    stepCount++;
-  }
-  // reset stepCount for next movement, estimate duration
-  if (stepCount >= stepsPerMovement) {
-    estimateDuration(0); // don't force refresh
-    stepCount = 0;
-    stepDue = 0;
-  }
-  // wait delay period before re-enabling stepping
-  if (stepDue == 0) {
-    stepperStep(0, shutterDelay*1000); // don't step and wait for delay
+  if (movementProgress <= numMovements && stepperMoved == false) {
+		// if shutter enabled, take photo
+		if (shutterState == 1 && shutterTriggered == false) {
+	    shutterTriggered = triggerShutter(); // take photo
+		}
+
+		// move stepper
+		stepperMoved = stepperStep(1, shutterDelay*1000); // forward direction, shutterdelay
+
+		if (stepperMoved == true) {
+			movementProgress++;
+	    // make sure correct screen is displaying
+	    if (activeScreen == 3) { // auto screen
+	      updateProgress(0); // don't force refresh
+				estimateDuration(0); // don't force refresh
+	    }
+			shutterTriggered = false; // reset shutter
+			stepperMoved = false; // reset stepper move
+		}
   }
   // stop AutoStack sequence if end reached
   if (movementProgress >= numMovements) {
@@ -1202,14 +1202,16 @@ void autoStack() {
     goToStart = 1;
     movementProgress = 0;
     joystickState = 1;
+		stepperMoved = false;
+		shutterTriggered = false;
     drawPlayPause(0, 0); // reset play to green
   }
 }
 
 void homeRail() {
   // wake stepper from sleep
-  if(digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
+  if (digitalRead(stepperEnablePin) == HIGH) {
+    toggleStepper(1);
   }
   stepper.setSpeed(0);
 
@@ -1237,8 +1239,8 @@ void homeRail() {
 
 void dryRun() {
   // wake stepper from sleep
-  if (digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
+	if (digitalRead(stepperEnablePin) == HIGH) {
+    toggleStepper(1);
   }
 
   // move to start
@@ -1271,33 +1273,39 @@ void dryRun() {
   displayPosition();
 }
 
-void stepperStep(int stepDirection, unsigned long delay) {
+bool stepperStep(int stepDirection, unsigned long stepperDelay) {
   currentTime = millis();
+
   // step after elapsed amount of time
-  if (currentTime - prevStepTime > delay) {
+  if (currentTime - prevStepTime > stepperDelay) {
     // wake stepper from sleep
-    if (digitalRead(stepperSleepPin) == LOW) {
-      digitalWrite(stepperSleepPin, HIGH);
-    }
+		if (digitalRead(stepperEnablePin) == HIGH) {
+	    toggleStepper(1);
+	  }
 
     int stepVelocity = stepDirection * stepsPerMovement;
 
     stepper.move(stepVelocity);
-    stepper.setSpeed(40*stepDirection);
-    stepper.runSpeed();
+		stepper.setSpeed(200*stepDirection);
+		while (stepper.distanceToGo() != 0) {
+	    stepper.runSpeed();
+			stepDue = 1;
+		}
 
-    stepDue = 1;
     prevStepTime = currentTime;
-  }
+		return true;
+  } else {
+			return false;
+	}
 }
 
 void joyStick() {
   // wake stepper from sleep
-  if (digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
+	if (digitalRead(stepperEnablePin) == HIGH) {
+    toggleStepper(1);
   }
   // while joystick is operated
-  while ((xStickPos >= 600 || xStickPos <= 400) && joystickState == 1) {
+  while ((xStickPos >= 550 || xStickPos <= 450) && joystickState == 1) {
     // move either -1, 0, or 1
     stepper.move(map(xStickPos, 0, 1023, -1, 1));
     stepper.runSpeed();
@@ -1381,7 +1389,7 @@ void resetAutoStack() {
     stepCount = 1;
     movementProgress = 0;
     numMovements = 0;
-    startPosition = 0;
+    startPosition = stepper.currentPosition();
     endPosition = 0;
     tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
 
@@ -1409,28 +1417,28 @@ void setShutterDelay() {
   }
 }
 
-void triggerShutter() {
+bool triggerShutter() {
   if (shutterState == 1) {
-		bool shotTaken = 0;
+		shutterTriggered = false;
 		unsigned long triggerTime = millis();
     digitalWrite(shutterPin, HIGH);
-		while (shotTaken == 0) {
+
+		while (shutterTriggered == false) {
 			// if signal missed or shot never taken, break
 			if (millis() - triggerTime > 10000) {
 				break;
 			}
 			// if signal received, exit and reset shutter
 			if (analogRead(godoxPin) == 0) {
-				shotTaken = 1;
+				shutterTriggered = true;
 				delay(250); // pause for 250ms
 			}
 		}
 		recycleTime = (millis() - triggerTime);
-		Serial.print("Recycle time: ");
-		Serial.println(recycleTime);
 
 		// reset shutter signal
     digitalWrite(shutterPin, LOW);
+		return shutterTriggered;
 	}
 }
 
@@ -1481,7 +1489,7 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
     // get new value
     startPosition = stepper.currentPosition();
     // print start point if changed
-    if (prevStartPosition != startPosition) {
+    if (prevStartPosition != startPosition && activeScreen == 4) {
       int16_t x1, y1;
       uint16_t w, h;
       tft.getTextBounds(String(prevStartPosition), 35, 65, &x1, &y1, &w, &h);
@@ -1503,7 +1511,7 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
     // get new value
     endPosition = stepper.currentPosition();
     // print end point if changed
-    if (prevEndPosition != endPosition) {
+    if (prevEndPosition != endPosition && activeScreen == 4) {
       int16_t x1, y1;
       uint16_t w, h;
       tft.getTextBounds(String(prevEndPosition), 35, 145, &x1, &y1, &w, &h);
@@ -1612,8 +1620,8 @@ void updateProgress(bool screenRefresh) {
 
 void limitSwitch() {
   // wake stepper from sleep
-  if(digitalRead(stepperSleepPin) == LOW) {
-    digitalWrite(stepperSleepPin, HIGH);
+	if (digitalRead(stepperEnablePin) == HIGH) {
+    toggleStepper(1);
   }
 
   while (digitalRead(rearLimitPin) == 0) { // switch closest to motor
@@ -1635,4 +1643,18 @@ void limitSwitch() {
     // reset stepper target
     targetFlag = 1;
   }
+}
+
+void toggleStepper(bool enable) {
+	if (enable == 1) {
+		delay(10); // give time for last step to complete
+		digitalWrite(stepperEnablePin, LOW);
+		delay(10); // breathing space
+	}
+
+	if (enable == 0) {
+		stepper.setSpeed(0);
+		stepper.move(0);
+		digitalWrite(stepperEnablePin, HIGH);
+	}
 }
