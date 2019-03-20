@@ -26,19 +26,19 @@
 #include <AccelStepper.h>							// software stepping implementation
 #include <TMC2130Stepper.h> 					// stepper driver library
 #include <TMC2130Stepper_REGDEFS.h>	  // stepper driver registry definitions
-#include <Fonts/Arimo_Regular_10.h>
-#include <Fonts/Arimo_Regular_16.h>
-#include <Fonts/Arimo_Regular_18.h>
-#include <Fonts/Arimo_Regular_20.h>
-#include <Fonts/Arimo_Bold_20.h>
-#include <Fonts/Arimo_Regular_22.h>
-#include <Fonts/Arimo_Regular_24.h>
-#include <Fonts/Arimo_Bold_24.h>
-#include <Fonts/Arimo_Regular_30.h>
-#include <Fonts/Arimo_Bold_30.h>
-#include <Fonts/Syncopate_Bold_36.h>
-#include <Fonts/Permanent_Marker_Regular_36.h>
-#include <Fonts/Lato_Black_34.h>
+#include <Arimo_Regular_10.h>
+#include <Arimo_Regular_16.h>
+#include <Arimo_Regular_18.h>
+#include <Arimo_Regular_20.h>
+#include <Arimo_Regular_22.h>
+#include <Arimo_Regular_24.h>
+#include <Arimo_Regular_30.h>
+#include <Arimo_Bold_20.h>
+#include <Arimo_Bold_24.h>
+#include <Arimo_Bold_30.h>
+#include <Syncopate_Bold_36.h>
+#include <Permanent_Marker_Regular_36.h>
+#include <Lato_Black_34.h>
 
 // 'cog', 50x50px
 const unsigned char cogWheel [] PROGMEM = {
