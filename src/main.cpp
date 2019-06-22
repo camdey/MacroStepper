@@ -12,7 +12,7 @@
 // This delay can be used to allow your camera flash time to recharge before the next shot.
 
 // DEFINITIONS:
-// STEP = one full step of the stepper stepper motor
+// STEP = one microstep step of the stepper stepper motor
 // MOVEMENT = one full movement of linear rail by specified distance, consisting of multiple steps
 // PROECDURE = one completed stack procedure, consisting of multiple movements
 // DISTANCE = distance travelled per movement = number of steps per movement * 0.0025mm
@@ -361,25 +361,6 @@ const unsigned char reset40 [] PROGMEM = {
 	0xff, 0xe0, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00
 };
 
-// definitions for touch inputs
-#define YP A3  // must be an analog pin, use "An" notation!
-#define XM A2  // must be an analog pin, use "An" notation!
-#define YM 9   // can be a digital pin
-#define XP 8   // can be a digital pin
-
-// definitions for touch screen orientation
-#define TS_MINX 100
-#define TS_MAXX 920
-#define TS_MINY 70
-#define TS_MAXY 920
-
-// tft screen definitions
-#define LCD_CS A3
-#define LCD_CD A2
-#define LCD_WR A1
-#define LCD_RD A0
-#define LCD_RESET A4
-
 // Definitions for some common 16-bit color values:
 #define	BLACK   					0x0000
 #define	BLUE    					0x001F
@@ -400,37 +381,47 @@ const unsigned char reset40 [] PROGMEM = {
 #define customGreyLite		0xDEFB
 
 // touch definitions
-#define minPressure 5
-#define maxPressure 2000
+#define minPressure 	5
+#define maxPressure 	2000
 
-// stepper pins
-#define stepperDirPin 27
-#define stepperStepPin 29
-#define stepperSleepPin 30
-#define stepperEnablePin 41
+// definitions for touch inputs
+#define YP 		A3  // must be an analog pin, use "An" notation!
+#define XM 		A2  // must be an analog pin, use "An" notation!
+#define YM 		9   // can be a digital pin
+#define XP 		8   // can be a digital pin
+
+// definitions for touch screen orientation
+#define TS_MINX 		100
+#define TS_MAXX 		920
+#define TS_MINY 		70
+#define TS_MAXY 		920
+
+// tft screen definitions
+#define LCD_CS 			A3
+#define LCD_CD 			A2
+#define LCD_WR 			A1
+#define LCD_RD			A0
+#define LCD_RESET 	A4
+
+// driver pins
+#define DIR_PIN 			36
+#define STEP_PIN 			34
+#define EN_PIN 	42
+#define DIAG_PIN 			18
+#define CS_PIN 				53
+#define MOSI_PIN 			51
+#define MISO_PIN 			52
+#define SCK_PIN 			52
 
 // misc hardware pins
-#define rearLimitPin 51
-#define forwardLimitPin 49
-#define xStickPin A12 // analog pin connected to X output
-#define yStickPin A13 // not used
-#define zStickPin A14 //68
-#define shutterPin 45
-#define godoxPin A15 // pin for pc sync cable from godox transmitter
-
-// TMC2130 pins and variables
-#define STALL_VALUE 0 // [-64..63]
-#define EN_PIN    40
-#define DIR_PIN   55
-#define STEP_PIN  54
-#define CS_PIN    53
-#define MOSI_PIN  51
-#define MISO_PIN  50
-#define SCK_PIN   52
+#define XSTICK_PIN 		A9 // analog pin connected to X output
+#define ZSTICK_PIN 		A8 //68
+#define FLASH_PIN 		A5 // pin for light sensor
+#define SHUTTER_PIN 	30
 
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
-TMC2130Stepper driver = TMC2130Stepper(CS_PIN);
-AccelStepper stepper(AccelStepper::DRIVER, stepperStepPin, stepperDirPin);
+TMC2130Stepper driver = TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
+AccelStepper stepper = AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
 MCUFRIEND_kbv tft;
 
 // --- Printing screen functions --- //
@@ -456,6 +447,8 @@ void autoStack();
 void homeRail();
 void dryRun();
 bool stepperStep(int direction, unsigned long stepperDelay);
+void changeDirection();
+void stallDetection();
 // --- Enable/Disable functions --- //
 void toggleJoystick();
 void toggleShutter();
@@ -464,11 +457,13 @@ void toggleStepper(bool enable);
 // --- Inputs and Outputs --- //
 void joyStick();
 bool triggerShutter();
-void limitSwitch();
+bool flashStatus();
 // --- Set value functions --- //
 void setStepDistance();
 void setShutterDelay();
 void setAutoStackPositions(bool setStart, bool setEnd);
+void stallGuardConfig();
+void silentStepConfig();
 
 
 // --- currentTimes and elapsed times --- //
@@ -496,6 +491,7 @@ int zStickVal = 1;              // increment count of z-axis button press
 int prevZStickVal = 1;          // only increment per button press
 int shutterDelay = 1;           // delay between step and shutter trigger
 int prevDelay = 1;              // previous delay value
+int joystick_speed = 0;					// joystick speed value
 // --- Enable/Disable functionality --- //
 bool bootFlag = 0;              // runs rehoming sequence
 bool goToStart = 1;             // move to start for autoStack procedure
@@ -505,9 +501,9 @@ bool pauseAutoStack = 0;        // pause stack procedure
 bool shutterState = 0;          // disabled/enabled
 bool stepDue = 0;               // step is due when movement complete
 bool targetFlag = 0;            // resets stepper target
+bool flashReady = 0;						// flash ready for next photo
+bool stallGuardConfigured = 1;	// stallGuard config has run
 // --- Position values --- //
-long rearLimitPos = 0;          // limit switch nearest stepper
-long forwardLimitPos = 10000;   // limit switch furtherest from stepper
 int startPosition = 0;          // start position for stack procedure
 int prevStartPosition = 0;
 int endPosition = 0;            // end position for stack procedure
@@ -515,13 +511,18 @@ int prevEndPosition = 0;
 int prevStepperPosition = 1;    // used for showing position of stepper if changed
 int manualMovementCount = 0;    // count of manual movements
 int prevManualMovementCount = 0;
+volatile long moveDist = 500000; // distance for homing
+volatile bool stepperDisabled = false;
+volatile bool directionFwd = true;
+long fwdPosition = 9999;
+long bwdPosition = 9999;
 // --- Stepper motor variables --- //
 int stepsPerMovement = 1;       // number of steps required for a given distance
 int numMovements = 0;           // equals total distance / step multiplier
 int prevNumMovements = 1;       // previous numMovements value
 int stepCount = 0;              // number of steps taken in a given movement
-double distancePerMovement = 2.50; // distance in micrometres travelled per movement
-double prevDistance = 2.50;     // previous step distance in micrometres
+double distancePerMovement = 1.25; // distance in micrometres travelled per movement
+double prevDistance = 1.25;     // previous step distance in micrometres
 int movementProgress = 0;       // number of completed movements
 int prevMovementProgress = 1;   // used for overwriting prev movement progress
 char prevProgressMovements[10] = "0/0"; // used for overwriting prev movement progress
@@ -531,21 +532,35 @@ bool shutterTriggered = false;	// did the shutter trigger or not
 // ***** --- PROGRAM --- ***** //
 
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(250000);
+	SPI.begin();
   tft.reset();
 
-  pinMode(rearLimitPin, INPUT);
-  pinMode(forwardLimitPin, INPUT);
-  pinMode(zStickPin, INPUT_PULLUP);
+	pinMode(EN_PIN, OUTPUT);
+  digitalWrite(EN_PIN, LOW);
+  pinMode(CS_PIN, OUTPUT);
+  digitalWrite(CS_PIN, HIGH);
+  pinMode(DIR_PIN, OUTPUT);
+  digitalWrite(DIR_PIN, LOW);
+  pinMode(DIAG_PIN, INPUT);
+  pinMode(ZSTICK_PIN, INPUT_PULLUP);
+  pinMode(SHUTTER_PIN, OUTPUT);
+  digitalWrite(SHUTTER_PIN, LOW);
+  attachInterrupt(digitalPinToInterrupt(DIAG_PIN), stallDetection, RISING);
 
-  pinMode(shutterPin, OUTPUT);
-  pinMode(stepperSleepPin, OUTPUT);
-  digitalWrite(stepperSleepPin, HIGH);
-  pinMode(stepperEnablePin, OUTPUT);
-  digitalWrite(stepperEnablePin, LOW);
+	// default driver settings
+  driver.begin();
+  driver.rms_current(900);
+  driver.microsteps(4);
+  driver.interpolate(1);
 
-  stepper.setMaxSpeed(1600);
-  stepper.setAcceleration(1400);
+  // set stepper AccelStepper config
+  stepper.setMaxSpeed(3200); // 100mm/s @ 80 steps/mm
+  stepper.setAcceleration(2000); // 2000mm/s^2
+  stepper.setEnablePin(EN_PIN);
+  stepper.setPinsInverted(false, false, true);
+  stepper.enableOutputs();
+  stepperDisabled = false;
 
   uint16_t identifier = tft.readID();
 
@@ -561,8 +576,8 @@ void setup(void) {
   tft.setRotation(1);
   startScreen();
 
-	// if holding down rear limit switch, don't home rail
-	if (digitalRead(rearLimitPin) == LOW) {
+	// if holding down ZSTICK_PIN, don't home rail
+	if (digitalRead(ZSTICK_PIN) == LOW) {
 		bootFlag = 1;
 	}
 }
@@ -582,34 +597,34 @@ void loop() {
   // take joystick and limit switch reading, put stepper to sleep
   if (currentTime - subRoutine2Time >= 100) {
     // check joystick for movement
-    xStickPos = analogRead(xStickPin);
+    xStickPos = analogRead(XSTICK_PIN);
     // move if past threshold and not in autoStack mode
     if ((xStickPos >= 550 || xStickPos <= 450) && autoStackFlag == 0) {
       joyStick();
     }
-    // check limit switches
-    if (digitalRead(rearLimitPin) + digitalRead(forwardLimitPin) < 2) {
-      limitSwitch();
-    }
     // sleep if stepper inactive, update position on manual screen
-    if (stepper.distanceToGo() == 0 && (autoStackFlag == 0 || pauseAutoStack == 1) && digitalRead(stepperEnablePin) == LOW) {
+    if (stepper.distanceToGo() == 0 && (autoStackFlag == 0 || pauseAutoStack == 1) && digitalRead(EN_PIN) == LOW) {
       toggleStepper(0); // disable stepper
       // refresh position on manual screen after stepping completed
       if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
         displayPosition();
       }
     }
-    // only increment per button click
-    if (digitalRead(zStickPin) == HIGH) {
-      prevZStickVal = zStickVal;
+    // toggle output if joystick pressed
+    if (digitalRead(ZSTICK_PIN) == LOW) {
+			if (stepperDisabled == false) {
+      	toggleStepper(0);
+				stepperDisabled = true;
+			}
+			else if (stepperDisabled == true) {
+				toggleStepper(1);
+				stepperDisabled = false;
+			}
     }
-    // increment joystick button for changing stepper speed
-    if (digitalRead(zStickPin) == LOW && prevZStickVal == zStickVal) {
-      zStickVal++;
-      if (zStickVal > 3) {
-        zStickVal = 1;
-      }
-    }
+		// configure SilentStep if not homing rail
+		if (stallGuardConfigured == 1 && bootFlag == 0) {
+			silentStepConfig();
+		}
 
     subRoutine2Time = millis();
   }
@@ -1169,7 +1184,7 @@ int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
 
 void autoStack() {
   // wake stepper from sleep
-  if (digitalRead(stepperEnablePin) == HIGH) {
+  if (digitalRead(EN_PIN) == HIGH) {
     toggleStepper(1);
   }
   // move stepper to start if not already there
@@ -1223,37 +1238,33 @@ void autoStack() {
 }
 
 void homeRail() {
-  // wake stepper from sleep
-  if (digitalRead(stepperEnablePin) == HIGH) {
-    toggleStepper(1);
-  }
-  stepper.setSpeed(0);
-
-  while (digitalRead(rearLimitPin) == 1) { // start in reverse
-    stepper.moveTo(-100000);
-    stepper.run();
-  }
-  // push off switch before setting pos.
-  limitSwitch();
-  // set rear position
-  rearLimitPos = 0;
-  stepper.setCurrentPosition(0); // set position
-
-  while (digitalRead(forwardLimitPin) == 1) { // move to forward limit
-    stepper.moveTo(100000);
-    stepper.run();
-  }
-  // push off switch before setting pos.
-  limitSwitch();
-  // set forward position, move back to middle of rail
-  forwardLimitPos = stepper.currentPosition(); // set position
-  stepper.moveTo(forwardLimitPos / 2); // return to the middle
-  stepper.runToPosition();
+	// set configuration for stallGuard
+	if (stallGuardConfigured == false) {
+		stallGuardConfig();
+	}
+	stepper.moveTo(moveDist);
+	// if in fwd direction, reverse direction
+	if (directionFwd == true) {
+		changeDirection();
+	}
+	// while back position not set and forward position not set, run to -50000 or stall
+	// after stall, change direction and run to 50000 or stall
+	while (bwdPosition != 0 || fwdPosition <= 9999) {
+		stepper.run();
+	}
+	// if back and forward position set, move to middle position
+	if (bwdPosition == 0 && fwdPosition > 10000) {
+		bootFlag = 0;
+		stepper.moveTo(fwdPosition / 2);
+		while (stepper.distanceToGo() != 0) {
+			stepper.run();
+		}
+	}
 }
 
 void dryRun() {
   // wake stepper from sleep
-	if (digitalRead(stepperEnablePin) == HIGH) {
+	if (digitalRead(EN_PIN) == HIGH) {
     toggleStepper(1);
   }
 
@@ -1293,7 +1304,7 @@ bool stepperStep(int stepDirection, unsigned long stepperDelay) {
   // step after elapsed amount of time
   if (currentTime - prevStepTime > stepperDelay) {
     // wake stepper from sleep
-		if (digitalRead(stepperEnablePin) == HIGH) {
+		if (digitalRead(EN_PIN) == HIGH) {
 	    toggleStepper(1);
 	  }
 
@@ -1315,46 +1326,21 @@ bool stepperStep(int stepDirection, unsigned long stepperDelay) {
 
 void joyStick() {
   // wake stepper from sleep
-	if (digitalRead(stepperEnablePin) == HIGH) {
+	if (stepperDisabled == true) {
     toggleStepper(1);
   }
   // while joystick is operated
-  while ((xStickPos >= 550 || xStickPos <= 450) && joystickState == 1) {
-    // move either -1, 0, or 1
-    stepper.move(map(xStickPos, 0, 1023, -1, 1));
+  while (xStickPos > 515 || xStickPos < 495) {
+    // move either -1, 0, or 1 steps
+    stepper.move(map(xStickPos, 0, 1023, 1, -1));
+    joystick_speed = map((xStickPos - 508), -508, 515, 2000, -2000);
+
+    stepper.setSpeed(joystick_speed);
     stepper.runSpeed();
 
     // check stick position again
-    xStickPos = analogRead(xStickPin);
-    // reset stepper target
-    targetFlag = 1;
-
-    // check limit switches
-    if (digitalRead(rearLimitPin) + digitalRead(forwardLimitPin) < 2) {
-      stepper.stop();
-      break;
-    }
-
-    // set speed based on joystick input
-    int stepperSpeed = 600;
-    switch (zStickVal) {
-      case 1:
-        stepperSpeed = 800;
-        break;
-      case 2:
-        stepperSpeed = 600;
-        break;
-      case 3:
-        stepperSpeed = 300;
-        break;
-    }
-
-    // set speed direction
-    if (xStickPos <= 400) {
-      stepper.setSpeed(stepperSpeed*-1);
-    }
-    if (xStickPos >= 600) {
-      stepper.setSpeed(stepperSpeed);
+    if (millis() % 50 == 0) {
+       xStickPos = analogRead(XSTICK_PIN);
     }
   }
 
@@ -1371,7 +1357,7 @@ void joyStick() {
     }
     setAutoStackPositions(0, 1); //set end but not start position
   }
-  if (activeScreen == 2 or activeScreen == 4) {
+  if (activeScreen == 2 || activeScreen == 4) {
     displayPosition();
   }
   // update prev position
@@ -1381,7 +1367,6 @@ void joyStick() {
 void toggleJoystick() {
   if ((currentTime - prevGenericTime) >= genericTouchDelay) {
     joystickState = !joystickState;
-
     prevGenericTime = millis();
   }
 }
@@ -1432,18 +1417,31 @@ void setShutterDelay() {
 }
 
 bool triggerShutter() {
+	flashReady = flashStatus();
   if (shutterState == 1) {
 		shutterTriggered = false;
 		unsigned long triggerTime = millis();
-    digitalWrite(shutterPin, HIGH);
 
+		// wait for flash to be ready
+		while (flashReady = 0) {
+			flashReady = flashStatus();
+			delay(50);
+		}
+
+		// trigger flash
+    digitalWrite(SHUTTER_PIN, HIGH);
+
+		// wait for flash to be triggered
 		while (shutterTriggered == false) {
+			delay(50);
 			// if signal missed or shot never taken, break
 			if (millis() - triggerTime > 10000) {
 				break;
 			}
+			// check if flash triggered
+			flashReady = flashStatus();
 			// if signal received, exit and reset shutter
-			if (analogRead(godoxPin) == 0) {
+			if (flashReady == 0) {
 				shutterTriggered = true;
 				delay(250); // pause for 250ms
 			}
@@ -1451,7 +1449,7 @@ bool triggerShutter() {
 		recycleTime = (millis() - triggerTime);
 
 		// reset shutter signal
-    digitalWrite(shutterPin, LOW);
+    digitalWrite(SHUTTER_PIN, LOW);
 		return shutterTriggered;
 	}
 }
@@ -1461,13 +1459,15 @@ void setStepDistance() {
   // constrain multiplier range
   if (stepsPerMovement < 1) {
     stepsPerMovement = 1;
-  } else if (stepsPerMovement > 40) {
+  } else if (stepsPerMovement > 80) {
     stepsPerMovement = 40;
   }
 
-  // stepper is 200 steps/rev, linear rail has 1mm pitch, 1/2 gear reduction
-  // 1 step = 1/200/2 = 0.0025mm or 2.5μm
-  distancePerMovement = 2.50 * stepsPerMovement;
+  // stepper is 200 steps/rev, linear rail has 1mm pitch, 1:1 gear ratio
+  // 1 step = 1/200 = 0.005mm
+	// microsteps = 4
+	// 0.005 / 4 = 1.25μm
+  distancePerMovement = 1.25 * stepsPerMovement;
 
   if (prevDistance != distancePerMovement) {
     // print new delay value
@@ -1632,43 +1632,104 @@ void updateProgress(bool screenRefresh) {
   }
 }
 
-void limitSwitch() {
-  // wake stepper from sleep
-	if (digitalRead(stepperEnablePin) == HIGH) {
-    toggleStepper(1);
-  }
-
-  while (digitalRead(rearLimitPin) == 0) { // switch closest to motor
-    stepper.setSpeed(0);
-    // move by 1 step until limit no longer triggered
-    stepper.move(1);
-    stepper.setSpeed(600);
-    stepper.runSpeed();
-    // reset stepper target
-    targetFlag = 1;
-  }
-
-  while (digitalRead(forwardLimitPin) == 0) { //switch furtherest from motor
-    stepper.setSpeed(0);
-    // move by -1 step until limit no longer triggered
-    stepper.move(-1);
-    stepper.setSpeed(-600);
-    stepper.runSpeed();
-    // reset stepper target
-    targetFlag = 1;
-  }
-}
-
 void toggleStepper(bool enable) {
 	if (enable == 1) {
 		delay(10); // give time for last step to complete
-		digitalWrite(stepperEnablePin, LOW);
+		stepper.enableOutputs();
+		stepperDisabled = false;
 		delay(10); // breathing space
 	}
 
 	if (enable == 0) {
 		stepper.setSpeed(0);
 		stepper.move(0);
-		digitalWrite(stepperEnablePin, HIGH);
+		stepper.disableOutputs();
+		stepperDisabled = true;
 	}
+}
+
+void stallGuardConfig() {
+  stallGuardConfigured = true;
+  //set TMC2130 config
+  driver.push(); // reset registers
+  driver.toff(3);
+  driver.tbl(1);
+  driver.hysteresis_start(8);
+  driver.hysteresis_end(1);
+  driver.diag1_stall(1);
+  driver.diag1_active_high(1);
+  driver.coolstep_min_speed(0x0009F); // 20bit max
+  driver.semin(3);
+  driver.semax(2);
+  driver.sg_min(1); // if sg_result < sg_min*32, current increase
+  driver.sg_max(3); // if sg_result >= (sg_min+sg_max+1)*32, current decrease
+  driver.sedn(0b01);
+  driver.sg_stall_value(0);
+  driver.stealthChop(0);
+  driver.stealth_autoscale(0);
+}
+
+void silentStepConfig() {
+  stallGuardConfigured = false;
+  driver.push(); // reset registers
+  driver.stealthChop(1);
+  driver.stealth_autoscale(1);
+  driver.stealth_gradient(0xF); // 1 to 15
+  driver.interpolate(1);
+  driver.push();
+  driver.diag1_stall(0);
+  driver.diag1_active_high(0);
+  driver.coolstep_min_speed(0x0);
+  driver.stealth_freq(0x0); // 0 or 1 for 16MHz
+//    driver.chopper_mode(0);
+//    driver.stealth_max_speed(0x0002F);
+//    driver.double_edge_step(1);
+//    driver.chopper_mode(1);
+//    driver.sync_phases(1);
+}
+
+bool flashStatus() {
+  int flashValue = 0;
+
+  flashValue = analogRead(FLASH_PIN);
+  Serial.println(flashValue);
+
+  if (flashValue >= 280) {
+    flashReady = true;
+  }
+  else {
+    flashReady = false;
+  }
+
+  return flashReady;
+}
+
+void changeDirection() {
+  if (directionFwd == true) {
+    moveDist = -500000;
+    directionFwd = false;
+  }
+  else if (directionFwd == false) {
+    moveDist = 500000;
+    directionFwd = true;
+  }
+  stepper.moveTo(moveDist);
+}
+
+void stallDetection() {
+  Serial.print("DIAG: ");
+  Serial.println(digitalRead(DIAG_PIN));
+  if (bootFlag == true) {
+    toggleStepper(0);
+    stepper.setSpeed(0);
+    if (directionFwd == false) {
+      stepper.setCurrentPosition(0);
+      bwdPosition = stepper.currentPosition();
+    }
+    if (directionFwd == true) {
+      fwdPosition = stepper.currentPosition();
+    }
+    toggleStepper(1);
+    changeDirection();
+  }
 }
