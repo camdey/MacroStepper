@@ -158,67 +158,70 @@ void silentStepConfig();
 
 
 // --- currentTimes and elapsed times --- //
-unsigned long currentTime 				= 0;        // current time in millis()
-unsigned long subRoutine1Time 		= 0;    		// time subroutine1 last ran
-unsigned long subRoutine2Time 		= 0;    		// time subroutine2 last ran
-unsigned long prevStepTime 				= 0;       	// previous step time reading
-unsigned long recycleTime 				= 0;    		// duration to take photo
-unsigned long prevGenericTime 		= 0;    		// generic timer for toggles and such
-unsigned long genericTouchDelay 	= 200; 			// 200ms touch delay for toggles
-int prevMinutes 									= 1;        // duration of autoStack
-int prevSeconds 									= 1;        // duration of autoStack
-char prevTimeMinutesSeconds[6] 		= "00:00"; 	// previous duration time
+unsigned long currentTime 				= 0;        	// current time in millis()
+unsigned long subRoutine1Time 		= 0;    			// time subroutine1 last ran
+unsigned long subRoutine2Time 		= 0;    			// time subroutine2 last ran
+unsigned long prevStepTime 				= 0;       		// previous step time reading
+unsigned long recycleTime 				= 0;    			// duration to take photo
+unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
+unsigned long genericTouchDelay 	= 200; 				// 200ms touch delay for toggles
+int prevMinutes 									= 1;        	// duration of autoStack
+int prevSeconds 									= 1;        	// duration of autoStack
+char prevTimeMinutesSeconds[6] 		= "00:00"; 		// previous duration time
 
 // --- Screen flags --- //
-int activeScreen 									= 1;        // currently displayed screen
-bool arrowsActive 								= false;        // take arrow touch readings
-bool editShutterDelay 						= false;      	// set shutter delay time
-bool editStartPosition 						= false;     		// set start point for auto mode
-bool editEndPosition 							= false;       	// set end point for auto mode
-bool editMovementDistance 				= false;  			// set step distance in any mode
+int activeScreen 									= 1;        	// currently displayed screen
+bool arrowsActive 								= false;      // take arrow touch readings
+bool editShutterDelay 						= false;     	// set shutter delay time
+bool editStartPosition 						= false;     	// set start point for auto mode
+bool editEndPosition 							= false;      // set end point for auto mode
+bool editMovementDistance 				= false;  		// set step distance in any mode
 // --- Input and Output values --- //
-int xStickPos 										= 0;        // ADC value of x-axis joystick
-int zStickVal 										= 1;        // increment count of z-axis button press
-int prevZStickVal 								= 1;        // only increment per button press
-int shutterDelay 									= 1;        // delay between step and shutter trigger
-int prevDelay 										= 1;        // previous delay value
-int joystick_speed 								= 0;				// joystick speed value
+int xStickPos 										= 0;        	// ADC value of x-axis joystick
+int zStickVal 										= 1;        	// increment count of z-axis button press
+int prevZStickVal 								= 1;        	// only increment per button press
+int shutterDelay 									= 1;        	// delay between step and shutter trigger
+int prevDelay 										= 1;        	// previous delay value
+int joystick_speed 								= 0;					// joystick speed value
+int xStickUpper										= 515;				// upper limit of joystick values that determines when to move stepper
+int xStickLower										= 495;				// lower limit of joystick values that determines when to move stepper
+int xStickMid											= 507;				// stable point of joystick reading
 // --- Enable/Disable functionality --- //
-bool bootFlag 										= false;        // runs rehoming sequence
-bool goToStart 										= true;        // move to start for autoStack procedure
-bool joystickState 								= true;        // enabled/disabled
-bool autoStackFlag 								= false;        // enables function for stack procedure
-bool pauseAutoStack 							= false;        // pause stack procedure
-bool shutterState 								= false;        // disabled/enabled
-// bool stepDue 											= 0;        // step is due when movement complete // seems unused
-bool targetFlag 									= false;        // resets stepper target
-bool flashReady 									= false;				// flash ready for next photo
+bool bootFlag 										= true;       // runs rehoming sequence
+bool goToStart 										= true;       // move to start for autoStack procedure
+bool joystickState 								= true;       // enabled/disabled
+bool autoStackFlag 								= false;      // enables function for stack procedure
+bool pauseAutoStack 							= false;      // pause stack procedure
+bool shutterState 								= false;      // disabled/enabled
+// bool stepDue 											= 0;      // step is due when movement complete // seems unused
+bool targetFlag 									= false;      // resets stepper target
+bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 // --- Position values --- //
-int startPosition 								= 0;        // start position for stack procedure
+int startPosition 								= 0;        	// start position for stack procedure
 int prevStartPosition 						= 0;
-int endPosition 									= 0;        // end position for stack procedure
+int endPosition 									= 0;        	// end position for stack procedure
 int prevEndPosition 							= 0;
-int prevStepperPosition 					= 1;    		// used for showing position of stepper if changed
-int manualMovementCount 					= 0;    		// count of manual movements
+int prevStepperPosition 					= 1;    			// used for showing position of stepper if changed
+int manualMovementCount 					= 0;    			// count of manual movements
 int prevManualMovementCount 			= 0;
-volatile long moveDist 						= 500000; 	// distance for homing
+volatile long moveDist 						= 500000; 		// distance for homing
 volatile bool stepperDisabled 		= false;
 volatile bool directionFwd 				= true;
 long fwdPosition 									= 9999;
 long bwdPosition 									= 9999;
 // --- Stepper motor variables --- //
-int stepsPerMovement 							= 1;       	// number of steps required for a given distance
-int numMovements 									= 0;        // equals total distance / step multiplier
-int prevNumMovements 							= 1;       	// previous numMovements value
-int stepCount 										= 0;        // number of steps taken in a given movement
-double distancePerMovement 				= 0; 				// distance in micrometres travelled per movement
-double prevDistance 							= 0;     		// previous step distance in micrometres
-int movementProgress 							= 0;       	// number of completed movements
-int prevMovementProgress 					= 1;   			// used for overwriting prev movement progress
-char prevProgressMovements[10] 		= "0/0"; 		// used for overwriting prev movement progress
-bool stepperMoved 								= false; 		// did stepperStep actually step or not
-bool shutterTriggered 						= false;		// did the shutter trigger or not
+int stepsPerMovement 							= 1;       		// number of steps required for a given distance
+int numMovements 									= 0;        	// equals total distance / step multiplier
+int prevNumMovements 							= 1;       		// previous numMovements value
+int stepCount 										= 0;        	// number of steps taken in a given movement
+double distancePerMovement 				= 0; 					// distance in micrometres travelled per movement
+double prevDistance 							= 0;     			// previous step distance in micrometres
+int movementProgress 							= 0;       		// number of completed movements
+int prevMovementProgress 					= 1;   				// used for overwriting prev movement progress
+char prevProgressMovements[10] 		= "0/0"; 			// used for overwriting prev movement progress
+bool stepperMoved 								= false; 			// did stepperStep actually step or not
+bool shutterTriggered 						= false;			// did the shutter trigger or not
 
 // ***** --- PROGRAM --- ***** //
 
@@ -269,7 +272,7 @@ void setup(void) {
 
 	// if holding down ZSTICK_PIN, don't home rail
 	if (digitalRead(ZSTICK_PIN) == LOW) {
-		bootFlag = true;
+		bootFlag = false;
 	}
 }
 
@@ -290,7 +293,7 @@ void loop() {
     // check joystick for movement
     xStickPos = analogRead(XSTICK_PIN);
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= 550 || xStickPos <= 450) && autoStackFlag == false) {
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
       joyStick();
     }
     // sleep if stepper inactive, update position on manual screen
@@ -313,7 +316,7 @@ void loop() {
 			}
     }
 		// configure SilentStep if not homing rail
-		if (stallGuardConfigured == true && bootFlag == true) {
+		if (stallGuardConfigured == true && bootFlag == false) {
 			silentStepConfig();
 		}
 
@@ -326,8 +329,8 @@ void loop() {
     targetFlag = false;
   }
   // run homing sequence if first loop
-  if (bootFlag == false) {
-    bootFlag = true;
+  if (bootFlag == true) {
+    bootFlag = false;
     // homeRail();
 		setAutoStackPositions(1, 1);
   }
@@ -514,7 +517,7 @@ void manualScreenTouch(TSPoint &point) {
         tft.setFont(&Arimo_Bold_30);
         tft.println(String(distancePerMovement/1000, 4));
       }
-      if (arrowsActive == 1 && editMovementDistance == true) {
+      if (arrowsActive == true && editMovementDistance == true) {
         tft.setTextColor(YELLOW);
         tft.setCursor(5, 30);
         tft.setFont(&Arimo_Regular_24);
@@ -528,7 +531,7 @@ void manualScreenTouch(TSPoint &point) {
     }
   }
   // set step size
-  if (arrowsActive == 1 && editMovementDistance == true) {
+  if (arrowsActive == true && editMovementDistance == true) {
     if (prevDistance != distancePerMovement) {
       prevDistance = distancePerMovement;
     }
@@ -633,7 +636,7 @@ void autoScreenTouch(TSPoint &point) {
         tft.setFont(&Arimo_Bold_30);
         tft.println(String(distancePerMovement/1000, 4));
       }
-      if (arrowsActive == 1 && editMovementDistance == true) {
+      if (arrowsActive == true && editMovementDistance == true) {
         tft.setTextColor(YELLOW);
         tft.setCursor(5, 30);
         tft.setFont(&Arimo_Regular_24);
@@ -647,7 +650,7 @@ void autoScreenTouch(TSPoint &point) {
     }
   }
   // set step size
-  if (arrowsActive == 1 && editMovementDistance == true) {
+  if (arrowsActive == true && editMovementDistance == true) {
     if (prevDistance != distancePerMovement) {
       prevDistance = distancePerMovement;
     }
@@ -735,11 +738,11 @@ void autoConfigScreenTouch(TSPoint &point) {
       arrowsActive = !arrowsActive;
       editStartPosition = !editStartPosition;
 
-      if (arrowsActive == 0 && editStartPosition == false) {
+      if (arrowsActive == false && editStartPosition == false) {
         // tft.drawRoundRect(15, 15, 125, 60, 4, BLACK);
         tft.fillRoundRect(10, 24, 5, 40, 4, BLACK);
       }
-      if (arrowsActive == 1 && editStartPosition == true) {
+      if (arrowsActive == true && editStartPosition == true) {
         // tft.drawRoundRect(15, 15, 125, 60, 4, YELLOW);
         tft.fillRoundRect(10, 24, 5, 40, 4, YELLOW);
       }
@@ -748,7 +751,7 @@ void autoConfigScreenTouch(TSPoint &point) {
     }
   }
   // set start position
-  if (editStartPosition == true && arrowsActive == 1) {
+  if (editStartPosition == true && arrowsActive == true) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
@@ -761,11 +764,11 @@ void autoConfigScreenTouch(TSPoint &point) {
       arrowsActive = !arrowsActive;
       editEndPosition = !editEndPosition;
 
-      if (arrowsActive == 0 && editEndPosition == false) {
+      if (arrowsActive == false && editEndPosition == false) {
         // tft.drawRoundRect(15, 15, 125, 60, 4, BLACK);
         tft.fillRoundRect(10, 104, 5, 40, 4, BLACK);
       }
-      if (arrowsActive == 1 && editEndPosition == true) {
+      if (arrowsActive == true && editEndPosition == true) {
         // tft.drawRoundRect(15, 15, 125, 60, 4, YELLOW);
         tft.fillRoundRect(10, 104, 5, 40, 4, YELLOW);
       }
@@ -774,7 +777,7 @@ void autoConfigScreenTouch(TSPoint &point) {
     }
   }
   // set end position
-  if (editEndPosition == true && arrowsActive == 1) {
+  if (editEndPosition == true && arrowsActive == true) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
@@ -794,10 +797,10 @@ void autoConfigScreenTouch(TSPoint &point) {
       arrowsActive = !arrowsActive;
       editShutterDelay = !editShutterDelay;
 
-      if (arrowsActive == 0 && editShutterDelay == false) {
+      if (arrowsActive == false && editShutterDelay == false) {
         tft.drawBitmap(160, 70, delayClock, 50, 50, WHITE);
       }
-      if (arrowsActive == 1 && editShutterDelay == true) {
+      if (arrowsActive == true && editShutterDelay == true) {
         tft.drawBitmap(160, 70, delayClock, 50, 50, YELLOW);
       }
 
@@ -805,7 +808,7 @@ void autoConfigScreenTouch(TSPoint &point) {
     }
   }
   // set shutter delay
-  if (editShutterDelay == true && arrowsActive == 1) {
+  if (editShutterDelay == true && arrowsActive == true) {
     if (prevDelay != shutterDelay) {
       prevDelay = shutterDelay;
     }
@@ -815,7 +818,7 @@ void autoConfigScreenTouch(TSPoint &point) {
   // show current position of stepper
   displayPosition();
   // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == 0) {
+  if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == false) {
     autoScreen();
   }
 
@@ -887,7 +890,7 @@ void autoStack() {
       stepper.runSpeedToPosition();
     }
 		goToStart = false;
-		movementProgress = 0;
+		movementProgress = false;
 		joystickState = false;
 		stepperMoved = false;
 		shutterTriggered = false;
@@ -920,7 +923,7 @@ void autoStack() {
 		estimateDuration(1); // force refresh
     autoStackFlag = false;
     goToStart = true;
-    movementProgress = 0;
+    movementProgress = false;
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
@@ -945,7 +948,7 @@ void homeRail() {
 	}
 	// if back and forward position set, move to middle position
 	if (bwdPosition == 0 && fwdPosition > 10000) {
-		bootFlag = true;
+		bootFlag = false;
 		stepper.moveTo(fwdPosition / 2);
 		while (stepper.distanceToGo() != 0) {
 			stepper.run();
@@ -985,7 +988,7 @@ void dryRun() {
   // stops motor instantly
   stepper.setSpeed(0);
   targetFlag = true;
-  movementProgress = 0;
+  movementProgress = false;
   displayPosition();
 }
 
@@ -1021,10 +1024,11 @@ void joyStick() {
     toggleStepper(1);
   }
   // while joystick is operated
-  while (xStickPos > 515 || xStickPos < 495) {
+  while (xStickPos >= xStickUpper || xStickPos <= xStickLower) {
     // move either -1, 0, or 1 steps
     stepper.move(map(xStickPos, 0, 1023, 1, -1));
-    joystick_speed = map((xStickPos - 508), -508, 515, 2000, -2000);
+		// xStickMid = resting stable point of joystick§
+    joystick_speed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
 
     stepper.setSpeed(joystick_speed);
     stepper.runSpeed();
@@ -1036,13 +1040,13 @@ void joyStick() {
   }
 
   // // check start/end position adjustment
-  if (editStartPosition == true && arrowsActive == 1) {
+  if (editStartPosition == true && arrowsActive == true) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
     setAutoStackPositions(1, 0); //set start but not end position
   }
-  if (editEndPosition == true && arrowsActive == 1) {
+  if (editEndPosition == true && arrowsActive == true) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
@@ -1077,7 +1081,7 @@ void resetAutoStack() {
     pauseAutoStack = false;
     // stepDue = true;
     stepCount = 1;
-    movementProgress = 0;
+    movementProgress = false;
     numMovements = 0;
     startPosition = stepper.currentPosition();
     endPosition = 0;
