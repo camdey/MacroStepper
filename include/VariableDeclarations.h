@@ -140,6 +140,7 @@ extern int prevStartPosition;
 extern int endPosition;
 extern int prevEndPosition;
 extern int prevStepperPosition;
+extern int manualMovementCount;
 extern int prevManualMovementCount;
 extern volatile long moveDist;
 extern volatile bool stepperDisabled;
