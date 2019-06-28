@@ -27,94 +27,38 @@
 #include <AccelStepper.h>											// software stepping implementation
 #include <TMC2130Stepper.h> 									// stepper driver library
 #include <TMC2130Stepper_REGDEFS.h>	  				// stepper driver registry definitions
-#include <Arimo_Regular_10.h>
-#include <Arimo_Regular_16.h>
-#include <Arimo_Regular_18.h>
-#include <Arimo_Regular_20.h>
-#include <Arimo_Regular_22.h>
-#include <Arimo_Regular_24.h>
-#include <Arimo_Regular_30.h>
-#include <Arimo_Bold_20.h>
-#include <Arimo_Bold_24.h>
-#include <Arimo_Bold_30.h>
-#include <Syncopate_Bold_36.h>
-#include <Permanent_Marker_Regular_36.h>
-#include <Lato_Black_34.h>
-#include <Aperture_Icon.h>	  								// icon for shutter state
-#include <Back_Arrow_Icon.h>									// icon for navigation back to previous screen
-#include <Cog_Wheel_Icon.h>										// icon for AutoStack config
-#include <Delay_Clock_Icon.h>									// icon for setting shutter delay
-#include <House_Icon.h>												// icon for HomeRail on main screen
-#include <Main_Logo_Icon.h>										// icon for main logo on home screen
-#include <Reset_Icon.h>												// icon for reseting/clearing data
-#include <Reset_40_Icon.h>										// icon for reseting/clearing data
+// custom functions for this project
+#include "VariableDeclarations.h"
+#include "DriverConfig.h"
+#include "ShutterControl.h"
+// custom fonts for TFT displa]y
+// #include <Fonts/Arimo_Regular_10.h>
+// #include <Fonts/Arimo_Regular_16.h>
+// #include <Fonts/Arimo_Regular_18.h>
+// #include <Fonts/Arimo_Regular_20.h>
+// #include <Fonts/Arimo_Regular_22.h>
+// #include <Fonts/Arimo_Regular_24.h>
+// #include <Fonts/Arimo_Regular_30.h>
+// #include <Fonts/Arimo_Bold_20.h>
+// #include <Fonts/Arimo_Bold_24.h>
+// #include <Fonts/Arimo_Bold_30.h>
+// #include <Fonts/Syncopate_Bold_36.h>
+// #include <Fonts/Permanent_Marker_Regular_36.h>
+// #include <Fonts/Lato_Black_34.h>
+// // custom icons for TFT display
+// #include <Icons/Aperture_Icon.h>	  					// icon for shutter state
+// #include <Icons/Back_Arrow_Icon.h>						// icon for navigation back to previous screen
+// #include <Icons/Cog_Wheel_Icon.h>							// icon for AutoStack config
+// #include <Icons/Delay_Clock_Icon.h>						// icon for setting shutter delay
+// #include <Icons/House_Icon.h>									// icon for HomeRail on main screen
+// #include <Icons/Main_Logo_Icon.h>							// icon for main logo on home screen
+// #include <Icons/Reset_Icon.h>									// icon for reseting/clearing data
+// #include <Icons/Reset_40_Icon.h>							// icon for reseting/clearing data
 
-
-// Definitions for some common 16-bit color values:
-#define	BLACK   						0x0000
-#define	BLUE    						0x001F
-#define	RED     						0xF800
-#define	GREEN   						0x07E0
-#define CYAN    						0x07FF
-#define MAGENTA 						0xF81F
-#define YELLOW  						0xFFE0
-#define WHITE   						0xFFFF
-#define GRAY    						0xE73C
-#define DARKGRAY						0x39E8
-#define CUSTOM_GREEN_LITE		0x9736
-#define CUSTOM_GREEN				0x4ECC
-#define CUSTOM_RED					0xFBCC
-#define CUSTOM_RED_LITE			0xFCD1
-#define CUSTOM_BLUE					0x4EDE
-#define CUSTOM_GREY					0xCE7A
-#define CUSTOM_GREY_LITE		0xDEFB
-
-// touch screen pressure values
-#define minPressure 			5
-#define maxPressure 			2000
-// drive microsteps value
-#define nrMicrosteps			4
-#define microstepDistance 1.25
-
-// definitions for touch screen orientation
-#define TS_MINX 					100
-#define TS_MAXX 					920
-#define TS_MINY 					70
-#define TS_MAXY 					920
-
-// pin definitions for touch inputs
-#define YP 								A3 			// must be an analog pin, use "An" notation!
-#define XM 								A2 			// must be an analog pin, use "An" notation!
-#define YM 								9 			// can be a digital pin
-#define XP 								8 			// can be a digital pin
-
-// pin definitions for tft screen
-#define LCD_CS 						A3
-#define LCD_CD 						A2
-#define LCD_WR 						A1
-#define LCD_RD						A0
-#define LCD_RESET 				A4
-
-// driver pins
-#define DIR_PIN 					36
-#define STEP_PIN 					34
-#define EN_PIN 						42
-#define DIAG_PIN 					18
-#define CS_PIN 						53
-#define MOSI_PIN 					51
-#define MISO_PIN 					52
-#define SCK_PIN 					52
-
-// misc hardware pins
-#define XSTICK_PIN 				A9 			// joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				A8 			// button-press from joystick
-#define FLASH_PIN 				A5 			// pin for light sensor
-#define SHUTTER_PIN 			30 			// pin for pulling camera focus and shutter to GND via transistor
-
-TouchScreen ts 					= TouchScreen(XP, YP, XM, YM, 300);
-TMC2130Stepper driver 	= TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
-AccelStepper stepper 		= AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
-MCUFRIEND_kbv tft;
+TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
+TMC2130Stepper 	driver 			= TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
+AccelStepper 		stepper 		= AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
+MCUFRIEND_kbv 	tft;
 
 // --- Printing screen functions --- //
 void startScreen();
@@ -182,7 +126,7 @@ int zStickVal 										= 1;        	// increment count of z-axis button press
 int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
 int prevDelay 										= 1;        	// previous delay value
-int joystick_speed 								= 0;					// joystick speed value
+int joystickSpeed 								= 0;					// joystick speed value
 int xStickUpper										= 515;				// upper limit of joystick values that determines when to move stepper
 int xStickLower										= 495;				// lower limit of joystick values that determines when to move stepper
 int xStickMid											= 507;				// stable point of joystick reading
@@ -1028,9 +972,9 @@ void joyStick() {
     // move either -1, 0, or 1 steps
     stepper.move(map(xStickPos, 0, 1023, 1, -1));
 		// xStickMid = resting stable point of joystick§
-    joystick_speed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
+    joystickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
 
-    stepper.setSpeed(joystick_speed);
+    stepper.setSpeed(joystickSpeed);
     stepper.runSpeed();
 
     // check stick position again
@@ -1066,12 +1010,12 @@ void toggleJoystick() {
   }
 }
 
-void toggleShutter() {
-  if ((currentTime - prevGenericTime) >= genericTouchDelay) {
-    shutterState = !shutterState;
-    prevGenericTime = millis();
-  }
-}
+// void toggleShutter() {
+//   if ((currentTime - prevGenericTime) >= genericTouchDelay) {
+//     shutterState = !shutterState;
+//     prevGenericTime = millis();
+//   }
+// }
 
 void resetAutoStack() {
   if ((currentTime - prevGenericTime) >= genericTouchDelay) {
@@ -1091,63 +1035,63 @@ void resetAutoStack() {
   }
 }
 
-void setShutterDelay() {
+// void setShutterDelay() {
+//
+//   if (shutterDelay < 1) {
+//     shutterDelay = 1;
+//   } else if (shutterDelay > 15) {
+//     shutterDelay = 15;
+//   }
+//
+//   if (prevDelay != shutterDelay) {
+//     // print new delay value
+//     tft.setCursor(155, 143);
+//     tft.setFont(&Arimo_Regular_20);
+//     tft.setTextColor(BLACK, BLACK);
+//     tft.println(prevDelay);
+//     tft.setCursor(155, 143);
+//     tft.setTextColor(WHITE, BLACK);
+//     tft.println(shutterDelay);
+//   }
+// }
 
-  if (shutterDelay < 1) {
-    shutterDelay = 1;
-  } else if (shutterDelay > 15) {
-    shutterDelay = 15;
-  }
-
-  if (prevDelay != shutterDelay) {
-    // print new delay value
-    tft.setCursor(155, 143);
-    tft.setFont(&Arimo_Regular_20);
-    tft.setTextColor(BLACK, BLACK);
-    tft.println(prevDelay);
-    tft.setCursor(155, 143);
-    tft.setTextColor(WHITE, BLACK);
-    tft.println(shutterDelay);
-  }
-}
-
-bool triggerShutter() {
-	flashReady = flashStatus();
-	shutterTriggered = false;
-  if (shutterState == true) {
-		unsigned long triggerTime = millis();
-
-		// wait for flash to be ready
-		while (flashReady == false) {
-			flashReady = flashStatus();
-			delay(50);
-		}
-
-		// trigger flash
-    digitalWrite(SHUTTER_PIN, HIGH);
-
-		// wait for flash to be triggered
-		while (shutterTriggered == false) {
-			delay(50);
-			// if signal missed or shot never taken, break
-			if (millis() - triggerTime > 10000) {
-				break;
-			}
-			// check if flash triggered
-			flashReady = flashStatus();
-			// if signal received, exit and reset shutter
-			if (flashReady == false) {
-				shutterTriggered = true;
-				delay(250); // pause for 250ms
-			}
-		}
-		recycleTime = (millis() - triggerTime);
-
-		// reset shutter signal
-    digitalWrite(SHUTTER_PIN, LOW);
-	}
-	return shutterTriggered;
-}
+// bool triggerShutter() {
+// 	flashReady = flashStatus();
+// 	shutterTriggered = false;
+//   if (shutterState == true) {
+// 		unsigned long triggerTime = millis();
+//
+// 		// wait for flash to be ready
+// 		while (flashReady == false) {
+// 			flashReady = flashStatus();
+// 			delay(50);
+// 		}
+//
+// 		// trigger flash
+//     digitalWrite(SHUTTER_PIN, HIGH);
+//
+// 		// wait for flash to be triggered
+// 		while (shutterTriggered == false) {
+// 			delay(50);
+// 			// if signal missed or shot never taken, break
+// 			if (millis() - triggerTime > 10000) {
+// 				break;
+// 			}
+// 			// check if flash triggered
+// 			flashReady = flashStatus();
+// 			// if signal received, exit and reset shutter
+// 			if (flashReady == false) {
+// 				shutterTriggered = true;
+// 				delay(250); // pause for 250ms
+// 			}
+// 		}
+// 		recycleTime = (millis() - triggerTime);
+//
+// 		// reset shutter signal
+//     digitalWrite(SHUTTER_PIN, LOW);
+// 	}
+// 	return shutterTriggered;
+// }
 
 void setStepDistance() {
 
@@ -1343,60 +1287,60 @@ void toggleStepper(bool enable) {
 	}
 }
 
-void stallGuardConfig() {
-  stallGuardConfigured = true;
-  //set TMC2130 config
-  driver.push(); // reset registers
-  driver.toff(3);
-  driver.tbl(1);
-  driver.hysteresis_start(8);
-  driver.hysteresis_end(1);
-  driver.diag1_stall(1);
-  driver.diag1_active_high(1);
-  driver.coolstep_min_speed(0x0009F); // 20bit max
-  driver.semin(3);
-  driver.semax(2);
-  driver.sg_min(1); // if sg_result < sg_min*32, current increase
-  driver.sg_max(3); // if sg_result >= (sg_min+sg_max+1)*32, current decrease
-  driver.sedn(0b01);
-  driver.sg_stall_value(0);
-  driver.stealthChop(0);
-}
+// void stallGuardConfig() {
+//   stallGuardConfigured = true;
+//   //set TMC2130 config
+//   driver.push(); // reset registers
+//   driver.toff(3);
+//   driver.tbl(1);
+//   driver.hysteresis_start(8);
+//   driver.hysteresis_end(1);
+//   driver.diag1_stall(1);
+//   driver.diag1_active_high(1);
+//   driver.coolstep_min_speed(0x0009F); // 20bit max
+//   driver.semin(3);
+//   driver.semax(2);
+//   driver.sg_min(1); // if sg_result < sg_min*32, current increase
+//   driver.sg_max(3); // if sg_result >= (sg_min+sg_max+1)*32, current decrease
+//   driver.sedn(0b01);
+//   driver.sg_stall_value(0);
+//   driver.stealthChop(0);
+// }
+//
+// void silentStepConfig() {
+//   stallGuardConfigured = false;
+//   driver.push(); // reset registers
+//   driver.stealthChop(1);
+//   driver.stealth_autoscale(1);
+//   driver.stealth_gradient(0xF); // 1 to 15
+//   driver.interpolate(1);
+//   driver.push();
+//   driver.diag1_stall(0);
+//   driver.diag1_active_high(0);
+//   driver.coolstep_min_speed(0x0);
+//   driver.stealth_freq(0x0); // 0 or 1 for 16MHz
+// //    driver.chopper_mode(0);
+// //    driver.stealth_max_speed(0x0002F);
+// //    driver.double_edge_step(1);
+// //    driver.chopper_mode(1);
+// //    driver.sync_phases(1);
+// }
 
-void silentStepConfig() {
-  stallGuardConfigured = false;
-  driver.push(); // reset registers
-  driver.stealthChop(1);
-  driver.stealth_autoscale(1);
-  driver.stealth_gradient(0xF); // 1 to 15
-  driver.interpolate(1);
-  driver.push();
-  driver.diag1_stall(0);
-  driver.diag1_active_high(0);
-  driver.coolstep_min_speed(0x0);
-  driver.stealth_freq(0x0); // 0 or 1 for 16MHz
-//    driver.chopper_mode(0);
-//    driver.stealth_max_speed(0x0002F);
-//    driver.double_edge_step(1);
-//    driver.chopper_mode(1);
-//    driver.sync_phases(1);
-}
-
-bool flashStatus() {
-  int flashValue = 0;
-
-  flashValue = analogRead(FLASH_PIN);
-  Serial.println(flashValue);
-
-  if (flashValue >= 280) {
-    flashReady = true;
-  }
-  else {
-    flashReady = false;
-  }
-
-  return flashReady;
-}
+// bool flashStatus() {
+//   int flashValue = 0;
+//
+//   flashValue = analogRead(FLASH_PIN);
+//   Serial.println(flashValue);
+//
+//   if (flashValue >= 280) {
+//     flashReady = true;
+//   }
+//   else {
+//     flashReady = false;
+//   }
+//
+//   return flashReady;
+// }
 
 void changeDirection() {
   if (directionFwd == true) {
