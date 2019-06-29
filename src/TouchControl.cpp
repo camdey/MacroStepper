@@ -4,24 +4,25 @@
 #include "TouchControl.h"
 #include "UserInterface.h"
 
-int arrowsTouch(TSPoint &point, bool stepMotor, int val = 0) {
+int arrowsTouch(TSPoint &point, bool moveStepper, int val = 0) {
   // scale from 0->1023 to tft dimension and swap coordinates
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
   int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
 
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
     val++;
-    if (stepMotor == 1) { // if stepping required, trigger shutter, move step
-      if (shutterState == true && activeScreen == 2) {
+    // if stepping required, trigger shutter, move step
+    if (moveStepper == true) {
+      if (shutterEnabled == true && activeScreen == 2) {
         shutterTriggered = triggerShutter();
       }
-      stepperMoved = stepperStep(1, 500); // forward
+      stepperMoved = stepMotor(1, 500); // forward
     }
   }
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
     val--;
-    if (stepMotor == 1) { // if stepping required, move motor
-      stepperMoved = stepperStep(-1, 500); // reverse
+    if (moveStepper == 1) { // if stepping required, move motor
+      stepperMoved = stepMotor(-1, 500); // reverse
     }
   }
 
@@ -134,9 +135,9 @@ void autoScreenTouch(TSPoint &point) {
   if ((xPos >= 140 && xPos <= 210) && (yPos >= 10 && yPos <= 70)) {
     if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       toggleShutter();
-      if (shutterState == true) {
+      if (shutterEnabled == true) {
         tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_GREEN);
-      } else if (shutterState == false) {
+      } else if (shutterEnabled == false) {
         tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_RED);
       }
       prevGenericTime = millis();
@@ -209,9 +210,9 @@ void manualScreenTouch(TSPoint &point) {
   if ((xPos >= 150 && xPos <= 220) && (yPos >= 10 && yPos <= 70)) {
     if ((currentTime - prevGenericTime) >= genericTouchDelay) {
       toggleShutter();
-      if (shutterState == true) {
+      if (shutterEnabled == true) {
         tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_GREEN);
-      } else if (shutterState == false) {
+      } else if (shutterEnabled == false) {
         tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_RED);
       }
 
@@ -269,7 +270,7 @@ void manualScreenTouch(TSPoint &point) {
     stepsPerMovement = arrowsTouch(point, 0, stepsPerMovement);
     setStepDistance();
   }
-  // step motor by specified distance
+  // step motor
   if (arrowsActive == false) {
     int val = arrowsTouch(point, 1, 0);
   }

@@ -84,9 +84,9 @@ void autoScreen() {
   updateProgress(1);
 
   // auto shutter
-  if (shutterState == true) {
+  if (shutterEnabled == true) {
     tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_GREEN);
-  } else if (shutterState == false) {
+  } else if (shutterEnabled == false) {
     tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_RED);
   }
 
@@ -113,11 +113,11 @@ void displayPosition() {
     if (activeScreen == 2) { // 2 = manual screen
       // update rail position value
       tft.setFont(&Arimo_Bold_30);
-      tft.getTextBounds(String(prevStepperPosition*0.0025, 4), 9, 220, &x1, &y1, &w, &h);
+      tft.getTextBounds(String(prevStepperPosition*(microstepDistance/1000), 4), 9, 220, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
       tft.setCursor(9, 220);
       tft.setTextColor(WHITE, CUSTOM_BLUE);
-      tft.println(String(stepper.currentPosition()*0.0025, 4));
+      tft.println(String(stepper.currentPosition()*(microstepDistance/1000), 4));
 
       // update movement count for manual screen
       manualMovementCount++;
@@ -208,12 +208,12 @@ void manualScreen() {
   tft.println("Rail Pos.");
   tft.setCursor(9, 220);
   tft.setFont(&Arimo_Bold_30);
-  tft.println(String(stepper.currentPosition()*0.0025, 4));
+  tft.println(String(stepper.currentPosition()*(microstepDistance/1000), 4));
 
   // auto shutter
-  if (shutterState == true) {
+  if (shutterEnabled == true) {
     tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_GREEN);
-  } else if (shutterState == false) {
+  } else if (shutterEnabled == false) {
     tft.drawBitmap(155, 15, aperture, 50, 50, CUSTOM_RED);
   }
 
@@ -258,23 +258,25 @@ void startScreen() {
 }
 
 void updateProgress(bool screenRefresh) {
-  char progressMovements[10];
+  char autoStackProgress[10]      = "0/0";
+  char prevAutoStackProgress[10]  = "0/0";
 
   int16_t x, y;
   uint16_t w, h;
-  sprintf_P(progressMovements, PSTR("%02d/%02d"), movementProgress, numMovements);
+  // displays progress in "Completed / Total" format
+  sprintf_P(autoStackProgress, PSTR("%02d/%02d"), completedMovements, movementsRequired);
 
-  if ((movementProgress != prevMovementProgress) || numMovements != prevNumMovements || screenRefresh == 1) {
-    tft.getTextBounds(String(prevProgressMovements), 20, 220, &x, &y, &w, &h);
+  if ((completedMovements != prevCompletedMovements) || movementsRequired != prevMovementsRequired || screenRefresh == 1) {
+    tft.getTextBounds(String(prevAutoStackProgress), 20, 220, &x, &y, &w, &h);
     tft.fillRect(x, y, w, h, CUSTOM_BLUE);
     tft.setFont(&Arimo_Bold_24);
     tft.setTextColor(WHITE);
     tft.setCursor(20, 220);
-    tft.println(progressMovements);
+    tft.println(autoStackProgress);
 
-    prevNumMovements = numMovements;
-    prevMovementProgress = movementProgress;
+    prevMovementsRequired = movementsRequired;
+    prevCompletedMovements = completedMovements;
     // assign new time to prev variable
-    sprintf_P(prevProgressMovements, PSTR("%02d:%02d"), movementProgress, numMovements);
+    sprintf_P(prevAutoStackProgress, PSTR("%02d:%02d"), completedMovements, movementsRequired);
   }
 }

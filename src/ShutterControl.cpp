@@ -4,9 +4,8 @@ bool flashStatus() {
   int flashValue = 0;
 
   flashValue = analogRead(FLASH_PIN);
-  Serial.println(flashValue);
 
-  if (flashValue >= 280) {
+  if (flashValue >= 250) {
     flashReady = true;
   }
   else {
@@ -38,41 +37,48 @@ void setShutterDelay() {
 
 void toggleShutter() {
   if ((currentTime - prevGenericTime) >= genericTouchDelay) {
-    shutterState = !shutterState;
+    shutterEnabled = !shutterEnabled;
     prevGenericTime = millis();
   }
 }
 
+/******************************************************************
+Triggers the camera shutter and flash, if enabled.
+It first checks if the flash has recycled (red LED is on) and then
+sets the shutter pin to HIGH. A loop will start where the flash is
+continually checked to see if it has triggered (red LED goes off)
+but it must stay in this loop for a minimum of 1000ms to ensure
+enough time for the camera to take the photo.
+******************************************************************/
 bool triggerShutter() {
 	flashReady = flashStatus();
 	shutterTriggered = false;
-  if (shutterState == true) {
+  if (shutterEnabled == true) {
 		unsigned long triggerTime = millis();
 
 		// wait for flash to be ready
 		while (flashReady == false) {
 			flashReady = flashStatus();
-			delay(50);
+			delay(10);
 		}
 
 		// trigger flash
     digitalWrite(SHUTTER_PIN, HIGH);
 
-		// wait for flash to be triggered
-		while (shutterTriggered == false) {
-			delay(50);
-			// if signal missed or shot never taken, break
-			if (millis() - triggerTime > 10000) {
-				break;
-			}
-			// check if flash triggered
-			flashReady = flashStatus();
-			// if signal received, exit and reset shutter
-			if (flashReady == false) {
-				shutterTriggered = true;
-				delay(250); // pause for 250ms
-			}
-		}
+    // delay function for giving enough time for camera to trigger
+    // also checks if flash has triggered by flashReady = false
+    while (millis() - triggerTime <= 3000) {
+      if (flashReady == true) {
+        flashReady = flashStatus();
+      }
+      if (flashReady == false && millis() - triggerTime > 1000) {
+        shutterTriggered = true;
+        break;
+      }
+      shutterTriggered = false;
+      delay(10);
+    }
+
 		recycleTime = (millis() - triggerTime);
 
 		// reset shutter signal

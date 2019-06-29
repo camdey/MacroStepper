@@ -12,13 +12,13 @@
 // per Movement. A shutter delay can also be specified so that there is a pause before each Movement.
 // This delay can be used to allow your camera flash time to recharge before the next shot.
 
-// DEFINITIONS:
-// STEP = one microstep step of the stepper stepper motor
-// MOVEMENT = one full movement of linear rail by specified distance, consisting of multiple steps
-// PROECDURE = one completed stack procedure, consisting of multiple movements
-// DISTANCE = distance travelled per movement = number of steps per movement * 0.0025mm
-// MANUAL MODE = user input required to step motor by specified distance
-// AUTOSTACK = automatic mode, stepper completes procedure without further input
+// ----- DEFINITIONS ----- //
+// STEP 				= one microstep step of the stepper stepper motor
+// MOVEMENT 		= one full movement of linear rail by specified distance, consisting of multiple steps
+// PROECDURE 		= one completed stack procedure, consisting of multiple movements
+// DISTANCE 		= distance travelled per movement = number of steps per movement * 0.0025mm
+// MANUAL MODE 	= user input required to step motor by specified distance
+// AUTOSTACK 		= automatic mode, stepper completes procedure without further input
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>    									// core graphics library
@@ -58,12 +58,12 @@ void startScreenTouch(TSPoint&);
 void manualScreenTouch(TSPoint&);
 void autoScreenTouch(TSPoint&);
 void autoConfigScreenTouch(TSPoint&);
-int arrowsTouch(TSPoint&, bool stepMotor, int val);
+int arrowsTouch(TSPoint&, bool moveStepper, int val);
 // --- Stepper motion functions --- //
 void autoStack();
 void homeRail();
 void dryRun();
-bool stepperStep(int direction, unsigned long stepperDelay);
+bool stepMotor(int direction, unsigned long stepperDelay);
 void changeDirection();
 void stallDetection();
 // --- Enable/Disable functions --- //
@@ -108,7 +108,7 @@ int zStickVal 										= 1;        	// increment count of z-axis button press
 int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
 int prevDelay 										= 1;        	// previous delay value
-int joystickSpeed 								= 0;					// joystick speed value
+int joyStickSpeed 								= 0;					// joystick speed value
 int xStickUpper										= 515;				// upper limit of joystick values that determines when to move stepper
 int xStickLower										= 495;				// lower limit of joystick values that determines when to move stepper
 int xStickMid											= 507;				// stable point of joystick reading
@@ -118,8 +118,7 @@ bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
 bool autoStackFlag 								= false;      // enables function for stack procedure
 bool pauseAutoStack 							= false;      // pause stack procedure
-bool shutterState 								= false;      // disabled/enabled
-// bool stepDue 											= 0;      // step is due when movement complete // seems unused
+bool shutterEnabled 								= false;      // disabled/enabled
 bool targetFlag 									= false;      // resets stepper target
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
@@ -131,22 +130,21 @@ int prevEndPosition 							= 0;
 int prevStepperPosition 					= 1;    			// used for showing position of stepper if changed
 int manualMovementCount 					= 0;    			// count of manual movements
 int prevManualMovementCount 			= 0;
-volatile long moveDist 						= 500000; 		// distance for homing
+volatile long moveDist 						= 60000; 			// distance for homing to ensure it reaches end stop
 volatile bool stepperDisabled 		= false;
 volatile bool directionFwd 				= true;
 long fwdPosition 									= 9999;
 long bwdPosition 									= 9999;
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
-int numMovements 									= 0;        	// equals total distance / step multiplier
-int prevNumMovements 							= 1;       		// previous numMovements value
+int movementsRequired 						= 0;        	// equals total distance / step multiplier
+int prevMovementsRequired 				= 1;       		// previous movementsRequired value
 int stepCount 										= 0;        	// number of steps taken in a given movement
-double distancePerMovement 				= 0; 					// distance in micrometres travelled per movement
+double distancePerMovement 				= 1.25; 			// distance in micrometres travelled per movement
 double prevDistance 							= 0;     			// previous step distance in micrometres
-int movementProgress 							= 0;       		// number of completed movements
-int prevMovementProgress 					= 1;   				// used for overwriting prev movement progress
-char prevProgressMovements[10] 		= "0/0"; 			// used for overwriting prev movement progress
-bool stepperMoved 								= false; 			// did stepperStep actually step or not
+int completedMovements 						= 0;       		// number of completed movements
+int prevCompletedMovements 				= 1;   				// used for overwriting prev movement progress
+bool stepperMoved 								= false; 			// did stepMotor actually step or not
 bool shutterTriggered 						= false;			// did the shutter trigger or not
 
 // ***** --- PROGRAM --- ***** //
@@ -155,6 +153,20 @@ void setup(void) {
   Serial.begin(250000);
 	SPI.begin();
   tft.reset();
+
+	uint16_t identifier = tft.readID();
+
+	if (identifier == 0x9341) {
+		Serial.println(F("Found ILI9341 LCD driver"));
+	} else {
+		Serial.print(F("No driver found"));
+	}
+
+	tft.setFont(&Arimo_Regular_24);
+	tft.begin(identifier);
+	tft.fillScreen(BLACK);
+	tft.setRotation(1);
+	startScreen();
 
 	driver.begin();
 	driver.rms_current(900);
@@ -180,21 +192,7 @@ void setup(void) {
   stepper.setPinsInverted(false, false, true);
   stepper.enableOutputs();
   stepperDisabled = false;
-	stallGuardConfig();
-
-  uint16_t identifier = tft.readID();
-
-  if (identifier == 0x9341) {
-    Serial.println(F("Found ILI9341 LCD driver"));
-  } else {
-    Serial.print(F("No driver found"));
-  }
-
-  tft.setFont(&Arimo_Regular_24);
-  tft.begin(identifier);
-  tft.fillScreen(BLACK);
-  tft.setRotation(1);
-  startScreen();
+	silentStepConfig();
 
 	// if holding down ZSTICK_PIN, don't home rail
 	if (digitalRead(ZSTICK_PIN) == LOW) {
@@ -256,8 +254,9 @@ void loop() {
   }
   // run homing sequence if first loop
   if (bootFlag == true) {
-    bootFlag = false;
     // homeRail();
 		setAutoStackPositions(1, 1);
+		silentStepConfig(); // set config for silentStep
+    bootFlag = false;
   }
 }

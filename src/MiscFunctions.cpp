@@ -2,8 +2,8 @@
 #include "UserInterface.h"
 
 void estimateDuration(bool screenRefresh) {
-  float duration = numMovements * (shutterDelay + (recycleTime/1000));
-  float elapsed = movementProgress * (shutterDelay + (recycleTime/1000));
+  float duration = movementsRequired * (shutterDelay + (recycleTime/1000));
+  float elapsed = completedMovements * (shutterDelay + (recycleTime/1000));
   float remaining = duration - elapsed;
   int minutes = floor(remaining / 60);
   int seconds = int(remaining) % 60;
@@ -36,8 +36,8 @@ void resetAutoStack() {
     pauseAutoStack = false;
     // stepDue = true;
     stepCount = 1;
-    movementProgress = false;
-    numMovements = 0;
+    completedMovements = 0;
+    movementsRequired = 0;
     startPosition = stepper.currentPosition();
     endPosition = 0;
     tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
@@ -73,8 +73,7 @@ void setStepDistance() {
     tft.println(String(distancePerMovement/1000, 4));
 
     // calculate number of steps required to cover range
-    numMovements = ceil((endPosition - startPosition)*1.00/stepsPerMovement);
-
+    movementsRequired = ceil((endPosition - startPosition)*1.00/stepsPerMovement);
     if (activeScreen == 3) {
       // update estimated time
       estimateDuration(0); // don't force refresh
@@ -82,7 +81,7 @@ void setStepDistance() {
       updateProgress(0); // don't force refresh
     }
 
-    prevNumMovements = numMovements;
+    prevMovementsRequired = movementsRequired;
   }
 }
 
@@ -130,6 +129,6 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
   }
 
   // calculate number of steps required to cover range
-  numMovements = ceil((endPosition - startPosition)/stepsPerMovement);
-  prevNumMovements = numMovements;
+  movementsRequired = ceil((endPosition - startPosition)/stepsPerMovement);
+  prevMovementsRequired = movementsRequired;
 }

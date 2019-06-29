@@ -4,6 +4,16 @@
 #include "ShutterControl.h"
 #include "UserInterface.h"
 
+/***********************************************************************
+Runs an AutoStack procedure comprised of multiple Movements. The
+function will first check whether the stage is in the Start position,
+if not it will move to the Start. If the number of completed
+Movements is less than the number of Movements required, it will
+attempt to take a photo and move the stage one Movement. If no
+Movement was taken due to delay, this function is called again and
+another Movement attempted. When all Movements required are completed,
+the autoStack will be completed and ceased to be called.
+***********************************************************************/
 void autoStack() {
   // wake stepper from sleep
   if (digitalRead(EN_PIN) == HIGH) {
@@ -18,40 +28,46 @@ void autoStack() {
       stepper.runSpeedToPosition();
     }
 		goToStart = false;
-		movementProgress = false;
+		completedMovements = 0;
 		joystickState = false;
 		stepperMoved = false;
 		shutterTriggered = false;
-    // stepper.move(0);
-    // stepper.setSpeed(0);
+    prevStepTime = millis();
+    Serial.println("0. Start");
   }
   // take photo and increment progress for first step of each movement
-  if (movementProgress <= numMovements && stepperMoved == false) {
+  if (completedMovements <= movementsRequired && stepperMoved == false) {
 		// if shutter enabled, take photo
-		if (shutterState == true && shutterTriggered == false) {
+		if (shutterEnabled == true && shutterTriggered == false) {
+      Serial.println("1. Ready");
 	    shutterTriggered = triggerShutter(); // take photo
+      if (shutterTriggered == true){
+        Serial.println("2. Photo Taken");
+      }
 		}
 
 		// move stepper
-		stepperMoved = stepperStep(1, shutterDelay*1000); // forward direction, shutterdelay
+		stepperMoved = stepMotor(1, shutterDelay*1000); // forward direction, shutterdelay
 
 		if (stepperMoved == true) {
-			movementProgress++;
+      Serial.println("3. Step Taken");
+			completedMovements++;
 	    // make sure correct screen is displaying
 	    if (activeScreen == 3) { // auto screen
 	      updateProgress(0); // don't force refresh
 				estimateDuration(0); // don't force refresh
 	    }
+
 			shutterTriggered = false; // reset shutter
 			stepperMoved = false; // reset stepper move
 		}
   }
   // stop AutoStack sequence if end reached
-  if (movementProgress >= numMovements) {
+  if (completedMovements >= movementsRequired) {
 		estimateDuration(1); // force refresh
     autoStackFlag = false;
     goToStart = true;
-    movementProgress = false;
+    completedMovements = 0;
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
@@ -103,11 +119,14 @@ void dryRun() {
   // stops motor instantly
   stepper.setSpeed(0);
   targetFlag = true;
-  movementProgress = false;
+  completedMovements = 0;
   displayPosition();
 }
 
 void homeRail() {
+  if (stepperDisabled == true) {
+    toggleStepper(1);
+  }
 	// set configuration for stallGuard
 	if (stallGuardConfigured == false) {
 		stallGuardConfig();
@@ -130,6 +149,8 @@ void homeRail() {
 			stepper.run();
 		}
 	}
+  // config silentStep after homing
+  silentStepConfig();
 }
 
 void joyStick() {
@@ -138,13 +159,14 @@ void joyStick() {
     toggleStepper(1);
   }
   // while joystick is operated
+  stepper.setAcceleration(500);
   while (xStickPos >= xStickUpper || xStickPos <= xStickLower) {
     // move either -1, 0, or 1 steps
     stepper.move(map(xStickPos, 0, 1023, 1, -1));
 		// xStickMid = resting stable point of joystick§
-    joystickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
-
-    stepper.setSpeed(joystickSpeed);
+    joyStickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
+    Serial.println(joyStickSpeed);
+    stepper.setSpeed(joyStickSpeed);
     stepper.runSpeed();
 
     // check stick position again
@@ -152,6 +174,7 @@ void joyStick() {
        xStickPos = analogRead(XSTICK_PIN);
     }
   }
+  stepper.setAcceleration(2000);
 
   // // check start/end position adjustment
   if (editStartPosition == true && arrowsActive == true) {
@@ -191,9 +214,15 @@ void stallDetection() {
   }
 }
 
-bool stepperStep(int stepDirection, unsigned long stepperDelay) {
+/******************************************************************
+Moves the stepper one Movement in a given direction. A Movement
+is the total number of steps required to travel a given distance.
+If there hasn't been a specified delay since the previous Movement,
+this function returns false and the calling function should loop
+until it receives a response of true.
+******************************************************************/
+bool stepMotor(int stepDirection, unsigned long stepperDelay) {
   currentTime = millis();
-
   // step after elapsed amount of time
   if (currentTime - prevStepTime > stepperDelay) {
     // wake stepper from sleep

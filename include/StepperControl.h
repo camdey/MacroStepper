@@ -10,7 +10,7 @@ void dryRun();
 void homeRail();
 void joyStick();
 void stallDetection();
-bool stepperStep(int stepDirection, unsigned long stepperDelay);
+bool stepMotor(int stepDirection, unsigned long stepperDelay);
 void toggleStepper(bool enable);
 
 #endif
