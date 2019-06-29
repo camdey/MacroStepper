@@ -9,6 +9,9 @@ void estimateDuration(bool screenRefresh) {
   int seconds = int(remaining) % 60;
   char timeMinutesSeconds[5];
 
+  // prevent screen overflow
+  minutes = valueCheck(minutes, 0, 299);
+
   int16_t x, y;
   uint16_t w, h;
   tft.setFont(&Arimo_Bold_30);
@@ -20,6 +23,8 @@ void estimateDuration(bool screenRefresh) {
     tft.fillRect(x, y, w, h, CUSTOM_BLUE);
     tft.setCursor(15, 140);
     tft.println(timeMinutesSeconds);
+    Serial.print("Time: ");
+    Serial.println(timeMinutesSeconds);
 
     prevMinutes = minutes;
     prevSeconds = seconds;
@@ -52,7 +57,7 @@ void setStepDistance() {
   if (stepsPerMovement < 1) {
     stepsPerMovement = 1;
   } else if (stepsPerMovement > 80) {
-    stepsPerMovement = 40;
+    stepsPerMovement = 80;
   }
 
   // stepper is 200 steps/rev, linear rail has 1mm pitch, 1:1 gear ratio
@@ -65,15 +70,17 @@ void setStepDistance() {
     // print new delay value
     int16_t x1, y1;
     uint16_t w, h;
-    tft.setFont(&Arimo_Bold_30);
-    tft.getTextBounds(String(prevDistance/1000, 4), 10, 60, &x1, &y1, &w, &h);
+    tft.setFont(&Arimo_Bold_24);
+    tft.getTextBounds(String(prevDistance/1000, 5), 15, 60, &x1, &y1, &w, &h);
     tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
-    tft.setCursor(10, 60);
-    tft.setTextColor(YELLOW, CUSTOM_BLUE);
-    tft.println(String(distancePerMovement/1000, 4));
+    updateValueField("Step Dist", YELLOW);
 
     // calculate number of steps required to cover range
     movementsRequired = ceil((endPosition - startPosition)*1.00/stepsPerMovement);
+
+    // prevent screen under/overflow of value
+    movementsRequired = valueCheck(movementsRequired, 0, 999);
+
     if (activeScreen == 3) {
       // update estimated time
       estimateDuration(0); // don't force refresh
@@ -99,36 +106,41 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
       uint16_t w, h;
       tft.getTextBounds(String(prevStartPosition), 35, 65, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, BLACK);
-      tft.setCursor(35, 65);
-      tft.setFont(&Arimo_Regular_16);
-      tft.setTextColor(WHITE, BLACK);
-      tft.println(startPosition);
+      updateValueField("Start Position", WHITE);
     }
     // reset macroStepping
     goToStart = true;
   }
 
   if (setEnd == 1) {
-    // lower limit
-    if (endPosition < 0) {
-      endPosition = 0;
-    }
     // get new value
     endPosition = stepper.currentPosition();
     // print end point if changed
     if (prevEndPosition != endPosition && activeScreen == 4) {
       int16_t x1, y1;
       uint16_t w, h;
+      tft.setFont(&Arimo_Regular_16);
       tft.getTextBounds(String(prevEndPosition), 35, 145, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, BLACK);
-      tft.setCursor(35, 145);
-      tft.setFont(&Arimo_Regular_16);
-      tft.setTextColor(WHITE, BLACK);
-      tft.println(endPosition);
+      updateValueField("End Position", WHITE);
     }
   }
 
   // calculate number of steps required to cover range
   movementsRequired = ceil((endPosition - startPosition)/stepsPerMovement);
+  movementsRequired = valueCheck(movementsRequired, 0, 999);
   prevMovementsRequired = movementsRequired;
+}
+
+int valueCheck(int value, int min, int max) {
+  if (value > max) {
+    value = max;
+  }
+  if (value < min) {
+    value = min;
+  }
+  else if (value >= min && value <= max) {
+    value = value;
+  }
+  return value;
 }

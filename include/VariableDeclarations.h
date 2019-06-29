@@ -57,8 +57,15 @@ extern MCUFRIEND_kbv 	  tft;
 #define minPressure 			5
 #define maxPressure 			2000
 // microstep values
-#define nrMicrosteps			4								// number of microsteps per full step
-#define microstepDistance 1.25						// distance travelled per microstep
+#define nrMicrosteps			4						  // number of microsteps per full step
+#define microstepDistance 1.25          // distance travelled per microstep
+#define minPosition       0
+#define maxPosition       57000         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton
+                                        // but consistently getting 58780 after homing
+// joystick defs
+#define xStickUpper			  515 				  // upper limit of joystick values that determines when to move stepper
+#define xStickLower				495				    // lower limit of joystick values that determines when to move stepper
+#define xStickMid					507				    // stable point of joystick reading
 
 // definitions for touch screen orientation
 #define TS_MINX 					100
@@ -68,9 +75,9 @@ extern MCUFRIEND_kbv 	  tft;
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!
-#define XM 								A2 						// must be an analog pin, use "An" notation!
-#define YM 								9 						// can be a digital pin
-#define XP 								8 						// can be a digital pin
+#define XM 								A2            // must be an analog pin, use "An" notation!
+#define YM 								9             // can be a digital pin
+#define XP 								8             // can be a digital pin
 
 // pin definitions for tft screen
 #define LCD_CS 						A3
@@ -90,10 +97,10 @@ extern MCUFRIEND_kbv 	  tft;
 #define SCK_PIN 					52
 
 // misc hardware pins
-#define XSTICK_PIN 				A9 					// joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				A8 					// button-press from joystick
-#define FLASH_PIN 				A5 					// pin for light sensor
-#define SHUTTER_PIN 			30 					// pin for pulling camera focus and shutter to GND via transistor
+#define XSTICK_PIN 				A9            // joystick X-axis pin (controls fwd and rev)
+#define ZSTICK_PIN 				A8            // button-press from joystick
+#define FLASH_PIN 				A5            // pin for light sensor
+#define SHUTTER_PIN 			30            // pin for pulling camera focus and shutter to GND via transistor
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
@@ -121,11 +128,9 @@ extern int prevZStickVal;
 extern int shutterDelay;
 extern int prevDelay;
 extern int joyStickSpeed;
-extern int xStickUpper;
-extern int xStickLower;
-extern int xStickMid;
 // --- Enable/Disable functionality --- //
 extern bool bootFlag;
+extern bool homedRail;
 extern bool goToStart;
 extern bool joystickState;
 extern bool autoStackFlag;
@@ -135,11 +140,11 @@ extern bool targetFlag;
 extern bool flashReady;
 extern bool stallGuardConfigured;
 // --- Position values --- //
-extern int startPosition;
-extern int prevStartPosition;
-extern int endPosition;
-extern int prevEndPosition;
-extern int prevStepperPosition;
+extern long startPosition;
+extern long prevStartPosition;
+extern long endPosition;
+extern long prevEndPosition;
+extern long prevStepperPosition;
 extern int manualMovementCount;
 extern int prevManualMovementCount;
 extern volatile long moveDist;

@@ -8,5 +8,6 @@ void estimateDuration(bool screenRefresh);
 void resetAutoStack();
 void setStepDistance();
 void setAutoStackPositions(bool setStart, bool setEnd);
+int valueCheck(int value, int min, int max);
 
 #endif

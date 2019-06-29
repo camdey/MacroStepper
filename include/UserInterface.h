@@ -12,5 +12,6 @@ void drawPlayPause(bool greyPlay, bool greyPause);
 void manualScreen();
 void startScreen();
 void updateProgress(bool screenRefresh);
+void updateValueField(String valueField, int textColour);
 
 #endif

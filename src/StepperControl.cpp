@@ -149,6 +149,7 @@ void homeRail() {
 			stepper.run();
 		}
 	}
+  homedRail = true;
   // config silentStep after homing
   silentStepConfig();
 }
@@ -161,11 +162,23 @@ void joyStick() {
   // while joystick is operated
   stepper.setAcceleration(500);
   while (xStickPos >= xStickUpper || xStickPos <= xStickLower) {
+    // if rail min/max postions have been set...
+    if (homedRail == true) {
+      // don't allow movement if within 1000 steps of forward stop
+      // values are inverse so high xStickPos = reverse
+      if (xStickPos >= xStickUpper && (abs(minPosition - stepper.currentPosition()) <= 1000)) {
+        break;
+      }
+      // don't allow movement if within 1000 steps of backward stop
+      // values are inverse so low xStickPos = forward
+      if (xStickPos <= xStickLower && (abs(maxPosition - stepper.currentPosition()) <= 1000)) {
+        break;
+      }
+    }
     // move either -1, 0, or 1 steps
     stepper.move(map(xStickPos, 0, 1023, 1, -1));
 		// xStickMid = resting stable point of joystick§
     joyStickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
-    Serial.println(joyStickSpeed);
     stepper.setSpeed(joyStickSpeed);
     stepper.runSpeed();
 
@@ -199,6 +212,7 @@ void joyStick() {
 void stallDetection() {
   Serial.print("DIAG: ");
   Serial.println(digitalRead(DIAG_PIN));
+
   if (bootFlag == true) {
     toggleStepper(0);
     stepper.setSpeed(0);
@@ -219,12 +233,32 @@ Moves the stepper one Movement in a given direction. A Movement
 is the total number of steps required to travel a given distance.
 If there hasn't been a specified delay since the previous Movement,
 this function returns false and the calling function should loop
-until it receives a response of true.
+until it receives a response of true. Prevents stall if rail has
+been homed and will exit autoStack if running.
 ******************************************************************/
 bool stepMotor(int stepDirection, unsigned long stepperDelay) {
+  bool stallWarning = false;
   currentTime = millis();
+
+  // trigger stall warning if approaching limits
+  if (stepDirection == 1 && (abs(maxPosition - stepper.currentPosition()) <= 1000) && homedRail == true) {
+    stallWarning = true;
+    return true;
+  }
+
+  // trigger stall warning if approaching limits
+  if (stepDirection == -1 && (abs(minPosition - stepper.currentPosition()) <= 1000) && homedRail == true) {
+    stallWarning = true;
+    return true;
+  }
+
+  // exit out of autoStack sequence if stall warning encountered
+  if (autoStackFlag == true && stallWarning == true) {
+    autoStackFlag = false;
+  }
+
   // step after elapsed amount of time
-  if (currentTime - prevStepTime > stepperDelay) {
+  if ((currentTime - prevStepTime > stepperDelay) && stallWarning == false) {
     // wake stepper from sleep
 		if (digitalRead(EN_PIN) == HIGH) {
 	    toggleStepper(1);

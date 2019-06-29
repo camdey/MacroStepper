@@ -158,18 +158,14 @@ void autoScreenTouch(TSPoint &point) {
         tft.setCursor(5, 30);
         tft.setFont(&Arimo_Regular_24);
         tft.println("Step Dist.");
-        tft.setCursor(10, 60);
-        tft.setFont(&Arimo_Bold_30);
-        tft.println(String(distancePerMovement/1000, 4));
+        updateValueField("Step Dist", WHITE);
       }
       if (arrowsActive == true && editMovementDistance == true) {
         tft.setTextColor(YELLOW);
         tft.setCursor(5, 30);
         tft.setFont(&Arimo_Regular_24);
         tft.println("Step Dist.");
-        tft.setCursor(10, 60);
-        tft.setFont(&Arimo_Bold_30);
-        tft.println(String(distancePerMovement/1000, 4));
+        updateValueField("Step Dist", YELLOW);
       }
 
       prevGenericTime = millis();
@@ -229,9 +225,7 @@ void manualScreenTouch(TSPoint &point) {
 
     manualMovementCount = 0;
     prevManualMovementCount = 0;
-    tft.setTextColor(WHITE);
-    tft.setCursor(45, 140);
-    tft.println(manualMovementCount);
+    updateValueField("Step Nr", WHITE);
   }
   // step distance button
   if ((xPos >= 5 && xPos <= 130) && (yPos >= 5 && yPos <= 70)) {
@@ -244,18 +238,14 @@ void manualScreenTouch(TSPoint &point) {
         tft.setCursor(5, 30);
         tft.setFont(&Arimo_Regular_24);
         tft.println("Step Dist.");
-        tft.setCursor(10, 60);
-        tft.setFont(&Arimo_Bold_30);
-        tft.println(String(distancePerMovement/1000, 4));
+        updateValueField("Step Dist", WHITE);
       }
       if (arrowsActive == true && editMovementDistance == true) {
         tft.setTextColor(YELLOW);
         tft.setCursor(5, 30);
         tft.setFont(&Arimo_Regular_24);
         tft.println("Step Dist.");
-        tft.setCursor(10, 60);
-        tft.setFont(&Arimo_Bold_30);
-        tft.println(String(distancePerMovement/1000, 4));
+        updateValueField("Step Dist", YELLOW);
       }
 
       prevGenericTime = millis();

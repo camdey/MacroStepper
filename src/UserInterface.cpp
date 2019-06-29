@@ -11,20 +11,14 @@ void autoConfigScreen() {
   tft.setFont(&Lato_Black_34);
   tft.setTextColor(CUSTOM_GREEN);
   tft.println("START");
-  tft.setCursor(35, 65);
-  tft.setFont(&Arimo_Regular_16);
-  tft.setTextColor(WHITE);
-  tft.println(startPosition);
+  updateValueField("Start Position", WHITE);
 
   // Set end point
   tft.setCursor(20, 130);
   tft.setFont(&Lato_Black_34);
   tft.setTextColor(CUSTOM_RED);
   tft.println("END");
-  tft.setCursor(35, 145);
-  tft.setFont(&Arimo_Regular_16);
-  tft.setTextColor(WHITE);
-  tft.println(endPosition);
+  updateValueField("End Position", WHITE);
 
   // Run from start to end and return
   // move back from end point to start point (with accel)
@@ -33,10 +27,7 @@ void autoConfigScreen() {
   tft.setFont(&Lato_Black_34);
   tft.setTextColor(CUSTOM_BLUE);
   tft.println("RUN");
-  tft.setCursor(35, 225);
-  tft.setFont(&Arimo_Regular_16);
-  tft.setTextColor(WHITE, BLACK);
-  tft.println(stepper.currentPosition());
+  updateValueField("Current Position", WHITE);
 
   // set delay
   tft.drawBitmap(160, 70, delayClock, 50, 50, WHITE);
@@ -63,9 +54,7 @@ void autoScreen() {
   tft.setCursor(5, 30);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
-  tft.setCursor(10, 60);
-  tft.setFont(&Arimo_Bold_30);
-  tft.println(String(distancePerMovement/1000, 4));
+  updateValueField("Step Dist", WHITE);
 
   // Estimated time remaining
   tft.fillRoundRect(-10, 85, 135, 65, 15, CUSTOM_BLUE);
@@ -112,12 +101,10 @@ void displayPosition() {
 
     if (activeScreen == 2) { // 2 = manual screen
       // update rail position value
-      tft.setFont(&Arimo_Bold_30);
-      tft.getTextBounds(String(prevStepperPosition*(microstepDistance/1000), 4), 9, 220, &x1, &y1, &w, &h);
+      tft.setFont(&Arimo_Bold_24);
+      tft.getTextBounds(String(prevStepperPosition*(microstepDistance/1000), 5), 10, 220, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
-      tft.setCursor(9, 220);
-      tft.setTextColor(WHITE, CUSTOM_BLUE);
-      tft.println(String(stepper.currentPosition()*(microstepDistance/1000), 4));
+      updateValueField("Rail Position", WHITE);
 
       // update movement count for manual screen
       manualMovementCount++;
@@ -125,9 +112,7 @@ void displayPosition() {
       tft.setFont(&Arimo_Bold_30);
       tft.getTextBounds(String(prevManualMovementCount), 45, 140, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
-      tft.setTextColor(WHITE);
-      tft.setCursor(45, 140);
-      tft.println(manualMovementCount);
+      updateValueField("Step Nr", WHITE);
 
       prevManualMovementCount = manualMovementCount;
     }
@@ -136,9 +121,7 @@ void displayPosition() {
       tft.setFont(&Arimo_Regular_16);
       tft.getTextBounds(String(prevStepperPosition), 35, 225, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, BLACK);
-      tft.setCursor(35, 225);
-      tft.setTextColor(WHITE, BLACK);
-      tft.println(stepper.currentPosition());
+      updateValueField("Current Position", WHITE);
     }
 
     prevStepperPosition = stepper.currentPosition();
@@ -184,10 +167,7 @@ void manualScreen() {
   tft.setCursor(5, 30);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Dist.");
-
-  tft.setCursor(10, 60);
-  tft.setFont(&Arimo_Bold_30);
-  tft.println(String(distancePerMovement/1000, 4));
+  updateValueField("Step Dist", WHITE);
 
   // Step Number
   // tft.fillRoundRect(5, 85, 125, 65, 14, CUSTOM_GREY);
@@ -195,10 +175,7 @@ void manualScreen() {
   tft.setCursor(5, 110);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Step Nr.");
-
-  tft.setCursor(45, 140);
-  tft.setFont(&Arimo_Bold_30);
-  tft.println(manualMovementCount);
+  updateValueField("Step Nr", WHITE);
 
   // Rail Posoition
   // tft.fillRoundRect(5, 165, 125, 65, 14, CUSTOM_GREY);
@@ -206,9 +183,7 @@ void manualScreen() {
   tft.setCursor(5, 190);
   tft.setFont(&Arimo_Regular_24);
   tft.println("Rail Pos.");
-  tft.setCursor(9, 220);
-  tft.setFont(&Arimo_Bold_30);
-  tft.println(String(stepper.currentPosition()*(microstepDistance/1000), 4));
+  updateValueField("Rail Position", WHITE);
 
   // auto shutter
   if (shutterEnabled == true) {
@@ -259,7 +234,6 @@ void startScreen() {
 
 void updateProgress(bool screenRefresh) {
   char autoStackProgress[10]      = "0/0";
-  char prevAutoStackProgress[10]  = "0/0";
 
   int16_t x, y;
   uint16_t w, h;
@@ -278,5 +252,55 @@ void updateProgress(bool screenRefresh) {
     prevCompletedMovements = completedMovements;
     // assign new time to prev variable
     sprintf_P(prevAutoStackProgress, PSTR("%02d:%02d"), completedMovements, movementsRequired);
+  }
+}
+
+/***********************************************************************
+Generic function for updating various values in different fields.
+Easier to update them all via one function so the code is contained in
+one place. Some fields are referenced from several parts of the code.
+***********************************************************************/
+void updateValueField(String valueField, int textColour) {
+  // rail position field in Manual screen
+  if (valueField == "Rail Position") {
+    tft.setTextColor(textColour, CUSTOM_BLUE);
+    tft.setFont(&Arimo_Bold_24);
+    tft.setCursor(10, 220);
+    tft.println(String(stepper.currentPosition()*(microstepDistance/1000), 5));
+  }
+  // step nr field in Manual screen
+  else if (valueField == "Step Nr") {
+    tft.setTextColor(textColour, CUSTOM_BLUE);
+    tft.setCursor(45, 140);
+    tft.setFont(&Arimo_Bold_30);
+    tft.println(manualMovementCount);
+  }
+  // step dist field in Manual and Auto screens
+  else if (valueField == "Step Dist") {
+    tft.setTextColor(textColour, CUSTOM_BLUE);
+    tft.setCursor(15, 60);
+    tft.setFont(&Arimo_Bold_24);
+    tft.println(String(distancePerMovement/1000, 5));
+  }
+  // start position in AutoConfig screen
+  else if (valueField == "Start Position") {
+    tft.setTextColor(textColour, BLACK);
+    tft.setCursor(35, 65);
+    tft.setFont(&Arimo_Regular_16);
+    tft.println(startPosition);
+  }
+  // end position in AutoConfig screen
+  else if (valueField == "End Position") {
+    tft.setTextColor(textColour, BLACK);
+    tft.setCursor(35, 145);
+    tft.setFont(&Arimo_Regular_16);
+    tft.println(endPosition);
+  }
+  // current position in AutoConfig screen
+  else if (valueField == "Current Position") {
+    tft.setTextColor(textColour, BLACK);
+    tft.setCursor(35, 225);
+    tft.setFont(&Arimo_Regular_16);
+    tft.println(stepper.currentPosition());
   }
 }
