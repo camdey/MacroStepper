@@ -152,6 +152,7 @@ extern volatile bool stepperDisabled;
 extern volatile bool directionFwd;
 extern long fwdPosition;
 extern long bwdPosition;
+extern bool firstFwdStall;
 // --- Stepper motor variables --- //
 extern int stepsPerMovement;
 extern int movementsRequired;

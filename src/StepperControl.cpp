@@ -144,12 +144,15 @@ void homeRail() {
 	// if back and forward position set, move to middle position
 	if (bwdPosition == 0 && fwdPosition > 10000) {
 		bootFlag = false;
+    // in case of hang-up on stall, set current position to fwdPosition before moving off
+    stepper.setCurrentPosition(fwdPosition);
 		stepper.moveTo(fwdPosition / 2);
 		while (stepper.distanceToGo() != 0) {
 			stepper.run();
 		}
 	}
   homedRail = true;
+  firstFwdStall = true; // reset first stall check in case homeRail run again
   // config silentStep after homing
   silentStepConfig();
 }
@@ -220,8 +223,9 @@ void stallDetection() {
       stepper.setCurrentPosition(0);
       bwdPosition = stepper.currentPosition();
     }
-    if (directionFwd == true) {
+    if (directionFwd == true && firstFwdStall == true) {
       fwdPosition = stepper.currentPosition();
+      firstFwdStall = false;
     }
     toggleStepper(1);
     changeDirection();

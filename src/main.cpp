@@ -47,7 +47,7 @@ unsigned long currentTime 				= 0;        	// current time in millis()
 unsigned long subRoutine1Time 		= 0;    			// time subroutine1 last ran
 unsigned long subRoutine2Time 		= 0;    			// time subroutine2 last ran
 unsigned long prevStepTime 				= 0;       		// previous step time reading
-unsigned long recycleTime 				= 0;    			// duration to take photo
+unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
 unsigned long genericTouchDelay 	= 200; 				// 200ms touch delay for toggles
 int prevMinutes 									= 1;        	// duration of autoStack
@@ -92,6 +92,7 @@ volatile bool stepperDisabled 		= false;
 volatile bool directionFwd 				= true;
 long fwdPosition 									= 9999;
 long bwdPosition 									= 9999;
+bool firstFwdStall								= true;				// takes first position reading when stalling in case of lost steps
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
 int movementsRequired 						= 0;        	// equals total distance / step multiplier

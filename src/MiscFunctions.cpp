@@ -7,7 +7,7 @@ void estimateDuration(bool screenRefresh) {
   float remaining = duration - elapsed;
   int minutes = floor(remaining / 60);
   int seconds = int(remaining) % 60;
-  char timeMinutesSeconds[5];
+  char timeMinutesSeconds[6];
 
   // prevent screen overflow
   minutes = valueCheck(minutes, 0, 299);
