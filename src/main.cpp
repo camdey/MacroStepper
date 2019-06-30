@@ -1,7 +1,7 @@
 // ********* Macro Stepper v1.1 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2019-06-28
+// *** UPDATED: 2019-06-30
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -61,6 +61,8 @@ bool editShutterDelay 						= false;     	// set shutter delay time
 bool editStartPosition 						= false;     	// set start point for auto mode
 bool editEndPosition 							= false;      // set end point for auto mode
 bool editMovementDistance 				= false;  		// set step distance in any mode
+bool editFlashOnValue							= false;			// set flash on value
+bool editFlashOffValue						= false;			// set flash off value
 // --- Input and Output values --- //
 int xStickPos 										= 0;        	// ADC value of x-axis joystick
 int zStickVal 										= 1;        	// increment count of z-axis button press
@@ -68,6 +70,8 @@ int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
 int prevDelay 										= 1;        	// previous delay value
 int joyStickSpeed 								= 0;					// joystick speed value
+int flashValue										= 10;					// reading from light sensor on flash LED
+int prevFlashValue								= 0;					// previous reading of flash light sensor
 // --- Enable/Disable functionality --- //
 bool bootFlag 										= true;       // runs rehoming sequence
 bool homedRail										= false;			// true if homeRail() run successfully
@@ -114,7 +118,6 @@ void setup(void) {
   tft.reset();
 
 	uint16_t identifier = tft.readID();
-
 	if (identifier == 0x9341) {
 		Serial.println(F("Found ILI9341 LCD driver"));
 	} else {
@@ -201,6 +204,24 @@ void loop() {
 		// configure SilentStep if not homing rail
 		if (stallGuardConfigured == true && bootFlag == false) {
 			silentStepConfig();
+		}
+		// update flashValue if on right screen
+		// if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
+		// 	updateFlashValue();
+		// }
+
+		switch (random(1,4)) {
+			case 1:
+				Serial.print("AnalogRead: ");
+				Serial.println(analogRead(FLASH_PIN));
+				break;
+			case 2:
+				flashReady = flashStatus();
+				break;
+			case 3:
+				Serial.print("FlashVal: ");
+				Serial.println(flashValue);
+				break;
 		}
 
     subRoutine2Time = millis();

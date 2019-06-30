@@ -131,7 +131,13 @@ void homeRail() {
 	if (stallGuardConfigured == false) {
 		stallGuardConfig();
 	}
+
+  // reset positions
+  fwdPosition = 0;
+  bwdPosition = 0;
+  // move to end of rail
 	stepper.moveTo(moveDist);
+
 	// if in fwd direction, reverse direction
 	if (directionFwd == true) {
 		changeDirection();

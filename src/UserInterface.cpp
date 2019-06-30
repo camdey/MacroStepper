@@ -1,5 +1,6 @@
 #include "MiscFunctions.h"
 #include "UserInterface.h"
+#include "ShutterControl.h"
 
 void autoConfigScreen() {
   activeScreen = 4;
@@ -156,6 +157,35 @@ void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
   }
 }
 
+void flashScreen() {
+  activeScreen = 5;
+  // Serial.print("Flash Value1: ");
+  // Serial.println(flashValue);
+  // flashReady = flashStatus(); // get latest value
+  // Serial.print("Flash Value4: ");
+  // Serial.println(flashValue);
+
+  tft.fillScreen(BLACK);
+  tft.setTextColor(BLACK);
+
+  // set off value
+  tft.setCursor(20, 50);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_GREEN);
+  tft.println("OFF");
+  // updateValueField("Flash Off", WHITE);
+
+  // Set on value
+  tft.setCursor(20, 130);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_RED);
+  tft.println("ON");
+  // updateValueField("Flash On", WHITE);
+
+  // back to auto screen
+  tft.drawBitmap(155, 175, backArrow, 50, 50, WHITE);
+}
+
 void manualScreen() {
   activeScreen = 2;
   tft.fillScreen(BLACK);
@@ -205,6 +235,7 @@ void startScreen() {
   activeScreen = 1;
   tft.fillScreen(BLACK);
 
+  // main logo
   tft.drawBitmap(40, 0, logo, 240, 82, WHITE);
 
   tft.setTextColor(BLACK);
@@ -221,14 +252,32 @@ void startScreen() {
   tft.println("Auto");
 
   // Homing option
-  // tft.fillRect(0, 200, 320, 40, CUSTOM_BLUE);
   tft.drawBitmap(30, 190, house, 50, 42, WHITE);
+
+  // Flash settings
+  tft.drawBitmap(145, 190, flash, 40, 42, WHITE);
 
   // Clear autoStack
   if (autoStackFlag == false) {
     tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
   } else if (autoStackFlag == true) {
     tft.drawBitmap(250, 190, reset40, 40, 40, CUSTOM_RED);
+  }
+}
+
+void updateFlashValue() {
+  // get latest flashValue reading
+  flashReady = flashStatus();
+
+  // if difference from previous reading > 2, updates value on screen
+  if (abs(flashValue - prevFlashValue) > 1) {
+    if (editFlashOffValue == true) {
+      updateValueField("Flash Off", WHITE);
+    }
+    if (editFlashOnValue == true) {
+      updateValueField("Flash On", WHITE);
+    }
+    // prevFlashValue = flashValue;
   }
 }
 
@@ -302,5 +351,26 @@ void updateValueField(String valueField, int textColour) {
     tft.setCursor(35, 225);
     tft.setFont(&Arimo_Regular_16);
     tft.println(stepper.currentPosition());
+  }
+  // flashValue from light sensor
+  else if (valueField == "Flash Off") {
+    int16_t x, y;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Regular_30);
+    tft.setTextColor(textColour, BLACK);
+    tft.getTextBounds(String(prevFlashValue), 30, 75, &x, &y, &w, &h);
+    tft.fillRect(x, y, w+4, h, BLACK);
+    tft.setCursor(30, 75);
+    tft.println(flashValue);
+  }
+  else if (valueField == "Flash On") {
+    int16_t x, y;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Regular_30);
+    tft.setTextColor(textColour, BLACK);
+    tft.getTextBounds(String(prevFlashValue), 30, 155, &x, &y, &w, &h);
+    tft.fillRect(x, y, w+4, h, BLACK);
+    tft.setCursor(30, 155);
+    tft.println(flashValue);
   }
 }

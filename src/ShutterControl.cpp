@@ -1,9 +1,14 @@
 #include "ShutterControl.h"
 
 bool flashStatus() {
-  int flashValue = 0;
-
-  flashValue = analogRead(FLASH_PIN);
+  int newValue = 0;
+  Serial.print("About to read: ");
+  Serial.println(analogRead(FLASH_PIN));
+  newValue = analogRead(FLASH_PIN);
+  delay(10);
+  flashValue = newValue;
+  // Serial.print("New Flash Value: ");
+  // Serial.println(flashValue);
 
   if (flashValue >= 250) {
     flashReady = true;
