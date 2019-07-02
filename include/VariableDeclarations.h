@@ -136,6 +136,10 @@ extern int prevDelay;
 extern int joyStickSpeed;
 extern int flashValue;
 extern int prevFlashValue;
+extern int flashThreshold;
+extern int prevFlashThreshold;
+extern int flashOnValue;
+extern int flashOffValue;
 // --- Enable/Disable functionality --- //
 extern bool bootFlag;
 extern bool homedRail;
@@ -173,9 +177,5 @@ extern int prevCompletedMovements;
 extern char prevAutoStackProgress[10];
 extern bool stepperMoved;
 extern bool shutterTriggered;
-extern int flashThreshold;
-extern int prevFlashThreshold;
-extern int flashOnValue;
-extern int flashOffValue;
 
 #endif

@@ -211,7 +211,6 @@ void flashScreenTouch(TSPoint &point) {
         // update threshold if changed
         if (prevFlashThreshold != flashThreshold) {
           updateValueField("Threshold", WHITE);
-          prevFlashThreshold = flashThreshold;
         }
       }
       if (editFlashOffValue == true) {
@@ -232,7 +231,6 @@ void flashScreenTouch(TSPoint &point) {
         // update threshold if changed
         if (prevFlashThreshold != flashThreshold) {
           updateValueField("Threshold", WHITE);
-          prevFlashThreshold = flashThreshold;
         }
       }
       if (editFlashOnValue == true) {
@@ -253,7 +251,7 @@ void flashScreenTouch(TSPoint &point) {
       }
       if (testFlash == true) {
         // draw box
-        tft.drawRect(190, 105, 100, 45, YELLOW);
+        updateValueField("Test Button", YELLOW);
 
         // trigger shutter§
         shutterTriggered = triggerShutter();
@@ -265,16 +263,15 @@ void flashScreenTouch(TSPoint &point) {
           updateValueField("Test Button", CUSTOM_GREEN);
         }
       } else if (testFlash == false) {
-        tft.drawRect(190, 105, 100, 45, WHITE);
-        updateValueField("Test Button", CUSTOM_BLUE);
+        updateValueField("Test Button", WHITE);
       }
 
       prevGenericTime = millis();
     }
   }
 
-  // back button - tft.setCursor(150, 205);
-  if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && editFlashOnValue == false && editFlashOffValue == false) {
+  // Back button
+  if ((xPos >= 130 && xPos <= 190) && (yPos >= 170 && yPos <= 225) && editFlashOnValue == false && editFlashOffValue == false) {
     startScreen();
   }
 }

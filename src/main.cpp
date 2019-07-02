@@ -74,6 +74,10 @@ int prevDelay 										= 1;        	// previous delay value
 int joyStickSpeed 								= 0;					// joystick speed value
 int flashValue										= 10;					// reading from light sensor on flash LED
 int prevFlashValue								= 0;					// previous reading of flash light sensor
+int flashThreshold                = 280;        // threshold value for flash being ready to fire
+int prevFlashThreshold            = 0;          // previous threshold value for flash being ready
+int flashOnValue                  = 300;        // initial value for flash considered as being ready
+int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool bootFlag 										= true;       // runs rehoming sequence
 bool homedRail										= false;			// true if homeRail() run successfully
@@ -111,10 +115,6 @@ int prevCompletedMovements 				= 1;   				// used for overwriting prev movement 
 char prevAutoStackProgress[10]  	= "0/0";			// prev progress value, global to prevent overwriting each loop
 bool stepperMoved 								= false; 			// did stepMotor actually step or not
 bool shutterTriggered 						= false;			// did the shutter trigger or not
-int flashThreshold                = 280;        // threshold value for flash being ready to fire
-int prevFlashThreshold            = 0;          // previous threshold value for flash being ready
-int flashOnValue                  = 300;        // initial value for flash considered as being ready
-int flashOffValue                 = 30;         // initial value for flash considered as recycling
 
 // ***** --- PROGRAM --- ***** //
 
@@ -215,7 +215,7 @@ void loop() {
   }
   // run homing sequence if first loop
   if (bootFlag == true) {
-    homeRail();
+    // homeRail();
 		setAutoStackPositions(1, 1);
 		silentStepConfig(); // set config for silentStep
     bootFlag = false;
