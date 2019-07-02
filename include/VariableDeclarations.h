@@ -112,6 +112,7 @@ extern unsigned long prevStepTime;
 extern unsigned long recycleTime;
 extern unsigned long prevGenericTime;
 extern unsigned long genericTouchDelay;
+extern unsigned long lastReadFlash;
 extern int prevMinutes;
 extern int prevSeconds;
 extern char prevTimeMinutesSeconds[6];
@@ -125,6 +126,7 @@ extern bool editEndPosition;
 extern bool editMovementDistance;
 extern bool editFlashOnValue;
 extern bool editFlashOffValue;
+extern bool testFlash;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;
@@ -171,5 +173,9 @@ extern int prevCompletedMovements;
 extern char prevAutoStackProgress[10];
 extern bool stepperMoved;
 extern bool shutterTriggered;
+extern int flashThreshold;
+extern int prevFlashThreshold;
+extern int flashOnValue;
+extern int flashOffValue;
 
 #endif

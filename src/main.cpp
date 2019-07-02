@@ -50,6 +50,7 @@ unsigned long prevStepTime 				= 0;       		// previous step time reading
 unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
 unsigned long genericTouchDelay 	= 200; 				// 200ms touch delay for toggles
+unsigned long lastReadFlash				= 0;					// previous time at which the light sensor was polled
 int prevMinutes 									= 1;        	// duration of autoStack
 int prevSeconds 									= 1;        	// duration of autoStack
 char prevTimeMinutesSeconds[6] 		= "00:00"; 		// previous duration time, global to prevent overwrite on loop
@@ -63,6 +64,7 @@ bool editEndPosition 							= false;      // set end point for auto mode
 bool editMovementDistance 				= false;  		// set step distance in any mode
 bool editFlashOnValue							= false;			// set flash on value
 bool editFlashOffValue						= false;			// set flash off value
+bool testFlash                    = false;      // flag for testing flash threshold
 // --- Input and Output values --- //
 int xStickPos 										= 0;        	// ADC value of x-axis joystick
 int zStickVal 										= 1;        	// increment count of z-axis button press
@@ -109,6 +111,10 @@ int prevCompletedMovements 				= 1;   				// used for overwriting prev movement 
 char prevAutoStackProgress[10]  	= "0/0";			// prev progress value, global to prevent overwriting each loop
 bool stepperMoved 								= false; 			// did stepMotor actually step or not
 bool shutterTriggered 						= false;			// did the shutter trigger or not
+int flashThreshold                = 280;        // threshold value for flash being ready to fire
+int prevFlashThreshold            = 0;          // previous threshold value for flash being ready
+int flashOnValue                  = 300;        // initial value for flash considered as being ready
+int flashOffValue                 = 30;         // initial value for flash considered as recycling
 
 // ***** --- PROGRAM --- ***** //
 
@@ -190,38 +196,13 @@ void loop() {
         displayPosition();
       }
     }
-    // toggle output if joystick pressed
-    if (digitalRead(ZSTICK_PIN) == LOW) {
-			if (stepperDisabled == false) {
-      	toggleStepper(0);
-				stepperDisabled = true;
-			}
-			else if (stepperDisabled == true) {
-				toggleStepper(1);
-				stepperDisabled = false;
-			}
-    }
 		// configure SilentStep if not homing rail
 		if (stallGuardConfigured == true && bootFlag == false) {
 			silentStepConfig();
 		}
 		// update flashValue if on right screen
-		// if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
-		// 	updateFlashValue();
-		// }
-
-		switch (random(1,4)) {
-			case 1:
-				Serial.print("AnalogRead: ");
-				Serial.println(analogRead(FLASH_PIN));
-				break;
-			case 2:
-				flashReady = flashStatus();
-				break;
-			case 3:
-				Serial.print("FlashVal: ");
-				Serial.println(flashValue);
-				break;
+		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
+			updateFlashValue();
 		}
 
     subRoutine2Time = millis();

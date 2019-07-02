@@ -207,10 +207,15 @@ void flashScreenTouch(TSPoint &point) {
       editFlashOffValue = !editFlashOffValue;
 
       if (editFlashOffValue == false) {
-        tft.fillRoundRect(10, 24, 5, 40, 4, BLACK);
+        tft.fillRoundRect(10, 24, 5, 50, 4, BLACK);
+        // update threshold if changed
+        if (prevFlashThreshold != flashThreshold) {
+          updateValueField("Threshold", WHITE);
+          prevFlashThreshold = flashThreshold;
+        }
       }
       if (editFlashOffValue == true) {
-        tft.fillRoundRect(10, 24, 5, 40, 4, YELLOW);
+        tft.fillRoundRect(10, 24, 5, 50, 4, YELLOW);
       }
 
       prevGenericTime = millis();
@@ -223,10 +228,45 @@ void flashScreenTouch(TSPoint &point) {
       editFlashOnValue = !editFlashOnValue;
 
       if (editFlashOnValue == false) {
-        tft.fillRoundRect(10, 104, 5, 40, 4, BLACK);
+        tft.fillRoundRect(10, 104, 5, 50, 4, BLACK);
+        // update threshold if changed
+        if (prevFlashThreshold != flashThreshold) {
+          updateValueField("Threshold", WHITE);
+          prevFlashThreshold = flashThreshold;
+        }
       }
       if (editFlashOnValue == true) {
-        tft.fillRoundRect(10, 104, 5, 40, 4, YELLOW);
+        tft.fillRoundRect(10, 104, 5, 50, 4, YELLOW);
+      }
+
+      prevGenericTime = millis();
+    }
+  }
+
+  // Test button
+  if ((xPos >= 190 && xPos <= 300) && (yPos >= 100 && yPos <= 150) && editFlashOffValue == false && editFlashOnValue == false) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay*5) {
+      testFlash = !testFlash;
+
+      if (shutterEnabled == false) {
+        toggleShutter();
+      }
+      if (testFlash == true) {
+        // draw box
+        tft.drawRect(190, 105, 100, 45, YELLOW);
+
+        // trigger shutter§
+        shutterTriggered = triggerShutter();
+
+        // check result
+        if (shutterTriggered == false) {
+          updateValueField("Test Button", CUSTOM_RED);
+        } else if (shutterTriggered == true) {
+          updateValueField("Test Button", CUSTOM_GREEN);
+        }
+      } else if (testFlash == false) {
+        tft.drawRect(190, 105, 100, 45, WHITE);
+        updateValueField("Test Button", CUSTOM_BLUE);
       }
 
       prevGenericTime = millis();

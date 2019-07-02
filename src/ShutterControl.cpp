@@ -2,15 +2,18 @@
 
 bool flashStatus() {
   int newValue = 0;
-  Serial.print("About to read: ");
-  Serial.println(analogRead(FLASH_PIN));
-  newValue = analogRead(FLASH_PIN);
-  delay(10);
-  flashValue = newValue;
-  // Serial.print("New Flash Value: ");
-  // Serial.println(flashValue);
 
-  if (flashValue >= 250) {
+  if (millis() - lastReadFlash >= 10) {
+    // update light reading from flash
+    newValue = analogRead(FLASH_PIN);
+    flashValue = newValue;
+    lastReadFlash = millis();
+
+    // update threshold, e.g. ((310-50)*0.75)+50 = 245
+    flashThreshold = int(((flashOnValue - flashOffValue) * 0.75) + flashOffValue);
+  }
+
+  if (flashValue >= flashThreshold) {
     flashReady = true;
   }
   else {
@@ -64,6 +67,10 @@ bool triggerShutter() {
 		// wait for flash to be ready
 		while (flashReady == false) {
 			flashReady = flashStatus();
+      // break if flash not turning on
+      if (millis() - triggerTime >= 5000) {
+        break;
+      }
 			delay(10);
 		}
 

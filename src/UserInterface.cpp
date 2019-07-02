@@ -159,11 +159,7 @@ void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
 
 void flashScreen() {
   activeScreen = 5;
-  // Serial.print("Flash Value1: ");
-  // Serial.println(flashValue);
-  // flashReady = flashStatus(); // get latest value
-  // Serial.print("Flash Value4: ");
-  // Serial.println(flashValue);
+  flashReady = flashStatus(); // get latest value
 
   tft.fillScreen(BLACK);
   tft.setTextColor(BLACK);
@@ -173,6 +169,10 @@ void flashScreen() {
   tft.setFont(&Lato_Black_34);
   tft.setTextColor(CUSTOM_GREEN);
   tft.println("OFF");
+  tft.setTextColor(WHITE);
+  tft.setCursor(30, 75);
+  tft.setFont(&Arimo_Regular_30);
+  tft.println(flashOffValue);
   // updateValueField("Flash Off", WHITE);
 
   // Set on value
@@ -180,7 +180,24 @@ void flashScreen() {
   tft.setFont(&Lato_Black_34);
   tft.setTextColor(CUSTOM_RED);
   tft.println("ON");
+  tft.setTextColor(WHITE);
+  tft.setCursor(30, 155);
+  tft.setFont(&Arimo_Regular_30);
+  tft.println(flashOnValue);
   // updateValueField("Flash On", WHITE);
+
+  // Trigger threshold
+  tft.setCursor(200, 50);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_BLUE);
+  tft.println("Limit");
+  updateValueField("Threshold", WHITE);
+
+  // Test button
+  tft.setCursor(200, 140);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_BLUE);
+  tft.println("TEST");
 
   // back to auto screen
   tft.drawBitmap(155, 175, backArrow, 50, 50, WHITE);
@@ -273,11 +290,13 @@ void updateFlashValue() {
   if (abs(flashValue - prevFlashValue) > 1) {
     if (editFlashOffValue == true) {
       updateValueField("Flash Off", WHITE);
+      flashOffValue = flashValue;
     }
     if (editFlashOnValue == true) {
       updateValueField("Flash On", WHITE);
+      flashOnValue = flashValue;
     }
-    // prevFlashValue = flashValue;
+    prevFlashValue = flashValue;
   }
 }
 
@@ -372,5 +391,21 @@ void updateValueField(String valueField, int textColour) {
     tft.fillRect(x, y, w+4, h, BLACK);
     tft.setCursor(30, 155);
     tft.println(flashValue);
+  }
+  else if (valueField == "Threshold") {
+    int16_t x, y;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Regular_30);
+    tft.setTextColor(textColour, BLACK);
+    tft.getTextBounds(String(prevFlashThreshold), 210, 75, &x, &y, &w, &h);
+    tft.fillRect(x, y, w+4, h, BLACK);
+    tft.setCursor(210, 75);
+    tft.println(flashThreshold);
+  }
+  else if (valueField == "Test Button") {
+    tft.setCursor(200, 140);
+    tft.setFont(&Lato_Black_34);
+    tft.setTextColor(textColour);
+    tft.println("TEST");
   }
 }
