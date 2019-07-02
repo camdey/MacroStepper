@@ -9,8 +9,10 @@ void autoScreen();
 void displayPosition();
 void drawArrows();
 void drawPlayPause(bool greyPlay, bool greyPause);
+void flashScreen();
 void manualScreen();
 void startScreen();
+void updateFlashValue();
 void updateProgress(bool screenRefresh);
 void updateValueField(String valueField, int textColour);
 

@@ -123,7 +123,6 @@ void autoConfigScreenTouch(TSPoint &point) {
   if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == false) {
     autoScreen();
   }
-
 }
 
 void autoScreenTouch(TSPoint &point) {
@@ -193,6 +192,86 @@ void autoScreenTouch(TSPoint &point) {
   }
   // back button
   if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == false) {
+    startScreen();
+  }
+}
+
+void flashScreenTouch(TSPoint &point) {
+  // scale from 0->1023 to tft dimension and swap coordinates
+  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
+  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+
+  // Off button
+  if ((xPos >= 10 && xPos <= 120) && (yPos >= 10 && yPos <= 80) && editFlashOnValue == false) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
+      editFlashOffValue = !editFlashOffValue;
+
+      if (editFlashOffValue == false) {
+        tft.fillRoundRect(10, 24, 5, 50, 4, BLACK);
+        // update threshold if changed
+        if (prevFlashThreshold != flashThreshold) {
+          updateValueField("Threshold", WHITE);
+        }
+      }
+      if (editFlashOffValue == true) {
+        tft.fillRoundRect(10, 24, 5, 50, 4, YELLOW);
+      }
+
+      prevGenericTime = millis();
+    }
+  }
+
+  // On button
+  if ((xPos >= 10 && xPos <= 120) && (yPos >= 90 && yPos <= 160) && editFlashOffValue == false) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay) {
+      editFlashOnValue = !editFlashOnValue;
+
+      if (editFlashOnValue == false) {
+        tft.fillRoundRect(10, 104, 5, 50, 4, BLACK);
+        // update threshold if changed
+        if (prevFlashThreshold != flashThreshold) {
+          updateValueField("Threshold", WHITE);
+        }
+      }
+      if (editFlashOnValue == true) {
+        tft.fillRoundRect(10, 104, 5, 50, 4, YELLOW);
+      }
+
+      prevGenericTime = millis();
+    }
+  }
+
+  // Test button
+  if ((xPos >= 190 && xPos <= 300) && (yPos >= 100 && yPos <= 150) && editFlashOffValue == false && editFlashOnValue == false) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay*5) {
+      testFlash = !testFlash;
+
+      if (shutterEnabled == false) {
+        toggleShutter();
+      }
+      if (testFlash == true) {
+        // draw box
+        updateValueField("Test Button", YELLOW);
+
+        // trigger shutter§
+        shutterTriggered = triggerShutter();
+
+        // check result
+        if (shutterTriggered == false) {
+          updateValueField("Test Button", CUSTOM_RED);
+        } else if (shutterTriggered == true) {
+          updateValueField("Test Button", CUSTOM_GREEN);
+        }
+      } else if (testFlash == false) {
+        updateValueField("Test Button", WHITE);
+      }
+
+      prevGenericTime = millis();
+    }
+  }
+
+  // Back button
+  if ((xPos >= 130 && xPos <= 190) && (yPos >= 170 && yPos <= 225) && editFlashOnValue == false && editFlashOffValue == false) {
     startScreen();
   }
 }
@@ -289,6 +368,10 @@ void startScreenTouch(TSPoint &point) {
     homeRail();
     tft.drawBitmap(30, 190, house, 50, 42, WHITE);
   }
+  // change flash value settings
+  if ((xPos >= 130 && xPos <= 200) && (yPos >= 200 && yPos <= 240)) {
+    flashScreen();
+  }
   // clear autoStack run
   if ((xPos >= 230 && xPos <= 320) && (yPos >= 200 && yPos <= 240) && autoStackFlag == true) {
     resetAutoStack(); // reset autostack settings
@@ -304,17 +387,24 @@ void touchScreen() {
 
   if (point.z > minPressure && point.z < maxPressure) {
     switch (activeScreen) {
+      // start screen
       case 1:
-        startScreenTouch(point); // main screen
+        startScreenTouch(point);
         break;
+      // manual screen
       case 2:
-        manualScreenTouch(point); // screen for manual mode
+        manualScreenTouch(point);
         break;
+      // autoStack screen
       case 3:
-        autoScreenTouch(point); // screen for autoStack
+        autoScreenTouch(point);
         break;
+      // autoStack config screen
       case 4:
-        autoConfigScreenTouch(point); // autoStack config
+        autoConfigScreenTouch(point);
+        break;
+      case 5:
+        flashScreenTouch(point);
         break;
     }
   }

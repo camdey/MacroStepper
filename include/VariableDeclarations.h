@@ -24,6 +24,7 @@
 #include <Icons/Back_Arrow_Icon.h>
 #include <Icons/Cog_Wheel_Icon.h>
 #include <Icons/Delay_Clock_Icon.h>
+#include <Icons/Flash_Icon.h>
 #include <Icons/House_Icon.h>
 #include <Icons/Main_Logo_Icon.h>
 #include <Icons/Reset_Icon.h>
@@ -56,11 +57,12 @@ extern MCUFRIEND_kbv 	  tft;
 // touch screen pressure values
 #define minPressure 			5
 #define maxPressure 			2000
-// microstep values
+// microsteps and positions
 #define nrMicrosteps			4						  // number of microsteps per full step
 #define microstepDistance 1.25          // distance travelled per microstep
+#define railTravel        73            // 75mm travel minus 1.5mm for bushing/washer
 #define minPosition       0
-#define maxPosition       57000         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton
+#define maxPosition       58400         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
                                         // but consistently getting 58780 after homing
 // joystick defs
 #define xStickUpper			  515 				  // upper limit of joystick values that determines when to move stepper
@@ -110,6 +112,7 @@ extern unsigned long prevStepTime;
 extern unsigned long recycleTime;
 extern unsigned long prevGenericTime;
 extern unsigned long genericTouchDelay;
+extern unsigned long lastReadFlash;
 extern int prevMinutes;
 extern int prevSeconds;
 extern char prevTimeMinutesSeconds[6];
@@ -121,6 +124,9 @@ extern bool editShutterDelay;
 extern bool editStartPosition;
 extern bool editEndPosition;
 extern bool editMovementDistance;
+extern bool editFlashOnValue;
+extern bool editFlashOffValue;
+extern bool testFlash;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;
@@ -128,6 +134,12 @@ extern int prevZStickVal;
 extern int shutterDelay;
 extern int prevDelay;
 extern int joyStickSpeed;
+extern int flashValue;
+extern int prevFlashValue;
+extern int flashThreshold;
+extern int prevFlashThreshold;
+extern int flashOnValue;
+extern int flashOffValue;
 // --- Enable/Disable functionality --- //
 extern bool bootFlag;
 extern bool homedRail;
@@ -152,6 +164,7 @@ extern volatile bool stepperDisabled;
 extern volatile bool directionFwd;
 extern long fwdPosition;
 extern long bwdPosition;
+extern bool firstFwdStall;
 // --- Stepper motor variables --- //
 extern int stepsPerMovement;
 extern int movementsRequired;

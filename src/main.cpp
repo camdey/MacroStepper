@@ -1,7 +1,7 @@
 // ********* Macro Stepper v1.1 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2019-06-28
+// *** UPDATED: 2019-06-30
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -47,9 +47,10 @@ unsigned long currentTime 				= 0;        	// current time in millis()
 unsigned long subRoutine1Time 		= 0;    			// time subroutine1 last ran
 unsigned long subRoutine2Time 		= 0;    			// time subroutine2 last ran
 unsigned long prevStepTime 				= 0;       		// previous step time reading
-unsigned long recycleTime 				= 0;    			// duration to take photo
+unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
 unsigned long genericTouchDelay 	= 200; 				// 200ms touch delay for toggles
+unsigned long lastReadFlash				= 0;					// previous time at which the light sensor was polled
 int prevMinutes 									= 1;        	// duration of autoStack
 int prevSeconds 									= 1;        	// duration of autoStack
 char prevTimeMinutesSeconds[6] 		= "00:00"; 		// previous duration time, global to prevent overwrite on loop
@@ -61,6 +62,9 @@ bool editShutterDelay 						= false;     	// set shutter delay time
 bool editStartPosition 						= false;     	// set start point for auto mode
 bool editEndPosition 							= false;      // set end point for auto mode
 bool editMovementDistance 				= false;  		// set step distance in any mode
+bool editFlashOnValue							= false;			// set flash on value
+bool editFlashOffValue						= false;			// set flash off value
+bool testFlash                    = false;      // flag for testing flash threshold
 // --- Input and Output values --- //
 int xStickPos 										= 0;        	// ADC value of x-axis joystick
 int zStickVal 										= 1;        	// increment count of z-axis button press
@@ -68,6 +72,12 @@ int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
 int prevDelay 										= 1;        	// previous delay value
 int joyStickSpeed 								= 0;					// joystick speed value
+int flashValue										= 10;					// reading from light sensor on flash LED
+int prevFlashValue								= 0;					// previous reading of flash light sensor
+int flashThreshold                = 280;        // threshold value for flash being ready to fire
+int prevFlashThreshold            = 0;          // previous threshold value for flash being ready
+int flashOnValue                  = 300;        // initial value for flash considered as being ready
+int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool bootFlag 										= true;       // runs rehoming sequence
 bool homedRail										= false;			// true if homeRail() run successfully
@@ -92,6 +102,7 @@ volatile bool stepperDisabled 		= false;
 volatile bool directionFwd 				= true;
 long fwdPosition 									= 9999;
 long bwdPosition 									= 9999;
+bool firstFwdStall								= true;				// takes first position reading when stalling in case of lost steps
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
 int movementsRequired 						= 0;        	// equals total distance / step multiplier
@@ -113,7 +124,6 @@ void setup(void) {
   tft.reset();
 
 	uint16_t identifier = tft.readID();
-
 	if (identifier == 0x9341) {
 		Serial.println(F("Found ILI9341 LCD driver"));
 	} else {
@@ -186,20 +196,13 @@ void loop() {
         displayPosition();
       }
     }
-    // toggle output if joystick pressed
-    if (digitalRead(ZSTICK_PIN) == LOW) {
-			if (stepperDisabled == false) {
-      	toggleStepper(0);
-				stepperDisabled = true;
-			}
-			else if (stepperDisabled == true) {
-				toggleStepper(1);
-				stepperDisabled = false;
-			}
-    }
 		// configure SilentStep if not homing rail
 		if (stallGuardConfigured == true && bootFlag == false) {
 			silentStepConfig();
+		}
+		// update flashValue if on right screen
+		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
+			updateFlashValue();
 		}
 
     subRoutine2Time = millis();
@@ -212,7 +215,7 @@ void loop() {
   }
   // run homing sequence if first loop
   if (bootFlag == true) {
-    homeRail();
+    // homeRail();
 		setAutoStackPositions(1, 1);
 		silentStepConfig(); // set config for silentStep
     bootFlag = false;

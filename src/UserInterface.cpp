@@ -1,5 +1,6 @@
 #include "MiscFunctions.h"
 #include "UserInterface.h"
+#include "ShutterControl.h"
 
 void autoConfigScreen() {
   activeScreen = 4;
@@ -156,6 +157,53 @@ void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
   }
 }
 
+void flashScreen() {
+  activeScreen = 5;
+  flashReady = flashStatus(); // get latest value
+
+  tft.fillScreen(BLACK);
+  tft.setTextColor(BLACK);
+
+  // set off value
+  tft.setCursor(20, 50);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_GREEN);
+  tft.println("OFF");
+  tft.setTextColor(WHITE);
+  tft.setCursor(30, 75);
+  tft.setFont(&Arimo_Regular_30);
+  tft.println(flashOffValue);
+  // updateValueField("Flash Off", WHITE);
+
+  // Set on value
+  tft.setCursor(20, 130);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_RED);
+  tft.println("ON");
+  tft.setTextColor(WHITE);
+  tft.setCursor(30, 155);
+  tft.setFont(&Arimo_Regular_30);
+  tft.println(flashOnValue);
+  // updateValueField("Flash On", WHITE);
+
+  // Trigger threshold
+  tft.setCursor(200, 50);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(CUSTOM_BLUE);
+  tft.println("Limit");
+  updateValueField("Threshold", WHITE);
+
+  // Test button
+  tft.fillRoundRect(190, 105, 100, 45, 5, CUSTOM_GREY_LITE);
+  tft.setCursor(200, 140);
+  tft.setFont(&Lato_Black_34);
+  tft.setTextColor(WHITE);
+  tft.println("TEST");
+
+  // back to auto screen
+  tft.drawBitmap(135, 175, backArrow, 50, 50, WHITE);
+}
+
 void manualScreen() {
   activeScreen = 2;
   tft.fillScreen(BLACK);
@@ -205,6 +253,7 @@ void startScreen() {
   activeScreen = 1;
   tft.fillScreen(BLACK);
 
+  // main logo
   tft.drawBitmap(40, 0, logo, 240, 82, WHITE);
 
   tft.setTextColor(BLACK);
@@ -221,14 +270,33 @@ void startScreen() {
   tft.println("Auto");
 
   // Homing option
-  // tft.fillRect(0, 200, 320, 40, CUSTOM_BLUE);
   tft.drawBitmap(30, 190, house, 50, 42, WHITE);
+
+  // Flash settings
+  tft.drawBitmap(145, 190, flash, 40, 42, WHITE);
 
   // Clear autoStack
   if (autoStackFlag == false) {
     tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
   } else if (autoStackFlag == true) {
     tft.drawBitmap(250, 190, reset40, 40, 40, CUSTOM_RED);
+  }
+}
+
+void updateFlashValue() {
+  // get latest flashValue reading
+  flashReady = flashStatus();
+
+  // if difference from previous reading > 1, updates value on screen
+  if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue == true) {
+    updateValueField("Flash Off", WHITE);
+    // set OFF value for flash
+    flashOffValue = flashValue;
+    }
+  if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue == true) {
+    updateValueField("Flash On", WHITE);
+    // set ON value for flash
+    flashOnValue = flashValue;
   }
 }
 
@@ -302,5 +370,46 @@ void updateValueField(String valueField, int textColour) {
     tft.setCursor(35, 225);
     tft.setFont(&Arimo_Regular_16);
     tft.println(stepper.currentPosition());
+  }
+  // flashValue from light sensor for calibrating OFF value
+  else if (valueField == "Flash Off") {
+    int16_t x, y;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Regular_30);
+    tft.setTextColor(textColour, BLACK);
+    tft.getTextBounds(String(flashOffValue), 30, 75, &x, &y, &w, &h);
+    tft.fillRect(x, y, w, h, BLACK);
+    tft.setCursor(30, 75);
+    tft.println(flashValue);
+  }
+  // flashValue from light sensor for calibrating ON value
+  else if (valueField == "Flash On") {
+    int16_t x, y;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Regular_30);
+    tft.setTextColor(textColour, BLACK);
+    tft.getTextBounds(String(flashOnValue), 30, 155, &x, &y, &w, &h);
+    tft.fillRect(x, y, w, h, BLACK);
+    tft.setCursor(30, 155);
+    tft.println(flashValue);
+  }
+  // update threshold value that determines if flash is ready to trigger or not
+  else if (valueField == "Threshold") {
+    int16_t x, y;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Regular_30);
+    tft.setTextColor(textColour, BLACK);
+    tft.getTextBounds(String(prevFlashThreshold), 215, 75, &x, &y, &w, &h);
+    tft.fillRect(x, y, w, h, BLACK);
+    tft.setCursor(215, 75);
+    tft.println(flashThreshold);
+    prevFlashThreshold = flashThreshold;
+  }
+  // update text of TEST for when running flash test
+  else if (valueField == "Test Button") {
+    tft.setCursor(200, 140);
+    tft.setFont(&Lato_Black_34);
+    tft.setTextColor(textColour);
+    tft.println("TEST");
   }
 }
