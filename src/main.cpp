@@ -115,7 +115,6 @@ int prevCompletedMovements 				= 1;   				// used for overwriting prev movement 
 char prevAutoStackProgress[10]  	= "0/0";			// prev progress value, global to prevent overwriting each loop
 bool stepperMoved 								= false; 			// did stepMotor actually step or not
 bool shutterTriggered 						= false;			// did the shutter trigger or not
-
 // ***** --- PROGRAM --- ***** //
 
 void setup(void) {
@@ -215,7 +214,7 @@ void loop() {
   }
   // run homing sequence if first loop
   if (bootFlag == true) {
-    // homeRail();
+    homeRail();
 		setAutoStackPositions(1, 1);
 		silentStepConfig(); // set config for silentStep
     bootFlag = false;

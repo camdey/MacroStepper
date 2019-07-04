@@ -17,7 +17,7 @@ void stallGuardConfig() {
   driver.sg_min(1); // if sg_result < sg_min*32, current increase
   driver.sg_max(3); // if sg_result >= (sg_min+sg_max+1)*32, current decrease
   driver.sedn(0b01);
-  driver.sg_stall_value(0);
+  driver.sg_stall_value(-5);
   driver.stealthChop(0);
 }
 

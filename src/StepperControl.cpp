@@ -85,6 +85,8 @@ void changeDirection() {
     directionFwd = true;
   }
   stepper.moveTo(moveDist);
+  Serial.print("Current Pos: ");
+  Serial.println(stepper.currentPosition());
 }
 
 void dryRun() {
@@ -131,7 +133,6 @@ void homeRail() {
 	if (stallGuardConfigured == false) {
 		stallGuardConfig();
 	}
-
   // reset positions
   fwdPosition = 0;
   bwdPosition = 0;
@@ -159,6 +160,7 @@ void homeRail() {
 	}
   homedRail = true;
   firstFwdStall = true; // reset first stall check in case homeRail run again
+  firstBwdStall = true;
   // config silentStep after homing
   silentStepConfig();
 }
@@ -231,7 +233,6 @@ void stallDetection() {
     }
     if (directionFwd == true && firstFwdStall == true) {
       fwdPosition = stepper.currentPosition();
-      firstFwdStall = false;
     }
     toggleStepper(1);
     changeDirection();

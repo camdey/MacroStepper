@@ -23,9 +23,7 @@ void estimateDuration(bool screenRefresh) {
     tft.fillRect(x, y, w, h, CUSTOM_BLUE);
     tft.setCursor(15, 140);
     tft.println(timeMinutesSeconds);
-    Serial.print("Time: ");
-    Serial.println(timeMinutesSeconds);
-
+    
     prevMinutes = minutes;
     prevSeconds = seconds;
     // assign new time to prev variable

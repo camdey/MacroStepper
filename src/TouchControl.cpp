@@ -365,6 +365,7 @@ void startScreenTouch(TSPoint &point) {
   // homing func
   if ((xPos >= 20 && xPos <= 100) && (yPos >= 190 && yPos <= 240)) {
     tft.drawBitmap(30, 190, house, 50, 42, CUSTOM_RED);
+    bootFlag = true;
     homeRail();
     tft.drawBitmap(30, 190, house, 50, 42, WHITE);
   }
