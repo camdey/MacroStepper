@@ -33,16 +33,16 @@ void autoStack() {
 		stepperMoved = false;
 		shutterTriggered = false;
     prevStepTime = millis();
-    Serial.println("0. Start");
+    // Serial.println("0. Start");
   }
   // take photo and increment progress for first step of each movement
   if (completedMovements <= movementsRequired && stepperMoved == false) {
 		// if shutter enabled, take photo
 		if (shutterEnabled == true && shutterTriggered == false) {
-      Serial.println("1. Ready");
+      // Serial.println("1. Ready");
 	    shutterTriggered = triggerShutter(); // take photo
       if (shutterTriggered == true){
-        Serial.println("2. Photo Taken");
+        // Serial.println("2. Photo Taken");
       }
 		}
 
@@ -50,7 +50,7 @@ void autoStack() {
 		stepperMoved = stepMotor(1, shutterDelay*1000); // forward direction, shutterdelay
 
 		if (stepperMoved == true) {
-      Serial.println("3. Step Taken");
+      // Serial.println("3. Step Taken");
 			completedMovements++;
 	    // make sure correct screen is displaying
 	    if (activeScreen == 3) { // auto screen
@@ -85,8 +85,8 @@ void changeDirection() {
     directionFwd = true;
   }
   stepper.moveTo(moveDist);
-  Serial.print("Current Pos: ");
-  Serial.println(stepper.currentPosition());
+  // Serial.print("Current Pos: ");
+  // Serial.println(stepper.currentPosition());
 }
 
 void dryRun() {
@@ -147,6 +147,11 @@ void homeRail() {
 	// after stall, change direction and run to 50000 or stall
 	while (bwdPosition != 0 || fwdPosition <= 9999) {
 		stepper.run();
+    // int sg_result = driver.sg_result();
+    // if (sg_result <= 50) {
+    //   Serial.print("SG Result: ");
+    //   Serial.println(sg_result);
+    // }
 	}
 	// if back and forward position set, move to middle position
 	if (bwdPosition == 0 && fwdPosition > 10000) {
@@ -160,7 +165,6 @@ void homeRail() {
 	}
   homedRail = true;
   firstFwdStall = true; // reset first stall check in case homeRail run again
-  firstBwdStall = true;
   // config silentStep after homing
   silentStepConfig();
 }
@@ -205,13 +209,13 @@ void joyStick() {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
-    setAutoStackPositions(1, 0); //set start but not end position
+    setAutoStackPositions(true, false); //set start but not end position
   }
   if (editEndPosition == true && arrowsActive == true) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
-    setAutoStackPositions(0, 1); //set end but not start position
+    setAutoStackPositions(false, true); //set end but not start position
   }
   if (activeScreen == 2 || activeScreen == 4) {
     displayPosition();

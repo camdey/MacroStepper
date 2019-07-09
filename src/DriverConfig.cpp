@@ -4,6 +4,7 @@
 void stallGuardConfig() {
   stallGuardConfigured = true;
   //set TMC2130 config
+  stepper.setAcceleration(1000);
   driver.push(); // reset registers
   driver.toff(3);
   driver.tbl(1);
@@ -23,6 +24,7 @@ void stallGuardConfig() {
 
 // config for TMC2130 when running all other functions as stealthChop is preferred
 void silentStepConfig() {
+  stepper.setAcceleration(2000);
   stallGuardConfigured = false;
   driver.push(); // reset registers
   driver.stealthChop(1);

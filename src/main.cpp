@@ -15,7 +15,7 @@
 // ----- DEFINITIONS ----- //
 // STEP 				= one microstep step of the stepper stepper motor
 // MOVEMENT 		= one full movement of linear rail by specified distance, consisting of multiple steps
-// PROECDURE 		= one completed stack procedure, consisting of multiple movements
+// PROCEDURE 		= one completed stack procedure, consisting of multiple movements
 // DISTANCE 		= distance travelled per movement = number of steps per movement * 0.0025mm
 // MANUAL MODE 	= user input required to step motor by specified distance
 // AUTOSTACK 		= automatic mode, stepper completes procedure without further input
@@ -89,6 +89,7 @@ bool shutterEnabled 								= false;      // disabled/enabled
 bool targetFlag 									= false;      // resets stepper target
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
+bool autoStackMax                 = false;      // set endPosition to max for indetermine autoStack procedure
 // --- Position values --- //
 long startPosition 								= 0;        	// start position for stack procedure
 long prevStartPosition 						= 0;
@@ -154,7 +155,7 @@ void setup(void) {
 
   // set stepper AccelStepper config
   stepper.setMaxSpeed(3200);
-  stepper.setAcceleration(2000);
+  // stepper.setAcceleration(2000);
   stepper.setEnablePin(EN_PIN);
   stepper.setPinsInverted(false, false, true);
   stepper.enableOutputs();
@@ -203,6 +204,12 @@ void loop() {
 		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
 			updateFlashValue();
 		}
+    // set END as maxPosition if Z Stick depressed
+    if (activeScreen == 4 && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+      autoStackMax = true;
+      setAutoStackPositions(false, true);
+      autoStackMax = false;
+    }
 
     subRoutine2Time = millis();
   }
@@ -215,7 +222,7 @@ void loop() {
   // run homing sequence if first loop
   if (bootFlag == true) {
     homeRail();
-		setAutoStackPositions(1, 1);
+		setAutoStackPositions(true, true);
 		silentStepConfig(); // set config for silentStep
     bootFlag = false;
   }

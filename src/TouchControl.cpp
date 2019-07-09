@@ -29,6 +29,7 @@ int arrowsTouch(TSPoint &point, bool moveStepper, int val = 0) {
   return val;
 }
 
+
 void autoConfigScreenTouch(TSPoint &point) {
   // scale from 0->1023 to tft dimension and swap coordinates
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
@@ -52,14 +53,15 @@ void autoConfigScreenTouch(TSPoint &point) {
       prevGenericTime = millis();
     }
   }
-  // set start position
+  // set start position using arrows or joystick
   if (editStartPosition == true && arrowsActive == true) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
     int val = arrowsTouch(point, 1, 0);
-    setAutoStackPositions(1, 0); //set start but not end position
+    setAutoStackPositions(true, false); //set start but not end position
   }
+
   // end button
   if ((xPos >= 10 && xPos <= 120) && (yPos >= 90 && yPos <= 160) && (editShutterDelay + editStartPosition) == 0) {
     if ((currentTime - prevGenericTime) >= genericTouchDelay) {
@@ -78,15 +80,16 @@ void autoConfigScreenTouch(TSPoint &point) {
       prevGenericTime = millis();
     }
   }
-  // set end position
+  // set end position using arrows or joystick
   if (editEndPosition == true && arrowsActive == true) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
 
     int val = arrowsTouch(point, 1, 0);
-    setAutoStackPositions(0, 1); //set end but not start position
+    setAutoStackPositions(false, true); //set end but not start position
   }
+  
   // run button
   if ((xPos >= 10 && xPos <= 120) && (yPos >= 170 && yPos <= 240) && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
     tft.fillRoundRect(10, 184, 5, 35, 4, YELLOW);
@@ -124,6 +127,7 @@ void autoConfigScreenTouch(TSPoint &point) {
     autoScreen();
   }
 }
+
 
 void autoScreenTouch(TSPoint &point) {
   // scale from 0->1023 to tft dimension and swap coordinates
@@ -195,6 +199,7 @@ void autoScreenTouch(TSPoint &point) {
     startScreen();
   }
 }
+
 
 void flashScreenTouch(TSPoint &point) {
   // scale from 0->1023 to tft dimension and swap coordinates
@@ -276,6 +281,7 @@ void flashScreenTouch(TSPoint &point) {
   }
 }
 
+
 void manualScreenTouch(TSPoint &point) {
   // scale from 0->1023 to tft dimension and swap coordinates
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
@@ -349,6 +355,7 @@ void manualScreenTouch(TSPoint &point) {
   }
 }
 
+
 void startScreenTouch(TSPoint &point) {
   // scale from 0->1023 to tft dimension and swap coordinates
   int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
@@ -378,6 +385,7 @@ void startScreenTouch(TSPoint &point) {
     resetAutoStack(); // reset autostack settings
   }
 }
+
 
 void touchScreen() {
   currentTime = millis(); // call frequently just in case

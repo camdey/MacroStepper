@@ -2,6 +2,14 @@
 #include "UserInterface.h"
 #include "ShutterControl.h"
 
+
+/***********************************************************************
+autoConfig screen of the controller. Allows user to:
+  - Set START point for autoStack procedure
+  - Set END point for autoStack procedure
+  - Do a fast dry run of the procedure with current START/END points
+  - Move stepper forwards/backwards one step at a time
+***********************************************************************/
 void autoConfigScreen() {
   activeScreen = 4;
   tft.fillScreen(BLACK);
@@ -45,6 +53,16 @@ void autoConfigScreen() {
   drawArrows();
 }
 
+
+/***********************************************************************
+Auto screen of the controller. Allows user to:
+  - Set step distance for stepper
+  - See estimated time remaining for an AutoStack sequence
+  - See autoStack procedure progress as "completed / remaining"
+  - Start/Stop/Pause autoStack procedure
+  - Enable/disable shutter trigger
+  - Open autoStack configuration
+***********************************************************************/
 void autoScreen() {
   activeScreen = 3;
   tft.fillScreen(BLACK);
@@ -94,6 +112,11 @@ void autoScreen() {
   }
 }
 
+
+/***********************************************************************
+Updates the current position on the screen depending on whether the
+current screen is the Manual or autoConfig screen.
+***********************************************************************/
 void displayPosition() {
   // update for new values
   if (prevStepperPosition != stepper.currentPosition()) {
@@ -129,6 +152,10 @@ void displayPosition() {
   }
 }
 
+
+/***********************************************************************
+Draws the Up/Down arrows in the Manual and AutoConfig screens
+***********************************************************************/
 void drawArrows() {
   tft.fillTriangle(230, 65, 260, 15, 290, 65, CUSTOM_GREEN);
   tft.fillRoundRect(245, 69, 30, 36, 4, CUSTOM_GREEN);
@@ -137,6 +164,10 @@ void drawArrows() {
   tft.fillRoundRect(245, 135, 30, 36, 4, CUSTOM_RED);
 }
 
+
+/***********************************************************************
+Draws the Play/Pause buttons in the AutoStack screen of the controller
+***********************************************************************/
 void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
   if (greyPlay == 1) {
     tft.fillCircle(270, 75, 37, CUSTOM_GREY_LITE);
@@ -157,6 +188,14 @@ void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
   }
 }
 
+
+/***********************************************************************
+Flash screen of the controller. Allows user to:
+  - Set ON value for expected light sensor reading when flash is ready
+  - Set OFF value for expected light sensor reading when flash is recycling
+  - Calculate new trigger threshold
+  - Test the flash is currently working with given threshold
+***********************************************************************/
 void flashScreen() {
   activeScreen = 5;
   flashReady = flashStatus(); // get latest value
@@ -204,6 +243,14 @@ void flashScreen() {
   tft.drawBitmap(135, 175, backArrow, 50, 50, WHITE);
 }
 
+
+/***********************************************************************
+Manual screen of the controller. Allows user to:
+  - Set step distance for stepper (distance travelled per step)
+  - View current position of stepper in mm
+  - Enable/disable shutter trigger
+  - Move stepper forward/back one step by specified step distance
+***********************************************************************/
 void manualScreen() {
   activeScreen = 2;
   tft.fillScreen(BLACK);
@@ -249,6 +296,15 @@ void manualScreen() {
   drawArrows();
 }
 
+
+/***********************************************************************
+Main screen of the controller. Allows user to:
+  - Home Rail
+  - Calibrate flash trigger point
+  - Clear the current autoStack sequence
+  - Move the stepper in Manual mode
+  - Create and run an AutoStack procedure
+***********************************************************************/
 void startScreen() {
   activeScreen = 1;
   tft.fillScreen(BLACK);
@@ -283,6 +339,12 @@ void startScreen() {
   }
 }
 
+
+/***********************************************************************
+Updates the screen with light sensor readings of the Flash LED. Used
+to calibrate optimal trigger point for flash given lighting conditions
+at the time that may affect the light sensor.
+***********************************************************************/
 void updateFlashValue() {
   // get latest flashValue reading
   flashReady = flashStatus();
@@ -300,6 +362,12 @@ void updateFlashValue() {
   }
 }
 
+
+/***********************************************************************
+Updates the autoStack screen with current progress of stack sequence.
+Uses sprintf_P function to concatenate two values and format them as
+"completed / remaining" on the screen.
+***********************************************************************/
 void updateProgress(bool screenRefresh) {
   char autoStackProgress[10]      = "0/0";
 
@@ -322,6 +390,7 @@ void updateProgress(bool screenRefresh) {
     sprintf_P(prevAutoStackProgress, PSTR("%02d:%02d"), completedMovements, movementsRequired);
   }
 }
+
 
 /***********************************************************************
 Generic function for updating various values in different fields.
