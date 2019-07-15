@@ -75,6 +75,7 @@ void autoStack() {
   }
 }
 
+
 void changeDirection() {
   if (directionFwd == true) {
     moveDist = -500000;
@@ -88,6 +89,7 @@ void changeDirection() {
   // Serial.print("Current Pos: ");
   // Serial.println(stepper.currentPosition());
 }
+
 
 void dryRun() {
   // wake stepper from sleep
@@ -124,6 +126,7 @@ void dryRun() {
   completedMovements = 0;
   displayPosition();
 }
+
 
 void homeRail() {
   if (stepperDisabled == true) {
@@ -169,13 +172,28 @@ void homeRail() {
   silentStepConfig();
 }
 
+/******************************************************************
+Function for moving the stepper via joystick control on the X axis.
+Re-enables stepper if previously disabled and then checks to make
+sure the joystick values are still in the operation range.  If the
+rail has been homed, it will prevent user from allowing rail to
+bump into endstops. Every 50ms it checks for new joystick input
+values and also adjusts speed based on joystick input position.
+For the first 5000 loops of the while() function, a modifier is
+used to reduce the initial acceleration of the stepper to control
+jerk. After 5000 steps, modifier is redundant and normal speed
+control resumes.
+******************************************************************/
 void joyStick() {
+  // count nr of loops in while() clause
+  long loopNr = 0;
+  int stepperSpeed = 0;
+
   // wake stepper from sleep
 	if (stepperDisabled == true) {
     toggleStepper(1);
   }
   // while joystick is operated
-  stepper.setAcceleration(500);
   while (xStickPos >= xStickUpper || xStickPos <= xStickLower) {
     // if rail min/max postions have been set...
     if (homedRail == true) {
@@ -192,17 +210,23 @@ void joyStick() {
     }
     // move either -1, 0, or 1 steps
     stepper.move(map(xStickPos, 0, 1023, 1, -1));
-		// xStickMid = resting stable point of joystick§
-    joyStickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
-    stepper.setSpeed(joyStickSpeed);
-    stepper.runSpeed();
 
-    // check stick position again
+    // check stick position again and set speed
     if (millis() % 50 == 0) {
        xStickPos = analogRead(XSTICK_PIN);
+       stepperSpeed = speedControl(loopNr);
+
+       // prevent overflow
+       if (abs(loopNr) > 2000000000) {
+         loopNr = 5000;
+       }
     }
+
+    stepper.setSpeed(stepperSpeed);
+    stepper.runSpeed();
+
+    loopNr++;
   }
-  stepper.setAcceleration(2000);
 
   // // check start/end position adjustment
   if (editStartPosition == true && arrowsActive == true) {
@@ -224,6 +248,27 @@ void joyStick() {
   prevStepperPosition = stepper.currentPosition();
 }
 
+
+int speedControl(long loopNr) {
+  int jerkControl = 5000;
+  int adjustedSpeed = 0;
+
+  // if exceeded 5000 loops, jerkControl multiplier = 1
+  if (loopNr >= jerkControl) {
+    loopNr = jerkControl;
+  }
+
+  // xStickMid = resting stable point of joystick§
+  joyStickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
+
+  // adjust speed based on jerkControl multiplier;
+  float speedModifier = loopNr*1.00 / jerkControl*1.00;
+  adjustedSpeed = joyStickSpeed * speedModifier;
+
+  return adjustedSpeed;
+}
+
+
 void stallDetection() {
   Serial.print("DIAG: ");
   Serial.println(digitalRead(DIAG_PIN));
@@ -242,6 +287,7 @@ void stallDetection() {
     changeDirection();
   }
 }
+
 
 /******************************************************************
 Moves the stepper one Movement in a given direction. A Movement
@@ -294,6 +340,7 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
 			return false;
 	}
 }
+
 
 void toggleStepper(bool enable) {
 	if (enable == 1) {
