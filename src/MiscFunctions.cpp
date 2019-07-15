@@ -23,8 +23,6 @@ void estimateDuration(bool screenRefresh) {
     tft.fillRect(x, y, w, h, CUSTOM_BLUE);
     tft.setCursor(15, 140);
     tft.println(timeMinutesSeconds);
-    Serial.print("Time: ");
-    Serial.println(timeMinutesSeconds);
 
     prevMinutes = minutes;
     prevSeconds = seconds;
@@ -93,7 +91,7 @@ void setStepDistance() {
 }
 
 void setAutoStackPositions(bool setStart, bool setEnd) {
-  if (setStart == 1) {
+  if (setStart == true) {
     // lower limit
     if (startPosition < 0) {
       startPosition = 0;
@@ -112,9 +110,14 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
     goToStart = true;
   }
 
-  if (setEnd == 1) {
-    // get new value
-    endPosition = stepper.currentPosition();
+  if (setEnd == true) {
+    // set new end value
+    if (autoStackMax == true) {
+      endPosition = maxPosition;
+    }
+    else if (autoStackMax == false) {
+      endPosition = stepper.currentPosition();
+    }
     // print end point if changed
     if (prevEndPosition != endPosition && activeScreen == 4) {
       int16_t x1, y1;
@@ -123,6 +126,7 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
       tft.getTextBounds(String(prevEndPosition), 35, 145, &x1, &y1, &w, &h);
       tft.fillRect(x1, y1, w, h, BLACK);
       updateValueField("End Position", WHITE);
+      prevEndPosition = endPosition;
     }
   }
 

@@ -60,9 +60,12 @@ extern MCUFRIEND_kbv 	  tft;
 // microsteps and positions
 #define nrMicrosteps			4						  // number of microsteps per full step
 #define microstepDistance 1.25          // distance travelled per microstep
-#define railTravel        73            // 75mm travel minus 1.5mm for bushing/washer
+#define railLength        150           // total length of actuator rails
+#define stageLength       75            // total length of rail stage
+#define bushingOverhang   1.9           // screw bushing protrudes and prevents stage from fully reaching rear end
+#define railTravel        73.1          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
 #define minPosition       0
-#define maxPosition       58400         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
+#define maxPosition       58480         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
                                         // but consistently getting 58780 after homing
 // joystick defs
 #define xStickUpper			  515 				  // upper limit of joystick values that determines when to move stepper
@@ -151,6 +154,7 @@ extern bool shutterEnabled;
 extern bool targetFlag;
 extern bool flashReady;
 extern bool stallGuardConfigured;
+extern bool autoStackMax;
 // --- Position values --- //
 extern long startPosition;
 extern long prevStartPosition;
