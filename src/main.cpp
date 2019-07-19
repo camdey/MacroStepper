@@ -135,7 +135,8 @@ void setup(void) {
 	tft.setFont(&Arimo_Regular_24);
 	tft.begin(identifier);
 	tft.fillScreen(BLACK);
-	tft.setRotation(1); // screenRotated = false
+	tft.setRotation(1);
+  screenRotated = false;
 	startScreen();
 
 	driver.begin();

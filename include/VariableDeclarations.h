@@ -69,8 +69,8 @@ extern MCUFRIEND_kbv 	  tft;
 #define maxPosition       58480         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
                                         // but consistently getting 58780 after homing
 // joystick defs
-#define xStickUpper			  515 				  // upper limit of joystick values that determines when to move stepper
-#define xStickLower				495				    // lower limit of joystick values that determines when to move stepper
+#define xStickUpper			  520 				  // upper limit of joystick values that determines when to move stepper
+#define xStickLower				490				    // lower limit of joystick values that determines when to move stepper
 #define xStickMid					507				    // stable point of joystick reading
 
 // definitions for touch screen orientation

@@ -254,9 +254,7 @@ void readJoystick() {
     xStickPos = analogRead(XSTICK_PIN);
   }
   else if (screenRotated == true) {
-    int xStickRaw = analogRead(XSTICK_PIN);
-    // 0 to 1023 has no middle integer, using 511 and 512 prevents out of bound numbers
-    xStickPos = 511 - (xStickRaw - 512);
+    xStickPos = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
   }
 }
 
