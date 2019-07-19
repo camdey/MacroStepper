@@ -37,15 +37,25 @@ void resetAutoStack() {
     goToStart = true;
     joystickState = true;
     pauseAutoStack = false;
-    // stepDue = true;
     stepCount = 1;
     completedMovements = 0;
     movementsRequired = 0;
     startPosition = stepper.currentPosition();
     endPosition = 0;
-    tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
+    tft.drawBitmap(160, 10, reset40, 40, 40, GRAY);
 
     prevGenericTime = millis();
+  }
+}
+
+void rotateScreen() {
+  if (screenRotated == false) {
+    tft.setRotation(3);
+    screenRotated = true;
+  }
+  else if (screenRotated == true) {
+    tft.setRotation(1);
+    screenRotated = false;
   }
 }
 

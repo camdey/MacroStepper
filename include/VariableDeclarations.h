@@ -29,6 +29,7 @@
 #include <Icons/Main_Logo_Icon.h>
 #include <Icons/Reset_Icon.h>
 #include <Icons/Reset_40_Icon.h>
+#include <Icons/Rotate_Icon.h>
 
 extern TouchScreen      ts;
 extern TMC2130Stepper   driver;
@@ -130,6 +131,7 @@ extern bool editMovementDistance;
 extern bool editFlashOnValue;
 extern bool editFlashOffValue;
 extern bool testFlash;
+extern bool screenRotated;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;

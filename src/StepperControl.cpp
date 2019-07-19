@@ -213,7 +213,7 @@ void joyStick() {
 
     // check stick position again and set speed
     if (millis() % 50 == 0) {
-       xStickPos = analogRead(XSTICK_PIN);
+       readJoystick();
        stepperSpeed = speedControl(loopNr);
 
        // prevent overflow
@@ -246,6 +246,18 @@ void joyStick() {
   }
   // update prev position
   prevStepperPosition = stepper.currentPosition();
+}
+
+
+void readJoystick() {
+  if (screenRotated == false) {
+    xStickPos = analogRead(XSTICK_PIN);
+  }
+  else if (screenRotated == true) {
+    int xStickRaw = analogRead(XSTICK_PIN);
+    // 0 to 1023 has no middle integer, using 511 and 512 prevents out of bound numbers
+    xStickPos = 511 - (xStickRaw - 512);
+  }
 }
 
 

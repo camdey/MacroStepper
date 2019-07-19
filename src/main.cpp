@@ -42,6 +42,7 @@ TMC2130Stepper 	driver 			= TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
 AccelStepper 		stepper 		= AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
 MCUFRIEND_kbv 	tft;
 
+
 // --- currentTimes and elapsed times --- //
 unsigned long currentTime 				= 0;        	// current time in millis()
 unsigned long subRoutine1Time 		= 0;    			// time subroutine1 last ran
@@ -65,6 +66,7 @@ bool editMovementDistance 				= false;  		// set step distance in any mode
 bool editFlashOnValue							= false;			// set flash on value
 bool editFlashOffValue						= false;			// set flash off value
 bool testFlash                    = false;      // flag for testing flash threshold
+bool screenRotated                 = false;      // false means usb in lower left corner
 // --- Input and Output values --- //
 int xStickPos 										= 0;        	// ADC value of x-axis joystick
 int zStickVal 										= 1;        	// increment count of z-axis button press
@@ -133,7 +135,7 @@ void setup(void) {
 	tft.setFont(&Arimo_Regular_24);
 	tft.begin(identifier);
 	tft.fillScreen(BLACK);
-	tft.setRotation(1);
+	tft.setRotation(1); // screenRotated = false
 	startScreen();
 
 	driver.begin();
@@ -183,7 +185,7 @@ void loop() {
   // take joystick and limit switch reading, put stepper to sleep
   if (currentTime - subRoutine2Time >= 100) {
     // check joystick for movement
-    xStickPos = analogRead(XSTICK_PIN);
+    readJoystick();
     // move if past threshold and not in autoStack mode
     if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
       joyStick();

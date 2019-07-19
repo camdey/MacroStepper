@@ -47,6 +47,13 @@ void autoConfigScreen() {
   tft.setCursor(175, 143);
   tft.println(" sec");
 
+  // Clear autoStack
+  if (autoStackFlag == false) {
+    tft.drawBitmap(160, 10, reset40, 40, 40, GRAY);
+  } else if (autoStackFlag == true) {
+    tft.drawBitmap(160, 10, reset40, 40, 40, CUSTOM_RED);
+  }
+
   // back to auto screen
   tft.drawBitmap(155, 175, backArrow, 50, 50, WHITE);
 
@@ -331,12 +338,8 @@ void startScreen() {
   // Flash settings
   tft.drawBitmap(145, 190, flash, 40, 42, WHITE);
 
-  // Clear autoStack
-  if (autoStackFlag == false) {
-    tft.drawBitmap(250, 190, reset40, 40, 40, GRAY);
-  } else if (autoStackFlag == true) {
-    tft.drawBitmap(250, 190, reset40, 40, 40, CUSTOM_RED);
-  }
+  // Rotate screen and controls
+  tft.drawBitmap(250, 190, rotate_icon, 45, 39, WHITE);
 }
 
 

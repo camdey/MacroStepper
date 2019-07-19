@@ -4,12 +4,12 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-int arrowsTouch(TSPoint &point, bool moveStepper, int val);
-void autoConfigScreenTouch(TSPoint &point);
-void autoScreenTouch(TSPoint &point);
-void flashScreenTouch(TSPoint &point);
-void manualScreenTouch(TSPoint &point);
-void startScreenTouch(TSPoint &point);
+int arrowsTouch(int xPos, int yPos, bool moveStepper, int val);
+void autoConfigScreenTouch(int xPos, int yPos);
+void autoScreenTouch(int xPos, int yPos);
+void flashScreenTouch(int xPos, int yPos);
+void manualScreenTouch(int xPos, int yPos);
+void startScreenTouch(int xPos, int yPos);
 void touchScreen();
 
 #endif

@@ -4,10 +4,7 @@
 #include "TouchControl.h"
 #include "UserInterface.h"
 
-int arrowsTouch(TSPoint &point, bool moveStepper, int val = 0) {
-  // scale from 0->1023 to tft dimension and swap coordinates
-  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
-  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+int arrowsTouch(int xPos, int yPos, bool moveStepper, int val = 0) {
 
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 15 && yPos <= 105)) {
     val++;
@@ -30,10 +27,7 @@ int arrowsTouch(TSPoint &point, bool moveStepper, int val = 0) {
 }
 
 
-void autoConfigScreenTouch(TSPoint &point) {
-  // scale from 0->1023 to tft dimension and swap coordinates
-  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
-  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+void autoConfigScreenTouch(int xPos, int yPos) {
 
   // start button
   if ((xPos >= 10 && xPos <= 140) && (yPos >= 10 && yPos <= 80) && (editShutterDelay + editEndPosition) == 0) {
@@ -58,7 +52,7 @@ void autoConfigScreenTouch(TSPoint &point) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
-    int val = arrowsTouch(point, 1, 0);
+    int val = arrowsTouch(xPos, yPos, 1, 0);
     setAutoStackPositions(true, false); //set start but not end position
   }
 
@@ -86,16 +80,17 @@ void autoConfigScreenTouch(TSPoint &point) {
       prevEndPosition = endPosition;
     }
 
-    int val = arrowsTouch(point, 1, 0);
+    int val = arrowsTouch(xPos, yPos, 1, 0);
     setAutoStackPositions(false, true); //set end but not start position
   }
-  
+
   // run button
   if ((xPos >= 10 && xPos <= 120) && (yPos >= 170 && yPos <= 240) && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
     tft.fillRoundRect(10, 184, 5, 35, 4, YELLOW);
     dryRun();
     tft.fillRoundRect(10, 184, 5, 35, 4, BLACK);
   }
+
   // delay button
   if ((xPos >= 150 && xPos <= 220) && (yPos >= 60 && yPos <= 130) && (editStartPosition + editEndPosition) == 0) {
     if ((currentTime - prevGenericTime) >= genericTouchDelay) {
@@ -112,16 +107,24 @@ void autoConfigScreenTouch(TSPoint &point) {
       prevGenericTime = millis();
     }
   }
+
   // set shutter delay
   if (editShutterDelay == true && arrowsActive == true) {
     if (prevDelay != shutterDelay) {
       prevDelay = shutterDelay;
     }
-    shutterDelay = arrowsTouch(point, 0, shutterDelay);
+    shutterDelay = arrowsTouch(xPos, yPos, 0, shutterDelay);
     setShutterDelay();
   }
+
+  // clear autoStack run
+  if ((xPos >= 150 && xPos <= 210) && (yPos >= 0 && yPos <= 50) && autoStackFlag == true) {
+    resetAutoStack(); // reset autostack settings
+  }
+
   // show current position of stepper
   displayPosition();
+
   // back button - tft.setCursor(150, 205);
   if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == false) {
     autoScreen();
@@ -129,10 +132,7 @@ void autoConfigScreenTouch(TSPoint &point) {
 }
 
 
-void autoScreenTouch(TSPoint &point) {
-  // scale from 0->1023 to tft dimension and swap coordinates
-  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
-  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+void autoScreenTouch(int xPos, int yPos) {
 
   // shutter toggle
   if ((xPos >= 140 && xPos <= 210) && (yPos >= 10 && yPos <= 70)) {
@@ -180,7 +180,7 @@ void autoScreenTouch(TSPoint &point) {
       prevDistance = distancePerMovement;
     }
 
-    stepsPerMovement = arrowsTouch(point, 0, stepsPerMovement);
+    stepsPerMovement = arrowsTouch(xPos, yPos, 0, stepsPerMovement);
     setStepDistance();
   }
   // run AutoStack sequence
@@ -201,10 +201,7 @@ void autoScreenTouch(TSPoint &point) {
 }
 
 
-void flashScreenTouch(TSPoint &point) {
-  // scale from 0->1023 to tft dimension and swap coordinates
-  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
-  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+void flashScreenTouch(int xPos, int yPos) {
 
   // Off button
   if ((xPos >= 10 && xPos <= 120) && (yPos >= 10 && yPos <= 80) && editFlashOnValue == false) {
@@ -282,10 +279,7 @@ void flashScreenTouch(TSPoint &point) {
 }
 
 
-void manualScreenTouch(TSPoint &point) {
-  // scale from 0->1023 to tft dimension and swap coordinates
-  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
-  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+void manualScreenTouch(int xPos, int yPos) {
 
   // toggle shutter on/off
   if ((xPos >= 150 && xPos <= 220) && (yPos >= 10 && yPos <= 70)) {
@@ -342,12 +336,12 @@ void manualScreenTouch(TSPoint &point) {
       prevDistance = distancePerMovement;
     }
 
-    stepsPerMovement = arrowsTouch(point, 0, stepsPerMovement);
+    stepsPerMovement = arrowsTouch(xPos, yPos, 0, stepsPerMovement);
     setStepDistance();
   }
   // step motor
   if (arrowsActive == false) {
-    int val = arrowsTouch(point, 1, 0);
+    int val = arrowsTouch(xPos, yPos, 1, 0);
   }
   // back button
   if ((xPos >= 150 && xPos <= 210) && (yPos >= 170 && yPos <= 225) && arrowsActive == false) {
@@ -356,10 +350,7 @@ void manualScreenTouch(TSPoint &point) {
 }
 
 
-void startScreenTouch(TSPoint &point) {
-  // scale from 0->1023 to tft dimension and swap coordinates
-  int xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());
-  int yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());
+void startScreenTouch(int xPos, int yPos) {
 
   // manual box
   if ((xPos >= 20 && xPos <= 150) && (yPos >= 90 && yPos <= 160)) {
@@ -380,17 +371,29 @@ void startScreenTouch(TSPoint &point) {
   if ((xPos >= 130 && xPos <= 200) && (yPos >= 200 && yPos <= 240)) {
     flashScreen();
   }
-  // clear autoStack run
-  if ((xPos >= 230 && xPos <= 320) && (yPos >= 200 && yPos <= 240) && autoStackFlag == true) {
-    resetAutoStack(); // reset autostack settings
+  // rotate screen
+  if ((xPos >= 230 && xPos <= 320) && (yPos >= 200 && yPos <= 240)) {
+    rotateScreen(); // rotate screen, touch controls, and joystick
+    startScreen();
   }
 }
 
 
 void touchScreen() {
+  int xPos, yPos;
   currentTime = millis(); // call frequently just in case
 
   TSPoint point = ts.getPoint();
+
+  if (screenRotated == false) {
+    xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());    // rotate & scale to TFT boundaries
+    yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());   //   ... USB port at upper left
+  }
+  else if (screenRotated == true) {
+    xPos = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);    // rotate & scale to TFT boundaries
+    yPos = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);   //   ... USB port at lower right
+  }
+
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
 
@@ -398,22 +401,22 @@ void touchScreen() {
     switch (activeScreen) {
       // start screen
       case 1:
-        startScreenTouch(point);
+        startScreenTouch(xPos, yPos);
         break;
       // manual screen
       case 2:
-        manualScreenTouch(point);
+        manualScreenTouch(xPos, yPos);
         break;
       // autoStack screen
       case 3:
-        autoScreenTouch(point);
+        autoScreenTouch(xPos, yPos);
         break;
       // autoStack config screen
       case 4:
-        autoConfigScreenTouch(point);
+        autoConfigScreenTouch(xPos, yPos);
         break;
       case 5:
-        flashScreenTouch(point);
+        flashScreenTouch(xPos, yPos);
         break;
     }
   }
