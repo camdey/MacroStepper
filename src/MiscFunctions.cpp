@@ -31,6 +31,7 @@ void estimateDuration(bool screenRefresh) {
   }
 }
 
+
 void resetAutoStack() {
   if ((currentTime - prevGenericTime) >= genericTouchDelay) {
     autoStackFlag = false;
@@ -48,6 +49,7 @@ void resetAutoStack() {
   }
 }
 
+
 void rotateScreen() {
   if (screenRotated == false) {
     tft.setRotation(3);
@@ -59,46 +61,6 @@ void rotateScreen() {
   }
 }
 
-void setStepDistance() {
-
-  // constrain multiplier range
-  if (stepsPerMovement < 1) {
-    stepsPerMovement = 1;
-  } else if (stepsPerMovement > 80) {
-    stepsPerMovement = 80;
-  }
-
-  // stepper is 200 steps/rev, linear rail has 1mm pitch, 1:1 gear ratio
-  // 1 step = 1/200 = 0.005mm
-	// microsteps = 4
-	// 0.005 / 4 = 1.25μm
-  distancePerMovement = microstepDistance * stepsPerMovement;
-
-  if (prevDistance != distancePerMovement) {
-    // print new delay value
-    int16_t x1, y1;
-    uint16_t w, h;
-    tft.setFont(&Arimo_Bold_24);
-    tft.getTextBounds(String(prevDistance/1000, 5), 15, 60, &x1, &y1, &w, &h);
-    tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
-    updateValueField("Step Dist", YELLOW);
-
-    // calculate number of steps required to cover range
-    movementsRequired = ceil((endPosition - startPosition)*1.00/stepsPerMovement);
-
-    // prevent screen under/overflow of value
-    movementsRequired = valueCheck(movementsRequired, 0, 999);
-
-    if (activeScreen == 3) {
-      // update estimated time
-      estimateDuration(0); // don't force refresh
-      // update progress
-      updateProgress(0); // don't force refresh
-    }
-
-    prevMovementsRequired = movementsRequired;
-  }
-}
 
 void setAutoStackPositions(bool setStart, bool setEnd) {
   if (setStart == true) {
@@ -140,11 +102,57 @@ void setAutoStackPositions(bool setStart, bool setEnd) {
     }
   }
 
-  // calculate number of steps required to cover range
-  movementsRequired = ceil((endPosition - startPosition)/stepsPerMovement);
-  movementsRequired = valueCheck(movementsRequired, 0, 999);
+  setMovementsRequired();
   prevMovementsRequired = movementsRequired;
 }
+
+
+void setMovementsRequired() {
+  // calculate number of steps required to cover range
+  movementsRequired = ceil((endPosition*1.00 - startPosition*1.00) / stepsPerMovement);
+
+  // prevent screen under/overflow of value
+  movementsRequired = valueCheck(movementsRequired, 0, 999);
+}
+
+
+void setStepDistance() {
+
+  // constrain multiplier range
+  if (stepsPerMovement < 1) {
+    stepsPerMovement = 1;
+  } else if (stepsPerMovement > 80) {
+    stepsPerMovement = 80;
+  }
+
+  // stepper is 200 steps/rev, linear rail has 1mm pitch, 1:1 gear ratio
+  // 1 step = 1/200 = 0.005mm
+	// microsteps = 4
+	// 0.005 / 4 = 1.25μm
+  distancePerMovement = microstepDistance * stepsPerMovement;
+
+  if (prevDistance != distancePerMovement) {
+    // print new delay value
+    int16_t x1, y1;
+    uint16_t w, h;
+    tft.setFont(&Arimo_Bold_24);
+    tft.getTextBounds(String(prevDistance/1000, 5), 15, 60, &x1, &y1, &w, &h);
+    tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
+    updateValueField("Step Dist", YELLOW);
+
+    setMovementsRequired();
+
+    if (activeScreen == 3) {
+      // update estimated time
+      estimateDuration(0); // don't force refresh
+      // update progress
+      updateProgress(0); // don't force refresh
+    }
+
+    prevMovementsRequired = movementsRequired;
+  }
+}
+
 
 int valueCheck(int value, int min, int max) {
   if (value > max) {

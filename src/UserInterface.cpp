@@ -175,8 +175,8 @@ void drawArrows() {
 /***********************************************************************
 Draws the Play/Pause buttons in the AutoStack screen of the controller
 ***********************************************************************/
-void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
-  if (greyPlay == 1) {
+void drawPlayPause(bool greyPlay = false, bool greyPause = false) {
+  if (greyPlay == true) {
     tft.fillCircle(270, 75, 37, CUSTOM_GREY_LITE);
     tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
   } else {
@@ -184,7 +184,7 @@ void drawPlayPause(bool greyPlay = 0, bool greyPause = 0) {
     tft.fillTriangle(255, 50, 295, 75, 255, 100, WHITE);
   }
 
-  if (greyPause == 1) {
+  if (greyPause == true) {
     tft.fillCircle(270, 180, 37, CUSTOM_GREY_LITE);
     tft.fillRoundRect(250, 155, 15, 50, 4, WHITE);
     tft.fillRoundRect(275, 155, 15, 50, 4, WHITE);

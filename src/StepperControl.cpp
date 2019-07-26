@@ -39,18 +39,25 @@ void autoStack() {
   if (completedMovements <= movementsRequired && stepperMoved == false) {
 		// if shutter enabled, take photo
 		if (shutterEnabled == true && shutterTriggered == false) {
-      // Serial.println("1. Ready");
+
 	    shutterTriggered = triggerShutter(); // take photo
-      if (shutterTriggered == true){
-        // Serial.println("2. Photo Taken");
+
+      // pause autoStack if flash failing
+      if (shutterTriggered == false) {
+        Serial.println("no shutter");
+        pauseAutoStack = true; // pause autostack
+        drawPlayPause(true, false); // grey out play, highlight pause
+        flashScreen(); // load screen for checking flash settings/functionality
       }
 		}
 
-		// move stepper
-		stepperMoved = stepMotor(1, shutterDelay*1000); // forward direction, shutterdelay
+    // only move if autoStack hasn't been paused by flash failure
+    if (pauseAutoStack != true) {
+  		// move stepper
+  		stepperMoved = stepMotor(1, shutterDelay*1000); // forward direction, shutterdelay
+    }
 
 		if (stepperMoved == true) {
-      // Serial.println("3. Step Taken");
 			completedMovements++;
 	    // make sure correct screen is displaying
 	    if (activeScreen == 3) { // auto screen
@@ -71,7 +78,7 @@ void autoStack() {
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
-    drawPlayPause(0, 0); // reset play to green
+    drawPlayPause(false, false); // reset play to green
   }
 }
 

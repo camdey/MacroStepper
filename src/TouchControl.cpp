@@ -264,6 +264,7 @@ void flashScreenTouch(int xPos, int yPos) {
         } else if (shutterTriggered == true) {
           updateValueField("Test Button", CUSTOM_GREEN);
         }
+
       } else if (testFlash == false) {
         updateValueField("Test Button", WHITE);
       }
