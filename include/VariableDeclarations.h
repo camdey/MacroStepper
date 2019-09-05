@@ -183,5 +183,6 @@ extern int prevCompletedMovements;
 extern char prevAutoStackProgress[10];
 extern bool stepperMoved;
 extern bool shutterTriggered;
+extern bool triggerFailed;
 
 #endif

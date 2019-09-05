@@ -19,6 +19,7 @@ void autoStack() {
   if (digitalRead(EN_PIN) == HIGH) {
     toggleStepper(1);
   }
+
   // move stepper to start if not already there
   if (goToStart == true) {
     while (stepper.currentPosition() != startPosition) {
@@ -35,19 +36,37 @@ void autoStack() {
     prevStepTime = millis();
     // Serial.println("0. Start");
   }
+
   // take photo and increment progress for first step of each movement
   if (completedMovements <= movementsRequired && stepperMoved == false) {
-		// if shutter enabled, take photo
+
+    // if shutter enabled, take photo
 		if (shutterEnabled == true && shutterTriggered == false) {
 
 	    shutterTriggered = triggerShutter(); // take photo
 
       // pause autoStack if flash failing
       if (shutterTriggered == false) {
-        Serial.println("no shutter");
-        pauseAutoStack = true; // pause autostack
-        drawPlayPause(true, false); // grey out play, highlight pause
-        flashScreen(); // load screen for checking flash settings/functionality
+        long failTime = millis();
+        triggerFailed = true; // used to set one-off delay later
+        // Serial.println("fail to trigger");
+
+        while (shutterTriggered == false) {
+          shutterTriggered = triggerShutter();
+          // if retry successful, break
+          if (shutterTriggered == true) {
+            // Serial.println("retry successful");
+            break;
+          }
+          // go to flashScreen if can't trigger after 10 seconds
+          else if (millis() - failTime >= 10000) {
+            // Serial.println("go to flash screen");
+            pauseAutoStack = true; // pause autostack
+            drawPlayPause(true, false); // grey out play, highlight pause
+            flashScreen(); // load screen for checking flash settings/functionality
+            break;
+          }
+        }
       }
 		}
 
@@ -68,6 +87,11 @@ void autoStack() {
 			shutterTriggered = false; // reset shutter
 			stepperMoved = false; // reset stepper move
 		}
+
+    if (triggerFailed == true) {
+      // 10 second delay to prevent trying to take another photo immediately after
+      delay(10000);
+    }
   }
   // stop AutoStack sequence if end reached
   if (completedMovements >= movementsRequired) {

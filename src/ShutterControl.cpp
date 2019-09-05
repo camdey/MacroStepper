@@ -1,5 +1,13 @@
 #include "ShutterControl.h"
 
+
+/******************************************************************
+Checks if last flash read was more than 10ms ago and then takes
+reading from FLASH_PIN. The flashThreshold will update if the
+ON and OFF values have been changed via the flashScreen.
+If the flashValue reading is >= than the Threshold, flashReady
+returns TRUE else FALSE.
+******************************************************************/
 bool flashStatus() {
   int newValue = 0;
 
@@ -60,41 +68,56 @@ enough time for the camera to take the photo.
 ******************************************************************/
 bool triggerShutter() {
 	flashReady = flashStatus();
+  bool flashReadyDebouncer = false;
 	shutterTriggered = false;
+
+  // Serial.println("triggerShutter");
+
   if (shutterEnabled == true) {
 		unsigned long triggerTime = millis();
 
 		// wait for flash to be ready
 		while (flashReady == false) {
 			flashReady = flashStatus();
+      flashReadyDebouncer = flashReady;
       // break if flash not turning on
       if (millis() - triggerTime >= 5000) {
+        // Serial.println("flash not ready timeout");
         break;
       }
 			delay(10);
 		}
+    // Serial.print("flashReady: ");
+    // Serial.println(flashReady);
 
 		// trigger flash
     digitalWrite(SHUTTER_PIN, HIGH);
 
     // delay function for giving enough time for camera to trigger
     // also checks if flash has triggered by flashReady = false
+    // second variable to debounce noisy readings
+
     while (millis() - triggerTime <= 3000) {
       if (flashReady == true) {
         flashReady = flashStatus();
+        flashReadyDebouncer = flashStatus();
       }
-      if (flashReady == false && millis() - triggerTime > 1000) {
+      if (flashReady == false && flashReadyDebouncer == false && millis() - triggerTime > 400) {
         shutterTriggered = true;
+        // Serial.println("shutter triggered");
         break;
       }
       shutterTriggered = false;
       delay(10);
     }
 
+    // Serial.println("left trigger loop");
 		recycleTime = (millis() - triggerTime);
 
 		// reset shutter signal
     digitalWrite(SHUTTER_PIN, LOW);
 	}
+  Serial.print("return shutterTriggered: ");
+  Serial.println(shutterTriggered);
 	return shutterTriggered;
 }

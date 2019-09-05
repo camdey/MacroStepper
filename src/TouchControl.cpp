@@ -245,7 +245,7 @@ void flashScreenTouch(int xPos, int yPos) {
 
   // Test button
   if ((xPos >= 190 && xPos <= 300) && (yPos >= 100 && yPos <= 150) && editFlashOffValue == false && editFlashOnValue == false) {
-    if ((currentTime - prevGenericTime) >= genericTouchDelay*5) {
+    if ((currentTime - prevGenericTime) >= genericTouchDelay * 5) {
       testFlash = !testFlash;
 
       if (shutterEnabled == false) {
@@ -264,6 +264,9 @@ void flashScreenTouch(int xPos, int yPos) {
         } else if (shutterTriggered == true) {
           updateValueField("Test Button", CUSTOM_GREEN);
         }
+
+        // reset testFlash to off
+        testFlash = !testFlash;
 
       } else if (testFlash == false) {
         updateValueField("Test Button", WHITE);

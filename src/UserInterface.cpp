@@ -372,7 +372,7 @@ Uses sprintf_P function to concatenate two values and format them as
 "completed / remaining" on the screen.
 ***********************************************************************/
 void updateProgress(bool screenRefresh) {
-  char autoStackProgress[10]      = "0/0";
+  char autoStackProgress[10]  = "0/0";
 
   int16_t x, y;
   uint16_t w, h;
@@ -380,9 +380,9 @@ void updateProgress(bool screenRefresh) {
   sprintf_P(autoStackProgress, PSTR("%02d/%02d"), completedMovements, movementsRequired);
 
   if ((completedMovements != prevCompletedMovements) || movementsRequired != prevMovementsRequired || screenRefresh == 1) {
+    tft.setFont(&Arimo_Bold_24);
     tft.getTextBounds(String(prevAutoStackProgress), 20, 220, &x, &y, &w, &h);
     tft.fillRect(x, y, w, h, CUSTOM_BLUE);
-    tft.setFont(&Arimo_Bold_24);
     tft.setTextColor(WHITE);
     tft.setCursor(20, 220);
     tft.println(autoStackProgress);
@@ -390,7 +390,7 @@ void updateProgress(bool screenRefresh) {
     prevMovementsRequired = movementsRequired;
     prevCompletedMovements = completedMovements;
     // assign new time to prev variable
-    sprintf_P(prevAutoStackProgress, PSTR("%02d:%02d"), completedMovements, movementsRequired);
+    sprintf_P(prevAutoStackProgress, PSTR("%02d/%02d"), completedMovements, movementsRequired);
   }
 }
 
