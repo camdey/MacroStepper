@@ -11,7 +11,7 @@ The MacroStepper is a fully automated macrophotography rig designed to enable a 
 
 # Schematic
 ## Fritzing Mockup
-![Schematic](https://raw.githubusercontent.com/camdey/MacroStepper/master/MacroStepper_schematic.png)
+![Schematic](https://github.com/camdey/MacroStepper/blob/master/MacroStepper%20Schematic%20%5BUpdate%5D.png)
 
 ## Pinouts
 **2.8" TFT Touch Screen Display**
