@@ -312,7 +312,7 @@ int speedControl(long loopNr) {
 
 void stallDetection() {
   Serial.print("DIAG: ");
-  Serial.println(digitalRead(DIAG_PIN));
+  Serial.println(digitalRead(DIAG1_PIN));
 
   if (bootFlag == true) {
     toggleStepper(0);

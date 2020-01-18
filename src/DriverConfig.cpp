@@ -2,7 +2,9 @@
 
 // config for TMC2130 when running homeRail() as StallGuard is required
 void stallGuardConfig() {
-  stallGuardConfigured = true;
+  // select SPI slave
+  digitalWrite(CS_PIN, LOW);
+
   //set TMC2130 config
   stepper.setAcceleration(1000);
   driver.push(); // reset registers
@@ -20,12 +22,19 @@ void stallGuardConfig() {
   driver.sedn(0b01);
   driver.sg_stall_value(-5);
   driver.stealthChop(0);
+
+  // unselect SPI slave
+  digitalWrite(CS_PIN, HIGH);
+
+  stallGuardConfigured = true;
 }
 
 // config for TMC2130 when running all other functions as stealthChop is preferred
 void silentStepConfig() {
+  // select SPI slave
+  digitalWrite(CS_PIN, LOW);
+
   stepper.setAcceleration(2000);
-  stallGuardConfigured = false;
   driver.push(); // reset registers
   driver.stealthChop(1);
   driver.stealth_autoscale(1);
@@ -41,4 +50,9 @@ void silentStepConfig() {
 //    driver.double_edge_step(1);
 //    driver.chopper_mode(1);
 //    driver.sync_phases(1);
+
+  // unselect SPI slave 
+  digitalWrite(CS_PIN, HIGH);
+
+  stallGuardConfigured = false;
 }

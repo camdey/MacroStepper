@@ -87,7 +87,7 @@ bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
 bool autoStackFlag 								= false;      // enables function for stack procedure
 bool pauseAutoStack 							= false;      // pause stack procedure
-bool shutterEnabled 								= false;      // disabled/enabled
+bool shutterEnabled 							= false;      // disabled/enabled
 bool targetFlag 									= false;      // resets stepper target
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
@@ -132,9 +132,9 @@ void setup(void) {
 	} else {
 		Serial.print(F("No driver found"));
 	}
-
-	tft.setFont(&Arimo_Regular_24);
 	tft.begin(identifier);
+	tft.setFont(&Arimo_Regular_24);
+
 	tft.fillScreen(BLACK);
 	tft.setRotation(1);
   screenRotated = false;
@@ -148,14 +148,15 @@ void setup(void) {
 	pinMode(EN_PIN, OUTPUT);
   digitalWrite(EN_PIN, LOW);
   pinMode(CS_PIN, OUTPUT);
+  // unselect SPI slave
   digitalWrite(CS_PIN, HIGH);
   pinMode(DIR_PIN, OUTPUT);
   digitalWrite(DIR_PIN, LOW);
-  pinMode(DIAG_PIN, INPUT);
+  pinMode(DIAG1_PIN, INPUT);
   pinMode(ZSTICK_PIN, INPUT_PULLUP);
   pinMode(SHUTTER_PIN, OUTPUT);
   digitalWrite(SHUTTER_PIN, LOW);
-  attachInterrupt(digitalPinToInterrupt(DIAG_PIN), stallDetection, RISING);
+  attachInterrupt(digitalPinToInterrupt(DIAG1_PIN), stallDetection, RISING);
 
   // set stepper AccelStepper config
   stepper.setMaxSpeed(3200);
@@ -177,59 +178,59 @@ void setup(void) {
 void loop() {
 	currentTime = millis();
 
-  // run AutoStack sequence if enabled
-  if (autoStackFlag == true && pauseAutoStack == false) {
-    autoStack();
-  }
+  // // run AutoStack sequence if enabled
+  // if (autoStackFlag == true && pauseAutoStack == false) {
+  //   autoStack();
+  // }
   // take touch reading
   if (currentTime - subRoutine1Time >= 50) {
     touchScreen();
     subRoutine1Time = millis();
   }
-  // take joystick and limit switch reading, put stepper to sleep
-  if (currentTime - subRoutine2Time >= 100) {
-    // check joystick for movement
-    readJoystick();
-    // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
-      joyStick();
-    }
-    // sleep if stepper inactive, update position on manual screen
-    if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
-      toggleStepper(0); // disable stepper
-      // refresh position on manual screen after stepping completed
-      if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
-        displayPosition();
-      }
-    }
-		// configure SilentStep if not homing rail
-		if (stallGuardConfigured == true && bootFlag == false) {
-			silentStepConfig();
-		}
-		// update flashValue if on right screen
-		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
-			updateFlashValue();
-		}
-    // set END as maxPosition if Z Stick depressed
-    if (activeScreen == 4 && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
-      autoStackMax = true;
-      setAutoStackPositions(false, true);
-      autoStackMax = false;
-    }
-
-    subRoutine2Time = millis();
-  }
-  // reset target to currentPosition
-  if (targetFlag == true) {
-    stepper.move(0);
-    stepper.setSpeed(0);
-    targetFlag = false;
-  }
-  // run homing sequence if first loop
-  if (bootFlag == true) {
-    homeRail();
-		setAutoStackPositions(true, true);
-		silentStepConfig(); // set config for silentStep
-    bootFlag = false;
-  }
+  // // take joystick and limit switch reading, put stepper to sleep
+  // if (currentTime - subRoutine2Time >= 100) {
+  //   // check joystick for movement
+  //   readJoystick();
+  //   // move if past threshold and not in autoStack mode
+  //   if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
+  //     joyStick();
+  //   }
+  //   // sleep if stepper inactive, update position on manual screen
+  //   if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
+  //     toggleStepper(0); // disable stepper
+  //     // refresh position on manual screen after stepping completed
+  //     if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
+  //       displayPosition();
+  //     }
+  //   }
+	// 	// configure SilentStep if not homing rail
+	// 	if (stallGuardConfigured == true && bootFlag == false) {
+	// 		silentStepConfig();
+	// 	}
+	// 	// update flashValue if on right screen
+	// 	if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
+	// 		updateFlashValue();
+	// 	}
+  //   // set END as maxPosition if Z Stick depressed
+  //   if (activeScreen == 4 && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+  //     autoStackMax = true;
+  //     setAutoStackPositions(false, true);
+  //     autoStackMax = false;
+  //   }
+  //
+  //   subRoutine2Time = millis();
+  // }
+  // // reset target to currentPosition
+  // if (targetFlag == true) {
+  //   stepper.move(0);
+  //   stepper.setSpeed(0);
+  //   targetFlag = false;
+  // }
+  // // run homing sequence if first loop
+  // if (bootFlag == true) {
+  //   homeRail();
+	// 	setAutoStackPositions(true, true);
+	// 	silentStepConfig(); // set config for silentStep
+  //   bootFlag = false;
+  // }
 }

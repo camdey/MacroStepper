@@ -93,20 +93,23 @@ extern MCUFRIEND_kbv 	  tft;
 #define LCD_RESET 				A4
 
 // driver pins
-#define DIR_PIN 					36
-#define STEP_PIN 					34
-#define EN_PIN 						42
-#define DIAG_PIN 					18
-#define CS_PIN 						53
-#define MOSI_PIN 					51
-#define MISO_PIN 					52
-#define SCK_PIN 					52
+#define DIAG1_PIN 				24
+#define DIAG0_PIN 				26
+#define DIR_PIN 					28
+#define STEP_PIN 					30
+#define CS_PIN 						32
+#define EN_PIN 						34
+// handled by SPI library
+// #define MOSI_PIN 				ICSP4
+// #define MISO_PIN 				ICSP1
+// #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define XSTICK_PIN 				A9            // joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				A8            // button-press from joystick
-#define FLASH_PIN 				A5            // pin for light sensor
-#define SHUTTER_PIN 			30            // pin for pulling camera focus and shutter to GND via transistor
+#define XSTICK_PIN 				A7            // joystick X-axis pin (controls fwd and rev)
+#define ZSTICK_PIN 				A6            // button-press from joystick
+#define FLASH_PIN 				A8            // pin for light sensor
+#define SHUTTER_PIN 			36            // pin for pulling camera focus and shutter to GND via opto
+#define PIEZO_PIN         22            // pin for Piezo buzzer
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
