@@ -167,6 +167,9 @@ void setup(void) {
   stepperDisabled = false;
 	silentStepConfig();
 
+  pinMode(SONY_PIN, OUTPUT);
+  digitalWrite(SONY_PIN, HIGH);
+
 	// if holding down ZSTICK_PIN, don't home rail
 	// if (digitalRead(ZSTICK_PIN) == LOW) {
 	// 	bootFlag = false;
@@ -187,10 +190,11 @@ void loop() {
     touchScreen();
     subRoutine1Time = millis();
   }
-  // // take joystick and limit switch reading, put stepper to sleep
-  // if (currentTime - subRoutine2Time >= 100) {
-  //   // check joystick for movement
-  //   readJoystick();
+  // take joystick and limit switch reading, put stepper to sleep
+  if (currentTime - subRoutine2Time >= 1000) {
+    // check joystick for movement
+    readJoystick();
+
   //   // move if past threshold and not in autoStack mode
   //   if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
   //     joyStick();
@@ -218,8 +222,14 @@ void loop() {
   //     autoStackMax = false;
   //   }
   //
-  //   subRoutine2Time = millis();
-  // }
+    subRoutine2Time = millis();
+  }
+
+  digitalWrite(SONY_PIN, !digitalRead(SONY_PIN));
+  Serial.print("Pin state: ");
+  Serial.println(digitalRead(SONY_PIN));
+  delay(5000);
+
   // // reset target to currentPosition
   // if (targetFlag == true) {
   //   stepper.move(0);

@@ -287,6 +287,8 @@ void readJoystick() {
   else if (screenRotated == true) {
     xStickPos = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
   }
+  Serial.print("joystick: ");
+  Serial.println(xStickPos);
 }
 
 
