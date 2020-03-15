@@ -17,7 +17,7 @@ the autoStack will be completed and ceased to be called.
 void autoStack() {
   // wake stepper from sleep
   if (digitalRead(EN_PIN) == HIGH) {
-    toggleStepper(1);
+    toggleStepper(true);
   }
 
   // move stepper to start if not already there
@@ -125,7 +125,7 @@ void changeDirection() {
 void dryRun() {
   // wake stepper from sleep
 	if (digitalRead(EN_PIN) == HIGH) {
-    toggleStepper(1);
+    toggleStepper(true);
   }
 
   // move to start
@@ -161,7 +161,7 @@ void dryRun() {
 
 void homeRail() {
   if (stepperDisabled == true) {
-    toggleStepper(1);
+    toggleStepper(true);
   }
 	// set configuration for stallGuard
 	if (stallGuardConfigured == false) {
@@ -222,7 +222,7 @@ void joyStick() {
 
   // wake stepper from sleep
 	if (stepperDisabled == true) {
-    toggleStepper(1);
+    toggleStepper(true);
   }
   // while joystick is operated
   while (xStickPos >= xStickUpper || xStickPos <= xStickLower) {
@@ -287,8 +287,6 @@ void readJoystick() {
   else if (screenRotated == true) {
     xStickPos = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
   }
-  Serial.print("joystick: ");
-  Serial.println(xStickPos);
 }
 
 
@@ -317,7 +315,7 @@ void stallDetection() {
   Serial.println(digitalRead(DIAG1_PIN));
 
   if (bootFlag == true) {
-    toggleStepper(0);
+    toggleStepper(false);
     stepper.setSpeed(0);
     if (directionFwd == false) {
       stepper.setCurrentPosition(0);
@@ -326,7 +324,7 @@ void stallDetection() {
     if (directionFwd == true && firstFwdStall == true) {
       fwdPosition = stepper.currentPosition();
     }
-    toggleStepper(1);
+    toggleStepper(true);
     changeDirection();
   }
 }
@@ -365,7 +363,7 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
   if ((currentTime - prevStepTime > stepperDelay) && stallWarning == false) {
     // wake stepper from sleep
 		if (digitalRead(EN_PIN) == HIGH) {
-	    toggleStepper(1);
+	    toggleStepper(true);
 	  }
 
     int stepVelocity = stepDirection * stepsPerMovement;
@@ -386,14 +384,14 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
 
 
 void toggleStepper(bool enable) {
-	if (enable == 1) {
+	if (enable == true) {
 		delay(10); // give time for last step to complete
 		stepper.enableOutputs();
 		stepperDisabled = false;
 		delay(10); // breathing space
 	}
 
-	if (enable == 0) {
+	if (enable == false) {
 		stepper.setSpeed(0);
 		stepper.move(0);
 		stepper.disableOutputs();

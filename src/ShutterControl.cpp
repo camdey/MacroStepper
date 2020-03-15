@@ -3,7 +3,7 @@
 
 /******************************************************************
 Checks if last flash read was more than 10ms ago and then takes
-reading from FLASH_PIN. The flashThreshold will update if the
+reading from GODOX_PIN. The flashThreshold will update if the
 ON and OFF values have been changed via the flashScreen.
 If the flashValue reading is >= than the Threshold, flashReady
 returns TRUE else FALSE.
@@ -13,8 +13,10 @@ bool flashStatus() {
 
   if (millis() - lastReadFlash >= 10) {
     // update light reading from flash
-    newValue = analogRead(FLASH_PIN);
+    newValue = analogRead(GODOX_PIN);
     flashValue = newValue;
+    Serial.print("flashValue: ");
+    Serial.println(flashValue);
     lastReadFlash = millis();
 
     // update threshold, e.g. ((310-50)*0.75)+50 = 245
@@ -91,7 +93,7 @@ bool triggerShutter() {
     // Serial.println(flashReady);
 
 		// trigger flash
-    digitalWrite(SHUTTER_PIN, HIGH);
+    digitalWrite(SONY_PIN, HIGH);
 
     // delay function for giving enough time for camera to trigger
     // also checks if flash has triggered by flashReady = false
@@ -115,7 +117,7 @@ bool triggerShutter() {
 		recycleTime = (millis() - triggerTime);
 
 		// reset shutter signal
-    digitalWrite(SHUTTER_PIN, LOW);
+    digitalWrite(SONY_PIN, LOW);
 	}
   Serial.print("return shutterTriggered: ");
   Serial.println(shutterTriggered);

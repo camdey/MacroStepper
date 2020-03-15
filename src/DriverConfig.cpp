@@ -34,13 +34,13 @@ void silentStepConfig() {
   // select SPI slave
   digitalWrite(CS_PIN, LOW);
 
-  stepper.setAcceleration(2000);
+  stepper.setAcceleration(4000);
   driver.push(); // reset registers
   driver.stealthChop(1);
   driver.stealth_autoscale(1);
   driver.stealth_gradient(0xF); // 1 to 15
   driver.interpolate(1);
-  driver.push();
+  // driver.push();
   driver.diag1_stall(0);
   driver.diag1_active_high(0);
   driver.coolstep_min_speed(0x0);
@@ -51,7 +51,7 @@ void silentStepConfig() {
 //    driver.chopper_mode(1);
 //    driver.sync_phases(1);
 
-  // unselect SPI slave 
+  // unselect SPI slave
   digitalWrite(CS_PIN, HIGH);
 
   stallGuardConfigured = false;

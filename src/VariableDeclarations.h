@@ -74,14 +74,10 @@ extern MCUFRIEND_kbv 	  tft;
 #define xStickMid					430				    // stable point of joystick reading
 
 // definitions for touch screen orientation
-// #define TS_MINX 					100
-// #define TS_MAXX 					920
-// #define TS_MINY 					70
-// #define TS_MAXY 					920
-#define TS_MINX 					316
-#define TS_MAXX 					762
-#define TS_MINY 					242
-#define TS_MAXY 					805
+#define TS_MINX 					160
+#define TS_MAXX 					850
+#define TS_MINY 					132
+#define TS_MAXY 					900
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!
@@ -103,7 +99,6 @@ extern MCUFRIEND_kbv 	  tft;
 #define STEP_PIN 					30
 #define CS_PIN 						32
 #define EN_PIN 						34
-#define SONY_PIN          36
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
@@ -112,9 +107,9 @@ extern MCUFRIEND_kbv 	  tft;
 // misc hardware pins
 #define ZSTICK_PIN 				A7            // button-press from joystick
 #define XSTICK_PIN 				A6            // joystick X-axis pin (controls fwd and rev)
-#define FLASH_PIN 				A8            // pin for light sensor
-#define SHUTTER_PIN 			36            // pin for pulling camera focus and shutter to GND via opto
+#define GODOX_PIN 				A8            // pin for GA1A12S202 light sensor
 #define PIEZO_PIN         22            // pin for Piezo buzzer
+#define SONY_PIN          36            // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
