@@ -10,7 +10,6 @@ Note: v1.0 documentation hasn't been updated to incorporate the TMC2130 driver o
 The MacroStepper is a fully automated macrophotography rig designed to enable a camera to take photos at precisely incremented steps. The macroStack can work with or without an automated shutter and also in manual mode if the user prefers to control the stepping themselves.
 
 # Schematic
-## Fritzing Mockup
 ![PCB_top](https://github.com/camdey/MacroStepper/blob/new_pcb_layout/schematics/MacroStepper_v2.0_top.png)
 ![PCB_bottom](https://github.com/camdey/MacroStepper/blob/new_pcb_layout/schematics/MacroStepper_v2.0_bottom.png)
 
