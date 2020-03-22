@@ -5,10 +5,11 @@
 #include "VariableDeclarations.h"
 
 void autoStack();
+void calibrateJoyStick();
 void changeDirection();
 void dryRun();
 void homeRail();
-void joyStick();
+void joystickControl();
 void readJoystick();
 int speedControl(long loopNr);
 void stallDetection();

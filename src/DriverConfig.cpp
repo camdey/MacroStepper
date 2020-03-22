@@ -5,8 +5,7 @@ void stallGuardConfig() {
   // select SPI slave
   digitalWrite(CS_PIN, LOW);
 
-  //set TMC2130 config
-  stepper.setAcceleration(1000);
+  stepper.setAcceleration(2000);
   driver.push(); // reset registers
   driver.toff(3);
   driver.tbl(1);
@@ -34,22 +33,21 @@ void silentStepConfig() {
   // select SPI slave
   digitalWrite(CS_PIN, LOW);
 
-  stepper.setAcceleration(4000);
+  stepper.setAcceleration(2000);
   driver.push(); // reset registers
   driver.stealthChop(1);
-  driver.stealth_autoscale(1);
-  driver.stealth_gradient(0xF); // 1 to 15
   driver.interpolate(1);
-  // driver.push();
   driver.diag1_stall(0);
   driver.diag1_active_high(0);
   driver.coolstep_min_speed(0x0);
-  driver.stealth_freq(0x0); // 0 or 1 for 16MHz
-//    driver.chopper_mode(0);
-//    driver.stealth_max_speed(0x0002F);
-//    driver.double_edge_step(1);
-//    driver.chopper_mode(1);
-//    driver.sync_phases(1);
+  // driver.stealth_autoscale(1);
+  // driver.stealth_gradient(0xF); // 1 to 15
+  // driver.stealth_freq(0x0); // 0 or 1 for 16MHz
+  // driver.chopper_mode(0);
+  // driver.stealth_max_speed(0x0002F);
+  // driver.double_edge_step(1);
+  // driver.chopper_mode(1);
+  // driver.sync_phases(1);
 
   // unselect SPI slave
   digitalWrite(CS_PIN, HIGH);

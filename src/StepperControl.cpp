@@ -106,6 +106,36 @@ void autoStack() {
   }
 }
 
+/******************************************************************
+Take 10 readings form the joystick X axis during setup and average
+the result. This becomes the resting value for the joystick. If
+out of the estimated range (500, 524), set at 512 to be safe.
+Add/substract 10 to this resting value to get an upper and lower
+bound for detecting movement. Also record difference between the
+resting value and ideal mid-point (511.5) to offset xPOS readings
+by in other functions that use this variable.
+******************************************************************/
+void calibrateJoyStick() {
+  int numReadings = 10;
+  int sumReadings = 0;
+
+  for (int xth_reading = 0; xth_reading < numReadings; xth_reading++) {
+    readJoystick();
+    sumReadings += xStickPos; // add reading to total
+    delay(10); // wait 10ms
+  }
+
+  xPosResting = (sumReadings / numReadings) + 0.5; // "round" to nearest whole number
+
+  // if xPosresting below/above these values, set at middle point to be safe
+  if (xPosResting < 500 || xPosResting > 524) {
+    xPosResting = 512;
+  }
+  xPosUpper = xPosResting + 10;
+  xPosLower = xPosResting - 10;
+  xPosDiff = 512 - xPosResting;
+}
+
 
 void changeDirection() {
   if (directionFwd == true) {
@@ -117,8 +147,6 @@ void changeDirection() {
     directionFwd = true;
   }
   stepper.moveTo(moveDist);
-  // Serial.print("Current Pos: ");
-  // Serial.println(stepper.currentPosition());
 }
 
 
@@ -168,8 +196,8 @@ void homeRail() {
 		stallGuardConfig();
 	}
   // reset positions
-  fwdPosition = 0;
-  bwdPosition = 0;
+  fwdPosition = 1;
+  bwdPosition = 1;
   // move to end of rail
 	stepper.moveTo(moveDist);
 
@@ -177,9 +205,10 @@ void homeRail() {
 	if (directionFwd == true) {
 		changeDirection();
 	}
-	// while back position not set and forward position not set, run to -50000 or stall
-	// after stall, change direction and run to 50000 or stall
-	while (bwdPosition != 0 || fwdPosition <= 9999) {
+	// while back position not set and forward position not set, run to -500000 or stall
+	// after stall, change direction and run to 500000 or stall
+  // 1mm pitch * 4 microsteps * 200 steps/rev * 73.1mm travel = 58,000 + steps
+	while (bwdPosition != 0 || fwdPosition <= 50000) {
 		stepper.run();
     // int sg_result = driver.sg_result();
     // if (sg_result <= 50) {
@@ -189,7 +218,7 @@ void homeRail() {
 	}
 	// if back and forward position set, move to middle position
 	if (bwdPosition == 0 && fwdPosition > 10000) {
-		bootFlag = false;
+		runHomingSequence = false;
     // in case of hang-up on stall, set current position to fwdPosition before moving off
     stepper.setCurrentPosition(fwdPosition);
 		stepper.moveTo(fwdPosition / 2);
@@ -198,10 +227,12 @@ void homeRail() {
 		}
 	}
   homedRail = true;
-  firstFwdStall = true; // reset first stall check in case homeRail run again
+  // TODO - does this need to be reset to false at some point?
+  firstFwdStall = true; // debouncer so that first position at stall is recorded
   // config silentStep after homing
   silentStepConfig();
 }
+
 
 /******************************************************************
 Function for moving the stepper via joystick control on the X axis.
@@ -215,7 +246,7 @@ used to reduce the initial acceleration of the stepper to control
 jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
-void joyStick() {
+void joystickControl() {
   // count nr of loops in while() clause
   long loopNr = 0;
   int stepperSpeed = 0;
@@ -225,22 +256,26 @@ void joyStick() {
     toggleStepper(true);
   }
   // while joystick is operated
-  while (xStickPos >= xStickUpper || xStickPos <= xStickLower) {
+  while (xStickPos >= xPosUpper || xStickPos <= xPosLower) {
     // if rail min/max postions have been set...
     if (homedRail == true) {
       // don't allow movement if within 1000 steps of forward stop
       // values are inverse so high xStickPos = reverse
-      if (xStickPos >= xStickUpper && (abs(minPosition - stepper.currentPosition()) <= 1000)) {
+      if (xStickPos >= xPosUpper && (abs(minPosition - stepper.currentPosition()) <= 1000)) {
         break;
       }
       // don't allow movement if within 1000 steps of backward stop
       // values are inverse so low xStickPos = forward
-      if (xStickPos <= xStickLower && (abs(maxPosition - stepper.currentPosition()) <= 1000)) {
+      if (xStickPos <= xPosLower && (abs(maxPosition - stepper.currentPosition()) <= 1000)) {
         break;
       }
     }
     // move either -1, 0, or 1 steps
-    stepper.move(map(xStickPos, 0, 1023, 1, -1));
+    int step_dir = 0;
+    if (xStickPos >= xPosUpper) step_dir = 1;
+    else if (xStickPos <= xPosLower) step_dir = 1;
+    else step_dir = 0;
+    stepper.move(step_dir);
 
     // check stick position again and set speed
     if (millis() % 50 == 0) {
@@ -249,7 +284,7 @@ void joyStick() {
 
        // prevent overflow
        if (abs(loopNr) > 2000000000) {
-         loopNr = 5000;
+         loopNr = rampSteps;
        }
     }
 
@@ -287,11 +322,14 @@ void readJoystick() {
   else if (screenRotated == true) {
     xStickPos = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
   }
+
+  // offset reading by difference between resting state and ideal middle point
+  xStickPos -= xPosDiff;
 }
 
 
 int speedControl(long loopNr) {
-  int jerkControl = 5000;
+  int jerkControl = rampSteps;
   int adjustedSpeed = 0;
 
   // if exceeded 5000 loops, jerkControl multiplier = 1
@@ -299,8 +337,8 @@ int speedControl(long loopNr) {
     loopNr = jerkControl;
   }
 
-  // xStickMid = resting stable point of joystick§
-  joyStickSpeed = map((xStickPos - xStickMid), -xStickMid, xStickMid, 2000, -2000);
+  // adjust input range based on diff between resting point and ideal middle
+  joyStickSpeed = map(xStickPos, (0 - xPosDiff), (1023 - xPosDiff), stepperMaxSpeed, -stepperMaxSpeed);
 
   // adjust speed based on jerkControl multiplier;
   float speedModifier = loopNr*1.00 / jerkControl*1.00;
@@ -311,21 +349,22 @@ int speedControl(long loopNr) {
 
 
 void stallDetection() {
-  Serial.print("DIAG: ");
-  Serial.println(digitalRead(DIAG1_PIN));
+  // Serial.print("DIAG: ");
+  // Serial.println(digitalRead(DIAG1_PIN));
 
-  if (bootFlag == true) {
-    toggleStepper(false);
-    stepper.setSpeed(0);
-    if (directionFwd == false) {
-      stepper.setCurrentPosition(0);
-      bwdPosition = stepper.currentPosition();
+  // only continue if triggered during home sequence
+  if (runHomingSequence == true) {
+    toggleStepper(false); // disable stepper
+    stepper.setSpeed(0); // set speed to 0 for reset
+    if (directionFwd == false) { // if hit rear end stop, set position as 0
+      stepper.setCurrentPosition(0); // set position for accelStepper
+      bwdPosition = stepper.currentPosition(); // set variable position
     }
-    if (directionFwd == true && firstFwdStall == true) {
-      fwdPosition = stepper.currentPosition();
+    else if (directionFwd == true && firstFwdStall == true) {
+      fwdPosition = stepper.currentPosition(); // set forward position
     }
-    toggleStepper(true);
-    changeDirection();
+    toggleStepper(true); // enable stepper
+    changeDirection(); // change direction
   }
 }
 
@@ -385,10 +424,10 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
 
 void toggleStepper(bool enable) {
 	if (enable == true) {
-		delay(10); // give time for last step to complete
+		// delay(10); // give time for last step to complete, may need to make optional as called during ISR
 		stepper.enableOutputs();
 		stepperDisabled = false;
-		delay(10); // breathing space
+		// delay(10); // breathing space
 	}
 
 	if (enable == false) {

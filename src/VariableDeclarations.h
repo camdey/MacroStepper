@@ -67,11 +67,7 @@ extern MCUFRIEND_kbv 	  tft;
 #define railTravel        73.1          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
 #define minPosition       0
 #define maxPosition       58480         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
-                                        // but consistently getting 58780 after homing
-// joystick defs
-#define xStickUpper			  540 				  // upper limit of joystick values that determines when to move stepper
-#define xStickLower				420				    // lower limit of joystick values that determines when to move stepper
-#define xStickMid					430				    // stable point of joystick reading
+// but consistently getting 58780 after homing
 
 // definitions for touch screen orientation
 #define TS_MINX 					160
@@ -138,6 +134,10 @@ extern bool screenRotated;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;
+extern int xPosUpper;
+extern int xPosDiff;
+extern int xPosResting;
+extern int xPosLower;
 extern int prevZStickVal;
 extern int shutterDelay;
 extern int prevDelay;
@@ -149,7 +149,7 @@ extern int prevFlashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
-extern bool bootFlag;
+extern bool runHomingSequence;
 extern bool homedRail;
 extern bool goToStart;
 extern bool joystickState;
@@ -171,8 +171,8 @@ extern int prevManualMovementCount;
 extern volatile long moveDist;
 extern volatile bool stepperDisabled;
 extern volatile bool directionFwd;
-extern long fwdPosition;
-extern long bwdPosition;
+extern volatile long fwdPosition;
+extern volatile long bwdPosition;
 extern bool firstFwdStall;
 // --- Stepper motor variables --- //
 extern int stepsPerMovement;
@@ -187,5 +187,8 @@ extern char prevAutoStackProgress[10];
 extern bool stepperMoved;
 extern bool shutterTriggered;
 extern bool triggerFailed;
+
+extern int stepperMaxSpeed;
+extern int rampSteps;
 
 #endif
