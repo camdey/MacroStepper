@@ -27,15 +27,16 @@
 #include <AccelStepper.h>											// software stepping implementation
 #include <TMC2130Stepper.h> 									// stepper driver library
 #include <TMC2130Stepper_REGDEFS.h>	  				// stepper driver registry definitions
+#include "TimerFreeTone.h"                    // produces beep tone for piezo
 // project definitions and functions
-#include "VariableDeclarations.h"							// external variable declarations
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
+#include "JoystickControl.h"                  // joystick control functions
 #include "MiscFunctions.h"										// miscellaneous functions
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
 #include "StepperControl.h"										// functions for controlling the stepper motor
 #include "TouchControl.h"											// touch screen functions for detecting touches
 #include "UserInterface.h"										// generates the different screen menus
-#include "TimerFreeTone.h"
+#include "VariableDeclarations.h"							// external variable declarations
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
