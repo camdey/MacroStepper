@@ -2,7 +2,9 @@
 Author: Cam Dey
 
 Created: 2018-12-18
+
 v2.0 added: 2020-01-01
+
 Last Revised: 2020-03-22
 
 Note: v1.0 documentation hasn't been updated to incorporate the TMC2130 driver or the other hardware changes.
