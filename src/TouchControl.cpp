@@ -367,7 +367,7 @@ void startScreenTouch(int xPos, int yPos) {
   // homing func
   if ((xPos >= 20 && xPos <= 100) && (yPos >= 190 && yPos <= 240)) {
     tft.drawBitmap(30, 190, house, 50, 42, CUSTOM_RED);
-    bootFlag = true;
+    runHomingSequence = true;
     homeRail();
     tft.drawBitmap(30, 190, house, 50, 42, WHITE);
   }
@@ -390,8 +390,8 @@ void touchScreen() {
   TSPoint point = ts.getPoint();
 
   if (screenRotated == false) {
-    xPos = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());    // rotate & scale to TFT boundaries
-    yPos = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());   //   ... USB port at upper left
+    xPos = map(point.y, TS_MINY, TS_MAXY, 0, 320);    // rotate & scale to TFT boundaries
+    yPos = map(point.x, TS_MINX, TS_MAXX, 0, 240);   //   ... USB port at upper left
   }
   else if (screenRotated == true) {
     xPos = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);    // rotate & scale to TFT boundaries

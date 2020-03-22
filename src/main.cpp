@@ -1,7 +1,7 @@
 // ********* Macro Stepper v1.1 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2019-06-30
+// *** UPDATED: 2020-03-22
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -27,14 +27,16 @@
 #include <AccelStepper.h>											// software stepping implementation
 #include <TMC2130Stepper.h> 									// stepper driver library
 #include <TMC2130Stepper_REGDEFS.h>	  				// stepper driver registry definitions
+#include "TimerFreeTone.h"                    // produces beep tone for piezo
 // project definitions and functions
-#include "VariableDeclarations.h"							// external variable declarations
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
+#include "JoystickControl.h"                  // joystick control functions
 #include "MiscFunctions.h"										// miscellaneous functions
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
 #include "StepperControl.h"										// functions for controlling the stepper motor
 #include "TouchControl.h"											// touch screen functions for detecting touches
 #include "UserInterface.h"										// generates the different screen menus
+#include "VariableDeclarations.h"							// external variable declarations
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
@@ -69,6 +71,10 @@ bool testFlash                    = false;      // flag for testing flash thresh
 bool screenRotated                 = false;      // false means usb in lower left corner
 // --- Input and Output values --- //
 int xStickPos 										= 0;        	// ADC value of x-axis joystick
+int xPosUpper                     = 522; 				// Upper boundary of joystick resting point, calibrated during setup
+int xPosResting                   = 512;				// Resting point of joystick reading, calibrated during setup
+int xPosLower                     = 502;				// Lower boundary of of joystick resting point, calibrated during setup
+int xPosDiff                      = 0;          // Difference between ideal middle (512) and actual resting point
 int zStickVal 										= 1;        	// increment count of z-axis button press
 int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
@@ -81,13 +87,13 @@ int prevFlashThreshold            = 0;          // previous threshold value for 
 int flashOnValue                  = 300;        // initial value for flash considered as being ready
 int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
-bool bootFlag 										= true;       // runs rehoming sequence
+bool runHomingSequence 										= true;       // runs rehoming sequence
 bool homedRail										= false;			// true if homeRail() run successfully
 bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
 bool autoStackFlag 								= false;      // enables function for stack procedure
 bool pauseAutoStack 							= false;      // pause stack procedure
-bool shutterEnabled 								= false;      // disabled/enabled
+bool shutterEnabled 							= false;      // disabled/enabled
 bool targetFlag 									= false;      // resets stepper target
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
@@ -101,10 +107,10 @@ long prevStepperPosition 					= 1;    			// used for showing position of stepper
 int manualMovementCount 					= 0;    			// count of manual movements
 int prevManualMovementCount 			= 0;
 volatile long moveDist 						= 60000; 			// distance for homing to ensure it reaches end stop
-volatile bool stepperDisabled 		= false;
-volatile bool directionFwd 				= true;
-long fwdPosition 									= 9999;
-long bwdPosition 									= 9999;
+volatile bool stepperDisabled 		= false;      // is stepper disabled? in ISR
+volatile bool directionFwd 				= true;       // is stepper in fwd direction? in ISR
+volatile long fwdPosition 				= 1;          // fwdPosition of rail, set to non-zero number initially, in ISR
+volatile long bwdPosition 				= 1;          // bwdPosition of rail, set to non-zero number initially, in ISR
 bool firstFwdStall								= true;				// takes first position reading when stalling in case of lost steps
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
@@ -119,7 +125,12 @@ char prevAutoStackProgress[10]  	= "0/0";			// prev progress value, global to pr
 bool stepperMoved 								= false; 			// did stepMotor actually step or not
 bool shutterTriggered 						= false;			// did the shutter trigger or not
 bool triggerFailed                = false;      // record state if shutter trigger has failed
+int stepperMaxSpeed               = 3000;       // max speed setting for AccelStepper
+int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
 // ***** --- PROGRAM --- ***** //
+
+void serialTuple(String cmd, int arg);
+
 
 void setup(void) {
   Serial.begin(250000);
@@ -133,8 +144,8 @@ void setup(void) {
 		Serial.print(F("No driver found"));
 	}
 
-	tft.setFont(&Arimo_Regular_24);
 	tft.begin(identifier);
+	tft.setFont(&Arimo_Regular_24);
 	tft.fillScreen(BLACK);
 	tft.setRotation(1);
   screenRotated = false;
@@ -143,35 +154,43 @@ void setup(void) {
 	driver.begin();
 	driver.rms_current(900);
 	driver.microsteps(nrMicrosteps);
-	driver.interpolate(1);
 
 	pinMode(EN_PIN, OUTPUT);
   digitalWrite(EN_PIN, LOW);
   pinMode(CS_PIN, OUTPUT);
-  digitalWrite(CS_PIN, HIGH);
+  digitalWrite(CS_PIN, HIGH); // unselect SPI slave
   pinMode(DIR_PIN, OUTPUT);
   digitalWrite(DIR_PIN, LOW);
-  pinMode(DIAG_PIN, INPUT);
+  pinMode(DIAG1_PIN, INPUT);
+  pinMode(PIEZO_PIN, OUTPUT);
+
+  // TimerFreeTone(PIEZO_PIN, 4000, 500, 10);
+
+  // declare analog pin as digital input
   pinMode(ZSTICK_PIN, INPUT_PULLUP);
-  pinMode(SHUTTER_PIN, OUTPUT);
-  digitalWrite(SHUTTER_PIN, LOW);
-  attachInterrupt(digitalPinToInterrupt(DIAG_PIN), stallDetection, RISING);
+  pinMode(SONY_PIN, OUTPUT);
+  digitalWrite(SONY_PIN, LOW);
+  attachInterrupt(digitalPinToInterrupt(DIAG1_PIN), stallDetection, RISING);
 
   // set stepper AccelStepper config
-  stepper.setMaxSpeed(3200);
-  // stepper.setAcceleration(2000);
+  stepper.setMaxSpeed(stepperMaxSpeed);
+  stepper.setAcceleration(2000);
   stepper.setEnablePin(EN_PIN);
+  stepper.setMinPulseWidth(1);
   stepper.setPinsInverted(false, false, true);
   stepper.enableOutputs();
   stepperDisabled = false;
 	silentStepConfig();
 
+  // find stable resting point of joystick
+  calibrateJoyStick();
+
 	// if holding down ZSTICK_PIN, don't home rail
 	// if (digitalRead(ZSTICK_PIN) == LOW) {
-	// 	bootFlag = false;
+	// 	runHomingSequence = false;
 	// }
   // don't home rail on start up
-  bootFlag = false;
+  runHomingSequence = false;
 }
 
 void loop() {
@@ -185,27 +204,49 @@ void loop() {
   if (currentTime - subRoutine1Time >= 50) {
     touchScreen();
     subRoutine1Time = millis();
+
+    if (Serial.available() > 0) {
+      String cmd = Serial.readStringUntil(' ');
+      String strArg = Serial.readStringUntil('\n');
+
+      int arg = strArg.toInt();
+
+      if (cmd == "speed") {
+        serialTuple("speed", arg);
+        Serial.print("Set speed to ");
+        Serial.println(arg);
+        stepper.setMaxSpeed(arg);
+        stepperMaxSpeed = arg;
+      }
+      else if (cmd == "accel") {
+        serialTuple("speed", arg);
+        Serial.print("Set acceleration to ");
+        Serial.println(arg);
+        stepper.setAcceleration(arg);
+      }
+    }
   }
   // take joystick and limit switch reading, put stepper to sleep
   if (currentTime - subRoutine2Time >= 100) {
     // check joystick for movement
     readJoystick();
+
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
-      joyStick();
+    if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
+      joystickControl();
     }
     // sleep if stepper inactive, update position on manual screen
     if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
-      toggleStepper(0); // disable stepper
+      toggleStepper(false); // disable stepper
       // refresh position on manual screen after stepping completed
       if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
         displayPosition();
       }
     }
 		// configure SilentStep if not homing rail
-		if (stallGuardConfigured == true && bootFlag == false) {
+		if (stallGuardConfigured == true && runHomingSequence == false) {
 			silentStepConfig();
-		}
+    }
 		// update flashValue if on right screen
 		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
 			updateFlashValue();
@@ -219,6 +260,7 @@ void loop() {
 
     subRoutine2Time = millis();
   }
+
   // reset target to currentPosition
   if (targetFlag == true) {
     stepper.move(0);
@@ -226,10 +268,18 @@ void loop() {
     targetFlag = false;
   }
   // run homing sequence if first loop
-  if (bootFlag == true) {
-    homeRail();
-		setAutoStackPositions(true, true);
+  if (runHomingSequence == true) {
+    homeRail(); // run homing routine
+		setAutoStackPositions(true, true); // set both start and end points
 		silentStepConfig(); // set config for silentStep
-    bootFlag = false;
+    runHomingSequence = false;
   }
+}
+
+void serialTuple(String cmd, int arg) {
+	Serial.print("Received command: ");
+	Serial.print(cmd);
+	Serial.print("(");
+	Serial.print(arg);
+	Serial.println(")");
 }

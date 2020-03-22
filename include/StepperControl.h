@@ -1,5 +1,5 @@
-#ifndef STEPPERFUNCTIONS_H
-#define STEPPERFUNCTIONS_H
+#ifndef STEPPERCONTROL_H
+#define STEPPERCONTROL_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
@@ -8,9 +8,7 @@ void autoStack();
 void changeDirection();
 void dryRun();
 void homeRail();
-void joyStick();
-void readJoystick();
-int speedControl(long loopNr);
+void overshootPosition(int position, int numberOfSteps, int direction);
 void stallDetection();
 bool stepMotor(int stepDirection, unsigned long stepperDelay);
 void toggleStepper(bool enable);

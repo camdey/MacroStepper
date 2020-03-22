@@ -1,53 +1,53 @@
-# MacroStepper v1.0
+# MacroStepper v2.0
 Author: Cam Dey
 
 Created: 2018-12-18
-
-Last Revised: 2019-02-17
+v2.0 added: 2020-01-01
+Last Revised: 2020-03-22
 
 Note: v1.0 documentation hasn't been updated to incorporate the TMC2130 driver or the other hardware changes.
 
 The MacroStepper is a fully automated macrophotography rig designed to enable a camera to take photos at precisely incremented steps. The macroStack can work with or without an automated shutter and also in manual mode if the user prefers to control the stepping themselves.
 
 # Schematic
-## Fritzing Mockup
-![Schematic](https://github.com/camdey/MacroStepper/blob/master/MacroStepper%20Schematic%20%5BUpdate%5D.png)
+![PCB_top](https://github.com/camdey/MacroStepper/blob/new_pcb_layout/schematics/MacroStepper_v2.0_top.png)
+![PCB_bottom](https://github.com/camdey/MacroStepper/blob/new_pcb_layout/schematics/MacroStepper_v2.0_bottom.png)
 
 ## Pinouts
 **2.8" TFT Touch Screen Display**
 
- - Connected via shield to Proto Shield (16bit parallel)
+ - Connected via custom PCB shield
+ 
+| TMC2130     | PCB 		|
+| ----------- | --------------- |
+| VMOT        | 12V Power Supply|
+| VIO         | Arduino 3.3V	|
+| GND         | GND		|
+| M1A         | Black wire	|
+| M1B         | Green wire	|
+| M2A         | Red wire        |
+| M2B         | Blue wire	|
+| DIR         | D28		|
+| STEP        | D30		|
+| CS          | D32		|
+| MISO        | ICSP1		|
+| SCK         | ICSP3		|
+| MOSI        | ICSP4		|
+| EN          | D34		|
 
-**DRV8825 Stepper Driver**
+| Joystick    | PCB	|
+| ----------- | ------- |
+| X Axis      | A6	|
+| Z Axis      | A7	|
 
- - VMOT - Arduino VIN
- - GND - Arduino GND
- - B2 - Stepper green wire
- - B1 - Stepper black wire
- - A2 - Stepper red wire
- - A1 - Stepper blue wire
- - FAULT - Arduino 5V
- - GND - Arduino GND
- - DIR - Arduino D27
- - STEP - Arduino D29
- - SLEEP - Arduino D30
- - RST - Arduino 5V
- - M2|M1|M0 - unconnected jumper pins
- - ENABLE - Arduino D41
+| Camera      | PCB 	|
+| ----------- | ------- |
+| GODOX       | A8	|
+| SHT         | D36	|
 
-**Joystick**
-
- - X Axis - Arduino A12
- - Y Axis - Arduino A13
- - Z Axis - Arduino A14
-
-**Limit Switches**
-- Forward Limit Switch - Arduino D49
-- Rear Limit Switch - Arduino D51
-
-**Camera**
-- Shutter Output - Arduino D45
-- Flash Input - Arduino A15
+| Misc        | PCB 	|
+| ----------- | ------- |
+| PIEZO       | D22	|
 
 
 # Interface

@@ -67,17 +67,13 @@ extern MCUFRIEND_kbv 	  tft;
 #define railTravel        73.1          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
 #define minPosition       0
 #define maxPosition       58480         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
-                                        // but consistently getting 58780 after homing
-// joystick defs
-#define xStickUpper			  520 				  // upper limit of joystick values that determines when to move stepper
-#define xStickLower				490				    // lower limit of joystick values that determines when to move stepper
-#define xStickMid					507				    // stable point of joystick reading
+// but consistently getting 58780 after homing
 
 // definitions for touch screen orientation
-#define TS_MINX 					100
-#define TS_MAXX 					920
-#define TS_MINY 					70
-#define TS_MAXY 					920
+#define TS_MINX 					160
+#define TS_MAXX 					850
+#define TS_MINY 					132
+#define TS_MAXY 					900
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!
@@ -93,20 +89,23 @@ extern MCUFRIEND_kbv 	  tft;
 #define LCD_RESET 				A4
 
 // driver pins
-#define DIR_PIN 					36
-#define STEP_PIN 					34
-#define EN_PIN 						42
-#define DIAG_PIN 					18
-#define CS_PIN 						53
-#define MOSI_PIN 					51
-#define MISO_PIN 					52
-#define SCK_PIN 					52
+#define DIAG1_PIN 				24
+#define DIAG0_PIN 				26
+#define DIR_PIN 					28
+#define STEP_PIN 					30
+#define CS_PIN 						32
+#define EN_PIN 						34
+// handled by SPI library
+// #define MOSI_PIN 				ICSP4
+// #define MISO_PIN 				ICSP1
+// #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define XSTICK_PIN 				A9            // joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				A8            // button-press from joystick
-#define FLASH_PIN 				A5            // pin for light sensor
-#define SHUTTER_PIN 			30            // pin for pulling camera focus and shutter to GND via transistor
+#define ZSTICK_PIN 				A7            // button-press from joystick
+#define XSTICK_PIN 				A6            // joystick X-axis pin (controls fwd and rev)
+#define GODOX_PIN 				A8            // pin for GA1A12S202 light sensor
+#define PIEZO_PIN         22            // pin for Piezo buzzer
+#define SONY_PIN          36            // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
@@ -135,6 +134,10 @@ extern bool screenRotated;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;
+extern int xPosUpper;
+extern int xPosDiff;
+extern int xPosResting;
+extern int xPosLower;
 extern int prevZStickVal;
 extern int shutterDelay;
 extern int prevDelay;
@@ -146,7 +149,7 @@ extern int prevFlashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
-extern bool bootFlag;
+extern bool runHomingSequence;
 extern bool homedRail;
 extern bool goToStart;
 extern bool joystickState;
@@ -168,8 +171,8 @@ extern int prevManualMovementCount;
 extern volatile long moveDist;
 extern volatile bool stepperDisabled;
 extern volatile bool directionFwd;
-extern long fwdPosition;
-extern long bwdPosition;
+extern volatile long fwdPosition;
+extern volatile long bwdPosition;
 extern bool firstFwdStall;
 // --- Stepper motor variables --- //
 extern int stepsPerMovement;
@@ -184,5 +187,8 @@ extern char prevAutoStackProgress[10];
 extern bool stepperMoved;
 extern bool shutterTriggered;
 extern bool triggerFailed;
+
+extern int stepperMaxSpeed;
+extern int rampSteps;
 
 #endif
