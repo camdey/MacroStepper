@@ -101,8 +101,8 @@ extern MCUFRIEND_kbv 	  tft;
 // #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define ZSTICK_PIN 				A7            // button-press from joystick
 #define XSTICK_PIN 				A6            // joystick X-axis pin (controls fwd and rev)
+#define ZSTICK_PIN 				A7            // button-press from joystick
 #define GODOX_PIN 				A8            // pin for GA1A12S202 light sensor
 #define PIEZO_PIN         22            // pin for Piezo buzzer
 #define SONY_PIN          36            // pin for pulling camera focus and shutter to GND via opto

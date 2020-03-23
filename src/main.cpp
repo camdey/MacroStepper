@@ -28,6 +28,7 @@
 #include <TMC2130Stepper.h> 									// stepper driver library
 #include <TMC2130Stepper_REGDEFS.h>	  				// stepper driver registry definitions
 #include "TimerFreeTone.h"                    // produces beep tone for piezo
+#include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
 #include "JoystickControl.h"                  // joystick control functions
@@ -131,6 +132,12 @@ int rampSteps                     = 50000;      // number of steps in ramp profi
 
 void serialTuple(String cmd, int arg);
 
+// TODO
+// - add reduced speed option for joystick (z button press?)
+// - remove serialTuple and functions for sending new speed/accel settings
+// - fix bug with rampSteps where hovering at low speed will use up all rampSteps and
+//    moving to a much higher speed will cause the motor to stall
+
 
 void setup(void) {
   Serial.begin(250000);
@@ -229,11 +236,11 @@ void loop() {
   // take joystick and limit switch reading, put stepper to sleep
   if (currentTime - subRoutine2Time >= 100) {
     // check joystick for movement
-    readJoystick();
+    // readJoystick();
 
     // move if past threshold and not in autoStack mode
     if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
-      joystickControl();
+      // joystickControl();
     }
     // sleep if stepper inactive, update position on manual screen
     if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
