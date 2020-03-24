@@ -38,12 +38,16 @@
 #include "TouchControl.h"											// touch screen functions for detecting touches
 #include "UserInterface.h"										// generates the different screen menus
 #include "VariableDeclarations.h"							// external variable declarations
+#include "TFT-Home.h"
+#include "TFT-Manual.h"
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
 TMC2130Stepper 	driver 			= TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
 AccelStepper 		stepper 		= AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
 MCUFRIEND_kbv 	tft;
+gfxButton       gfxB;
+gfxTouch        gfxT;
 
 
 // --- currentTimes and elapsed times --- //

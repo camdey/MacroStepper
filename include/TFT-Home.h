@@ -4,10 +4,11 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void main_Auto(bool btnActive);
-void main_Manual(bool btnActive);
-void main_Home(bool btnActive);
-void main_Flash(bool btnActive);
-void main_Rotate(bool btnActive);
+void initHomeButtons();
+void func_Auto(bool btnActive);
+void func_Manual(bool btnActive);
+void func_Home(bool btnActive);
+void func_Flash(bool btnActive);
+void func_Rotate(bool btnActive);
 
 #endif

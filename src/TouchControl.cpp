@@ -18,7 +18,7 @@ int arrowsTouch(int xPos, int yPos, bool moveStepper, int val = 0) {
   }
   if ((xPos >= 230 && xPos <= 290) && (yPos >= 135 && yPos <= 225)) {
     val--;
-    if (moveStepper == 1) { // if stepping required, move motor
+    if (moveStepper == true) { // if stepping required, move motor
       stepperMoved = stepMotor(-1, 500); // reverse
     }
   }
