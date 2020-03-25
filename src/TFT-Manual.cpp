@@ -8,9 +8,9 @@
 #include "UserInterface.h"
 #include "gfxButton.h"
 
-#define numButtons 8
-gfxButton btn_Array[numButtons];
-gfxTouch  tch_Array[numButtons];
+#define num_btns_Manual 8
+gfxButton btn_array_Manual[num_btns_Manual];
+gfxTouch  tch_array_Manual[num_btns_Manual];
 
 
 gfxButton btn_StepDistance =   gfxB.initButton(       "manual", "fillRoundRect",  -10,  5,    135,  65,   15, CUSTOM_BLUE  );
@@ -28,25 +28,59 @@ gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,          func_Back, 
 gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,       func_ArrowUp,       "btn_ArrowUp",       20 );
 gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,     func_ArrowDown,     "btn_ArrowDown",     20 );
 
-void initManualButtons() {
-  btn_Array[0] = btn_StepDistance;
-  btn_Array[1] = btn_StepNumber;
-  btn_Array[2] = btn_Position;
-  btn_Array[3] = btn_Flash;
-  btn_Array[4] = btn_Reset;
-  btn_Array[5] = btn_Back;
-  btn_Array[6] = btn_ArrowUp;
-  btn_Array[7] = btn_ArrowDown;
 
-  tch_Array[0] = tch_StepDistance;
-  // tch_Array[1] = NULL;
-  // tch_Array[2] = NULL;
-  tch_Array[3] = tch_Flash;
-  tch_Array[4] = tch_Reset;
-  tch_Array[5] = tch_Back;
-  tch_Array[6] = tch_ArrowUp;
-  tch_Array[7] = tch_ArrowDown;
+void initManualButtons() {
+  btn_array_Manual[0] = btn_StepDistance;
+  btn_array_Manual[1] = btn_StepNumber;
+  btn_array_Manual[2] = btn_Position;
+  btn_array_Manual[3] = btn_Flash;
+  btn_array_Manual[4] = btn_Reset;
+  btn_array_Manual[5] = btn_Back;
+  btn_array_Manual[6] = btn_ArrowUp;
+  btn_array_Manual[7] = btn_ArrowDown;
+
+  tch_array_Manual[0] = tch_StepDistance;
+  // tch_array_Manual[1] = NULL;
+  // tch_array_Manual[2] = NULL;
+  tch_array_Manual[3] = tch_Flash;
+  tch_array_Manual[4] = tch_Reset;
+  tch_array_Manual[5] = tch_Back;
+  tch_array_Manual[6] = tch_ArrowUp;
+  tch_array_Manual[7] = tch_ArrowDown;
 }
+
+
+void populateManualScreen() {
+  // draw buttons
+  for (int i=0; i < num_btns_Manual; i++) {
+    btn_array_Manual[i].drawButton(tft);
+  }
+  // draw text
+  btn_StepDistance.writeText( tft, Arimo_Regular_24, String("Step Dist."),  WHITE, "c");
+  btn_StepNumber.writeText(   tft, Arimo_Regular_24, String("Step Nr."),    WHITE, "c");
+  btn_Position.writeText(     tft, Arimo_Regular_24, String("Rail Pos."),   WHITE, "c");
+}
+
+
+void checkManualButtons(int touch_x, int touch_y, int touch_z) {
+  // if screen pressed
+  if (touch_z >= 100 && touch_z <= 1000) {
+    for (int i=0; i < num_btns_Manual; i++) {
+      tch_array_Manual[i].checkButton("manual", touch_x, touch_y);
+    }
+  }
+
+  // TODO - something better so we don't check the entire array every loop??
+  // else if screen not pressed, re-enable toggle
+  if (touch_z == 0) {
+    for (int i=0; i < num_btns_Manual; i++) {
+      if (tch_array_Manual[i].touchType == "toggle") {
+        tch_array_Manual[i].toggleCoolOff();
+      }
+    }
+  }
+}
+
 
 void func_StepDistance(bool btnActive) {
   if (btnActive == true) {
@@ -69,17 +103,20 @@ void func_StepDistance(bool btnActive) {
   }
 }
 
+
 void func_StepNumber() {
   btn_StepNumber.drawButton(tft, CUSTOM_BLUE);
   btn_StepNumber.writeText(tft, Arimo_Regular_24, String("Step Nr."), WHITE, "c");
   updateValueField("Step Nr", WHITE);
 }
 
+
 void func_Position() {
   btn_Position.drawButton(tft, CUSTOM_BLUE);
   btn_Position.writeText(tft, Arimo_Regular_24, String("Rail Pos."), WHITE, "c");
   updateValueField("Rail Position", WHITE);
 }
+
 
 void func_Flash(bool btnActive) {
   int colour;
@@ -99,6 +136,7 @@ void func_Flash(bool btnActive) {
   }
 }
 
+
 void func_Reset(bool btnActive) {
   if (btnActive == true) {
     // when reset button pressed, redraw step nr button and print new value via updateValueField
@@ -114,6 +152,7 @@ void func_Reset(bool btnActive) {
   }
 }
 
+
 void func_Back(bool btnActive) {
   if (btnActive == true) {
     // go back to start screen
@@ -123,6 +162,7 @@ void func_Back(bool btnActive) {
     btn_Back.drawButton(tft, WHITE);
   }
 }
+
 
 void func_ArrowUp(bool btnActive) {
   if (btnActive == true) {
@@ -136,6 +176,7 @@ void func_ArrowUp(bool btnActive) {
     btn_ArrowUp.drawButton(tft, CUSTOM_GREEN);
   }
 }
+
 
 void func_ArrowDown(bool btnActive) {
   if (btnActive == true) {

@@ -7,9 +7,10 @@
 #include "UserInterface.h"
 #include "gfxButton.h"
 
-#define numButtons 5
-gfxButton btn_Array[numButtons];
-gfxTouch  tch_Array[numButtons];
+#define num_btns_Home 5
+gfxButton btn_array_Home[num_btns_Home];
+gfxTouch  tch_array_Home[num_btns_Home];
+
 
 gfxButton btn_Auto     =   gfxB.initButton(       "main", "fillRoundRect",  170,  100,  130,  60,   8, CUSTOM_GREEN );
 gfxButton btn_Manual   =   gfxB.initButton(       "main", "fillRoundRect",  20,   100,  130,  60,   8, CUSTOM_BLUE  );
@@ -22,22 +23,57 @@ gfxTouch  tch_Home     =   gfxT.addMomentary( btn_Home,    func_Home,    "btn_Ho
 gfxTouch  tch_Flash    =   gfxT.addMomentary( btn_Flash,   func_Flash,   "btn_Flash",   20  );
 gfxTouch  tch_Rotate   =   gfxT.addMomentary( btn_Rotate,  func_Rotate,  "btn_Rotate",  20  );
 
+
 void initHomeButtons() {
   gfxT.setToggleDebounce(250);
   gfxT.setMomentaryDebounce(100);
 
-  btn_Array[0] = btn_Manual;
-  btn_Array[1] = btn_Auto;
-  btn_Array[2] = btn_Home;
-  btn_Array[3] = btn_Flash;
-  btn_Array[4] = btn_Rotate;
+  btn_array_Home[0] = btn_Manual;
+  btn_array_Home[1] = btn_Auto;
+  btn_array_Home[2] = btn_Home;
+  btn_array_Home[3] = btn_Flash;
+  btn_array_Home[4] = btn_Rotate;
 
-  tch_Array[0] = tch_Manual;
-  tch_Array[1] = tch_Auto;
-  tch_Array[2] = tch_Home;
-  tch_Array[3] = tch_Flash;
-  tch_Array[4] = tch_Rotate;
+  tch_array_Home[0] = tch_Manual;
+  tch_array_Home[1] = tch_Auto;
+  tch_array_Home[2] = tch_Home;
+  tch_array_Home[3] = tch_Flash;
+  tch_array_Home[4] = tch_Rotate;
 }
+
+
+void populateHomeScreen() {
+  // draw logo
+  tft.drawBitmap(40, 0, logo, 240, 82, WHITE);
+  // draw buttons
+  for (int i=0; i < num_btns_Home; i++) {
+    btn_array_Home[i].drawButton(tft);
+  }
+  // draw text
+  btn_Auto.writeText(   tft, Arimo_Bold_30, String("Auto"),   BLACK, "c");
+  btn_Manual.writeText( tft, Arimo_Bold_30, String("Manual"), BLACK, "c");
+}
+
+
+void checkHomeButtons(int touch_x, int touch_y, int touch_z) {
+  // if screen pressed
+  if (touch_z >= 100 && touch_z <= 1000) {
+    for (int i=0; i < num_btns_Home; i++) {
+      tch_array_Home[i].checkButton("home", touch_x, touch_y);
+    }
+  }
+
+  // TODO - something better so we don't check the entire array every loop??
+  // else if screen not pressed, re-enable toggle
+  if (touch_z == 0) {
+    for (int i=0; i < num_btns_Home; i++) {
+      if (tch_array_Home[i].touchType == "toggle") {
+        tch_array_Home[i].toggleCoolOff();
+      }
+    }
+  }
+}
+
 
 void func_Auto(bool btnActive) {
   if (btnActive == true) {
@@ -49,6 +85,7 @@ void func_Auto(bool btnActive) {
   }
 }
 
+
 void func_Manual(bool btnActive) {
   if (btnActive == true) {
     manualScreen();
@@ -58,6 +95,7 @@ void func_Manual(bool btnActive) {
     btn_Manual.writeText(tft, Arimo_Bold_30, String("Manual"), BLACK, "c");
   }
 }
+
 
 void func_Home(bool btnActive) {
   if (btnActive == true) {
@@ -71,6 +109,7 @@ void func_Home(bool btnActive) {
   }
 }
 
+
 void func_Flash(bool btnActive) {
   if (btnActive == true) {
     flashScreen();
@@ -79,6 +118,7 @@ void func_Flash(bool btnActive) {
     btn_Flash.drawButton(tft, WHITE);
   }
 }
+
 
 void func_Rotate(bool btnActive) {
   if (btnActive == true) {

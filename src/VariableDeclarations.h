@@ -6,6 +6,7 @@
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
+#include <gfxButton.h>
 #include <AccelStepper.h>
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
@@ -37,6 +38,8 @@ extern TouchScreen      ts;
 extern TMC2130Stepper   driver;
 extern AccelStepper 		stepper;
 extern MCUFRIEND_kbv 	  tft;
+extern gfxButton        gfxB;
+extern gfxTouch         gfxT;
 
 // Definitions for some common 16-bit color values:
 #define	BLACK   						0x0000
