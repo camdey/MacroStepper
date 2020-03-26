@@ -154,7 +154,7 @@ void func_Reset(bool btnActive) {
 
 
 void func_Back(bool btnActive) {
-  if (btnActive == true) {
+  if (btnActive == true && arrowsActive == false) {
     // go back to start screen
     startScreen();
   }
