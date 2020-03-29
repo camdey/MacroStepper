@@ -75,10 +75,16 @@ extern gfxTouch         gfxT;
 // but consistently getting 58780 after homing
 
 // definitions for touch screen orientation
-#define TS_MINX 					160
-#define TS_MAXX 					850
-#define TS_MINY 					132
-#define TS_MAXY 					900
+// Arduino Due + 2.8" TFT
+// #define TS_MINX 					160
+// #define TS_MAXX 					850
+// #define TS_MINY 					132
+// #define TS_MAXY 					900
+// Grand Central M4 + 2.8" TFT
+#define TS_MINX 					320
+#define TS_MAXX 					760
+#define TS_MINY 					235
+#define TS_MAXY 					810
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
+namespace manual_screen {
 // extern gfxButton btn_test;
 // extern gfxButton btn_StepDistance;
 // extern gfxButton btn_StepNumber;
@@ -31,5 +32,5 @@ void func_Reset(bool btnActive);
 void func_Back(bool btnActive);
 void func_ArrowUp(bool btnActive);
 void func_ArrowDown(bool btnActive);
-
+}
 #endif
