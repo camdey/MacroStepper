@@ -40,26 +40,26 @@ namespace flash_screen {
 
     tch_array_Flash[0] = tch_FlashOff;
     tch_array_Flash[1] = tch_FlashOn;
-    // tch_array_Flash[2] = NULL;
-    tch_array_Flash[3] = tch_FlashTest;
-    tch_array_Flash[4] = tch_Back;
+    tch_array_Flash[2] = tch_FlashTest;
+    tch_array_Flash[3] = tch_Back;
   }
 
 
   void populateFlashScreen() {
+    setCurrentScreen("Flash");
     flashReady = flashStatus(); // get latest values
     // draw buttons
     for (int i=0; i < num_btns_Flash; i++) {
       btn_array_Flash[i].drawButton(tft);
     }
     // draw text
-    btn_FlashOff.writeTextTopCentre(    tft, Arimo_Regular_30, String("Flash Off"),   WHITE);
-    btn_OffValue.writeTextBottomCentre( tft, Arimo_Regular_30, String(flashOffValue), WHITE);
-    btn_FlashOn.writeTextCentre(        tft, Arimo_Regular_30, String("Flash On"),    WHITE);
-    btn_OnValue.writeTextBottomCentre(  tft, Arimo_Regular_30, String(flashOnValue),  WHITE);
-    btn_Threshold.writeTextTopCentre(   tft, Arimo_Regular_30, String("Threshold"),   WHITE);
-    btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashThreshold),WHITE);
-    btn_FlashTest.writeTextCentre(      tft, Arimo_Regular_30, String("Test Flash"),  WHITE);
+    btn_FlashOff.writeTextTopCentre(    tft, Arimo_Regular_24, String("Flash Off"),   WHITE);
+    btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), WHITE);
+    btn_FlashOn.writeTextTopCentre(     tft, Arimo_Regular_24, String("Flash On"),    WHITE);
+    btn_OnValue.writeTextBottomCentre(  tft, Arimo_Bold_30, String(flashOnValue),  WHITE);
+    btn_Threshold.writeTextTopCentre(   tft, Arimo_Regular_24, String("Threshold"),   WHITE);
+    btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold),WHITE);
+    btn_FlashTest.writeTextCentre(      tft, Arimo_Bold_24, String("Test Flash"),  WHITE);
   }
 
 
@@ -85,13 +85,13 @@ namespace flash_screen {
   void func_FlashOff(bool btnActive) {
     if (btnActive == true) {
       editFlashOffValue = true;
-      btn_OffValue.writeTextBottomCentre( tft, Arimo_Regular_30, String(flashOffValue), YELLOW);
-      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashThreshold), WHITE);
+      btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), YELLOW);
+      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
     else {
       editFlashOffValue = false;
-      btn_OffValue.writeTextBottomCentre( tft, Arimo_Regular_30, String(flashOffValue), WHITE);
-      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashThreshold), WHITE);
+      btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), WHITE);
+      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
   }
 
@@ -99,13 +99,13 @@ namespace flash_screen {
   void func_FlashOn(bool btnActive) {
     if (btnActive == true) {
       editFlashOnValue = true;
-      btn_OnValue.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashOnValue), YELLOW);
-      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashThreshold), WHITE);
+      btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), YELLOW);
+      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
     else {
       editFlashOnValue = false;
-      btn_OnValue.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashOnValue), WHITE);
-      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Regular_30, String(flashThreshold), WHITE);
+      btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), WHITE);
+      btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
   }
 
@@ -118,17 +118,17 @@ namespace flash_screen {
         toggleShutter();
       }
       // print as yellow until result returned
-      btn_FlashTest.writeTextCentre(tft, Arimo_Regular_30, String("Test Flash"), YELLOW);
+      btn_FlashTest.writeTextCentre(tft, Arimo_Bold_24, String("Test Flash"), YELLOW);
 
       // trigger shutter
       shutterTriggered = triggerShutter();
 
       // check result
       if (shutterTriggered == false) {
-        btn_FlashTest.writeTextCentre(tft, Arimo_Regular_30, String("Test Flash"), CUSTOM_RED);
+        btn_FlashTest.writeTextCentre(tft, Arimo_Bold_24, String("Test Flash"), CUSTOM_RED);
       }
       else if (shutterTriggered == true) {
-        btn_FlashTest.writeTextCentre(tft, Arimo_Regular_30, String("Test Flash"), CUSTOM_GREEN);
+        btn_FlashTest.writeTextCentre(tft, Arimo_Bold_24, String("Test Flash"), CUSTOM_GREEN);
       }
       testFlash = false;
     }

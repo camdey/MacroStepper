@@ -22,6 +22,7 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
 
 
 void populateScreen(String screen) {
+  tft.fillScreen(BLACK);
   if (screen == "Home") {
     populateHomeScreen();
   }
@@ -41,9 +42,18 @@ void checkButtons(String screen) {
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
 
-  int touch_x = map(point.y, 937, 140, 0, 480);
-  int touch_y = map(point.x, 846, 148, 0, 320);
+  int touch_x;
+  int touch_y;
   int touch_z = point.z;
+
+  if (screenRotated == false) {
+    touch_x = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());    // rotate & scale to TFT boundaries
+    touch_y = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());   //   ... USB port at upper left
+  }
+  else if (screenRotated == true) {
+    touch_x = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);    // rotate & scale to TFT boundaries
+    touch_y = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);   //   ... USB port at lower right
+  }
 
   if (screen == "Home") {
     checkHomeButtons(touch_x, touch_y, touch_z);
@@ -54,6 +64,16 @@ void checkButtons(String screen) {
   else if (screen == "Manual") {
     checkManualButtons(touch_x, touch_y, touch_z);
   }
+}
+
+
+void setCurrentScreen(String screen) {
+  currentScreen = screen;
+}
+
+
+String getCurrentScreen() {
+  return currentScreen;
 }
 
 

@@ -38,8 +38,10 @@
 #include "TouchControl.h"											// touch screen functions for detecting touches
 #include "UserInterface.h"										// generates the different screen menus
 #include "VariableDeclarations.h"							// external variable declarations
+#include "TFT-Main.h"
 #include "TFT-Home.h"
 #include "TFT-Manual.h"
+#include "TFT-Flash.h"
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
@@ -132,6 +134,9 @@ bool shutterTriggered 						= false;			// did the shutter trigger or not
 bool triggerFailed                = false;      // record state if shutter trigger has failed
 int stepperMaxSpeed               = 3000;       // max speed setting for AccelStepper
 int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
+
+String currentScreen;
+
 // ***** --- PROGRAM --- ***** //
 
 void serialTuple(String cmd, int arg);
@@ -156,11 +161,8 @@ void setup(void) {
 	}
 
 	tft.begin(identifier);
-	tft.setFont(&Arimo_Regular_24);
-	tft.fillScreen(BLACK);
 	tft.setRotation(1);
   screenRotated = false;
-	startScreen();
 
 	driver.begin();
 	driver.rms_current(900);
@@ -202,6 +204,9 @@ void setup(void) {
 	// }
   // don't home rail on start up
   runHomingSequence = false;
+
+  initButtons(250, 50);
+  populateScreen("Home");
 }
 
 void loop() {
@@ -213,30 +218,31 @@ void loop() {
   }
   // take touch reading
   if (currentTime - subRoutine1Time >= 50) {
-    touchScreen();
+    checkButtons(getCurrentScreen());
     subRoutine1Time = millis();
 
-    if (Serial.available() > 0) {
-      String cmd = Serial.readStringUntil(' ');
-      String strArg = Serial.readStringUntil('\n');
-
-      int arg = strArg.toInt();
-
-      if (cmd == "speed") {
-        serialTuple("speed", arg);
-        Serial.print("Set speed to ");
-        Serial.println(arg);
-        stepper.setMaxSpeed(arg);
-        stepperMaxSpeed = arg;
-      }
-      else if (cmd == "accel") {
-        serialTuple("speed", arg);
-        Serial.print("Set acceleration to ");
-        Serial.println(arg);
-        stepper.setAcceleration(arg);
-      }
-    }
+  //   if (Serial.available() > 0) {
+  //     String cmd = Serial.readStringUntil(' ');
+  //     String strArg = Serial.readStringUntil('\n');
+  //
+  //     int arg = strArg.toInt();
+  //
+  //     if (cmd == "speed") {
+  //       serialTuple("speed", arg);
+  //       Serial.print("Set speed to ");
+  //       Serial.println(arg);
+  //       stepper.setMaxSpeed(arg);
+  //       stepperMaxSpeed = arg;
+  //     }
+  //     else if (cmd == "accel") {
+  //       serialTuple("speed", arg);
+  //       Serial.print("Set acceleration to ");
+  //       Serial.println(arg);
+  //       stepper.setAcceleration(arg);
+  //     }
+  //   }
   }
+
   // take joystick and limit switch reading, put stepper to sleep
   if (currentTime - subRoutine2Time >= 100) {
     // check joystick for movement

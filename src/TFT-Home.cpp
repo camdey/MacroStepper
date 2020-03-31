@@ -13,8 +13,8 @@ namespace home_screen {
   gfxTouch  tch_array_Home[num_btns_Home];
 
 
-  gfxButton btn_Auto     =   gfxB.initButton(       "Home", "fillRoundRect",  170,  100,  130,  60,   8, CUSTOM_GREEN );
   gfxButton btn_Manual   =   gfxB.initButton(       "Home", "fillRoundRect",  20,   100,  130,  60,   8, CUSTOM_BLUE  );
+  gfxButton btn_Auto     =   gfxB.initButton(       "Home", "fillRoundRect",  170,  100,  130,  60,   8, CUSTOM_GREEN );
   gfxButton btn_Home     =   gfxB.initBitmapButton( "Home", house,            30,   190,  50,   42,      WHITE        );
   gfxButton btn_Flash    =   gfxB.initBitmapButton( "Home", flash,            145,  190,  40,   42,      WHITE        );
   gfxButton btn_Rotate   =   gfxB.initBitmapButton( "Home", rotate_icon,      250,  190,  45,   39,      WHITE        );
@@ -41,6 +41,7 @@ namespace home_screen {
 
 
   void populateHomeScreen() {
+    setCurrentScreen("Home");
     // draw logo
     tft.drawBitmap(40, 0, logo, 240, 82, WHITE);
     // draw buttons
@@ -75,6 +76,7 @@ namespace home_screen {
 
   void func_Auto(bool btnActive) {
     if (btnActive == true) {
+      // populateScreen("Auto");
       autoScreen();
     }
   }
@@ -82,7 +84,8 @@ namespace home_screen {
 
   void func_Manual(bool btnActive) {
     if (btnActive == true) {
-      manualScreen();
+      populateScreen("Manual");
+      // manualScreen();
     }
   }
 
@@ -99,7 +102,8 @@ namespace home_screen {
 
   void func_Flash(bool btnActive) {
     if (btnActive == true) {
-      flashScreen();
+      populateScreen("Flash");
+      // flashScreen();
     }
   }
 
@@ -107,7 +111,8 @@ namespace home_screen {
   void func_Rotate(bool btnActive) {
     if (btnActive == true) {
       rotateScreen(); // rotate screen, touch controls, and joystick
-      startScreen();
+      populateScreen("Home");
+      // startScreen(); // reload startScreen
     }
   }
 }

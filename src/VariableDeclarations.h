@@ -202,4 +202,6 @@ extern bool triggerFailed;
 extern int stepperMaxSpeed;
 extern int rampSteps;
 
+extern String currentScreen;
+
 #endif

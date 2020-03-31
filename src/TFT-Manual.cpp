@@ -9,21 +9,21 @@
 #include "gfxButton.h"
 
 namespace manual_screen {
-  #define num_btns_Manual 10
+  #define num_btns_Manual 11
   gfxButton btn_array_Manual[num_btns_Manual];
   gfxTouch  tch_array_Manual[num_btns_Manual];
 
   String stepDist = String(distancePerMovement/1000, 5);
-  String stepNr = String(manualMovementCount);
-  String railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
+  String stepNr   = String(manualMovementCount);
+  String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
 
 
   gfxButton btn_StepDistance =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
   gfxButton btn_DistanceVal  =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
   gfxButton btn_StepNr       =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
   gfxButton btn_StepNrVal    =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_RailPos     =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_RailPosVal  =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_RailPos      =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_RailPosVal   =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
   gfxButton btn_Flash        =   gfxB.initBitmapButton( "Manual", aperture,         155,  15,   50,   50,       CUSTOM_RED   );
   gfxButton btn_Reset        =   gfxB.initBitmapButton( "Manual", reset,            155,  95,   50,   50,       WHITE        );
   gfxButton btn_Back         =   gfxB.initBitmapButton( "Manual", backArrow,        155,  175,  50,   50,       WHITE        );
@@ -38,30 +38,29 @@ namespace manual_screen {
 
 
   void initManualButtons() {
-    btn_array_Manual[0] = btn_StepDistance;
-    btn_array_Manual[1] = btn_DistanceVal;
-    btn_array_Manual[2] = btn_StepNr;
-    btn_array_Manual[3] = btn_StepNrVal;
-    btn_array_Manual[4] = btn_RailPos;
-    btn_array_Manual[5] = btn_RailPosVal;
-    btn_array_Manual[6] = btn_Flash;
-    btn_array_Manual[7] = btn_Reset;
-    btn_array_Manual[8] = btn_Back;
-    btn_array_Manual[9] = btn_ArrowUp;
-    btn_array_Manual[10] = btn_ArrowDown;
+    btn_array_Manual[0]   = btn_StepDistance;
+    btn_array_Manual[1]   = btn_DistanceVal;
+    btn_array_Manual[2]   = btn_StepNr;
+    btn_array_Manual[3]   = btn_StepNrVal;
+    btn_array_Manual[4]   = btn_RailPos;
+    btn_array_Manual[5]   = btn_RailPosVal;
+    btn_array_Manual[6]   = btn_Flash;
+    btn_array_Manual[7]   = btn_Reset;
+    btn_array_Manual[8]   = btn_Back;
+    btn_array_Manual[9]   = btn_ArrowUp;
+    btn_array_Manual[10]  = btn_ArrowDown;
 
     tch_array_Manual[0] = tch_StepDistance;
-    // tch_array_Manual[1] = NULL;
-    // tch_array_Manual[2] = NULL;
-    tch_array_Manual[3] = tch_Flash;
-    tch_array_Manual[4] = tch_Reset;
-    tch_array_Manual[5] = tch_Back;
-    tch_array_Manual[6] = tch_ArrowUp;
-    tch_array_Manual[7] = tch_ArrowDown;
+    tch_array_Manual[1] = tch_Flash;
+    tch_array_Manual[2] = tch_Reset;
+    tch_array_Manual[3] = tch_Back;
+    tch_array_Manual[4] = tch_ArrowUp;
+    tch_array_Manual[5] = tch_ArrowDown;
   }
 
 
   void populateManualScreen() {
+    setCurrentScreen("Manual");
     stepDist = String(distancePerMovement/1000, 5);
     stepNr = String(manualMovementCount);
     railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
@@ -71,12 +70,12 @@ namespace manual_screen {
       btn_array_Manual[i].drawButton(tft);
     }
     // draw text
-    btn_StepDistance.writeTextCentre( tft, Arimo_Regular_24, String("Step Dist."),  WHITE);
-    btn_DistanceVal.writeTextCentre(  tft, Arimo_Regular_24, stepDist,  WHITE);
-    btn_StepNr.writeTextCentre(       tft, Arimo_Regular_24, String("Step Nr."),    WHITE);
-    btn_StepNrVal.writeTextCentre(    tft, Arimo_Regular_24, stepNr,    WHITE);
-    btn_RailPos.writeTextCentre(     tft, Arimo_Regular_24, String("Rail Pos."),   WHITE);
-    btn_RailPosVal.writeTextCentre(  tft, Arimo_Regular_24, railPos,   WHITE);
+    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."),  WHITE);
+    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist,  WHITE);
+    btn_StepNr.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Nr."),    WHITE);
+    btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr,    WHITE);
+    btn_RailPos.writeTextTopCentre(tft, Arimo_Regular_24, String("Rail Pos."),   WHITE);
+    btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_24, railPos,   WHITE);
   }
 
 
@@ -106,31 +105,32 @@ namespace manual_screen {
       editMovementDistance = true;
 
       stepDist = String(distancePerMovement/1000, 5); // get latest value
-      btn_StepDistance.writeTextCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-      btn_DistanceVal.writeTextCentre(tft, Arimo_Regular_24, stepDist, WHITE);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
     }
     else {
       arrowsActive = false;
       editMovementDistance = false;
 
       stepDist = String(distancePerMovement/1000, 5); // get latest value
-      btn_StepDistance.writeTextCentre(tft, Arimo_Regular_24, String("Step Dist."), WHITE);
-      btn_DistanceVal.writeTextCentre(tft, Arimo_Regular_24, stepDist, WHITE);
+      // TODO would be nice to not re-write the top line on every arrow press
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), WHITE);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, WHITE);
     }
   }
 
 
-  void func_btn_StepNr() {
+  void func_StepNr() {
     stepNr = String(manualMovementCount); // get latest value
-    btn_StepNr.writeTextCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-    btn_StepNrVal.writeTextCentre(tft, Arimo_Regular_24, stepNr, WHITE);
+    btn_StepNr.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
+    btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepNr, WHITE);
   }
 
 
   void func_RailPos() {
     railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
-    btn_RailPos.writeTextCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-    btn_RailPosVal.writeTextCentre(tft, Arimo_Regular_24, railPos, WHITE);
+    btn_RailPos.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
+    btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_24, railPos, WHITE);
   }
 
 
@@ -151,8 +151,7 @@ namespace manual_screen {
       manualMovementCount = 0; // reset
       prevManualMovementCount = 0; // reset
       stepNr = String(manualMovementCount); // get latest value
-      btn_StepNr.writeTextCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-      btn_StepNrVal.writeTextCentre(tft, Arimo_Regular_24, stepNr, WHITE);
+      btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
     }
   }
 
