@@ -23,6 +23,7 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
 
 void populateScreen(String screen) {
   tft.fillScreen(BLACK);
+  delay(20); // see if this solves the superimposition of two different screens
   if (screen == "Home") {
     populateHomeScreen();
   }
@@ -55,14 +56,16 @@ void checkButtons(String screen) {
     touch_y = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);   //   ... USB port at lower right
   }
 
-  if (screen == "Home") {
-    checkHomeButtons(touch_x, touch_y, touch_z);
-  }
-  else if (screen == "Flash") {
-    checkFlashButtons(touch_x, touch_y, touch_z);
-  }
-  else if (screen == "Manual") {
-    checkManualButtons(touch_x, touch_y, touch_z);
+  if ((touch_x > 0 && touch_x <= tft.width()) && (touch_y > 0 && touch_y <= tft.height())) {
+    if (screen == "Home") {
+      checkHomeButtons(touch_x, touch_y, touch_z);
+    }
+    else if (screen == "Flash") {
+      checkFlashButtons(touch_x, touch_y, touch_z);
+    }
+    else if (screen == "Manual") {
+      checkManualButtons(touch_x, touch_y, touch_z);
+    }
   }
 }
 

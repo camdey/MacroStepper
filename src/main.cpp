@@ -136,6 +136,7 @@ int stepperMaxSpeed               = 3000;       // max speed setting for AccelSt
 int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
 
 String currentScreen;
+String stepDist = "0.00125";
 
 // ***** --- PROGRAM --- ***** //
 
@@ -205,7 +206,7 @@ void setup(void) {
   // don't home rail on start up
   runHomingSequence = false;
 
-  initButtons(250, 50);
+  initButtons(200, 75);
   populateScreen("Home");
 }
 
@@ -265,8 +266,8 @@ void loop() {
 			silentStepConfig();
     }
 		// update flashValue if on right screen
-		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
-			updateFlashValue();
+		if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
+			flash_screen::updateFlashValue();
 		}
     // set END as maxPosition if Z Stick depressed
     if (activeScreen == 4 && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {

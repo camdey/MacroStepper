@@ -10,10 +10,10 @@
 
 namespace manual_screen {
   #define num_btns_Manual 11
+  #define num_tchs_Manual 6
   gfxButton btn_array_Manual[num_btns_Manual];
-  gfxTouch  tch_array_Manual[num_btns_Manual];
+  gfxTouch  tch_array_Manual[num_tchs_Manual];
 
-  String stepDist = String(distancePerMovement/1000, 5);
   String stepNr   = String(manualMovementCount);
   String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
 
@@ -61,7 +61,6 @@ namespace manual_screen {
 
   void populateManualScreen() {
     setCurrentScreen("Manual");
-    stepDist = String(distancePerMovement/1000, 5);
     stepNr = String(manualMovementCount);
     railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
 
@@ -82,20 +81,21 @@ namespace manual_screen {
   void checkManualButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
     if (touch_z >= 100 && touch_z <= 1000) {
-      for (int i=0; i < num_btns_Manual; i++) {
+      for (int i=0; i < num_tchs_Manual; i++) {
         tch_array_Manual[i].checkButton("Manual", touch_x, touch_y);
       }
     }
 
     // TODO - something better so we don't check the entire array every loop??
     // else if screen not pressed, re-enable toggle
-    if (touch_z == 0) {
-      for (int i=0; i < num_btns_Manual; i++) {
-        if (tch_array_Manual[i].touchType == "toggle") {
-          tch_array_Manual[i].toggleCoolOff();
-        }
-      }
-    }
+    // else if (touch_z == 0 && resetToggle == true) {
+    //   for (int i=0; i < num_btns_Manual; i++) {
+    //     if (tch_array_Manual[i].touchType == "toggle") {
+    //       tch_array_Manual[i].setTouchReset(true);
+    //     }
+    //   }
+    //   resetToggle = false;
+    // }
   }
 
 
@@ -104,7 +104,6 @@ namespace manual_screen {
       arrowsActive = true;
       editMovementDistance = true;
 
-      stepDist = String(distancePerMovement/1000, 5); // get latest value
       btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
     }
@@ -112,7 +111,6 @@ namespace manual_screen {
       arrowsActive = false;
       editMovementDistance = false;
 
-      stepDist = String(distancePerMovement/1000, 5); // get latest value
       // TODO would be nice to not re-write the top line on every arrow press
       btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), WHITE);
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, WHITE);
@@ -158,7 +156,7 @@ namespace manual_screen {
 
   void func_Back(bool btnActive) {
     if (btnActive == true && arrowsActive == false) {
-      startScreen();
+      populateScreen("Home");
     }
   }
 
@@ -173,6 +171,7 @@ namespace manual_screen {
 
         stepsPerMovement++; // increment
         setStepDistance();
+        btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
       }
       // if not setting step dist., move the stepper forward
       else if (editMovementDistance == false) {
@@ -197,6 +196,7 @@ namespace manual_screen {
 
         stepsPerMovement--; // decrement
         setStepDistance();
+        btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
       }
       // if not setting step dist., move the stepper forward
       else if (editMovementDistance == false) {

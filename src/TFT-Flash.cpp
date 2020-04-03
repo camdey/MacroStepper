@@ -53,13 +53,14 @@ namespace flash_screen {
       btn_array_Flash[i].drawButton(tft);
     }
     // draw text
-    btn_FlashOff.writeTextTopCentre(    tft, Arimo_Regular_24, String("Flash Off"),   WHITE);
+    btn_FlashOff.writeTextTopCentre(    tft, Arimo_Regular_24, String("Off Value"),   WHITE);
     btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), WHITE);
-    btn_FlashOn.writeTextTopCentre(     tft, Arimo_Regular_24, String("Flash On"),    WHITE);
+    btn_FlashOn.writeTextTopCentre(     tft, Arimo_Regular_24, String("On Value"),    WHITE);
     btn_OnValue.writeTextBottomCentre(  tft, Arimo_Bold_30, String(flashOnValue),  WHITE);
     btn_Threshold.writeTextTopCentre(   tft, Arimo_Regular_24, String("Threshold"),   WHITE);
     btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold),WHITE);
-    btn_FlashTest.writeTextCentre(      tft, Arimo_Bold_24, String("Test Flash"),  WHITE);
+    btn_FlashTest.writeTextTopCentre(   tft, Arimo_Bold_24, String("Test"),  WHITE);
+    btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"),  WHITE);
   }
 
 
@@ -73,13 +74,13 @@ namespace flash_screen {
 
     // TODO - something better so we don't check the entire array every loop??
     // else if screen not pressed, re-enable toggle
-    if (touch_z == 0) {
-      for (int i=0; i < num_btns_Flash; i++) {
-        if (tch_array_Flash[i].touchType == "toggle") {
-          tch_array_Flash[i].toggleCoolOff();
-        }
-      }
-    }
+    // if (touch_z == 0) {
+    //   for (int i=0; i < num_btns_Flash; i++) {
+    //     if (tch_array_Flash[i].touchType == "toggle") {
+    //       tch_array_Flash[i].setTouchReset(true);
+    //     }
+    //   }
+    // }
   }
 
   void func_FlashOff(bool btnActive) {
@@ -118,17 +119,20 @@ namespace flash_screen {
         toggleShutter();
       }
       // print as yellow until result returned
-      btn_FlashTest.writeTextCentre(tft, Arimo_Bold_24, String("Test Flash"), YELLOW);
+      btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_24, String("Test"), YELLOW);
+      btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"), YELLOW);
 
       // trigger shutter
       shutterTriggered = triggerShutter();
 
       // check result
       if (shutterTriggered == false) {
-        btn_FlashTest.writeTextCentre(tft, Arimo_Bold_24, String("Test Flash"), CUSTOM_RED);
+        btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_24, String("Test"), CUSTOM_RED);
+        btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"), CUSTOM_RED);
       }
       else if (shutterTriggered == true) {
-        btn_FlashTest.writeTextCentre(tft, Arimo_Bold_24, String("Test Flash"), CUSTOM_GREEN);
+        btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_24, String("Test"), CUSTOM_GREEN);
+        btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"), CUSTOM_GREEN);
       }
       testFlash = false;
     }
@@ -138,7 +142,30 @@ namespace flash_screen {
   void func_Back(bool btnActive) {
     if (btnActive == true && editFlashOnValue == false && editFlashOffValue == false && testFlash == false) {
       // go back to start screen
-      startScreen();
+      populateScreen("Home");
+    }
+  }
+
+
+  /***********************************************************************
+  Updates the screen with light sensor readings of the Flash LED. Used
+  to calibrate optimal trigger point for flash given lighting conditions
+  at the time that may affect the light sensor.
+  ***********************************************************************/
+  void updateFlashValue() {
+    // get latest flashValue reading
+    flashReady = flashStatus();
+
+    // if difference from previous reading > 1, updates value on screen
+    if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue == true) {
+      func_FlashOff(true);
+      // set OFF value for flash
+      flashOffValue = flashValue;
+      }
+    if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue == true) {
+      func_FlashOn(true);
+      // set ON value for flash
+      flashOnValue = flashValue;
     }
   }
 

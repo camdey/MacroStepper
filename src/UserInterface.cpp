@@ -343,27 +343,27 @@ void startScreen() {
 }
 
 
-/***********************************************************************
-Updates the screen with light sensor readings of the Flash LED. Used
-to calibrate optimal trigger point for flash given lighting conditions
-at the time that may affect the light sensor.
-***********************************************************************/
-void updateFlashValue() {
-  // get latest flashValue reading
-  flashReady = flashStatus();
-
-  // if difference from previous reading > 1, updates value on screen
-  if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue == true) {
-    updateValueField("Flash Off", WHITE);
-    // set OFF value for flash
-    flashOffValue = flashValue;
-    }
-  if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue == true) {
-    updateValueField("Flash On", WHITE);
-    // set ON value for flash
-    flashOnValue = flashValue;
-  }
-}
+// /***********************************************************************
+// Updates the screen with light sensor readings of the Flash LED. Used
+// to calibrate optimal trigger point for flash given lighting conditions
+// at the time that may affect the light sensor.
+// ***********************************************************************/
+// void updateFlashValue() {
+//   // get latest flashValue reading
+//   flashReady = flashStatus();
+//
+//   // if difference from previous reading > 1, updates value on screen
+//   if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue == true) {
+//     func_FlashOff(true);
+//     // set OFF value for flash
+//     flashOffValue = flashValue;
+//     }
+//   if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue == true) {
+//     func_FlashOn(true);
+//     // set ON value for flash
+//     flashOnValue = flashValue;
+//   }
+// }
 
 
 /***********************************************************************

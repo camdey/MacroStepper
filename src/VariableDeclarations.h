@@ -203,5 +203,6 @@ extern int stepperMaxSpeed;
 extern int rampSteps;
 
 extern String currentScreen;
+extern String stepDist;
 
 #endif

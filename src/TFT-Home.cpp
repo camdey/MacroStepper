@@ -64,13 +64,13 @@ namespace home_screen {
 
     // TODO - something better so we don't check the entire array every loop??
     // else if screen not pressed, re-enable toggle
-    if (touch_z == 0) {
-      for (int i=0; i < num_btns_Home; i++) {
-        if (tch_array_Home[i].touchType == "toggle") {
-          tch_array_Home[i].toggleCoolOff();
-        }
-      }
-    }
+    // if (touch_z == 0) {
+    //   for (int i=0; i < num_btns_Home; i++) {
+    //     if (tch_array_Home[i].touchType == "toggle") {
+    //       tch_array_Home[i].setTouchReset(true);
+    //     }
+    //   }
+    // }
   }
 
 

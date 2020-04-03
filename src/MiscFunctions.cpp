@@ -1,6 +1,7 @@
 #include "MiscFunctions.h"
 #include "UserInterface.h"
 #include "TFT-Manual.h"
+#include "TFT-Main.h"
 
 void estimateDuration(bool screenRefresh) {
   float duration = movementsRequired * (shutterDelay + (recycleTime/1000));
@@ -131,19 +132,13 @@ void setStepDistance() {
 	// microsteps = 4
 	// 0.005 / 4 = 1.25μm
   distancePerMovement = microstepDistance * stepsPerMovement;
+  stepDist = String(distancePerMovement/1000, 5);
 
   if (prevDistance != distancePerMovement) {
     // print new delay value
-    // int16_t x1, y1;
-    // uint16_t w, h;
-    // tft.setFont(&Arimo_Bold_24);
-    // tft.getTextBounds(String(prevDistance/1000, 5), 15, 60, &x1, &y1, &w, &h);
-    // tft.fillRect(x1, y1, w, h, CUSTOM_BLUE);
-    // updateValueField("Step Dist", YELLOW);
-    manual_screen::func_StepDistance(true);
     setMovementsRequired();
 
-    if (activeScreen == 3) {
+    if (getCurrentScreen() == "Auto") {
       // update estimated time
       estimateDuration(0); // don't force refresh
       // update progress
