@@ -3,6 +3,7 @@
 #include "StepperControl.h"
 #include "TouchControl.h"
 #include "UserInterface.h"
+#include "TFT-Main.h"
 
 int arrowsTouch(int xPos, int yPos, bool moveStepper, int val = 0) {
 
@@ -10,7 +11,7 @@ int arrowsTouch(int xPos, int yPos, bool moveStepper, int val = 0) {
     val++;
     // if stepping required, trigger shutter, move step
     if (moveStepper == true) {
-      if (shutterEnabled == true && activeScreen == 2) {
+      if (shutterEnabled == true && getCurrentScreen() == "Manual") {
         shutterTriggered = triggerShutter();
       }
       stepperMoved = stepMotor(1, 500); // forward

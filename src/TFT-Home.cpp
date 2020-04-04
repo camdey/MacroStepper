@@ -76,8 +76,7 @@ namespace home_screen {
 
   void func_Auto(bool btnActive) {
     if (btnActive == true) {
-      // populateScreen("Auto");
-      autoScreen();
+      populateScreen("Auto");
     }
   }
 
@@ -85,7 +84,6 @@ namespace home_screen {
   void func_Manual(bool btnActive) {
     if (btnActive == true) {
       populateScreen("Manual");
-      // manualScreen();
     }
   }
 
@@ -103,7 +101,6 @@ namespace home_screen {
   void func_Flash(bool btnActive) {
     if (btnActive == true) {
       populateScreen("Flash");
-      // flashScreen();
     }
   }
 
@@ -112,7 +109,6 @@ namespace home_screen {
     if (btnActive == true) {
       rotateScreen(); // rotate screen, touch controls, and joystick
       populateScreen("Home");
-      // startScreen(); // reload startScreen
     }
   }
 }

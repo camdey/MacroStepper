@@ -3,6 +3,8 @@
 #include "StepperControl.h"
 #include "ShutterControl.h"
 #include "UserInterface.h"
+#include "TFT-Main.h"
+#include "TFT-Auto.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -74,8 +76,8 @@ void autoStack() {
           else if (millis() - failTime >= 10000) {
             // Serial.println("go to flash screen");
             pauseAutoStack = true; // pause autostack
-            drawPlayPause(true, false); // grey out play, highlight pause
-            flashScreen(); // load screen for checking flash settings/functionality
+            auto_screen::drawPlayPause(true, false); // grey out play, highlight pause
+            populateScreen("Flash"); // load screen for checking flash settings/functionality
             break;
           }
         }
@@ -91,9 +93,9 @@ void autoStack() {
 		if (stepperMoved == true) {
 			completedMovements++;
 	    // make sure correct screen is displaying
-	    if (activeScreen == 3) { // auto screen
-	      updateProgress(0); // don't force refresh
-				estimateDuration(0); // don't force refresh
+	    if (getCurrentScreen() == "Auto") { // auto screen
+	      auto_screen::updateProgress(0); // don't force refresh
+				auto_screen::estimateDuration(0); // don't force refresh
 	    }
 
 			shutterTriggered = false; // reset shutter
@@ -107,14 +109,14 @@ void autoStack() {
   }
   // stop AutoStack sequence if end reached
   if (completedMovements >= movementsRequired) {
-		estimateDuration(1); // force refresh
+		auto_screen::estimateDuration(1); // force refresh
     autoStackFlag = false;
     goToStart = true;
     completedMovements = 0;
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
-    drawPlayPause(false, false); // reset play to green
+    auto_screen::drawPlayPause(false, false); // reset play to green
   }
 }
 

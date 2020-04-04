@@ -33,6 +33,8 @@
 #include <Icons/Rotate_Icon.h>
 #include <Icons/Arrow_Up.h>
 #include <Icons/Arrow_Down.h>
+#include <Icons/Play_Icon.h>
+#include <Icons/Pause_Icon.h>
 
 extern TouchScreen      ts;
 extern TMC2130Stepper   driver;

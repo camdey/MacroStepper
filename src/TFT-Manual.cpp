@@ -85,17 +85,6 @@ namespace manual_screen {
         tch_array_Manual[i].checkButton("Manual", touch_x, touch_y);
       }
     }
-
-    // TODO - something better so we don't check the entire array every loop??
-    // else if screen not pressed, re-enable toggle
-    // else if (touch_z == 0 && resetToggle == true) {
-    //   for (int i=0; i < num_btns_Manual; i++) {
-    //     if (tch_array_Manual[i].touchType == "toggle") {
-    //       tch_array_Manual[i].setTouchReset(true);
-    //     }
-    //   }
-    //   resetToggle = false;
-    // }
   }
 
 

@@ -42,6 +42,7 @@
 #include "TFT-Home.h"
 #include "TFT-Manual.h"
 #include "TFT-Flash.h"
+#include "TFT-Auto.h"
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
@@ -257,7 +258,7 @@ void loop() {
     if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
       toggleStepper(false); // disable stepper
       // refresh position on manual screen after stepping completed
-      if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
+      if (prevStepperPosition != stepper.currentPosition() && getCurrentScreen() == "Manual") {
         displayPosition();
       }
     }
@@ -270,7 +271,7 @@ void loop() {
 			flash_screen::updateFlashValue();
 		}
     // set END as maxPosition if Z Stick depressed
-    if (activeScreen == 4 && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+    if (getCurrentScreen() == "Auto" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
       autoStackMax = true;
       setAutoStackPositions(false, true);
       autoStackMax = false;

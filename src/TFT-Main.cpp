@@ -2,10 +2,12 @@
 #include "TFT-Home.h"
 #include "TFT-Flash.h"
 #include "TFT-Manual.h"
+#include "TFT-Auto.h"
 #include "gfxButton.h"
 using namespace manual_screen;
 using namespace home_screen;
 using namespace flash_screen;
+using namespace auto_screen;
 
 // TODO - replaceText function for overwriting
 // TODO - writeText align centre top for manual page buttons
@@ -17,6 +19,7 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
   initHomeButtons();
   initFlashButtons();
   initManualButtons();
+  initAutoButtons();
 
 }
 
@@ -32,6 +35,9 @@ void populateScreen(String screen) {
   }
   else if (screen == "Manual") {
     populateManualScreen();
+  }
+  else if (screen == "Auto") {
+    populateAutoScreen();
   }
 }
 
@@ -65,6 +71,9 @@ void checkButtons(String screen) {
     }
     else if (screen == "Manual") {
       checkManualButtons(touch_x, touch_y, touch_z);
+    }
+    else if (screen == "Auto") {
+      checkAutoButtons(touch_x, touch_y, touch_z);
     }
   }
 }
