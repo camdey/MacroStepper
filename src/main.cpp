@@ -43,6 +43,7 @@
 #include "TFT-Manual.h"
 #include "TFT-Flash.h"
 #include "TFT-Auto.h"
+#include "TFT-AutoConfig.h"
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
@@ -271,9 +272,9 @@ void loop() {
 			flash_screen::updateFlashValue();
 		}
     // set END as maxPosition if Z Stick depressed
-    if (getCurrentScreen() == "Auto" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+    if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
       autoStackMax = true;
-      setAutoStackPositions(false, true);
+      autoConfig_screen::setAutoStackPositions(false, true);
       autoStackMax = false;
     }
 
@@ -289,7 +290,7 @@ void loop() {
   // run homing sequence if first loop
   if (runHomingSequence == true) {
     homeRail(); // run homing routine
-		setAutoStackPositions(true, true); // set both start and end points
+		autoConfig_screen::setAutoStackPositions(true, true); // set both start and end points
 		silentStepConfig(); // set config for silentStep
     runHomingSequence = false;
   }

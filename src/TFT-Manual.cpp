@@ -27,8 +27,8 @@ namespace manual_screen {
   gfxButton btn_Flash        =   gfxB.initBitmapButton( "Manual", aperture,         155,  15,   50,   50,       CUSTOM_RED   );
   gfxButton btn_Reset        =   gfxB.initBitmapButton( "Manual", reset,            155,  95,   50,   50,       WHITE        );
   gfxButton btn_Back         =   gfxB.initBitmapButton( "Manual", backArrow,        155,  175,  50,   50,       WHITE        );
-  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( "Manual", arrowUp,          230,  15,   60,   68,       CUSTOM_GREEN );
-  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( "Manual", arrowDown,        230,  135,  60,   68,       CUSTOM_RED   );
+  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( "Manual", arrowUp,          240,  26,   60,   68,       CUSTOM_GREEN );
+  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( "Manual", arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
   gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,   func_StepDistance,  "btn_DistanceVal",   20 );
   gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,         func_Flash,         "btn_Flash",         20 );
   gfxTouch  tch_Reset        =   gfxT.addMomentary( btn_Reset,         func_Reset,         "btn_Reset",         20 );

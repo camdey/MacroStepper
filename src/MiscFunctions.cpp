@@ -35,22 +35,22 @@
 // }
 
 
-void resetAutoStack() {
-  if ((currentTime - prevGenericTime) >= genericTouchDelay) {
-    autoStackFlag = false;
-    goToStart = true;
-    joystickState = true;
-    pauseAutoStack = false;
-    stepCount = 1;
-    completedMovements = 0;
-    movementsRequired = 0;
-    startPosition = stepper.currentPosition();
-    endPosition = 0;
-    tft.drawBitmap(160, 10, reset40, 40, 40, GRAY);
-
-    prevGenericTime = millis();
-  }
-}
+// void resetAutoStack() {
+//   if ((currentTime - prevGenericTime) >= genericTouchDelay) {
+//     autoStackFlag = false;
+//     goToStart = true;
+//     joystickState = true;
+//     pauseAutoStack = false;
+//     stepCount = 1;
+//     completedMovements = 0;
+//     movementsRequired = 0;
+//     startPosition = stepper.currentPosition();
+//     endPosition = 0;
+//     tft.drawBitmap(160, 10, reset40, 40, 40, GRAY);
+//
+//     prevGenericTime = millis();
+//   }
+// }
 
 
 void rotateScreen() {
@@ -64,50 +64,6 @@ void rotateScreen() {
   }
 }
 
-
-void setAutoStackPositions(bool setStart, bool setEnd) {
-  if (setStart == true) {
-    // lower limit
-    if (startPosition < 0) {
-      startPosition = 0;
-    }
-    // get new value
-    startPosition = stepper.currentPosition();
-    // print start point if changed
-    if (prevStartPosition != startPosition && getCurrentScreen() == "AutoConfig") {
-      int16_t x1, y1;
-      uint16_t w, h;
-      tft.getTextBounds(String(prevStartPosition), 35, 65, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, BLACK);
-      updateValueField("Start Position", WHITE);
-    }
-    // reset macroStepping
-    goToStart = true;
-  }
-
-  if (setEnd == true) {
-    // set new end value
-    if (autoStackMax == true) {
-      endPosition = maxPosition;
-    }
-    else if (autoStackMax == false) {
-      endPosition = stepper.currentPosition();
-    }
-    // print end point if changed
-    if (prevEndPosition != endPosition && getCurrentScreen() == "AutoConfig") {
-      int16_t x1, y1;
-      uint16_t w, h;
-      tft.setFont(&Arimo_Regular_16);
-      tft.getTextBounds(String(prevEndPosition), 35, 145, &x1, &y1, &w, &h);
-      tft.fillRect(x1, y1, w, h, BLACK);
-      updateValueField("End Position", WHITE);
-      prevEndPosition = endPosition;
-    }
-  }
-
-  setMovementsRequired();
-  prevMovementsRequired = movementsRequired;
-}
 
 
 void setMovementsRequired() {

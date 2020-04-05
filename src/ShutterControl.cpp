@@ -1,4 +1,5 @@
 #include "ShutterControl.h"
+#include "TFT-AutoConfig.h"
 
 
 /******************************************************************
@@ -29,26 +30,6 @@ bool flashStatus() {
   }
 
   return flashReady;
-}
-
-void setShutterDelay() {
-
-  if (shutterDelay < 1) {
-    shutterDelay = 1;
-  } else if (shutterDelay > 15) {
-    shutterDelay = 15;
-  }
-
-  if (prevDelay != shutterDelay) {
-    // print new delay value
-    tft.setCursor(155, 143);
-    tft.setFont(&Arimo_Regular_20);
-    tft.setTextColor(BLACK, BLACK);
-    tft.println(prevDelay);
-    tft.setCursor(155, 143);
-    tft.setTextColor(WHITE, BLACK);
-    tft.println(shutterDelay);
-  }
 }
 
 void toggleShutter() {

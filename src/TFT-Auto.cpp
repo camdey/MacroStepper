@@ -4,9 +4,9 @@
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
 #include "StepperControl.h"
-#include "TouchControl.h"
+// #include "TouchControl.h"
 #include "UserInterface.h"
-#include "gfxButton.h"
+// #include "gfxButton.h"
 
 namespace auto_screen {
   #define num_btns_Auto 9
@@ -25,10 +25,10 @@ namespace auto_screen {
   gfxButton btn_Config       =   gfxB.initBitmapButton( "Auto", cogWheel,         155,   95,   50,  50,       WHITE        );
   gfxButton btn_Back         =   gfxB.initBitmapButton( "Auto", backArrow,        155,  175,   50,  50,       WHITE        );
   // don't add these buttons to an array as they depend on logic as to which symbol appears and in which colour
-  gfxButton btn_Play         =   gfxB.initBitmapButton( "Auto", play,             232,   15,  56,   70,       CUSTOM_GREEN );
-  gfxButton btn_Pause        =   gfxB.initBitmapButton( "Auto", pause,            232,  135,  56,   70,       CUSTOM_BLUE  );
-  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( "Auto", arrowUp,          230,   15,  60,   68,       CUSTOM_GREEN );
-  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( "Auto", arrowDown,        230,  135,  60,   68,       CUSTOM_RED   );
+  gfxButton btn_Play         =   gfxB.initBitmapButton( "Auto", play,             242,   25,  56,   70,       CUSTOM_GREEN );
+  gfxButton btn_Pause        =   gfxB.initBitmapButton( "Auto", pause,            242,  145,  56,   70,       CUSTOM_BLUE  );
+  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( "Auto", arrowUp,          240,   26,  60,   68,       CUSTOM_GREEN );
+  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( "Auto", arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
   gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance,  "btn_DistanceVal",  20 );
   gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,         "btn_Flash",        20 );
   gfxTouch  tch_Config       =   gfxT.addMomentary( btn_Config,       func_Config,        "btn_Config",       20 );
