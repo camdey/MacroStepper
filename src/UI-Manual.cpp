@@ -14,23 +14,23 @@ namespace manual_screen {
   String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
 
 
-  gfxButton btn_StepDistance =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_DistanceVal  =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_StepNr       =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_StepNrVal    =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_RailPos      =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_RailPosVal   =   gfxB.initButton(       "Manual", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_Flash        =   gfxB.initBitmapButton( "Manual", aperture,         155,  15,   50,   50,       CUSTOM_RED   );
-  gfxButton btn_Reset        =   gfxB.initBitmapButton( "Manual", reset,            155,  95,   50,   50,       WHITE        );
-  gfxButton btn_Back         =   gfxB.initBitmapButton( "Manual", backArrow,        155,  175,  50,   50,       WHITE        );
-  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( "Manual", arrowUp,          240,  26,   60,   68,       CUSTOM_GREEN );
-  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( "Manual", arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
-  gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,   func_StepDistance,  "btn_DistanceVal",   20 );
-  gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,         func_Flash,         "btn_Flash",         20 );
-  gfxTouch  tch_Reset        =   gfxT.addMomentary( btn_Reset,         func_Reset,         "btn_Reset",         20 );
-  gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,          func_Back,          "btn_Back",          20 );
-  gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,       func_ArrowUp,       "btn_ArrowUp",       20 );
-  gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,     func_ArrowDown,     "btn_ArrowDown",     20 );
+  gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_DistanceVal  =   gfxB.initButton(       "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_StepNr       =   gfxB.initButton(       "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_StepNrVal    =   gfxB.initButton(       "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_RailPos      =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_RailPosVal   =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_Flash        =   gfxB.initBitmapButton( aperture,         155,  15,   50,   50,       CUSTOM_RED   );
+  gfxButton btn_Reset        =   gfxB.initBitmapButton( reset,            155,  95,   50,   50,       WHITE        );
+  gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,        155,  175,  50,   50,       WHITE        );
+  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,          240,  26,   60,   68,       CUSTOM_GREEN );
+  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
+  gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance, 20 );
+  gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,        20 );
+  gfxTouch  tch_Reset        =   gfxT.addMomentary( btn_Reset,        func_Reset,        20 );
+  gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,         func_Back,         20 );
+  gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,      func_ArrowUp,      20 );
+  gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,    func_ArrowDown,    20 );
 
 
   void initManualButtons() {

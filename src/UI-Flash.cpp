@@ -5,22 +5,23 @@
 namespace flash_screen {
 
   #define num_btns_Flash 8
+  #define num_tchs_Flash 4
   gfxButton btn_array_Flash[num_btns_Flash];
-  gfxTouch  tch_array_Flash[num_btns_Flash];
+  gfxTouch  tch_array_Flash[num_tchs_Flash];
 
   // TODO maybe only have one button to set values and just record the max and min value
-  gfxButton btn_FlashOff   =   gfxB.initButton(       "Flash", "fillRoundRect",   0,   5,    125,   66,   15,  CUSTOM_RED     );
-  gfxButton btn_OffValue   =   gfxB.initButton(       "Flash", "fillRoundRect",   0,   5,    125,   66,   15,  CUSTOM_RED     );
-  gfxButton btn_FlashOn    =   gfxB.initButton(       "Flash", "fillRoundRect",   0,  85,    125,   66,   15,  CUSTOM_GREEN   );
-  gfxButton btn_OnValue    =   gfxB.initButton(       "Flash", "fillRoundRect",   0,  85,    125,   66,   15,  CUSTOM_GREEN   );
-  gfxButton btn_Threshold  =   gfxB.initButton(       "Flash", "fillRoundRect", 195,   5,    125,   66,   15,  CUSTOM_BLUE    );
-  gfxButton btn_ThreshVal  =   gfxB.initButton(       "Flash", "fillRoundRect", 195,   5,    125,   66,   15,  CUSTOM_BLUE    );
-  gfxButton btn_FlashTest  =   gfxB.initButton(       "Flash", "fillRoundRect", 195,  85,    125,   66,   15,  CUSTOM_GREY    );
-  gfxButton btn_Back       =   gfxB.initBitmapButton( "Flash",  backArrow,      135,  175,    50,   50,        WHITE          );
-  gfxTouch  tch_FlashOff   =   gfxT.addToggle(    btn_OffValue,   func_FlashOff,  "btn_OffValue",   20 );
-  gfxTouch  tch_FlashOn    =   gfxT.addToggle(    btn_OnValue,    func_FlashOn,   "btn_OnValue",    20 );
-  gfxTouch  tch_FlashTest  =   gfxT.addMomentary( btn_FlashTest,  func_FlashTest, "btn_FlashTest",  20 );
-  gfxTouch  tch_Back       =   gfxT.addMomentary( btn_Back,       func_Back,      "btn_Back",       20 );
+  gfxButton btn_FlashOff   =   gfxB.initButton(       "fillRoundRect",    0,    5,    125,   66,   15,  CUSTOM_RED    );
+  gfxButton btn_OffValue   =   gfxB.initButton(       "fillRoundRect",    0,    5,    125,   66,   15,  CUSTOM_RED    );
+  gfxButton btn_FlashOn    =   gfxB.initButton(       "fillRoundRect",    0,   85,    125,   66,   15,  CUSTOM_GREEN  );
+  gfxButton btn_OnValue    =   gfxB.initButton(       "fillRoundRect",    0,   85,    125,   66,   15,  CUSTOM_GREEN  );
+  gfxButton btn_Threshold  =   gfxB.initButton(       "fillRoundRect",  195,    5,    125,   66,   15,  CUSTOM_BLUE   );
+  gfxButton btn_ThreshVal  =   gfxB.initButton(       "fillRoundRect",  195,    5,    125,   66,   15,  CUSTOM_BLUE   );
+  gfxButton btn_Back       =   gfxB.initBitmapButton( backArrow,        135,  175,    50,   50,         WHITE         );
+  gfxButton btn_FlashTest  =   gfxB.initBlankButton(                    195,  85,    125,   66                        );
+  gfxTouch  tch_FlashOff   =   gfxT.addToggle(    btn_OffValue,   func_FlashOff,  20 );
+  gfxTouch  tch_FlashOn    =   gfxT.addToggle(    btn_OnValue,    func_FlashOn,   20 );
+  gfxTouch  tch_FlashTest  =   gfxT.addMomentary( btn_FlashTest,  func_FlashTest, 20 );
+  gfxTouch  tch_Back       =   gfxT.addMomentary( btn_Back,       func_Back,      20 );
 
   void initFlashButtons() {
     btn_array_Flash[0] = btn_FlashOff;
@@ -53,15 +54,15 @@ namespace flash_screen {
     btn_OnValue.writeTextBottomCentre(  tft, Arimo_Bold_30, String(flashOnValue),  WHITE);
     btn_Threshold.writeTextTopCentre(   tft, Arimo_Regular_24, String("Threshold"),   WHITE);
     btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold),WHITE);
-    btn_FlashTest.writeTextTopCentre(   tft, Arimo_Bold_24, String("Test"),  WHITE);
-    btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"),  WHITE);
+    btn_FlashTest.writeTextTopCentre(   tft, Arimo_Bold_30, String("TEST"),  WHITE);
+    btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"),  WHITE);
   }
 
 
   void checkFlashButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
     if (touch_z >= 50 && touch_z <= 1000) {
-      for (int i=0; i < num_btns_Flash; i++) {
+      for (int i=0; i < num_tchs_Flash; i++) {
         tch_array_Flash[i].checkButton("Flash", touch_x, touch_y);
       }
     }
@@ -113,20 +114,20 @@ namespace flash_screen {
         toggleShutter();
       }
       // print as yellow until result returned
-      btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_24, String("Test"), YELLOW);
-      btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"), YELLOW);
+      btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), YELLOW);
+      btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), YELLOW);
 
       // trigger shutter
       shutterTriggered = triggerShutter();
 
       // check result
       if (shutterTriggered == false) {
-        btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_24, String("Test"), CUSTOM_RED);
-        btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"), CUSTOM_RED);
+        btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_RED);
+        btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_RED);
       }
       else if (shutterTriggered == true) {
-        btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_24, String("Test"), CUSTOM_GREEN);
-        btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_24, String("Flash"), CUSTOM_GREEN);
+        btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_GREEN);
+        btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_GREEN);
       }
       testFlash = false;
     }

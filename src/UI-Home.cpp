@@ -5,20 +5,21 @@
 
 namespace home_screen {
   #define num_btns_Home 5
+  #define num_tchs_Home 5
   gfxButton btn_array_Home[num_btns_Home];
-  gfxTouch  tch_array_Home[num_btns_Home];
+  gfxTouch  tch_array_Home[num_tchs_Home];
 
 
-  gfxButton btn_Manual   =   gfxB.initButton(       "Home", "fillRoundRect",  20,   100,  130,  60,   8, CUSTOM_BLUE  );
-  gfxButton btn_Auto     =   gfxB.initButton(       "Home", "fillRoundRect",  170,  100,  130,  60,   8, CUSTOM_GREEN );
-  gfxButton btn_Home     =   gfxB.initBitmapButton( "Home", house,            30,   190,  50,   42,      WHITE        );
-  gfxButton btn_Flash    =   gfxB.initBitmapButton( "Home", flash,            145,  190,  40,   42,      WHITE        );
-  gfxButton btn_Rotate   =   gfxB.initBitmapButton( "Home", rotate,      250,  190,  45,   39,      WHITE        );
-  gfxTouch  tch_Auto     =   gfxT.addMomentary( btn_Auto,    func_Auto,    "btn_Auto",    20  );
-  gfxTouch  tch_Manual   =   gfxT.addMomentary( btn_Manual,  func_Manual,  "btn_Manual",  20  );
-  gfxTouch  tch_Home     =   gfxT.addMomentary( btn_Home,    func_Home,    "btn_Home",    20  );
-  gfxTouch  tch_Flash    =   gfxT.addMomentary( btn_Flash,   func_Flash,   "btn_Flash",   20  );
-  gfxTouch  tch_Rotate   =   gfxT.addMomentary( btn_Rotate,  func_Rotate,  "btn_Rotate",  20  );
+  gfxButton btn_Manual   =   gfxB.initButton(       "fillRoundRect",   20,  100,  130,  60, 8,  CUSTOM_BLUE   );
+  gfxButton btn_Auto     =   gfxB.initButton(       "fillRoundRect",  170,  100,  130,  60, 8,  CUSTOM_GREEN  );
+  gfxButton btn_Home     =   gfxB.initBitmapButton( house,             30,  190,   50,  42,     WHITE         );
+  gfxButton btn_Flash    =   gfxB.initBitmapButton( flash,            145,  190,   40,  42,     WHITE         );
+  gfxButton btn_Rotate   =   gfxB.initBitmapButton( rotate,           250,  190,   45,  39,     WHITE         );
+  gfxTouch  tch_Auto     =   gfxT.addMomentary( btn_Auto,    func_Auto,    20 );
+  gfxTouch  tch_Manual   =   gfxT.addMomentary( btn_Manual,  func_Manual,  20 );
+  gfxTouch  tch_Home     =   gfxT.addMomentary( btn_Home,    func_Home,    20 );
+  gfxTouch  tch_Flash    =   gfxT.addMomentary( btn_Flash,   func_Flash,   20 );
+  gfxTouch  tch_Rotate   =   gfxT.addMomentary( btn_Rotate,  func_Rotate,  20 );
 
 
   void initHomeButtons() {
@@ -53,7 +54,7 @@ namespace home_screen {
   void checkHomeButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
     if (touch_z >= 50 && touch_z <= 1000) {
-      for (int i=0; i < num_btns_Home; i++) {
+      for (int i=0; i < num_tchs_Home; i++) {
         tch_array_Home[i].checkButton("Home", touch_x, touch_y);
       }
     }

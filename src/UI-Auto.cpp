@@ -10,28 +10,28 @@ namespace auto_screen {
   gfxTouch  tch_array_Auto[num_tchs_Auto];
 
 
-  gfxButton btn_StepDistance =   gfxB.initButton(       "Auto", "fillRoundRect",    0,    5,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_DistanceVal  =   gfxB.initButton(       "Auto", "fillRoundRect",    0,    5,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_EstTime      =   gfxB.initButton(       "Auto", "fillRoundRect",    0,   85,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_EstTimeVal   =   gfxB.initButton(       "Auto", "fillRoundRect",    0,   85,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_Progress     =   gfxB.initButton(       "Auto", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_ProgressVal  =   gfxB.initButton(       "Auto", "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_Flash        =   gfxB.initBitmapButton( "Auto", aperture,         155,   15,   50,  50,       CUSTOM_RED   );
-  gfxButton btn_Config       =   gfxB.initBitmapButton( "Auto", cogWheel,         155,   95,   50,  50,       WHITE        );
-  gfxButton btn_Back         =   gfxB.initBitmapButton( "Auto", backArrow,        155,  175,   50,  50,       WHITE        );
+  gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",    0,    5,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_DistanceVal  =   gfxB.initButton(       "fillRoundRect",    0,    5,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_EstTime      =   gfxB.initButton(       "fillRoundRect",    0,   85,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_EstTimeVal   =   gfxB.initButton(       "fillRoundRect",    0,   85,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_Progress     =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_ProgressVal  =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
+  gfxButton btn_Flash        =   gfxB.initBitmapButton( aperture,         155,   15,   50,  50,       CUSTOM_RED   );
+  gfxButton btn_Config       =   gfxB.initBitmapButton( cogWheel,         155,   95,   50,  50,       WHITE        );
+  gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,        155,  175,   50,  50,       WHITE        );
   // don't add these buttons to an array as they depend on logic as to which symbol appears and in which colour
-  gfxButton btn_Play         =   gfxB.initBitmapButton( "Auto", play,             242,   25,  56,   70,       CUSTOM_GREEN );
-  gfxButton btn_Pause        =   gfxB.initBitmapButton( "Auto", pause,            242,  145,  56,   70,       CUSTOM_BLUE  );
-  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( "Auto", arrowUp,          240,   26,  60,   68,       CUSTOM_GREEN );
-  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( "Auto", arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
-  gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance,  "btn_DistanceVal",  20 );
-  gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,         "btn_Flash",        20 );
-  gfxTouch  tch_Config       =   gfxT.addMomentary( btn_Config,       func_Config,        "btn_Config",       20 );
-  gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,         func_Back,          "btn_Back",         20 );
-  gfxTouch  tch_Play         =   gfxT.addToggle(    btn_Play,         func_Play,          "btn_Play",         20 );
-  gfxTouch  tch_Pause        =   gfxT.addToggle(    btn_Pause,        func_Pause,         "btn_Pause",        20 );
-  gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,      func_ArrowUp,       "btn_ArrowUp",      20 );
-  gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,    func_ArrowDown,     "btn_ArrowDown",    20 );
+  gfxButton btn_Play         =   gfxB.initBitmapButton( play,             242,   25,  56,   70,       CUSTOM_GREEN );
+  gfxButton btn_Pause        =   gfxB.initBitmapButton( pause,            242,  145,  56,   70,       CUSTOM_BLUE  );
+  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,          240,   26,  60,   68,       CUSTOM_GREEN );
+  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
+  gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance,  20 );
+  gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,         20 );
+  gfxTouch  tch_Config       =   gfxT.addMomentary( btn_Config,       func_Config,        20 );
+  gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,         func_Back,          20 );
+  gfxTouch  tch_Play         =   gfxT.addToggle(    btn_Play,         func_Play,          20 );
+  gfxTouch  tch_Pause        =   gfxT.addToggle(    btn_Pause,        func_Pause,         20 );
+  gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,      func_ArrowUp,       20 );
+  gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,    func_ArrowDown,     20 );
 
 
   void initAutoButtons() {
