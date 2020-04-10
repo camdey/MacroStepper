@@ -1,12 +1,6 @@
-#include "TFT-Main.h"
-#include "TFT-Home.h"
-#include "TFT-Flash.h"
-#include "MiscFunctions.h"
+#include "UI-Main.h"
+#include "UI-Flash.h"
 #include "ShutterControl.h"
-#include "StepperControl.h"
-#include "TouchControl.h"
-#include "UserInterface.h"
-#include "gfxButton.h"
 
 namespace flash_screen {
 
@@ -66,7 +60,7 @@ namespace flash_screen {
 
   void checkFlashButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
-    if (touch_z >= 100 && touch_z <= 1000) {
+    if (touch_z >= 50 && touch_z <= 1000) {
       for (int i=0; i < num_btns_Flash; i++) {
         tch_array_Flash[i].checkButton("Flash", touch_x, touch_y);
       }

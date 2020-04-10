@@ -2,9 +2,9 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "ShutterControl.h"
-#include "UserInterface.h"
-#include "TFT-Main.h"
-#include "TFT-Auto.h"
+#include "UI-Main.h"
+#include "UI-Auto.h"
+#include "UI-AutoConfig.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -146,7 +146,7 @@ void dryRun() {
     stepper.moveTo(startPosition);
     stepper.runSpeedToPosition();
   }
-  displayPosition();
+  config_screen::displayPosition();
 
   // step slow through procedure
   while (stepper.currentPosition() < endPosition) {
@@ -154,7 +154,7 @@ void dryRun() {
     stepper.moveTo(endPosition);
     stepper.runSpeedToPosition();
   }
-  displayPosition();
+  config_screen::displayPosition();
 
   // return to start
   if (stepper.currentPosition() > startPosition) {
@@ -166,7 +166,7 @@ void dryRun() {
   stepper.setSpeed(0);
   targetFlag = true;
   completedMovements = 0;
-  displayPosition();
+  config_screen::displayPosition();
 }
 
 

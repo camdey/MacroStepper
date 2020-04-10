@@ -1,12 +1,7 @@
-#include "TFT-Main.h"
-#include "TFT-Home.h"
-#include "TFT-Auto.h"
+#include "UI-Main.h"
+#include "UI-Auto.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
-#include "StepperControl.h"
-// #include "TouchControl.h"
-#include "UserInterface.h"
-// #include "gfxButton.h"
 
 namespace auto_screen {
   #define num_btns_Auto 9
@@ -85,7 +80,7 @@ namespace auto_screen {
 
   void checkAutoButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
-    if (touch_z >= 100 && touch_z <= 1000) {
+    if (touch_z >= 50 && touch_z <= 1000) {
       for (int i=0; i < num_tchs_Auto; i++) {
         tch_array_Auto[i].checkButton("Auto", touch_x, touch_y);
       }

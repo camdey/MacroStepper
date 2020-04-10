@@ -1,11 +1,7 @@
-#include "TFT-Main.h"
-#include "TFT-Home.h"
+#include "UI-Main.h"
+#include "UI-Home.h"
 #include "MiscFunctions.h"
-#include "ShutterControl.h"
 #include "StepperControl.h"
-#include "TouchControl.h"
-#include "UserInterface.h"
-#include "gfxButton.h"
 
 namespace home_screen {
   #define num_btns_Home 5
@@ -17,7 +13,7 @@ namespace home_screen {
   gfxButton btn_Auto     =   gfxB.initButton(       "Home", "fillRoundRect",  170,  100,  130,  60,   8, CUSTOM_GREEN );
   gfxButton btn_Home     =   gfxB.initBitmapButton( "Home", house,            30,   190,  50,   42,      WHITE        );
   gfxButton btn_Flash    =   gfxB.initBitmapButton( "Home", flash,            145,  190,  40,   42,      WHITE        );
-  gfxButton btn_Rotate   =   gfxB.initBitmapButton( "Home", rotate_icon,      250,  190,  45,   39,      WHITE        );
+  gfxButton btn_Rotate   =   gfxB.initBitmapButton( "Home", rotate,      250,  190,  45,   39,      WHITE        );
   gfxTouch  tch_Auto     =   gfxT.addMomentary( btn_Auto,    func_Auto,    "btn_Auto",    20  );
   gfxTouch  tch_Manual   =   gfxT.addMomentary( btn_Manual,  func_Manual,  "btn_Manual",  20  );
   gfxTouch  tch_Home     =   gfxT.addMomentary( btn_Home,    func_Home,    "btn_Home",    20  );
@@ -56,7 +52,7 @@ namespace home_screen {
 
   void checkHomeButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
-    if (touch_z >= 100 && touch_z <= 1000) {
+    if (touch_z >= 50 && touch_z <= 1000) {
       for (int i=0; i < num_btns_Home; i++) {
         tch_array_Home[i].checkButton("Home", touch_x, touch_y);
       }

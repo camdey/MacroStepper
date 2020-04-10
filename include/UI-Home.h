@@ -1,5 +1,5 @@
-#ifndef TFTHOME_H
-#define TFTHOME_H
+#ifndef UIHOME_H
+#define UIHOME_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"

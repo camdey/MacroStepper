@@ -21,20 +21,20 @@
 #include <Fonts/Syncopate_Bold_36.h>
 #include <Fonts/Permanent_Marker_Regular_36.h>
 #include <Fonts/Lato_Black_34.h>
-#include <Icons/Aperture_Icon.h>
-#include <Icons/Back_Arrow_Icon.h>
-#include <Icons/Cog_Wheel_Icon.h>
-#include <Icons/Delay_Clock_Icon.h>
-#include <Icons/Flash_Icon.h>
-#include <Icons/House_Icon.h>
-#include <Icons/Main_Logo_Icon.h>
-#include <Icons/Reset_Icon.h>
-#include <Icons/Reset_40_Icon.h>
-#include <Icons/Rotate_Icon.h>
-#include <Icons/Arrow_Up.h>
-#include <Icons/Arrow_Down.h>
-#include <Icons/Play_Icon.h>
-#include <Icons/Pause_Icon.h>
+#include <Icons/Aperture.h>
+#include <Icons/ArrowUp.h>
+#include <Icons/ArrowDown.h>
+#include <Icons/BackArrow.h>
+#include <Icons/CogWheel.h>
+#include <Icons/DelayClock.h>
+#include <Icons/Flash.h>
+#include <Icons/House.h>
+#include <Icons/MainLogo.h>
+#include <Icons/Play.h>
+#include <Icons/Pause.h>
+#include <Icons/Reset.h>
+#include <Icons/Reset40.h>
+#include <Icons/Rotate.h>
 
 extern TouchScreen      ts;
 extern TMC2130Stepper   driver;

@@ -1,12 +1,8 @@
-#include "TFT-Main.h"
-#include "TFT-Home.h"
-#include "TFT-Manual.h"
+#include "UI-Main.h"
+#include "UI-Manual.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
 #include "StepperControl.h"
-#include "TouchControl.h"
-#include "UserInterface.h"
-#include "gfxButton.h"
 
 namespace manual_screen {
   #define num_btns_Manual 11
@@ -80,7 +76,7 @@ namespace manual_screen {
 
   void checkManualButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
-    if (touch_z >= 100 && touch_z <= 1000) {
+    if (touch_z >= 50 && touch_z <= 1000) {
       for (int i=0; i < num_tchs_Manual; i++) {
         tch_array_Manual[i].checkButton("Manual", touch_x, touch_y);
       }
@@ -104,20 +100,6 @@ namespace manual_screen {
       btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), WHITE);
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, WHITE);
     }
-  }
-
-
-  void func_StepNr() {
-    stepNr = String(manualMovementCount); // get latest value
-    btn_StepNr.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-    btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepNr, WHITE);
-  }
-
-
-  void func_RailPos() {
-    railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
-    btn_RailPos.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-    btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_24, railPos, WHITE);
   }
 
 
@@ -168,8 +150,8 @@ namespace manual_screen {
         if (shutterEnabled == true) {
           shutterTriggered = triggerShutter();
         }
-        stepperMoved = stepMotor(1, 500); // forward
-        // check void displayPosition() for how we update StepNrVal
+        stepperMoved = stepMotor(1, 200); // forward
+        displayPosition();
       }
     }
   }
@@ -194,8 +176,29 @@ namespace manual_screen {
           shutterTriggered = triggerShutter();
         }
         stepperMoved = stepMotor(-1, 500); // reverse
-        // check void displayPosition() for how we update StepNrVal
+        displayPosition();
       }
     }
   }
+
+
+  void displayPosition() {
+    // update for new values
+    if (prevStepperPosition != stepper.currentPosition()) {
+      int currentPosition = stepper.currentPosition();
+      railPos = String(currentPosition*(microstepDistance/1000), 5);
+      // update rail position value
+      btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_24, railPos, WHITE);
+
+
+      manualMovementCount++;
+      stepNr = String(manualMovementCount);
+      // update movement count for manual screen
+      btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepNr, WHITE);
+
+      prevManualMovementCount = manualMovementCount;
+      prevStepperPosition = currentPosition;
+    }
+  }
+
 }

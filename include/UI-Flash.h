@@ -1,5 +1,5 @@
-#ifndef TFTFLASH_H
-#define TFTFLASH_H
+#ifndef UIFLASH_H
+#define UIFLASH_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"

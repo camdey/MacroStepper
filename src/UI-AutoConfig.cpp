@@ -1,30 +1,25 @@
-#include "TFT-Main.h"
-#include "TFT-Auto.h"
-#include "TFT-AutoConfig.h"
+#include "UI-Main.h"
+#include "UI-AutoConfig.h"
 #include "MiscFunctions.h"
-#include "ShutterControl.h"
 #include "StepperControl.h"
-// #include "TouchControl.h"
-// #include "UserInterface.h"
-// #include "gfxButton.h"
 
-namespace autoConfig_screen {
+namespace config_screen {
   #define num_btns_AutoConfig 11
   #define num_tchs_AutoConfig 8
   gfxButton btn_array_AutoConfig[num_btns_AutoConfig];
   gfxTouch  tch_array_AutoConfig[num_tchs_AutoConfig];
 
 
-  gfxButton btn_Start         =   gfxB.initButton(       "AutoConfig", "drawRect",    0,    5,  125,  66, 0, WHITE        );
-  gfxButton btn_StartVal      =   gfxB.initButton(       "AutoConfig", "drawRect",    0,    5,  125,  66, 0, WHITE        );
-  gfxButton btn_End           =   gfxB.initButton(       "AutoConfig", "drawRect",    0,   85,  125,  66, 0, WHITE        );
-  gfxButton btn_EndVal        =   gfxB.initButton(       "AutoConfig", "drawRect",    0,   85,  125,  66, 0, WHITE        );
-  gfxButton btn_Run           =   gfxB.initButton(       "AutoConfig", "drawRect",    0,  165,  125,  66, 0, WHITE        );
-  gfxButton btn_RunVal        =   gfxB.initButton(       "AutoConfig", "drawRect",    0,  165,  125,  66, 0, WHITE        );
-  gfxButton btn_DelayVal      =   gfxB.initButton(       "AutoConfig", "drawRect",  155,  125,   60,  30, 0, WHITE        );
+  gfxButton btn_Start         =   gfxB.initBlankButton(  "AutoConfig",    0,    5,  125,  66);
+  gfxButton btn_StartVal      =   gfxB.initBlankButton(  "AutoConfig",    0,    5,  125,  66);
+  gfxButton btn_End           =   gfxB.initBlankButton(  "AutoConfig",    0,   85,  125,  66);
+  gfxButton btn_EndVal        =   gfxB.initBlankButton(  "AutoConfig",    0,   85,  125,  66);
+  gfxButton btn_Run           =   gfxB.initBlankButton(  "AutoConfig",    0,  165,  125,  66);
+  gfxButton btn_RunVal        =   gfxB.initBlankButton(  "AutoConfig",    0,  165,  125,  66);
+  gfxButton btn_DelayVal      =   gfxB.initBlankButton(  "AutoConfig",  155,  125,   60,  30);
   gfxButton btn_Delay         =   gfxB.initBitmapButton( "AutoConfig", delayClock,  160,   75,   50,  50,    WHITE        );
   // don't add btn_Reset to array as its colour depends on the state of autoStack
-  gfxButton btn_Reset         =   gfxB.initBitmapButton( "autoConfig", reset40,     165,   10,   40,  40,    GRAY         );
+  gfxButton btn_Reset         =   gfxB.initBitmapButton( "AutoConfig", reset40,     165,   10,   40,  40,    GRAY         );
   gfxButton btn_Back          =   gfxB.initBitmapButton( "AutoConfig", backArrow,   160,  175,   50,  50,    WHITE        );
   gfxButton btn_ArrowUp       =   gfxB.initBitmapButton( "AutoConfig", arrowUp,     240,   26,   60,  68,    CUSTOM_GREEN );
   gfxButton btn_ArrowDown     =   gfxB.initBitmapButton( "AutoConfig", arrowDown,   240,  146,   60,  68,    CUSTOM_RED   );
@@ -94,7 +89,7 @@ namespace autoConfig_screen {
 
   void checkAutoConfigButtons(int touch_x, int touch_y, int touch_z) {
     // if screen pressed
-    if (touch_z >= 100 && touch_z <= 1000) {
+    if (touch_z >= 50 && touch_z <= 1000) {
       for (int i=0; i < num_tchs_AutoConfig; i++) {
         tch_array_AutoConfig[i].checkButton("AutoConfig", touch_x, touch_y);
       }
@@ -104,30 +99,32 @@ namespace autoConfig_screen {
 
   void func_Start(bool btnActive) {
     if (btnActive == true && editShutterDelay == false && editEndPosition == false) {
-      arrowsActive = !arrowsActive;
-      editStartPosition = !editStartPosition;
+      arrowsActive = true;
+      editStartPosition = true;
 
-      if (arrowsActive == false && editStartPosition == false) {
-        btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(startPosition), WHITE);
-      }
-      else if (arrowsActive == true && editStartPosition == true) {
-        btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(startPosition), YELLOW);
-      }
+      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(startPosition), YELLOW);
+    }
+    else if (btnActive == false && editStartPosition == true) {
+      arrowsActive = false;
+      editStartPosition = false;
+
+      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(startPosition), WHITE);
     }
   }
 
 
   void func_End(bool btnActive) {
     if (btnActive == true && editShutterDelay == false && editStartPosition == false) {
-      arrowsActive = !arrowsActive;
-      editEndPosition = !editEndPosition;
+      arrowsActive = true;
+      editEndPosition = true;
 
-      if (arrowsActive == false && editEndPosition == false) {
-        btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(endPosition), WHITE);
-      }
-      else if (arrowsActive == true && editEndPosition == true) {
-        btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(endPosition), YELLOW);
-      }
+      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(endPosition), YELLOW);
+    }
+    else if (btnActive == false && editEndPosition == true) {
+      arrowsActive = false;
+      editEndPosition = false;
+
+      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(endPosition), WHITE);
     }
   }
 
@@ -138,21 +135,24 @@ namespace autoConfig_screen {
       dryRun();
       btn_Run.writeTextTopCentre(tft, Lato_Black_34, String("RUN"), CUSTOM_BLUE);
       tch_Run.setState(false); // reset button state to false
+
+      displayPosition();
     }
   }
 
 
   void func_Delay(bool btnActive) {
     if (btnActive == true) {
-      arrowsActive = !arrowsActive;
-      editShutterDelay = !editShutterDelay;
+      arrowsActive = true;
+      editShutterDelay = true;
 
-      if (arrowsActive == false && editShutterDelay == false) {
-        btn_Delay.drawButton(tft, WHITE);
-      }
-      else if (arrowsActive == true && editShutterDelay == true) {
-        btn_Delay.drawButton(tft, YELLOW);
-      }
+      btn_Delay.drawButton(tft, YELLOW);
+    }
+    else if (btnActive == false && editShutterDelay == true) {
+      arrowsActive = false;
+      editShutterDelay = false;
+
+      btn_Delay.drawButton(tft, WHITE);
     }
   }
 
@@ -187,7 +187,7 @@ namespace autoConfig_screen {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
-        stepperMoved = stepMotor(1, 500); // forward
+        stepperMoved = stepMotor(1, 150); // forward
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
@@ -195,7 +195,7 @@ namespace autoConfig_screen {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
-        stepperMoved = stepMotor(1, 500); // forward
+        stepperMoved = stepMotor(1, 150); // forward
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
@@ -217,7 +217,7 @@ namespace autoConfig_screen {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
-        stepperMoved = stepMotor(-1, 500); // backwards
+        stepperMoved = stepMotor(-1, 150); // backwards
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
@@ -225,7 +225,7 @@ namespace autoConfig_screen {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
-        stepperMoved = stepMotor(-1, 500); // forward
+        stepperMoved = stepMotor(-1, 150); // forward
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
@@ -290,6 +290,16 @@ namespace autoConfig_screen {
       char delaySeconds[6];
       sprintf_P(delaySeconds, PSTR("%02d:%02d"), 0, shutterDelay);
       btn_DelayVal.writeTextCentre(tft, Arimo_Regular_20, String(delaySeconds), WHITE);
+    }
+  }
+
+
+  void displayPosition() {
+    if (prevStepperPosition != stepper.currentPosition()) {
+      int currentPosition = stepper.currentPosition();
+      btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_20, String(currentPosition), WHITE);
+
+      prevStepperPosition = currentPosition;
     }
   }
 

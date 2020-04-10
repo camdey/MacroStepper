@@ -1,5 +1,4 @@
 #include "ShutterControl.h"
-#include "TFT-AutoConfig.h"
 
 
 /******************************************************************

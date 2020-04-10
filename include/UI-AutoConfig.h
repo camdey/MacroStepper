@@ -1,10 +1,10 @@
-#ifndef TFTAUTOCONFIG_H
-#define TFTAUTOCONFIG_H
+#ifndef UIAUTOCONFIG_H
+#define UIAUTOCONFIG_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-namespace autoConfig_screen {
+namespace config_screen {
   void initAutoConfigButtons();
   void populateAutoConfigScreen();
   void checkAutoConfigButtons(int touch_x, int touch_y, int touch_z);
@@ -19,5 +19,6 @@ namespace autoConfig_screen {
   void func_ArrowDown(bool btnActive);
   void setAutoStackPositions(bool setStart, bool setEnd);
   void setShutterDelay();
+  void displayPosition();
 }
 #endif

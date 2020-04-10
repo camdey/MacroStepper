@@ -1,5 +1,5 @@
-#ifndef TFTAUTO_H
-#define TFTAUTO_H
+#ifndef UIAUTO_H
+#define UIAUTO_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"

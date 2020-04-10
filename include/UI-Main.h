@@ -1,5 +1,5 @@
-#ifndef TFTMAIN_H
-#define TFTMAIN_H
+#ifndef UIMAIN_H
+#define UIMAIN_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"

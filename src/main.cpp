@@ -1,7 +1,7 @@
-// ********* Macro Stepper v1.1 *********
+// ********* Macro Stepper v2.1 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2020-03-22
+// *** UPDATED: 2020-04-10
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -20,13 +20,13 @@
 // MANUAL MODE 	= user input required to step motor by specified distance
 // AUTOSTACK 		= automatic mode, stepper completes procedure without further input
 
-#include <Arduino.h>
-#include <Adafruit_GFX.h>    									// core graphics library
-#include <TouchScreen.h>											// touchscreen library
-#include <MCUFRIEND_kbv.h>										// display driver for IL9481
-#include <AccelStepper.h>											// software stepping implementation
-#include <TMC2130Stepper.h> 									// stepper driver library
-#include <TMC2130Stepper_REGDEFS.h>	  				// stepper driver registry definitions
+#include "Arduino.h"
+#include "Adafruit_GFX.h"    									// core graphics library
+#include "TouchScreen.h"											// touchscreen library
+#include "MCUFRIEND_kbv.h"										// display driver for IL9481
+#include "AccelStepper.h"											// software stepping implementation
+#include "TMC2130Stepper.h" 									// stepper driver library
+#include "TMC2130Stepper_REGDEFS.h"	  				// stepper driver registry definitions
 #include "TimerFreeTone.h"                    // produces beep tone for piezo
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
@@ -35,15 +35,13 @@
 #include "MiscFunctions.h"										// miscellaneous functions
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
 #include "StepperControl.h"										// functions for controlling the stepper motor
-#include "TouchControl.h"											// touch screen functions for detecting touches
-#include "UserInterface.h"										// generates the different screen menus
 #include "VariableDeclarations.h"							// external variable declarations
-#include "TFT-Main.h"
-#include "TFT-Home.h"
-#include "TFT-Manual.h"
-#include "TFT-Flash.h"
-#include "TFT-Auto.h"
-#include "TFT-AutoConfig.h"
+#include "UI-Main.h"
+#include "UI-Home.h"
+#include "UI-Manual.h"
+#include "UI-Flash.h"
+#include "UI-Auto.h"
+#include "UI-AutoConfig.h"
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
@@ -224,26 +222,26 @@ void loop() {
     checkButtons(getCurrentScreen());
     subRoutine1Time = millis();
 
-  //   if (Serial.available() > 0) {
-  //     String cmd = Serial.readStringUntil(' ');
-  //     String strArg = Serial.readStringUntil('\n');
-  //
-  //     int arg = strArg.toInt();
-  //
-  //     if (cmd == "speed") {
-  //       serialTuple("speed", arg);
-  //       Serial.print("Set speed to ");
-  //       Serial.println(arg);
-  //       stepper.setMaxSpeed(arg);
-  //       stepperMaxSpeed = arg;
-  //     }
-  //     else if (cmd == "accel") {
-  //       serialTuple("speed", arg);
-  //       Serial.print("Set acceleration to ");
-  //       Serial.println(arg);
-  //       stepper.setAcceleration(arg);
-  //     }
-  //   }
+    if (Serial.available() > 0) {
+      String cmd = Serial.readStringUntil(' ');
+      String strArg = Serial.readStringUntil('\n');
+  
+      int arg = strArg.toInt();
+
+      if (cmd == "speed") {
+        serialTuple("speed", arg);
+        Serial.print("Set speed to ");
+        Serial.println(arg);
+        stepper.setMaxSpeed(arg);
+        stepperMaxSpeed = arg;
+      }
+      else if (cmd == "accel") {
+        serialTuple("speed", arg);
+        Serial.print("Set acceleration to ");
+        Serial.println(arg);
+        stepper.setAcceleration(arg);
+      }
+    }
   }
 
   // take joystick and limit switch reading, put stepper to sleep
@@ -260,7 +258,7 @@ void loop() {
       toggleStepper(false); // disable stepper
       // refresh position on manual screen after stepping completed
       if (prevStepperPosition != stepper.currentPosition() && getCurrentScreen() == "Manual") {
-        displayPosition();
+        manual_screen::displayPosition();
       }
     }
 		// configure SilentStep if not homing rail
@@ -274,7 +272,7 @@ void loop() {
     // set END as maxPosition if Z Stick depressed
     if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
       autoStackMax = true;
-      autoConfig_screen::setAutoStackPositions(false, true);
+      config_screen::setAutoStackPositions(false, true);
       autoStackMax = false;
     }
 
@@ -290,7 +288,7 @@ void loop() {
   // run homing sequence if first loop
   if (runHomingSequence == true) {
     homeRail(); // run homing routine
-		autoConfig_screen::setAutoStackPositions(true, true); // set both start and end points
+		config_screen::setAutoStackPositions(true, true); // set both start and end points
 		silentStepConfig(); // set config for silentStep
     runHomingSequence = false;
   }

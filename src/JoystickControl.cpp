@@ -1,8 +1,9 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "UserInterface.h"
 #include "JoystickControl.h"
-#include "TFT-Main.h"
+#include "UI-Main.h"
+#include "UI-Manual.h"
+#include "UI-AutoConfig.h"
 
 /******************************************************************
 Take 10 readings form the joystick X axis during setup and average
@@ -108,8 +109,11 @@ void joystickControl() {
     }
     setAutoStackPositions(false, true); //set end but not start position
   }
-  if (getCurrentScreen() == "Manual" || getCurrentScreen() == "AutoConfig") {
-    displayPosition();
+  if (getCurrentScreen() == "Manual") {
+    manual_screen::displayPosition();
+  }
+  else if (getCurrentScreen() == "AutoConfig") {
+    config_screen::displayPosition();
   }
   // update prev position
   prevStepperPosition = stepper.currentPosition();
