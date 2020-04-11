@@ -68,6 +68,11 @@ void checkButtons(String screen) {
   }
 
   if ((touch_x > 0 && touch_x <= tft.width()) && (touch_y > 0 && touch_y <= tft.height())) {
+    if (touch_z > 50 && touch_z < 1000) {
+      Serial.print("point x: "); Serial.print(point.x); Serial.print(" touch y: "); Serial.println(touch_y);
+      Serial.print("point y: "); Serial.print(point.y); Serial.print(" touch x: "); Serial.println(touch_x);
+    }
+
     if (screen == "Home") {
       checkHomeButtons(touch_x, touch_y, touch_z);
     }

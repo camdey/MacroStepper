@@ -14,17 +14,17 @@ namespace manual_screen {
   String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
 
 
-  gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_DistanceVal  =   gfxB.initButton(       "fillRoundRect",    0,  5,    125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_StepNr       =   gfxB.initButton(       "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_StepNrVal    =   gfxB.initButton(       "fillRoundRect",    0,  85,   125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_RailPos      =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_RailPosVal   =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_Flash        =   gfxB.initBitmapButton( aperture,         155,  15,   50,   50,       CUSTOM_RED   );
-  gfxButton btn_Reset        =   gfxB.initBitmapButton( reset,            155,  95,   50,   50,       WHITE        );
-  gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,        155,  175,  50,   50,       WHITE        );
-  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,          240,  26,   60,   68,       CUSTOM_GREEN );
-  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
+  gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",    10,  20,    150,  80,   15, CUSTOM_BLUE  );
+  gfxButton btn_DistanceVal  =   gfxB.initButton(       "fillRoundRect",    10,  20,    150,  80,   15, CUSTOM_BLUE  );
+  gfxButton btn_StepNr       =   gfxB.initButton(       "fillRoundRect",    10,  120,   150,  80,   15, CUSTOM_BLUE  );
+  gfxButton btn_StepNrVal    =   gfxB.initButton(       "fillRoundRect",    10,  120,   150,  80,   15, CUSTOM_BLUE  );
+  gfxButton btn_RailPos      =   gfxB.initButton(       "fillRoundRect",    10,  220,   150,  80,   15, CUSTOM_BLUE  );
+  gfxButton btn_RailPosVal   =   gfxB.initButton(       "fillRoundRect",    10,  220,   150,  80,   15, CUSTOM_BLUE  );
+  gfxButton btn_Flash        =   gfxB.initBitmapButton( flashOn,          200,  20,   80,   80,       CUSTOM_RED   );
+  gfxButton btn_Reset        =   gfxB.initBitmapButton( reset,            200,  120,  80,   80,       WHITE        );
+  gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,        200,  220,  80,   80,       WHITE        );
+  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,          320,  26,   60,   68,       CUSTOM_GREEN );
+  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,        320,  146,  60,   68,       CUSTOM_RED   );
   gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance, 20 );
   gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,        20 );
   gfxTouch  tch_Reset        =   gfxT.addMomentary( btn_Reset,        func_Reset,        20 );

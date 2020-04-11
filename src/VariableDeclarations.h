@@ -27,7 +27,9 @@
 #include <Icons/BackArrow.h>
 #include <Icons/CogWheel.h>
 #include <Icons/DelayClock.h>
-#include <Icons/Flash.h>
+#include <Icons/FlashBulb.h>
+#include <Icons/FlashOn.h>
+#include <Icons/FlashOff.h>
 #include <Icons/House.h>
 #include <Icons/MainLogo.h>
 #include <Icons/Play.h>
@@ -35,6 +37,7 @@
 #include <Icons/Reset.h>
 #include <Icons/Reset40.h>
 #include <Icons/Rotate.h>
+#include <Icons/Target.h>
 
 extern TouchScreen      ts;
 extern TMC2130Stepper   driver;
@@ -82,11 +85,21 @@ extern gfxTouch         gfxT;
 // #define TS_MAXX 					850
 // #define TS_MINY 					132
 // #define TS_MAXY 					900
+// Arduino Due + 3.5" TFT
+#define TS_MINX 					760
+#define TS_MAXX 					315
+#define TS_MINY 					852
+#define TS_MAXY 					220
 // Grand Central M4 + 2.8" TFT
-#define TS_MINX 					320
-#define TS_MAXX 					760
-#define TS_MINY 					235
-#define TS_MAXY 					810
+// #define TS_MINX 					320
+// #define TS_MAXX 					760
+// #define TS_MINY 					235
+// #define TS_MAXY 					810
+// grand central M4 + 3.5" TFT
+// #define TS_MINX 					846
+// #define TS_MAXX 					148
+// #define TS_MINY 					937
+// #define TS_MAXY 					140
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!

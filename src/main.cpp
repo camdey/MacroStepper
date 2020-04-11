@@ -208,6 +208,7 @@ void setup(void) {
 
   initButtons(200, 75);
   populateScreen("Home");
+
 }
 
 void loop() {
@@ -225,7 +226,7 @@ void loop() {
     if (Serial.available() > 0) {
       String cmd = Serial.readStringUntil(' ');
       String strArg = Serial.readStringUntil('\n');
-  
+
       int arg = strArg.toInt();
 
       if (cmd == "speed") {
