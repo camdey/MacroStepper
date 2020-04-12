@@ -98,7 +98,8 @@ namespace auto_screen {
       if (arrowsActive == false) {
         tch_Play.checkButton("Auto", touch_x, touch_y);
         tch_Pause.checkButton("Auto", touch_x, touch_y);
-      } else if (arrowsActive == true) {
+      }
+      else if (arrowsActive == true) {
         tch_ArrowUp.checkButton("Auto", touch_x, touch_y);
         tch_ArrowDown.checkButton("Auto", touch_x, touch_y);
       }
@@ -117,8 +118,8 @@ namespace auto_screen {
       btn_ArrowUp.drawButton(tft, CUSTOM_GREEN);
       btn_ArrowDown.drawButton(tft, CUSTOM_RED);
 
-      // btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), YELLOW);
-      // btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), YELLOW);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
     }
     else {
       arrowsActive = false;
@@ -131,8 +132,8 @@ namespace auto_screen {
       btn_Pause.drawButton(tft, CUSTOM_BLUE);
 
       // TODO would be nice to not re-write the top line on every arrow press
-      // btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
-      // btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
     }
   }
 

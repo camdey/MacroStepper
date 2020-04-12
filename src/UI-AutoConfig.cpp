@@ -11,19 +11,19 @@ namespace config_screen {
 
  // TODO implement toggle touch reset
 
-  gfxButton btn_Start         =   gfxB.initBlankButton(   0,    5,  125,  66  );
-  gfxButton btn_StartVal      =   gfxB.initBlankButton(   0,    5,  125,  66  );
-  gfxButton btn_End           =   gfxB.initBlankButton(   0,   85,  125,  66  );
-  gfxButton btn_EndVal        =   gfxB.initBlankButton(   0,   85,  125,  66  );
-  gfxButton btn_Run           =   gfxB.initBlankButton(   0,  165,  125,  66  );
-  gfxButton btn_RunVal        =   gfxB.initBlankButton(   0,  165,  125,  66  );
-  gfxButton btn_DelayVal      =   gfxB.initBlankButton( 155,  125,   60,  30  );
-  gfxButton btn_Delay         =   gfxB.initBitmapButton( delayClock,  160,   75,   50,  50, WHITE         );
+  gfxButton btn_Start         =   gfxB.initBlankButton(                 0,   20,   160,   80                );
+  gfxButton btn_StartVal      =   gfxB.initBlankButton(                 0,   20,   160,   80                );
+  gfxButton btn_End           =   gfxB.initBlankButton(                 0,  120,   160,   80                );
+  gfxButton btn_EndVal        =   gfxB.initBlankButton(                 0,  120,   160,   80                );
+  gfxButton btn_Run           =   gfxB.initBlankButton(                 0,  220,   160,   80                );
+  gfxButton btn_RunVal        =   gfxB.initBlankButton(                 0,  220,   160,   80                );
+  gfxButton btn_Delay         =   gfxB.initBitmapButton( timer,       220,   20,    80,   80, WHITE         );
+  gfxButton btn_DelayVal      =   gfxB.initBlankButton(               295,   20,    40,   30                );
   // don't add btn_Reset to array as its colour depends on the state of autoStack
-  gfxButton btn_Reset         =   gfxB.initBitmapButton( reset40,     165,   10,   40,  40, GRAY          );
-  gfxButton btn_Back          =   gfxB.initBitmapButton( backArrow,   160,  175,   50,  50, WHITE         );
-  gfxButton btn_ArrowUp       =   gfxB.initBitmapButton( arrowUp,     240,   26,   60,  68, CUSTOM_GREEN  );
-  gfxButton btn_ArrowDown     =   gfxB.initBitmapButton( arrowDown,   240,  146,   60,  68, CUSTOM_RED    );
+  gfxButton btn_Reset         =   gfxB.initBitmapButton( cancel,      220,  120,    80,   80, GRAY          );
+  gfxButton btn_Back          =   gfxB.initBitmapButton( backArrow,   220,  220,    80,   80, WHITE         );
+  gfxButton btn_ArrowUp       =   gfxB.initBitmapButton( arrowUp,     350,   20,   120,  120, CUSTOM_GREEN  );
+  gfxButton btn_ArrowDown     =   gfxB.initBitmapButton( arrowDown,   350,  180,   120,  120, CUSTOM_RED    );
   gfxTouch  tch_Start         =   gfxT.addToggle(    btn_StartVal,  func_Start,     20 );
   gfxTouch  tch_End           =   gfxT.addToggle(    btn_EndVal,    func_End,       20 );
   gfxTouch  tch_Run           =   gfxT.addToggle(    btn_RunVal,    func_Run,       20 );
@@ -74,17 +74,17 @@ namespace config_screen {
     }
 
     int currentPosition = stepper.currentPosition();
-    char delaySeconds[6];
-    sprintf_P(delaySeconds, PSTR("%02d:%02d"), 0, shutterDelay);
+    // char delaySeconds[6];
+    // sprintf_P(delaySeconds, PSTR("%02d:%02d"), 0, shutterDelay);
 
     // draw text
-    btn_Start.writeTextTopLeft(       tft, Lato_Black_34,     String("START"),         CUSTOM_GREEN);
-    btn_StartVal.writeTextBottomLeft( tft, Arimo_Bold_20,     String(startPosition),   WHITE);
-    btn_End.writeTextTopLeft(         tft, Lato_Black_34,     String("END"),           CUSTOM_RED);
-    btn_EndVal.writeTextBottomLeft(   tft, Arimo_Bold_20,     String(endPosition),     WHITE);
-    btn_Run.writeTextTopLeft(         tft, Lato_Black_34,     String("RUN"),           CUSTOM_BLUE);
-    btn_RunVal.writeTextBottomLeft(   tft, Arimo_Bold_20,     String(currentPosition), WHITE);
-    btn_DelayVal.writeTextCentre(     tft, Arimo_Bold_20,     String(delaySeconds),    WHITE);
+    btn_Start.writeTextTopLeft(       tft, Lato_Black_40,  String("START"),         CUSTOM_GREEN);
+    btn_StartVal.writeTextBottomLeft( tft, Arimo_Bold_30,  String(startPosition),   WHITE);
+    btn_End.writeTextTopLeft(         tft, Lato_Black_40,  String("END"),           CUSTOM_RED);
+    btn_EndVal.writeTextBottomLeft(   tft, Arimo_Bold_30,  String(endPosition),     WHITE);
+    btn_Run.writeTextTopLeft(         tft, Lato_Black_40,  String("RUN"),           CUSTOM_BLUE);
+    btn_RunVal.writeTextBottomLeft(   tft, Arimo_Bold_30,  String(currentPosition), WHITE);
+    btn_DelayVal.writeTextCentre(     tft, Arimo_Bold_30,  String(shutterDelay),    WHITE);
   }
 
 
@@ -103,13 +103,13 @@ namespace config_screen {
       arrowsActive = true;
       editStartPosition = true;
 
-      btn_StartVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(startPosition), YELLOW);
+      btn_StartVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(startPosition), YELLOW);
     }
     else if (btnActive == false && editStartPosition == true) {
       arrowsActive = false;
       editStartPosition = false;
 
-      btn_StartVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(startPosition), WHITE);
+      btn_StartVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(startPosition), WHITE);
     }
   }
 
@@ -119,22 +119,22 @@ namespace config_screen {
       arrowsActive = true;
       editEndPosition = true;
 
-      btn_EndVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(endPosition), YELLOW);
+      btn_EndVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(endPosition), YELLOW);
     }
     else if (btnActive == false && editEndPosition == true) {
       arrowsActive = false;
       editEndPosition = false;
 
-      btn_EndVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(endPosition), WHITE);
+      btn_EndVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(endPosition), WHITE);
     }
   }
 
 
   void func_Run(bool btnActive) {
     if (btnActive == true && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
-      btn_Run.writeTextTopLeft(tft, Lato_Black_34, String("RUN"), YELLOW);
+      btn_Run.writeTextTopLeft(tft, Lato_Black_40, String("RUN"), YELLOW);
       dryRun();
-      btn_Run.writeTextTopLeft(tft, Lato_Black_34, String("RUN"), CUSTOM_BLUE);
+      btn_Run.writeTextTopLeft(tft, Lato_Black_40, String("RUN"), CUSTOM_BLUE);
       tch_Run.setState(false); // reset button state to false
 
       displayPosition();
@@ -148,12 +148,14 @@ namespace config_screen {
       editShutterDelay = true;
 
       btn_Delay.drawButton(tft, YELLOW);
+      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), YELLOW);
     }
     else if (btnActive == false && editShutterDelay == true) {
       arrowsActive = false;
       editShutterDelay = false;
 
       btn_Delay.drawButton(tft, WHITE);
+      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), WHITE);
     }
   }
 
@@ -251,7 +253,7 @@ namespace config_screen {
       startPosition = stepper.currentPosition();
       // print start point if changed
       if (prevStartPosition != startPosition && getCurrentScreen() == "AutoConfig") {
-        btn_StartVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(startPosition), YELLOW);
+        btn_StartVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(startPosition), YELLOW);
         prevStartPosition = startPosition;
       }
       // reset macroStepping
@@ -268,7 +270,7 @@ namespace config_screen {
       }
       // print end point if changed
       if (prevEndPosition != endPosition && getCurrentScreen() == "AutoConfig") {
-        btn_EndVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(endPosition), YELLOW);
+        btn_EndVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(endPosition), YELLOW);
         prevEndPosition = endPosition;
       }
     }
@@ -288,9 +290,9 @@ namespace config_screen {
     }
 
     if (prevDelay != shutterDelay) {
-      char delaySeconds[6];
-      sprintf_P(delaySeconds, PSTR("%02d:%02d"), 0, shutterDelay);
-      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_20, String(delaySeconds), WHITE);
+      // char delaySeconds[6];
+      // sprintf_P(delaySeconds, PSTR("%02d"), 0, shutterDelay);
+      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), YELLOW);
     }
   }
 
@@ -298,7 +300,7 @@ namespace config_screen {
   void displayPosition() {
     if (prevStepperPosition != stepper.currentPosition()) {
       int currentPosition = stepper.currentPosition();
-      btn_RunVal.writeTextBottomLeft(tft, Arimo_Bold_20, String(currentPosition), WHITE);
+      btn_RunVal.writeTextBottomLeft(tft, Arimo_Bold_30, String(currentPosition), WHITE);
 
       prevStepperPosition = currentPosition;
     }

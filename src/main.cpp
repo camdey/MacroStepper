@@ -138,9 +138,12 @@ int rampSteps                     = 50000;      // number of steps in ramp profi
 String currentScreen;
 String stepDist = "0.00125";
 
+extern "C" char *sbrk(int i);
+
 // ***** --- PROGRAM --- ***** //
 
 void serialTuple(String cmd, int arg);
+int FreeRam();
 
 // TODO
 // - add reduced speed option for joystick (z button press?)
@@ -247,6 +250,7 @@ void loop() {
 
   // take joystick and limit switch reading, put stepper to sleep
   if (millis() - prevJoystickCheck >= 250) {
+    // Serial.print(millis()); Serial.print(" | free ram: "); Serial.println(FreeRam());
     // check joystick for movement
     // readJoystick();
 
@@ -301,4 +305,10 @@ void serialTuple(String cmd, int arg) {
 	Serial.print("(");
 	Serial.print(arg);
 	Serial.println(")");
+}
+
+
+int FreeRam () {
+  char stack_dummy = 0;
+  return &stack_dummy - sbrk(0);
 }
