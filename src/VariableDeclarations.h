@@ -15,9 +15,13 @@
 #include <Fonts/Arimo_Regular_22.h>
 #include <Fonts/Arimo_Regular_24.h>
 #include <Fonts/Arimo_Regular_30.h>
+#include <Fonts/Arimo_Regular_36.h>
+#include <Fonts/Arimo_Regular_40.h>
 #include <Fonts/Arimo_Bold_20.h>
 #include <Fonts/Arimo_Bold_24.h>
 #include <Fonts/Arimo_Bold_30.h>
+#include <Fonts/Arimo_Bold_36.h>
+#include <Fonts/Arimo_Bold_40.h>
 #include <Fonts/Syncopate_Bold_36.h>
 #include <Fonts/Permanent_Marker_Regular_36.h>
 #include <Fonts/Lato_Black_34.h>
@@ -25,6 +29,7 @@
 #include <Icons/ArrowUp.h>
 #include <Icons/ArrowDown.h>
 #include <Icons/BackArrow.h>
+#include <Icons/Cancel.h>
 #include <Icons/CogWheel.h>
 #include <Icons/DelayClock.h>
 #include <Icons/FlashBulb.h>
@@ -135,8 +140,8 @@ extern gfxTouch         gfxT;
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
-extern unsigned long subRoutine1Time;
-extern unsigned long subRoutine2Time;
+extern unsigned long prevButtonCheck;
+extern unsigned long prevJoystickCheck;
 extern unsigned long prevStepTime;
 extern unsigned long recycleTime;
 extern unsigned long prevGenericTime;

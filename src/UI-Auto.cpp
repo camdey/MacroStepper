@@ -4,27 +4,28 @@
 #include "ShutterControl.h"
 
 namespace auto_screen {
-  #define num_btns_Auto 9
+  #define num_btns_Auto 8
   #define num_tchs_Auto 4
   gfxButton btn_array_Auto[num_btns_Auto];
   gfxTouch  tch_array_Auto[num_tchs_Auto];
 
 
-  gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",    0,    5,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_DistanceVal  =   gfxB.initButton(       "fillRoundRect",    0,    5,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_EstTime      =   gfxB.initButton(       "fillRoundRect",    0,   85,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_EstTimeVal   =   gfxB.initButton(       "fillRoundRect",    0,   85,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_Progress     =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_ProgressVal  =   gfxB.initButton(       "fillRoundRect",    0,  165,  125,  66,   15, CUSTOM_BLUE  );
-  gfxButton btn_Flash        =   gfxB.initBitmapButton( aperture,         155,   15,   50,  50,       CUSTOM_RED   );
-  gfxButton btn_Config       =   gfxB.initBitmapButton( cogWheel,         155,   95,   50,  50,       WHITE        );
-  gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,        155,  175,   50,  50,       WHITE        );
+  gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",    0,   20,   160,   80,   15, CUSTOM_BLUE  );
+  gfxButton btn_DistanceVal  =   gfxB.initButton(       "fillRoundRect",    0,   20,   160,   80,   15, CUSTOM_BLUE  );
+  gfxButton btn_EstTime      =   gfxB.initButton(       "fillRoundRect",    0,  120,   160,   80,   15, CUSTOM_BLUE  );
+  gfxButton btn_EstTimeVal   =   gfxB.initButton(       "fillRoundRect",    0,  120,   160,   80,   15, CUSTOM_BLUE  );
+  gfxButton btn_Progress     =   gfxB.initButton(       "fillRoundRect",    0,  220,   160,   80,   15, CUSTOM_BLUE  );
+  gfxButton btn_ProgressVal  =   gfxB.initButton(       "fillRoundRect",    0,  220,   160,   80,   15, CUSTOM_BLUE  );
+  gfxButton btn_Flash        =   gfxB.initBitmapButton( flashOff,         220,   20,    80,   80,       CUSTOM_RED   );
+  gfxButton btn_Config       =   gfxB.initBitmapButton( cogWheel,         220,  120,    80,   80,       WHITE        );
+  gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,        220,  220,    80,   80,       WHITE        );
   // don't add these buttons to an array as they depend on logic as to which symbol appears and in which colour
-  gfxButton btn_Play         =   gfxB.initBitmapButton( play,             242,   25,  56,   70,       CUSTOM_GREEN );
-  gfxButton btn_Pause        =   gfxB.initBitmapButton( pause,            242,  145,  56,   70,       CUSTOM_BLUE  );
-  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,          240,   26,  60,   68,       CUSTOM_GREEN );
-  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,        240,  146,  60,   68,       CUSTOM_RED   );
+  gfxButton btn_Play         =   gfxB.initBitmapButton( play,             350,   20,   120,  120,       CUSTOM_GREEN );
+  gfxButton btn_Pause        =   gfxB.initBitmapButton( pause,            350,  180,   120,  120,       CUSTOM_BLUE  );
+  gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,          350,   20,   120,  120,       CUSTOM_GREEN );
+  gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,        350,  180,   120,  120,       CUSTOM_RED   );
   gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance,  20 );
+  // don't add flash button to array as bitmap depends on state
   gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,         20 );
   gfxTouch  tch_Config       =   gfxT.addMomentary( btn_Config,       func_Config,        20 );
   gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,         func_Back,          20 );
@@ -37,13 +38,15 @@ namespace auto_screen {
   void initAutoButtons() {
     btn_array_Auto[0]   = btn_StepDistance;
     btn_array_Auto[1]   = btn_DistanceVal;
+    btn_array_Auto[1].addBorder(3, WHITE);
     btn_array_Auto[2]   = btn_EstTime;
     btn_array_Auto[3]   = btn_EstTimeVal;
+    btn_array_Auto[3].addBorder(3, WHITE);
     btn_array_Auto[4]   = btn_Progress;
     btn_array_Auto[5]   = btn_ProgressVal;
-    btn_array_Auto[6]   = btn_Flash;
-    btn_array_Auto[7]   = btn_Config;
-    btn_array_Auto[8]   = btn_Back;
+    btn_array_Auto[5].addBorder(3, WHITE);
+    btn_array_Auto[6]   = btn_Config;
+    btn_array_Auto[7]   = btn_Back;
 
     tch_array_Auto[0] = tch_StepDistance;
     tch_array_Auto[1] = tch_Flash;
@@ -61,20 +64,27 @@ namespace auto_screen {
     }
     // draw play/pause separately
     if (pauseAutoStack == true && autoStackFlag == true) {
-      drawPlayPause(0, 1);
+      drawPlayPause(false, true);
     } else if (pauseAutoStack == false && autoStackFlag == true) {
-      drawPlayPause(1, 0);
+      drawPlayPause(true, false);
     } else if (pauseAutoStack == false && autoStackFlag == false) {
-      drawPlayPause(0, 0);
+      drawPlayPause(false, false);
+    }
+
+    if (shutterEnabled == false) {
+      btn_Flash.drawButton(tft, CUSTOM_RED);
+    }
+    else if (shutterEnabled == true) {
+      btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
     // draw text
-    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), WHITE);
-    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, WHITE);
-    btn_EstTime.writeTextTopCentre(tft, Arimo_Regular_24, String("Est. Time"), WHITE);
-    estimateDuration(1);
-    btn_Progress.writeTextTopCentre(tft, Arimo_Regular_24, String("Progress"), WHITE);
-    updateProgress(1);
+    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
+    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
+    btn_EstTime.writeTextTopCentre(tft, Arimo_Regular_30, String("Est. Time"), WHITE);
+    estimateDuration(true);
+    btn_Progress.writeTextTopCentre(tft, Arimo_Regular_30, String("Progress"), WHITE);
+    updateProgress(true);
   }
 
 
@@ -107,8 +117,8 @@ namespace auto_screen {
       btn_ArrowUp.drawButton(tft, CUSTOM_GREEN);
       btn_ArrowDown.drawButton(tft, CUSTOM_RED);
 
-      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), YELLOW);
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
+      // btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), YELLOW);
+      // btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
     }
     else {
       arrowsActive = false;
@@ -121,8 +131,8 @@ namespace auto_screen {
       btn_Pause.drawButton(tft, CUSTOM_BLUE);
 
       // TODO would be nice to not re-write the top line on every arrow press
-      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_24, String("Step Dist."), WHITE);
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, WHITE);
+      // btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
+      // btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
     }
   }
 
@@ -155,7 +165,7 @@ namespace auto_screen {
 
   void func_Play(bool btnActive) {
     if (btnActive == true) {
-      btn_Play.drawButton(tft, WHITE);
+      btn_Play.drawButton(tft, CUSTOM_GREY);
     }
     else {
       btn_Play.drawButton(tft, CUSTOM_GREEN);
@@ -165,7 +175,7 @@ namespace auto_screen {
 
   void func_Pause(bool btnActive) {
     if (btnActive == true) {
-      btn_Pause.drawButton(tft, WHITE);
+      btn_Pause.drawButton(tft, CUSTOM_GREY);
     }
     else {
       btn_Pause.drawButton(tft, CUSTOM_BLUE);
@@ -181,7 +191,7 @@ namespace auto_screen {
 
       stepsPerMovement++; // increment
       setStepDistance();
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
     }
   }
 
@@ -194,7 +204,7 @@ namespace auto_screen {
 
       stepsPerMovement--; // decrement
       setStepDistance();
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_24, stepDist, YELLOW);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
     }
   }
 
@@ -258,7 +268,7 @@ namespace auto_screen {
     sprintf_P(autoStackProgress, PSTR("%02d/%02d"), completedMovements, movementsRequired);
 
     if ((completedMovements != prevCompletedMovements) || movementsRequired != prevMovementsRequired || screenRefresh == 1) {
-      btn_ProgressVal.writeTextBottomCentre(tft, Arimo_Bold_24, autoStackProgress, WHITE);
+      btn_ProgressVal.writeTextBottomCentre(tft, Arimo_Bold_30, autoStackProgress, WHITE);
 
       prevMovementsRequired = movementsRequired;
       prevCompletedMovements = completedMovements;

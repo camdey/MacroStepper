@@ -226,16 +226,12 @@ void overshootPosition(int position, int numberOfSteps, int direction) {
     stepper.moveTo(offsetPosition); // move past start
     stepper.runSpeedToPosition();
   }
-  Serial.print("current pos: ");
-  Serial.println(stepper.currentPosition());
   delay(50);
   while (stepper.currentPosition() != position) {
     stepper.setSpeed(-speed); // reverse direcyion
     stepper.moveTo(position); // move to start
     stepper.runSpeedToPosition();
   }
-  Serial.print("current pos: ");
-  Serial.println(stepper.currentPosition());
 }
 
 

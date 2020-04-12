@@ -54,8 +54,8 @@ gfxTouch        gfxT;
 
 // --- currentTimes and elapsed times --- //
 unsigned long currentTime 				= 0;        	// current time in millis()
-unsigned long subRoutine1Time 		= 0;    			// time subroutine1 last ran
-unsigned long subRoutine2Time 		= 0;    			// time subroutine2 last ran
+unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
+unsigned long prevJoystickCheck 		= 0;    			// time subroutine2 last ran
 unsigned long prevStepTime 				= 0;       		// previous step time reading
 unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
@@ -219,34 +219,34 @@ void loop() {
     autoStack();
   }
   // take touch reading
-  if (currentTime - subRoutine1Time >= 50) {
+  if (millis() - prevButtonCheck >= 50) {
     checkButtons(getCurrentScreen());
-    subRoutine1Time = millis();
+    prevButtonCheck = millis();
 
-    if (Serial.available() > 0) {
-      String cmd = Serial.readStringUntil(' ');
-      String strArg = Serial.readStringUntil('\n');
-
-      int arg = strArg.toInt();
-
-      if (cmd == "speed") {
-        serialTuple("speed", arg);
-        Serial.print("Set speed to ");
-        Serial.println(arg);
-        stepper.setMaxSpeed(arg);
-        stepperMaxSpeed = arg;
-      }
-      else if (cmd == "accel") {
-        serialTuple("speed", arg);
-        Serial.print("Set acceleration to ");
-        Serial.println(arg);
-        stepper.setAcceleration(arg);
-      }
-    }
+    // if (Serial.available() > 0) {
+    //   String cmd = Serial.readStringUntil(' ');
+    //   String strArg = Serial.readStringUntil('\n');
+    //
+    //   int arg = strArg.toInt();
+    //
+    //   if (cmd == "speed") {
+    //     serialTuple("speed", arg);
+    //     Serial.print("Set speed to ");
+    //     Serial.println(arg);
+    //     stepper.setMaxSpeed(arg);
+    //     stepperMaxSpeed = arg;
+    //   }
+    //   else if (cmd == "accel") {
+    //     serialTuple("speed", arg);
+    //     Serial.print("Set acceleration to ");
+    //     Serial.println(arg);
+    //     stepper.setAcceleration(arg);
+    //   }
+    // }
   }
 
   // take joystick and limit switch reading, put stepper to sleep
-  if (currentTime - subRoutine2Time >= 100) {
+  if (millis() - prevJoystickCheck >= 250) {
     // check joystick for movement
     // readJoystick();
 
@@ -277,7 +277,7 @@ void loop() {
       autoStackMax = false;
     }
 
-    subRoutine2Time = millis();
+    prevJoystickCheck = millis();
   }
 
   // reset target to currentPosition

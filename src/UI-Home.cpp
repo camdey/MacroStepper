@@ -26,7 +26,9 @@ namespace home_screen {
 
   void initHomeButtons() {
     btn_array_Home[0] = btn_Manual;
+    btn_array_Home[0].addBorder(4, WHITE);
     btn_array_Home[1] = btn_Auto;
+    btn_array_Home[1].addBorder(4, WHITE);
     btn_array_Home[2] = btn_Logo;
     btn_array_Home[3] = btn_Home;
     btn_array_Home[4] = btn_Flash;
