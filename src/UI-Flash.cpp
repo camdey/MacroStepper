@@ -66,16 +66,6 @@ namespace flash_screen {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Flash", touch_x, touch_y);
     }
-
-    // TODO - something better so we don't check the entire array every loop??
-    // else if screen not pressed, re-enable toggle
-    // if (touch_z == 0) {
-    //   for (int i=0; i < num_btns; i++) {
-    //     if (tch_array[i].touchType == "toggle") {
-    //       tch_array[i].setTouchReset(true);
-    //     }
-    //   }
-    // }
   }
 
   void func_FlashOff(bool btnActive) {

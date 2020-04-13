@@ -101,13 +101,13 @@ void joystickControl() {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
-    setAutoStackPositions(true, false); //set start but not end position
+    config_screen::setAutoStackPositions(true, false); //set start but not end position
   }
   if (editEndPosition == true && arrowsActive == true) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
-    setAutoStackPositions(false, true); //set end but not start position
+    config_screen::setAutoStackPositions(false, true); //set end but not start position
   }
   if (getCurrentScreen() == "Manual") {
     manual_screen::displayPosition();

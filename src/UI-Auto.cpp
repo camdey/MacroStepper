@@ -141,11 +141,11 @@ namespace auto_screen {
   void func_Flash(bool btnActive) {
     if (btnActive == true) {
       toggleShutter();
-      btn_Flash.drawButton(tft, CUSTOM_GREEN);
+      btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
     else if (btnActive == false) {
       toggleShutter();
-      btn_Flash.drawButton(tft, CUSTOM_RED);
+      btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
   }
 
