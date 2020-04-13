@@ -11,7 +11,7 @@ namespace home_screen {
   // draw logo
   // tft.drawBitmap(40, 0, logo, 240, 82, WHITE);
 
-  gfxButton btn_Logo     =   gfxB.initBitmapButton( logo,              50,   5,   380,   105,     CUSTOM_RED    );
+  gfxButton btn_Logo     =   gfxB.initBitmapButton( logo,              50,   5,   380,   105,     CUSTOM_YELLOW );
   gfxButton btn_Manual   =   gfxB.initButton(       "fillRoundRect",   30,  120,  180,    80, 15, CUSTOM_BLUE   );
   gfxButton btn_Auto     =   gfxB.initButton(       "fillRoundRect",  270,  120,  180,    80, 15, CUSTOM_GREEN  );
   gfxButton btn_Home     =   gfxB.initBitmapButton( target,            40,  230,   80,    80,     WHITE         );
@@ -59,16 +59,6 @@ namespace home_screen {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Home", touch_x, touch_y);
     }
-
-    // TODO - something better so we don't check the entire array every loop??
-    // else if screen not pressed, re-enable toggle
-    // if (touch_z == 0) {
-    //   for (int i=0; i < num_btns; i++) {
-    //     if (tch_array[i].touchType == "toggle") {
-    //       tch_array[i].setTouchReset(true);
-    //     }
-    //   }
-    // }
   }
 
 

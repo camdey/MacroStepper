@@ -252,11 +252,11 @@ void loop() {
   if (millis() - prevJoystickCheck >= 250) {
     // Serial.print(millis()); Serial.print(" | free ram: "); Serial.println(FreeRam());
     // check joystick for movement
-    // readJoystick();
+    readJoystick();
 
     // move if past threshold and not in autoStack mode
     if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
-      // joystickControl();
+      joystickControl();
     }
     // sleep if stepper inactive, update position on manual screen
     if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {

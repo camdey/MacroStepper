@@ -67,6 +67,7 @@ extern gfxTouch         gfxT;
 #define CUSTOM_BLUE					0x4EDE
 #define CUSTOM_GREY					0xCE7A
 #define CUSTOM_GREY_LITE		0xDEFB
+#define CUSTOM_YELLOW       0xFF46
 
 // touch screen pressure values
 #define minPressure 			5
@@ -89,20 +90,20 @@ extern gfxTouch         gfxT;
 // #define TS_MINY 					132
 // #define TS_MAXY 					900
 // Arduino Due + 3.5" TFT
-#define TS_MINX 					760
-#define TS_MAXX 					315
-#define TS_MINY 					852
-#define TS_MAXY 					220
+#define TS_MINX 					846
+#define TS_MAXX 					148
+#define TS_MINY 					937
+#define TS_MAXY 					140
 // Grand Central M4 + 2.8" TFT
 // #define TS_MINX 					320
 // #define TS_MAXX 					760
 // #define TS_MINY 					235
 // #define TS_MAXY 					810
 // grand central M4 + 3.5" TFT
-// #define TS_MINX 					846
-// #define TS_MAXX 					148
-// #define TS_MINY 					937
-// #define TS_MAXY 					140
+// #define TS_MINX 					760
+// #define TS_MAXX 					315
+// #define TS_MINY 					852
+// #define TS_MAXY 					220
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!
