@@ -4,10 +4,10 @@
 
 namespace flash_screen {
 
-  #define num_btns_Flash 8
-  #define num_tchs_Flash 4
-  gfxButton btn_array_Flash[num_btns_Flash];
-  gfxTouch  tch_array_Flash[num_tchs_Flash];
+  #define num_btns 8
+  #define num_tchs 4
+  gfxButton *btn_array[num_btns];
+  gfxTouch  *tch_array[num_tchs];
 
   // TODO maybe only have one button to set values and just record the max and min value
   gfxButton btn_FlashOff   =   gfxB.initButton(       "fillRoundRect",    0,   20,    160,   80,   15,  CUSTOM_RED    );
@@ -18,28 +18,28 @@ namespace flash_screen {
   gfxButton btn_ThreshVal  =   gfxB.initButton(       "fillRoundRect",  320,   20,    160,   80,   15,  CUSTOM_BLUE   );
   gfxButton btn_FlashTest  =   gfxB.initBlankButton(                    320,  120,    160,   80                       );
   gfxButton btn_Back       =   gfxB.initBitmapButton( backArrow,        220,  220,     80,   80,        WHITE         );
-  gfxTouch  tch_FlashOff   =   gfxT.addToggle(    btn_OffValue,   func_FlashOff,  20 );
-  gfxTouch  tch_FlashOn    =   gfxT.addToggle(    btn_OnValue,    func_FlashOn,   20 );
-  gfxTouch  tch_FlashTest  =   gfxT.addMomentary( btn_FlashTest,  func_FlashTest, 20 );
-  gfxTouch  tch_Back       =   gfxT.addMomentary( btn_Back,       func_Back,      20 );
+  gfxTouch  tch_FlashOff   =   gfxT.addToggle(    btn_OffValue,   func_FlashOff,  0 );
+  gfxTouch  tch_FlashOn    =   gfxT.addToggle(    btn_OnValue,    func_FlashOn,   0 );
+  gfxTouch  tch_FlashTest  =   gfxT.addMomentary( btn_FlashTest,  func_FlashTest, 0 );
+  gfxTouch  tch_Back       =   gfxT.addMomentary( btn_Back,       func_Back,      0 );
 
   void initFlashButtons() {
-    btn_array_Flash[0] = btn_FlashOff;
-    btn_array_Flash[1] = btn_OffValue;
-    btn_array_Flash[1].addBorder(3, WHITE);
-    btn_array_Flash[2] = btn_FlashOn;
-    btn_array_Flash[3] = btn_OnValue;
-    btn_array_Flash[3].addBorder(3, WHITE);
-    btn_array_Flash[4] = btn_Threshold;
-    btn_array_Flash[5] = btn_ThreshVal;
-    btn_array_Flash[5].addBorder(3, WHITE);
-    btn_array_Flash[6] = btn_FlashTest;
-    btn_array_Flash[7] = btn_Back;
+    btn_array[0] = &btn_FlashOff;
+    btn_array[1] = &btn_OffValue;
+    btn_array[1]->addBorder(3, WHITE);
+    btn_array[2] = &btn_FlashOn;
+    btn_array[3] = &btn_OnValue;
+    btn_array[3]->addBorder(3, WHITE);
+    btn_array[4] = &btn_Threshold;
+    btn_array[5] = &btn_ThreshVal;
+    btn_array[5]->addBorder(3, WHITE);
+    btn_array[6] = &btn_FlashTest;
+    btn_array[7] = &btn_Back;
 
-    tch_array_Flash[0] = tch_FlashOff;
-    tch_array_Flash[1] = tch_FlashOn;
-    tch_array_Flash[2] = tch_FlashTest;
-    tch_array_Flash[3] = tch_Back;
+    tch_array[0] = &tch_FlashOff;
+    tch_array[1] = &tch_FlashOn;
+    tch_array[2] = &tch_FlashTest;
+    tch_array[3] = &tch_Back;
   }
 
 
@@ -47,8 +47,8 @@ namespace flash_screen {
     setCurrentScreen("Flash");
     flashReady = flashStatus(); // get latest values
     // draw buttons
-    for (int i=0; i < num_btns_Flash; i++) {
-      btn_array_Flash[i].drawButton(tft);
+    for (int i=0; i < num_btns; i++) {
+      btn_array[i]->drawButton(tft);
     }
     // draw text
     btn_FlashOff.writeTextTopCentre(    tft, Arimo_Regular_30, String("Off Value"),   WHITE);
@@ -63,19 +63,16 @@ namespace flash_screen {
 
 
   void checkFlashButtons(int touch_x, int touch_y, int touch_z) {
-    // if screen pressed
-    if (touch_z >= 50 && touch_z <= 1000) {
-      for (int i=0; i < num_tchs_Flash; i++) {
-        tch_array_Flash[i].checkButton("Flash", touch_x, touch_y);
-      }
+    for (int i=0; i < num_tchs; i++) {
+      tch_array[i]->checkButton("Flash", touch_x, touch_y);
     }
 
     // TODO - something better so we don't check the entire array every loop??
     // else if screen not pressed, re-enable toggle
     // if (touch_z == 0) {
-    //   for (int i=0; i < num_btns_Flash; i++) {
-    //     if (tch_array_Flash[i].touchType == "toggle") {
-    //       tch_array_Flash[i].setTouchReset(true);
+    //   for (int i=0; i < num_btns; i++) {
+    //     if (tch_array[i].touchType == "toggle") {
+    //       tch_array[i].setTouchReset(true);
     //     }
     //   }
     // }

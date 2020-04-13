@@ -75,8 +75,7 @@ void autoStack() {
           // go to flashScreen if can't trigger after 10 seconds
           else if (millis() - failTime >= 10000) {
             // Serial.println("go to flash screen");
-            pauseAutoStack = true; // pause autostack
-            auto_screen::drawPlayPause(true, false); // grey out play, highlight pause
+            auto_screen::pauseStack();
             populateScreen("Flash"); // load screen for checking flash settings/functionality
             break;
           }
@@ -116,7 +115,8 @@ void autoStack() {
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
-    auto_screen::drawPlayPause(false, false); // reset play to green
+    auto_screen::pauseStack(); // reset PlayPause button to "paused" mode"
+    pauseAutoStack = false; // autoStack is completed but not paused
   }
 }
 

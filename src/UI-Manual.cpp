@@ -5,10 +5,10 @@
 #include "StepperControl.h"
 
 namespace manual_screen {
-  #define num_btns_Manual 11
-  #define num_tchs_Manual 6
-  gfxButton btn_array_Manual[num_btns_Manual];
-  gfxTouch  tch_array_Manual[num_tchs_Manual];
+  #define num_btns 10
+  #define num_tchs 6
+  gfxButton *btn_array[num_btns];
+  gfxTouch  *tch_array[num_tchs];
 
   String stepNr   = String(manualMovementCount);
   String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
@@ -26,36 +26,36 @@ namespace manual_screen {
   gfxButton btn_Back         =   gfxB.initBitmapButton( backArrow,         220,  220,    80,   80,       WHITE        );
   gfxButton btn_ArrowUp      =   gfxB.initBitmapButton( arrowUp,           350,   20,   120,  120,       CUSTOM_GREEN );
   gfxButton btn_ArrowDown    =   gfxB.initBitmapButton( arrowDown,         350,  180,   120,  120,       CUSTOM_RED   );
-  gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance, 20 );
-  gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,        20 );
-  gfxTouch  tch_Reset        =   gfxT.addMomentary( btn_Reset,        func_Reset,        20 );
-  gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,         func_Back,         20 );
-  gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,      func_ArrowUp,      20 );
-  gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,    func_ArrowDown,    20 );
+  gfxTouch  tch_StepDistance =   gfxT.addToggle(    btn_DistanceVal,  func_StepDistance, 0 );
+  gfxTouch  tch_Flash        =   gfxT.addToggle(    btn_Flash,        func_Flash,        0 );
+  gfxTouch  tch_Reset        =   gfxT.addMomentary( btn_Reset,        func_Reset,        0 );
+  gfxTouch  tch_Back         =   gfxT.addMomentary( btn_Back,         func_Back,         0 );
+  gfxTouch  tch_ArrowUp      =   gfxT.addMomentary( btn_ArrowUp,      func_ArrowUp,      0 );
+  gfxTouch  tch_ArrowDown    =   gfxT.addMomentary( btn_ArrowDown,    func_ArrowDown,    0 );
 
 
   void initManualButtons() {
-    btn_array_Manual[0]   = btn_StepDistance;
-    btn_array_Manual[1]   = btn_DistanceVal;
-    btn_array_Manual[1].addBorder(3, WHITE); //0x43AF
-    btn_array_Manual[2]   = btn_StepNr;
-    btn_array_Manual[3]   = btn_StepNrVal;
-    btn_array_Manual[3].addBorder(3, WHITE);
-    btn_array_Manual[4]   = btn_RailPos;
-    btn_array_Manual[5]   = btn_RailPosVal;
-    btn_array_Manual[5].addBorder(3, WHITE);
-    // btn_array_Manual[6]   = btn_Flash;
-    btn_array_Manual[6]   = btn_Reset;
-    btn_array_Manual[7]   = btn_Back;
-    btn_array_Manual[8]   = btn_ArrowUp;
-    btn_array_Manual[9]   = btn_ArrowDown;
+    btn_array[0] = &btn_StepDistance;
+    btn_array[1] = &btn_DistanceVal;
+    btn_array[2] = &btn_StepNr;
+    btn_array[3] = &btn_StepNrVal;
+    btn_array[4] = &btn_RailPos;
+    btn_array[5] = &btn_RailPosVal;
+    btn_array[6] = &btn_Reset;
+    btn_array[7] = &btn_Back;
+    btn_array[8] = &btn_ArrowUp;
+    btn_array[9] = &btn_ArrowDown;
 
-    tch_array_Manual[0]   = tch_StepDistance;
-    tch_array_Manual[1]   = tch_Flash;
-    tch_array_Manual[2]   = tch_Reset;
-    tch_array_Manual[3]   = tch_Back;
-    tch_array_Manual[4]   = tch_ArrowUp;
-    tch_array_Manual[5]   = tch_ArrowDown;
+    tch_array[0] = &tch_StepDistance;
+    tch_array[1] = &tch_Flash;
+    tch_array[2] = &tch_Reset;
+    tch_array[3] = &tch_Back;
+    tch_array[4] = &tch_ArrowUp;
+    tch_array[5] = &tch_ArrowDown;
+
+    btn_array[1]->addBorder(3, WHITE); //0x43AF
+    btn_array[3]->addBorder(3, WHITE);
+    btn_array[5]->addBorder(3, WHITE);
   }
 
 
@@ -65,8 +65,8 @@ namespace manual_screen {
     railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
 
     // draw buttons
-    for (int i=0; i < num_btns_Manual; i++) {
-      btn_array_Manual[i].drawButton(tft);
+    for (int i=0; i < num_btns; i++) {
+      btn_array[i]->drawButton(tft);
     }
     if (shutterEnabled == false) {
       btn_Flash.drawButton(tft, CUSTOM_RED);
@@ -74,10 +74,6 @@ namespace manual_screen {
     else if (shutterEnabled == true) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
-
-    // tft.drawRoundRect(0, 20, 160, 80, 15, WHITE);
-    // tft.drawRoundRect(1, 21, 158, 78, 14, WHITE);
-    // tft.drawRoundRect(2, 22, 156, 76, 13, WHITE);
 
     // draw text
     btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."),  WHITE);
@@ -90,11 +86,8 @@ namespace manual_screen {
 
 
   void checkManualButtons(int touch_x, int touch_y, int touch_z) {
-    // if screen pressed
-    if (touch_z >= 50 && touch_z <= 1000) {
-      for (int i=0; i < num_tchs_Manual; i++) {
-        tch_array_Manual[i].checkButton("Manual", touch_x, touch_y);
-      }
+    for (int i=0; i < num_tchs; i++) {
+      tch_array[i]->checkButton("Manual", touch_x, touch_y);
     }
   }
 
