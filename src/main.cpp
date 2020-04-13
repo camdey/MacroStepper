@@ -1,7 +1,7 @@
-// ********* Macro Stepper v1.1 *********
+// ********* Macro Stepper v2.1 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2020-03-22
+// *** UPDATED: 2020-04-10
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -20,35 +20,42 @@
 // MANUAL MODE 	= user input required to step motor by specified distance
 // AUTOSTACK 		= automatic mode, stepper completes procedure without further input
 
-#include <Arduino.h>
-#include <Adafruit_GFX.h>    									// core graphics library
-#include <TouchScreen.h>											// touchscreen library
-#include <MCUFRIEND_kbv.h>										// display driver for IL9481
-#include <AccelStepper.h>											// software stepping implementation
-#include <TMC2130Stepper.h> 									// stepper driver library
-#include <TMC2130Stepper_REGDEFS.h>	  				// stepper driver registry definitions
+#include "Arduino.h"
+#include "Adafruit_GFX.h"    									// core graphics library
+#include "TouchScreen.h"											// touchscreen library
+#include "MCUFRIEND_kbv.h"										// display driver for IL9481
+#include "AccelStepper.h"											// software stepping implementation
+#include "TMC2130Stepper.h" 									// stepper driver library
+#include "TMC2130Stepper_REGDEFS.h"	  				// stepper driver registry definitions
 #include "TimerFreeTone.h"                    // produces beep tone for piezo
+#include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
 #include "JoystickControl.h"                  // joystick control functions
 #include "MiscFunctions.h"										// miscellaneous functions
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
 #include "StepperControl.h"										// functions for controlling the stepper motor
-#include "TouchControl.h"											// touch screen functions for detecting touches
-#include "UserInterface.h"										// generates the different screen menus
 #include "VariableDeclarations.h"							// external variable declarations
+#include "UI-Main.h"
+#include "UI-Home.h"
+#include "UI-Manual.h"
+#include "UI-Flash.h"
+#include "UI-Auto.h"
+#include "UI-AutoConfig.h"
 
 
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
 TMC2130Stepper 	driver 			= TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
 AccelStepper 		stepper 		= AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
 MCUFRIEND_kbv 	tft;
+gfxButton       gfxB;
+gfxTouch        gfxT;
 
 
 // --- currentTimes and elapsed times --- //
 unsigned long currentTime 				= 0;        	// current time in millis()
-unsigned long subRoutine1Time 		= 0;    			// time subroutine1 last ran
-unsigned long subRoutine2Time 		= 0;    			// time subroutine2 last ran
+unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
+unsigned long prevJoystickCheck 		= 0;    			// time subroutine2 last ran
 unsigned long prevStepTime 				= 0;       		// previous step time reading
 unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
@@ -127,9 +134,22 @@ bool shutterTriggered 						= false;			// did the shutter trigger or not
 bool triggerFailed                = false;      // record state if shutter trigger has failed
 int stepperMaxSpeed               = 3000;       // max speed setting for AccelStepper
 int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
+
+String currentScreen;
+String stepDist = "0.00125";
+
+extern "C" char *sbrk(int i);
+
 // ***** --- PROGRAM --- ***** //
 
 void serialTuple(String cmd, int arg);
+int FreeRam();
+
+// TODO
+// - add reduced speed option for joystick (z button press?)
+// - remove serialTuple and functions for sending new speed/accel settings
+// - fix bug with rampSteps where hovering at low speed will use up all rampSteps and
+//    moving to a much higher speed will cause the motor to stall
 
 
 void setup(void) {
@@ -145,11 +165,8 @@ void setup(void) {
 	}
 
 	tft.begin(identifier);
-	tft.setFont(&Arimo_Regular_24);
-	tft.fillScreen(BLACK);
 	tft.setRotation(1);
   screenRotated = false;
-	startScreen();
 
 	driver.begin();
 	driver.rms_current(900);
@@ -191,6 +208,10 @@ void setup(void) {
 	// }
   // don't home rail on start up
   runHomingSequence = false;
+
+  initButtons(200, 75);
+  populateScreen("Home");
+
 }
 
 void loop() {
@@ -201,46 +222,48 @@ void loop() {
     autoStack();
   }
   // take touch reading
-  if (currentTime - subRoutine1Time >= 50) {
-    touchScreen();
-    subRoutine1Time = millis();
+  if (millis() - prevButtonCheck >= 50) {
+    checkButtons(getCurrentScreen());
+    prevButtonCheck = millis();
 
-    if (Serial.available() > 0) {
-      String cmd = Serial.readStringUntil(' ');
-      String strArg = Serial.readStringUntil('\n');
-
-      int arg = strArg.toInt();
-
-      if (cmd == "speed") {
-        serialTuple("speed", arg);
-        Serial.print("Set speed to ");
-        Serial.println(arg);
-        stepper.setMaxSpeed(arg);
-        stepperMaxSpeed = arg;
-      }
-      else if (cmd == "accel") {
-        serialTuple("speed", arg);
-        Serial.print("Set acceleration to ");
-        Serial.println(arg);
-        stepper.setAcceleration(arg);
-      }
-    }
+    // if (Serial.available() > 0) {
+    //   String cmd = Serial.readStringUntil(' ');
+    //   String strArg = Serial.readStringUntil('\n');
+    //
+    //   int arg = strArg.toInt();
+    //
+    //   if (cmd == "speed") {
+    //     serialTuple("speed", arg);
+    //     Serial.print("Set speed to ");
+    //     Serial.println(arg);
+    //     stepper.setMaxSpeed(arg);
+    //     stepperMaxSpeed = arg;
+    //   }
+    //   else if (cmd == "accel") {
+    //     serialTuple("speed", arg);
+    //     Serial.print("Set acceleration to ");
+    //     Serial.println(arg);
+    //     stepper.setAcceleration(arg);
+    //   }
+    // }
   }
+
   // take joystick and limit switch reading, put stepper to sleep
-  if (currentTime - subRoutine2Time >= 100) {
+  if (millis() - prevJoystickCheck >= 250) {
+    // Serial.print(millis()); Serial.print(" | free ram: "); Serial.println(FreeRam());
     // check joystick for movement
-    readJoystick();
+    // readJoystick();
 
     // move if past threshold and not in autoStack mode
     if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
-      joystickControl();
+      // joystickControl();
     }
     // sleep if stepper inactive, update position on manual screen
     if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
       toggleStepper(false); // disable stepper
       // refresh position on manual screen after stepping completed
-      if (prevStepperPosition != stepper.currentPosition() && activeScreen == 2) {
-        displayPosition();
+      if (prevStepperPosition != stepper.currentPosition() && getCurrentScreen() == "Manual") {
+        manual_screen::displayPosition();
       }
     }
 		// configure SilentStep if not homing rail
@@ -248,17 +271,17 @@ void loop() {
 			silentStepConfig();
     }
 		// update flashValue if on right screen
-		if (activeScreen == 5 && (editFlashOffValue == true || editFlashOnValue == true)) {
-			updateFlashValue();
+		if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
+			flash_screen::updateFlashValue();
 		}
     // set END as maxPosition if Z Stick depressed
-    if (activeScreen == 4 && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+    if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
       autoStackMax = true;
-      setAutoStackPositions(false, true);
+      config_screen::setAutoStackPositions(false, true);
       autoStackMax = false;
     }
 
-    subRoutine2Time = millis();
+    prevJoystickCheck = millis();
   }
 
   // reset target to currentPosition
@@ -270,7 +293,7 @@ void loop() {
   // run homing sequence if first loop
   if (runHomingSequence == true) {
     homeRail(); // run homing routine
-		setAutoStackPositions(true, true); // set both start and end points
+		config_screen::setAutoStackPositions(true, true); // set both start and end points
 		silentStepConfig(); // set config for silentStep
     runHomingSequence = false;
   }
@@ -282,4 +305,10 @@ void serialTuple(String cmd, int arg) {
 	Serial.print("(");
 	Serial.print(arg);
 	Serial.println(")");
+}
+
+
+int FreeRam () {
+  char stack_dummy = 0;
+  return &stack_dummy - sbrk(0);
 }

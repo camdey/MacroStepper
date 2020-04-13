@@ -6,6 +6,7 @@
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
+#include <gfxButton.h>
 #include <AccelStepper.h>
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
@@ -14,27 +15,39 @@
 #include <Fonts/Arimo_Regular_22.h>
 #include <Fonts/Arimo_Regular_24.h>
 #include <Fonts/Arimo_Regular_30.h>
+#include <Fonts/Arimo_Regular_36.h>
+#include <Fonts/Arimo_Regular_40.h>
 #include <Fonts/Arimo_Bold_20.h>
 #include <Fonts/Arimo_Bold_24.h>
 #include <Fonts/Arimo_Bold_30.h>
+#include <Fonts/Arimo_Bold_36.h>
+#include <Fonts/Arimo_Bold_40.h>
 #include <Fonts/Syncopate_Bold_36.h>
 #include <Fonts/Permanent_Marker_Regular_36.h>
 #include <Fonts/Lato_Black_34.h>
-#include <Icons/Aperture_Icon.h>
-#include <Icons/Back_Arrow_Icon.h>
-#include <Icons/Cog_Wheel_Icon.h>
-#include <Icons/Delay_Clock_Icon.h>
-#include <Icons/Flash_Icon.h>
-#include <Icons/House_Icon.h>
-#include <Icons/Main_Logo_Icon.h>
-#include <Icons/Reset_Icon.h>
-#include <Icons/Reset_40_Icon.h>
-#include <Icons/Rotate_Icon.h>
+#include <Fonts/Lato_Black_40.h>
+#include <Icons/ArrowUp.h>
+#include <Icons/ArrowDown.h>
+#include <Icons/BackArrow.h>
+#include <Icons/Cancel.h>
+#include <Icons/CogWheel.h>
+#include <Icons/DelayClock.h>
+#include <Icons/FlashBulb.h>
+#include <Icons/FlashOn.h>
+#include <Icons/FlashOff.h>
+#include <Icons/MainLogo.h>
+#include <Icons/Play.h>
+#include <Icons/Pause.h>
+#include <Icons/Rotate.h>
+#include <Icons/Target.h>
+#include <Icons/Timer.h>
 
 extern TouchScreen      ts;
 extern TMC2130Stepper   driver;
 extern AccelStepper 		stepper;
 extern MCUFRIEND_kbv 	  tft;
+extern gfxButton        gfxB;
+extern gfxTouch         gfxT;
 
 // Definitions for some common 16-bit color values:
 #define	BLACK   						0x0000
@@ -70,10 +83,26 @@ extern MCUFRIEND_kbv 	  tft;
 // but consistently getting 58780 after homing
 
 // definitions for touch screen orientation
-#define TS_MINX 					160
-#define TS_MAXX 					850
-#define TS_MINY 					132
-#define TS_MAXY 					900
+// Arduino Due + 2.8" TFT
+// #define TS_MINX 					160
+// #define TS_MAXX 					850
+// #define TS_MINY 					132
+// #define TS_MAXY 					900
+// Arduino Due + 3.5" TFT
+#define TS_MINX 					760
+#define TS_MAXX 					315
+#define TS_MINY 					852
+#define TS_MAXY 					220
+// Grand Central M4 + 2.8" TFT
+// #define TS_MINX 					320
+// #define TS_MAXX 					760
+// #define TS_MINY 					235
+// #define TS_MAXY 					810
+// grand central M4 + 3.5" TFT
+// #define TS_MINX 					846
+// #define TS_MAXX 					148
+// #define TS_MINY 					937
+// #define TS_MAXY 					140
 
 // pin definitions for touch inputs
 #define YP 								A3 						// must be an analog pin, use "An" notation!
@@ -101,16 +130,16 @@ extern MCUFRIEND_kbv 	  tft;
 // #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define ZSTICK_PIN 				A7            // button-press from joystick
 #define XSTICK_PIN 				A6            // joystick X-axis pin (controls fwd and rev)
+#define ZSTICK_PIN 				A7            // button-press from joystick
 #define GODOX_PIN 				A8            // pin for GA1A12S202 light sensor
 #define PIEZO_PIN         22            // pin for Piezo buzzer
 #define SONY_PIN          36            // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
-extern unsigned long subRoutine1Time;
-extern unsigned long subRoutine2Time;
+extern unsigned long prevButtonCheck;
+extern unsigned long prevJoystickCheck;
 extern unsigned long prevStepTime;
 extern unsigned long recycleTime;
 extern unsigned long prevGenericTime;
@@ -190,5 +219,8 @@ extern bool triggerFailed;
 
 extern int stepperMaxSpeed;
 extern int rampSteps;
+
+extern String currentScreen;
+extern String stepDist;
 
 #endif

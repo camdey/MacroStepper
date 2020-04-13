@@ -15,8 +15,6 @@ bool flashStatus() {
     // update light reading from flash
     newValue = analogRead(GODOX_PIN);
     flashValue = newValue;
-    Serial.print("flashValue: ");
-    Serial.println(flashValue);
     lastReadFlash = millis();
 
     // update threshold, e.g. ((310-50)*0.75)+50 = 245
@@ -31,26 +29,6 @@ bool flashStatus() {
   }
 
   return flashReady;
-}
-
-void setShutterDelay() {
-
-  if (shutterDelay < 1) {
-    shutterDelay = 1;
-  } else if (shutterDelay > 15) {
-    shutterDelay = 15;
-  }
-
-  if (prevDelay != shutterDelay) {
-    // print new delay value
-    tft.setCursor(155, 143);
-    tft.setFont(&Arimo_Regular_20);
-    tft.setTextColor(BLACK, BLACK);
-    tft.println(prevDelay);
-    tft.setCursor(155, 143);
-    tft.setTextColor(WHITE, BLACK);
-    tft.println(shutterDelay);
-  }
 }
 
 void toggleShutter() {
@@ -73,7 +51,6 @@ bool triggerShutter() {
   bool flashReadyDebouncer = false;
 	shutterTriggered = false;
 
-  // Serial.println("triggerShutter");
 
   if (shutterEnabled == true) {
 		unsigned long triggerTime = millis();
@@ -84,13 +61,10 @@ bool triggerShutter() {
       flashReadyDebouncer = flashReady;
       // break if flash not turning on
       if (millis() - triggerTime >= 5000) {
-        // Serial.println("flash not ready timeout");
         break;
       }
 			delay(10);
 		}
-    // Serial.print("flashReady: ");
-    // Serial.println(flashReady);
 
 		// trigger flash
     digitalWrite(SONY_PIN, HIGH);
@@ -106,20 +80,16 @@ bool triggerShutter() {
       }
       if (flashReady == false && flashReadyDebouncer == false && millis() - triggerTime > 400) {
         shutterTriggered = true;
-        // Serial.println("shutter triggered");
         break;
       }
       shutterTriggered = false;
       delay(10);
     }
 
-    // Serial.println("left trigger loop");
 		recycleTime = (millis() - triggerTime);
 
 		// reset shutter signal
     digitalWrite(SONY_PIN, LOW);
 	}
-  Serial.print("return shutterTriggered: ");
-  Serial.println(shutterTriggered);
 	return shutterTriggered;
 }

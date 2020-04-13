@@ -2,7 +2,9 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "ShutterControl.h"
-#include "UserInterface.h"
+#include "UI-Main.h"
+#include "UI-Auto.h"
+#include "UI-AutoConfig.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -73,9 +75,8 @@ void autoStack() {
           // go to flashScreen if can't trigger after 10 seconds
           else if (millis() - failTime >= 10000) {
             // Serial.println("go to flash screen");
-            pauseAutoStack = true; // pause autostack
-            drawPlayPause(true, false); // grey out play, highlight pause
-            flashScreen(); // load screen for checking flash settings/functionality
+            auto_screen::pauseStack();
+            populateScreen("Flash"); // load screen for checking flash settings/functionality
             break;
           }
         }
@@ -91,9 +92,9 @@ void autoStack() {
 		if (stepperMoved == true) {
 			completedMovements++;
 	    // make sure correct screen is displaying
-	    if (activeScreen == 3) { // auto screen
-	      updateProgress(0); // don't force refresh
-				estimateDuration(0); // don't force refresh
+	    if (getCurrentScreen() == "Auto") { // auto screen
+	      auto_screen::updateProgress(0); // don't force refresh
+				auto_screen::estimateDuration(0); // don't force refresh
 	    }
 
 			shutterTriggered = false; // reset shutter
@@ -107,14 +108,15 @@ void autoStack() {
   }
   // stop AutoStack sequence if end reached
   if (completedMovements >= movementsRequired) {
-		estimateDuration(1); // force refresh
+		auto_screen::estimateDuration(1); // force refresh
     autoStackFlag = false;
     goToStart = true;
     completedMovements = 0;
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
-    drawPlayPause(false, false); // reset play to green
+    auto_screen::pauseStack(); // reset PlayPause button to "paused" mode"
+    pauseAutoStack = false; // autoStack is completed but not paused
   }
 }
 
@@ -144,7 +146,7 @@ void dryRun() {
     stepper.moveTo(startPosition);
     stepper.runSpeedToPosition();
   }
-  displayPosition();
+  config_screen::displayPosition();
 
   // step slow through procedure
   while (stepper.currentPosition() < endPosition) {
@@ -152,7 +154,7 @@ void dryRun() {
     stepper.moveTo(endPosition);
     stepper.runSpeedToPosition();
   }
-  displayPosition();
+  config_screen::displayPosition();
 
   // return to start
   if (stepper.currentPosition() > startPosition) {
@@ -164,7 +166,7 @@ void dryRun() {
   stepper.setSpeed(0);
   targetFlag = true;
   completedMovements = 0;
-  displayPosition();
+  config_screen::displayPosition();
 }
 
 
@@ -224,16 +226,12 @@ void overshootPosition(int position, int numberOfSteps, int direction) {
     stepper.moveTo(offsetPosition); // move past start
     stepper.runSpeedToPosition();
   }
-  Serial.print("current pos: ");
-  Serial.println(stepper.currentPosition());
   delay(50);
   while (stepper.currentPosition() != position) {
     stepper.setSpeed(-speed); // reverse direcyion
     stepper.moveTo(position); // move to start
     stepper.runSpeedToPosition();
   }
-  Serial.print("current pos: ");
-  Serial.println(stepper.currentPosition());
 }
 
 
