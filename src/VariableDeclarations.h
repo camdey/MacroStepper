@@ -2,7 +2,8 @@
 #define VARIABLEDECLARATIONS_H
 
 #include <Arduino.h>
-#include <TMC2130Stepper.h>
+// #include <TMC2130Stepper.h>
+#include "TMCStepper.h"
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
@@ -43,8 +44,7 @@
 #include <Icons/Timer.h>
 
 extern TouchScreen      ts;
-extern TMC2130Stepper   driver;
-extern AccelStepper 		stepper;
+extern TMC5160Stepper   driver;
 extern MCUFRIEND_kbv 	  tft;
 extern gfxButton        gfxB;
 extern gfxTouch         gfxT;
@@ -73,15 +73,14 @@ extern gfxTouch         gfxT;
 #define minPressure 			5
 #define maxPressure 			2000
 // microsteps and positions
-#define nrMicrosteps			4						  // number of microsteps per full step
+#define nrMicrosteps			16						// number of microsteps per full step
 #define microstepDistance 1.25          // distance travelled per microstep
-#define railLength        150           // total length of actuator rails
-#define stageLength       75            // total length of rail stage
-#define bushingOverhang   1.9           // screw bushing protrudes and prevents stage from fully reaching rear end
-#define railTravel        73.1          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
+#define railLength        200           // total length of actuator rails
+#define stageLength       60            // total length of rail stage
+#define endStoppers       18            // screw bushing protrudes and prevents stage from fully reaching rear end
+#define railTravel        120           // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
 #define minPosition       0
-#define maxPosition       58480         // 1mm pitch x 4 microsteps/step x 200 steps/revoluton * 73mm
-// but consistently getting 58780 after homing
+#define maxPosition       384000        // (120mm travel / 2mm pitch) * 400 steps * 16 microsteps
 
 // definitions for touch screen orientation
 // Arduino Due + 2.8" TFT
@@ -125,6 +124,7 @@ extern gfxTouch         gfxT;
 #define STEP_PIN 					30
 #define CS_PIN 						32
 #define EN_PIN 						34
+#define R_SENSE           0.075f       // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
@@ -218,6 +218,7 @@ extern bool stepperMoved;
 extern bool shutterTriggered;
 extern bool triggerFailed;
 
+extern int joystickMaxVelocity;
 extern int stepperMaxSpeed;
 extern int rampSteps;
 

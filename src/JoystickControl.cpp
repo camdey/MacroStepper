@@ -48,53 +48,53 @@ used to reduce the initial acceleration of the stepper to control
 jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
-void joystickControl() {
-  // count nr of loops in while() clause
-  long loopNr = 0;
-  int stepperSpeed = 0;
+void joystick(int xVal, bool dir) {
+  long velocity = calcVelocity(xVal);
+  unsigned long velocityCheck = millis();
 
   // wake stepper from sleep
-	if (stepperDisabled == true) {
+  if (stepperDisabled == true) {
     toggleStepper(true);
   }
-  // while joystick is operated
-  while (xStickPos >= xPosUpper || xStickPos <= xPosLower) {
-    // if rail min/max postions have been set...
+
+  while (xVal >= xPosUpper || xVal <= xPosLower) {
+    long currentPos = driver.XACTUAL();
+    long targetPos = driver.XTARGET();
+
     if (homedRail == true) {
       // don't allow movement if within 1000 steps of forward stop
       // values are inverse so high xStickPos = reverse
-      if (xStickPos >= xPosUpper && (abs(minPosition - stepper.currentPosition()) <= 1000)) {
+      if (xVal >= xPosUpper && (abs(minPosition - driver.XACTUAL()) <= 1000)) {
         break;
       }
       // don't allow movement if within 1000 steps of backward stop
       // values are inverse so low xStickPos = forward
-      if (xStickPos <= xPosLower && (abs(maxPosition - stepper.currentPosition()) <= 1000)) {
+      if (xVal <= xPosLower && (abs(maxPosition - driver.XACTUAL()) <= 1000)) {
         break;
       }
     }
-    // move either -1, 0, or 1 steps
-    int step_dir = 0;
-    if (xStickPos >= xPosUpper) step_dir = 1;
-    else if (xStickPos <= xPosLower) step_dir = 1;
-    else step_dir = 0;
-    stepper.move(step_dir);
 
-    // check stick position again and set speed
-    if (millis() % 50 == 0) {
-       readJoystick();
-       stepperSpeed = speedControl(loopNr);
-
-       // prevent overflow
-       if (abs(loopNr) > 2000000000) {
-         loopNr = rampSteps;
-       }
+    if (millis() - velocityCheck >= 100) {
+      velocity = calcVelocity(xVal);
+      Serial.print(" xVal: "); Serial.print(xVal);
+      Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
+      Serial.print(" | currentPos: "); Serial.print(currentPos);
+      Serial.print(" | targetPos: "); Serial.print(targetPos);
+      Serial.print(" | velocity: "); Serial.println(velocity);
+      velocityCheck = millis();
+    }
+    if (dir == 1) {
+      driver.XTARGET(800000);
+    }
+    else if (dir == 0) {
+      driver.XTARGET(-800000);
     }
 
-    stepper.setSpeed(stepperSpeed);
-    stepper.runSpeed();
-
-    loopNr++;
+    driver.VMAX(velocity);
+    xVal = readJoystick();
   }
+  driver.XTARGET(driver.XACTUAL());
+  driver.VMAX(0);
 
   // // check start/end position adjustment
   if (editStartPosition == true && arrowsActive == true) {
@@ -116,38 +116,38 @@ void joystickControl() {
     config_screen::displayPosition();
   }
   // update prev position
-  prevStepperPosition = stepper.currentPosition();
+  prevStepperPosition = driver.XACTUAL();
 }
 
 
-void readJoystick() {
+int readJoystick() {
+  int val;
+
   if (screenRotated == false) {
-    xStickPos = analogRead(XSTICK_PIN);
+    val = analogRead(XSTICK_PIN);
   }
   else if (screenRotated == true) {
-    xStickPos = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
+    val = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
   }
 
   // offset reading by difference between resting state and ideal middle point
-  xStickPos -= xPosDiff;
+  val -= xPosDiff;
+  return val;
 }
 
 
-int speedControl(long loopNr) {
-  int jerkControl = rampSteps;
-  int adjustedSpeed = 0;
+long calcVelocity(int xVal) {
+  long velocity;
+  long xAdj;
 
-  // if exceeded 5000 loops, jerkControl multiplier = 1
-  if (loopNr >= jerkControl) {
-    loopNr = jerkControl;
+  if (xVal < 512) {
+    xAdj = xVal + 1; // prevent taking log of 0
   }
+  else if (xVal >= 512) {
+    xAdj = (1024 - xVal);
+  }
+  xAdj = log(xAdj)*100; // multiply by 100 as value will be truncated to integer
+  velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
 
-  // adjust input range based on diff between resting point and ideal middle
-  joyStickSpeed = map(xStickPos, (0 - xPosDiff), (1023 - xPosDiff), stepperMaxSpeed, -stepperMaxSpeed);
-
-  // adjust speed based on jerkControl multiplier;
-  float speedModifier = loopNr*1.00 / jerkControl*1.00;
-  adjustedSpeed = joyStickSpeed * speedModifier;
-
-  return adjustedSpeed;
+  return velocity;
 }

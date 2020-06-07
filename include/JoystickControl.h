@@ -6,7 +6,7 @@
 
 void calibrateJoyStick();
 void joystickControl();
-void readJoystick();
-int speedControl(long loopNr);
+int readJoystick();
+long calcVelocity(int xVal);
 
 #endif

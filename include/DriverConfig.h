@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void stallGuardConfig();
-void silentStepConfig();
+void driverConfig(String configType);
 
 #endif

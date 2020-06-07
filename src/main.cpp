@@ -25,8 +25,9 @@
 #include "TouchScreen.h"											// touchscreen library
 #include "MCUFRIEND_kbv.h"										// display driver for IL9481
 #include "AccelStepper.h"											// software stepping implementation
-#include "TMC2130Stepper.h" 									// stepper driver library
-#include "TMC2130Stepper_REGDEFS.h"	  				// stepper driver registry definitions
+// #include "TMC2130Stepper.h" 									// stepper driver library
+// #include "TMC2130Stepper_REGDEFS.h"	  				// stepper driver registry definitions
+#include "TMCStepper.h"
 #include "TimerFreeTone.h"                    // produces beep tone for piezo
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
@@ -44,9 +45,8 @@
 #include "UI-AutoConfig.h"
 
 
+TMC5160Stepper                driver(CS_PIN, R_SENSE);
 TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
-TMC2130Stepper 	driver 			= TMC2130Stepper(EN_PIN, DIR_PIN, STEP_PIN, CS_PIN);
-AccelStepper 		stepper 		= AccelStepper(stepper.DRIVER, STEP_PIN, DIR_PIN);
 MCUFRIEND_kbv 	tft;
 gfxButton       gfxB;
 gfxTouch        gfxT;
@@ -137,13 +137,9 @@ int rampSteps                     = 50000;      // number of steps in ramp profi
 
 String currentScreen;
 String stepDist = "0.00125";
-
-extern "C" char *sbrk(int i);
+int joystickMaxVelocity = 100000;
 
 // ***** --- PROGRAM --- ***** //
-
-void serialTuple(String cmd, int arg);
-int FreeRam();
 
 // TODO
 // - add reduced speed option for joystick (z button press?)
@@ -169,8 +165,10 @@ void setup(void) {
   screenRotated = false;
 
 	driver.begin();
-	driver.rms_current(900);
+	driver.rms_current(1900);
 	driver.microsteps(nrMicrosteps);
+  stepperDisabled = false;
+  driverConfig("joystick");
 
 	pinMode(EN_PIN, OUTPUT);
   digitalWrite(EN_PIN, LOW);
@@ -188,16 +186,6 @@ void setup(void) {
   pinMode(SONY_PIN, OUTPUT);
   digitalWrite(SONY_PIN, LOW);
   attachInterrupt(digitalPinToInterrupt(DIAG1_PIN), stallDetection, RISING);
-
-  // set stepper AccelStepper config
-  stepper.setMaxSpeed(stepperMaxSpeed);
-  stepper.setAcceleration(2000);
-  stepper.setEnablePin(EN_PIN);
-  stepper.setMinPulseWidth(1);
-  stepper.setPinsInverted(false, false, true);
-  stepper.enableOutputs();
-  stepperDisabled = false;
-	silentStepConfig();
 
   // find stable resting point of joystick
   calibrateJoyStick();
@@ -225,27 +213,6 @@ void loop() {
   if (millis() - prevButtonCheck >= 50) {
     checkButtons(getCurrentScreen());
     prevButtonCheck = millis();
-
-    // if (Serial.available() > 0) {
-    //   String cmd = Serial.readStringUntil(' ');
-    //   String strArg = Serial.readStringUntil('\n');
-    //
-    //   int arg = strArg.toInt();
-    //
-    //   if (cmd == "speed") {
-    //     serialTuple("speed", arg);
-    //     Serial.print("Set speed to ");
-    //     Serial.println(arg);
-    //     stepper.setMaxSpeed(arg);
-    //     stepperMaxSpeed = arg;
-    //   }
-    //   else if (cmd == "accel") {
-    //     serialTuple("speed", arg);
-    //     Serial.print("Set acceleration to ");
-    //     Serial.println(arg);
-    //     stepper.setAcceleration(arg);
-    //   }
-    // }
   }
 
   // take joystick and limit switch reading, put stepper to sleep
@@ -268,7 +235,7 @@ void loop() {
     }
 		// configure SilentStep if not homing rail
 		if (stallGuardConfigured == true && runHomingSequence == false) {
-			silentStepConfig();
+			driverConfig("joystick");
     }
 		// update flashValue if on right screen
 		if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
@@ -294,21 +261,7 @@ void loop() {
   if (runHomingSequence == true) {
     homeRail(); // run homing routine
 		config_screen::setAutoStackPositions(true, true); // set both start and end points
-		silentStepConfig(); // set config for silentStep
+		driverConfig("joystick"); // set config for silentStep
     runHomingSequence = false;
   }
-}
-
-void serialTuple(String cmd, int arg) {
-	Serial.print("Received command: ");
-	Serial.print(cmd);
-	Serial.print("(");
-	Serial.print(arg);
-	Serial.println(")");
-}
-
-
-int FreeRam () {
-  char stack_dummy = 0;
-  return &stack_dummy - sbrk(0);
 }
