@@ -11,7 +11,7 @@ namespace manual_screen {
   gfxTouch  *tch_array[num_tchs];
 
   String stepNr   = String(manualMovementCount);
-  String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
+  String railPos  = String(driver.XACTUAL()*(microstepDistance/1000), 5);
 
 
   gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",     0,   20,   160,   80,   15, CUSTOM_BLUE  );
@@ -62,7 +62,7 @@ namespace manual_screen {
   void populateManualScreen() {
     setCurrentScreen("Manual");
     stepNr = String(manualMovementCount);
-    railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
+    railPos = String(driver.XACTUAL()*(microstepDistance/1000), 5);
 
     // draw buttons
     for (int i=0; i < num_btns; i++) {
@@ -193,8 +193,8 @@ namespace manual_screen {
 
   void displayPosition() {
     // update for new values
-    if (prevStepperPosition != stepper.currentPosition()) {
-      int currentPosition = stepper.currentPosition();
+    if (prevStepperPosition != driver.XACTUAL()) {
+      int currentPosition = driver.XACTUAL();
       railPos = String(currentPosition*(microstepDistance/1000), 5);
       // update rail position value
       btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);

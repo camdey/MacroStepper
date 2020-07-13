@@ -77,7 +77,7 @@ namespace config_screen {
       btn_Reset.drawButton(tft, CUSTOM_RED);
     }
 
-    int currentPosition = stepper.currentPosition();
+    int currentPosition = driver.XACTUAL();
     // char delaySeconds[6];
     // sprintf_P(delaySeconds, PSTR("%02d:%02d"), 0, shutterDelay);
 
@@ -137,7 +137,7 @@ namespace config_screen {
 
   void func_Run(bool btnActive) {
     if (btnActive == true && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
-      int currentPosition = stepper.currentPosition();
+      int currentPosition = driver.XACTUAL();
 
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), YELLOW);
       btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), YELLOW);
@@ -180,8 +180,8 @@ namespace config_screen {
       stepCount = 1;
       completedMovements = 0;
       movementsRequired = 0;
-      startPosition = stepper.currentPosition();
-      endPosition = stepper.currentPosition();
+      startPosition = driver.XACTUAL();
+      endPosition = driver.XACTUAL();
       btn_Reset.drawButton(tft, BLACK);
     }
   }
@@ -261,7 +261,7 @@ namespace config_screen {
         startPosition = 0;
       }
       // get new value
-      startPosition = stepper.currentPosition();
+      startPosition = driver.XACTUAL();
       // print start point if changed
       if (prevStartPosition != startPosition && getCurrentScreen() == "AutoConfig") {
         btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
@@ -278,7 +278,7 @@ namespace config_screen {
         endPosition = maxPosition;
       }
       else if (autoStackMax == false) {
-        endPosition = stepper.currentPosition();
+        endPosition = driver.XACTUAL();
       }
       // print end point if changed
       if (prevEndPosition != endPosition && getCurrentScreen() == "AutoConfig") {
@@ -311,8 +311,8 @@ namespace config_screen {
 
 
   void displayPosition() {
-    if (prevStepperPosition != stepper.currentPosition()) {
-      int currentPosition = stepper.currentPosition();
+    if (prevStepperPosition != driver.XACTUAL()) {
+      int currentPosition = driver.XACTUAL();
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
       btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), WHITE);
 

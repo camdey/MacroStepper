@@ -43,7 +43,7 @@ void driverConfig(String configType) {
 
     driver.sg_stop(false);       // stop by stallguard, disable to release motor after stall event
   }
-  else if (configType == "homing") {
+  else if (configType == "stallGuard") {
 
     driver.GCONF();
     driver.en_pwm_mode(true);

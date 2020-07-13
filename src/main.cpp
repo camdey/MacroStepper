@@ -43,6 +43,7 @@
 #include "UI-Flash.h"
 #include "UI-Auto.h"
 #include "UI-AutoConfig.h"
+#include "Wire.h"
 
 
 TMC5160Stepper                driver(CS_PIN, R_SENSE);
@@ -118,7 +119,6 @@ volatile bool stepperDisabled 		= false;      // is stepper disabled? in ISR
 volatile bool directionFwd 				= true;       // is stepper in fwd direction? in ISR
 volatile long fwdPosition 				= 1;          // fwdPosition of rail, set to non-zero number initially, in ISR
 volatile long bwdPosition 				= 1;          // bwdPosition of rail, set to non-zero number initially, in ISR
-bool firstFwdStall								= true;				// takes first position reading when stalling in case of lost steps
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
 int movementsRequired 						= 0;        	// equals total distance / step multiplier
@@ -167,6 +167,7 @@ void setup(void) {
 	driver.begin();
 	driver.rms_current(1900);
 	driver.microsteps(nrMicrosteps);
+  driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
   stepperDisabled = false;
   driverConfig("joystick");
 
@@ -185,7 +186,6 @@ void setup(void) {
   pinMode(ZSTICK_PIN, INPUT_PULLUP);
   pinMode(SONY_PIN, OUTPUT);
   digitalWrite(SONY_PIN, LOW);
-  attachInterrupt(digitalPinToInterrupt(DIAG1_PIN), stallDetection, RISING);
 
   // find stable resting point of joystick
   calibrateJoyStick();
@@ -206,57 +206,57 @@ void loop() {
 	currentTime = millis();
 
   // run AutoStack sequence if enabled
-  if (autoStackFlag == true && pauseAutoStack == false) {
-    autoStack();
-  }
-  // take touch reading
-  if (millis() - prevButtonCheck >= 50) {
-    checkButtons(getCurrentScreen());
-    prevButtonCheck = millis();
-  }
+  // if (autoStackFlag == true && pauseAutoStack == false) {
+  //   autoStack();
+  // }
+  // // take touch reading
+  // if (millis() - prevButtonCheck >= 50) {
+  //   checkButtons(getCurrentScreen());
+  //   prevButtonCheck = millis();
+  // }
 
   // take joystick and limit switch reading, put stepper to sleep
-  if (millis() - prevJoystickCheck >= 250) {
-    // Serial.print(millis()); Serial.print(" | free ram: "); Serial.println(FreeRam());
-    // check joystick for movement
-    readJoystick();
-
-    // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
-      joystickControl();
-    }
-    // sleep if stepper inactive, update position on manual screen
-    if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
-      toggleStepper(false); // disable stepper
-      // refresh position on manual screen after stepping completed
-      if (prevStepperPosition != stepper.currentPosition() && getCurrentScreen() == "Manual") {
-        manual_screen::displayPosition();
-      }
-    }
-		// configure SilentStep if not homing rail
-		if (stallGuardConfigured == true && runHomingSequence == false) {
-			driverConfig("joystick");
-    }
-		// update flashValue if on right screen
-		if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
-			flash_screen::updateFlashValue();
-		}
-    // set END as maxPosition if Z Stick depressed
-    if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
-      autoStackMax = true;
-      config_screen::setAutoStackPositions(false, true);
-      autoStackMax = false;
-    }
-
-    prevJoystickCheck = millis();
-  }
+  // if (millis() - prevJoystickCheck >= 250) {
+  //   // Serial.print(millis()); Serial.print(" | free ram: "); Serial.println(FreeRam());
+  //   // check joystick for movement
+  //   readJoystick();
+  //
+  //   // move if past threshold and not in autoStack mode
+  //   if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
+  //     joystickControl();
+  //   }
+  //   // sleep if stepper inactive, update position on manual screen
+  //   if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
+  //     toggleStepper(false); // disable stepper
+  //     // refresh position on manual screen after stepping completed
+  //     if (prevStepperPosition != driver.XACTUAL() && getCurrentScreen() == "Manual") {
+  //       manual_screen::displayPosition();
+  //     }
+  //   }
+	// 	// configure SilentStep if not homing rail
+	// 	if (stallGuardConfigured == true && runHomingSequence == false) {
+	// 		driverConfig("joystick");
+  //   }
+	// 	// update flashValue if on right screen
+	// 	if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
+	// 		flash_screen::updateFlashValue();
+	// 	}
+  //   // set END as maxPosition if Z Stick depressed
+  //   if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+  //     autoStackMax = true;
+  //     config_screen::setAutoStackPositions(false, true);
+  //     autoStackMax = false;
+  //   }
+  //
+  //   prevJoystickCheck = millis();
+  // }
 
   // reset target to currentPosition
-  if (targetFlag == true) {
-    stepper.move(0);
-    stepper.setSpeed(0);
-    targetFlag = false;
-  }
+  // if (targetFlag == true) {
+  //   stepper.move(0);
+  //   stepper.setSpeed(0);
+  //   targetFlag = false;
+  // }
   // run homing sequence if first loop
   if (runHomingSequence == true) {
     homeRail(); // run homing routine
