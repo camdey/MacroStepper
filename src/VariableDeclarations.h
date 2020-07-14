@@ -8,7 +8,7 @@
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
 #include <gfxButton.h>
-#include <AccelStepper.h>
+// #include <AccelStepper.h>
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
 #include <Fonts/Arimo_Regular_18.h>

@@ -24,11 +24,11 @@
 #include "Adafruit_GFX.h"    									// core graphics library
 #include "TouchScreen.h"											// touchscreen library
 #include "MCUFRIEND_kbv.h"										// display driver for IL9481
-#include "AccelStepper.h"											// software stepping implementation
+// #include "AccelStepper.h"											// software stepping implementation
 // #include "TMC2130Stepper.h" 									// stepper driver library
 // #include "TMC2130Stepper_REGDEFS.h"	  				// stepper driver registry definitions
 #include "TMCStepper.h"
-#include "TimerFreeTone.h"                    // produces beep tone for piezo
+// #include "TimerFreeTone.h"                    // produces beep tone for piezo
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
@@ -164,12 +164,12 @@ void setup(void) {
 	tft.setRotation(1);
   screenRotated = false;
 
-	driver.begin();
-	driver.rms_current(1900);
-	driver.microsteps(nrMicrosteps);
-  driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+	// driver.begin();
+	// driver.rms_current(900);
+	// driver.microsteps(nrMicrosteps);
+  // driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
   stepperDisabled = false;
-  driverConfig("joystick");
+  // driverConfig("joystick");
 
 	pinMode(EN_PIN, OUTPUT);
   digitalWrite(EN_PIN, LOW);
@@ -188,7 +188,7 @@ void setup(void) {
   digitalWrite(SONY_PIN, LOW);
 
   // find stable resting point of joystick
-  calibrateJoyStick();
+  // calibrateJoyStick();
 
 	// if holding down ZSTICK_PIN, don't home rail
 	// if (digitalRead(ZSTICK_PIN) == LOW) {
@@ -210,10 +210,10 @@ void loop() {
   //   autoStack();
   // }
   // // take touch reading
-  // if (millis() - prevButtonCheck >= 50) {
-  //   checkButtons(getCurrentScreen());
-  //   prevButtonCheck = millis();
-  // }
+  if (millis() - prevButtonCheck >= 50) {
+    checkButtons(getCurrentScreen());
+    prevButtonCheck = millis();
+  }
 
   // take joystick and limit switch reading, put stepper to sleep
   // if (millis() - prevJoystickCheck >= 250) {
@@ -258,10 +258,10 @@ void loop() {
   //   targetFlag = false;
   // }
   // run homing sequence if first loop
-  if (runHomingSequence == true) {
-    homeRail(); // run homing routine
-		config_screen::setAutoStackPositions(true, true); // set both start and end points
-		driverConfig("joystick"); // set config for silentStep
-    runHomingSequence = false;
-  }
+  // if (runHomingSequence == true) {
+  //   homeRail(); // run homing routine
+	// 	config_screen::setAutoStackPositions(true, true); // set both start and end points
+	// 	driverConfig("joystick"); // set config for silentStep
+  //   runHomingSequence = false;
+  // }
 }
