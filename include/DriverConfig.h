@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void driverConfig(String configType);
+void configStealthChop();
+void configStallGuard();
 
 #endif

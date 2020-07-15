@@ -2,13 +2,11 @@
 #define VARIABLEDECLARATIONS_H
 
 #include <Arduino.h>
-// #include <TMC2130Stepper.h>
 #include "TMCStepper.h"
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
 #include <gfxButton.h>
-// #include <AccelStepper.h>
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
 #include <Fonts/Arimo_Regular_18.h>
@@ -45,7 +43,7 @@
 
 extern TouchScreen      ts;
 extern TMC5160Stepper   driver;
-extern MCUFRIEND_kbv 	  tft;
+extern MCUFRIEND_kbv 	tft;
 extern gfxButton        gfxB;
 extern gfxTouch         gfxT;
 
@@ -60,27 +58,27 @@ extern gfxTouch         gfxT;
 #define WHITE   						0xFFFF
 #define GRAY    						0xE73C
 #define DARKGRAY						0x39E8
-#define CUSTOM_GREEN_LITE		0x9736
-#define CUSTOM_GREEN				0x4ECC
-#define CUSTOM_RED					0xFBCC
-#define CUSTOM_RED_LITE			0xFCD1
-#define CUSTOM_BLUE					0x4EDE
-#define CUSTOM_GREY					0xCE7A
-#define CUSTOM_GREY_LITE		0xDEFB
-#define CUSTOM_YELLOW       0xFF46
+#define CUSTOM_GREEN_LITE		        0x9736
+#define CUSTOM_GREEN				    0x4ECC
+#define CUSTOM_RED					    0xFBCC
+#define CUSTOM_RED_LITE			        0xFCD1
+#define CUSTOM_BLUE					    0x4EDE
+#define CUSTOM_GREY					    0xCE7A
+#define CUSTOM_GREY_LITE		        0xDEFB
+#define CUSTOM_YELLOW                   0xFF46
 
 // touch screen pressure values
 #define minPressure 			5
 #define maxPressure 			2000
 // microsteps and positions
-#define nrMicrosteps			16						// number of microsteps per full step
-#define microstepDistance 1.25          // distance travelled per microstep
-#define railLength        200           // total length of actuator rails
-#define stageLength       60            // total length of rail stage
-#define endStoppers       18            // screw bushing protrudes and prevents stage from fully reaching rear end
-#define railTravel        120           // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
-#define minPosition       0
-#define maxPosition       384000        // (120mm travel / 2mm pitch) * 400 steps * 16 microsteps
+#define nrMicrosteps			16              // number of microsteps per full step
+#define microstepDistance       0.3125          // distance travelled per microstep = 2 / 400 / 16
+#define railLength              200             // total length of actuator rails
+#define stageLength             62              // total length of rail stage minus rubber pads on stage ends
+#define endStoppers             18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
+#define railTravel              120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
+#define minRailPosition         0
+#define maxRailPosition         384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 
 // definitions for touch screen orientation
 // Arduino Due + 2.8" TFT

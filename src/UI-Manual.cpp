@@ -11,7 +11,8 @@ namespace manual_screen {
   gfxTouch  *tch_array[num_tchs];
 
   String stepNr   = String(manualMovementCount);
-  String railPos  = String(driver.XACTUAL()*(microstepDistance/1000), 5);
+  String railPos;
+  // String railPos  = String(driver.XACTUAL()*(microstepDistance/1000), 5);
 
 
   gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",     0,   20,   160,   80,   15, CUSTOM_BLUE  );

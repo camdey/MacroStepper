@@ -24,9 +24,6 @@
 #include "Adafruit_GFX.h"    									// core graphics library
 #include "TouchScreen.h"											// touchscreen library
 #include "MCUFRIEND_kbv.h"										// display driver for IL9481
-// #include "AccelStepper.h"											// software stepping implementation
-// #include "TMC2130Stepper.h" 									// stepper driver library
-// #include "TMC2130Stepper_REGDEFS.h"	  				// stepper driver registry definitions
 #include "TMCStepper.h"
 // #include "TimerFreeTone.h"                    // produces beep tone for piezo
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
@@ -46,8 +43,8 @@
 #include "Wire.h"
 
 
-TMC5160Stepper                driver(CS_PIN, R_SENSE);
-TouchScreen 		ts 					= TouchScreen(XP, YP, XM, YM, 300);
+TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
+TMC5160Stepper  driver(CS_PIN, R_SENSE);
 MCUFRIEND_kbv 	tft;
 gfxButton       gfxB;
 gfxTouch        gfxT;
@@ -95,7 +92,7 @@ int prevFlashThreshold            = 0;          // previous threshold value for 
 int flashOnValue                  = 300;        // initial value for flash considered as being ready
 int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
-bool runHomingSequence 										= true;       // runs rehoming sequence
+bool runHomingSequence 						= true;       // runs rehoming sequence
 bool homedRail										= false;			// true if homeRail() run successfully
 bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
@@ -164,12 +161,12 @@ void setup(void) {
 	tft.setRotation(1);
   screenRotated = false;
 
-	// driver.begin();
-	// driver.rms_current(900);
-	// driver.microsteps(nrMicrosteps);
-  // driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+	driver.begin();
+	driver.rms_current(900);
+	driver.microsteps(nrMicrosteps);
+  driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
   stepperDisabled = false;
-  // driverConfig("joystick");
+  configStealthChop();
 
 	pinMode(EN_PIN, OUTPUT);
   digitalWrite(EN_PIN, LOW);
@@ -179,16 +176,16 @@ void setup(void) {
   digitalWrite(DIR_PIN, LOW);
   pinMode(DIAG1_PIN, INPUT);
   pinMode(PIEZO_PIN, OUTPUT);
-
+  
   // TimerFreeTone(PIEZO_PIN, 4000, 500, 10);
-
+  
   // declare analog pin as digital input
   pinMode(ZSTICK_PIN, INPUT_PULLUP);
   pinMode(SONY_PIN, OUTPUT);
   digitalWrite(SONY_PIN, LOW);
 
   // find stable resting point of joystick
-  // calibrateJoyStick();
+  calibrateJoyStick();
 
 	// if holding down ZSTICK_PIN, don't home rail
 	// if (digitalRead(ZSTICK_PIN) == LOW) {
@@ -235,13 +232,13 @@ void loop() {
   //   }
 	// 	// configure SilentStep if not homing rail
 	// 	if (stallGuardConfigured == true && runHomingSequence == false) {
-	// 		driverConfig("joystick");
+	// 		configStealthChop();
   //   }
 	// 	// update flashValue if on right screen
 	// 	if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
 	// 		flash_screen::updateFlashValue();
 	// 	}
-  //   // set END as maxPosition if Z Stick depressed
+  //   // set END as maxRailPosition if Z Stick depressed
   //   if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
   //     autoStackMax = true;
   //     config_screen::setAutoStackPositions(false, true);
@@ -258,10 +255,9 @@ void loop() {
   //   targetFlag = false;
   // }
   // run homing sequence if first loop
-  // if (runHomingSequence == true) {
-  //   homeRail(); // run homing routine
-	// 	config_screen::setAutoStackPositions(true, true); // set both start and end points
-	// 	driverConfig("joystick"); // set config for silentStep
-  //   runHomingSequence = false;
-  // }
+  if (runHomingSequence == true) {
+    homeRail(); // run homing routine
+		config_screen::setAutoStackPositions(true, true); // update autoStack positions as rail has moved
+		configStealthChop(); // set config for silentStep
+  }
 }

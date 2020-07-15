@@ -49,74 +49,74 @@ jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
 void joystick(int xVal, bool dir) {
-  // long velocity = calcVelocity(xVal);
-  // unsigned long velocityCheck = millis();
-  //
-  // // wake stepper from sleep
-  // if (stepperDisabled == true) {
-  //   toggleStepper(true);
-  // }
-  //
-  // while (xVal >= xPosUpper || xVal <= xPosLower) {
-  //   long currentPos = driver.XACTUAL();
-  //   long targetPos = driver.XTARGET();
-  //
-  //   if (homedRail == true) {
-  //     // don't allow movement if within 1000 steps of forward stop
-  //     // values are inverse so high xStickPos = reverse
-  //     if (xVal >= xPosUpper && (abs(minPosition - driver.XACTUAL()) <= 1000)) {
-  //       break;
-  //     }
-  //     // don't allow movement if within 1000 steps of backward stop
-  //     // values are inverse so low xStickPos = forward
-  //     if (xVal <= xPosLower && (abs(maxPosition - driver.XACTUAL()) <= 1000)) {
-  //       break;
-  //     }
-  //   }
-  //
-  //   if (millis() - velocityCheck >= 100) {
-  //     velocity = calcVelocity(xVal);
-  //     Serial.print(" xVal: "); Serial.print(xVal);
-  //     Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
-  //     Serial.print(" | currentPos: "); Serial.print(currentPos);
-  //     Serial.print(" | targetPos: "); Serial.print(targetPos);
-  //     Serial.print(" | velocity: "); Serial.println(velocity);
-  //     velocityCheck = millis();
-  //   }
-  //   if (dir == 1) {
-  //     driver.XTARGET(800000);
-  //   }
-  //   else if (dir == 0) {
-  //     driver.XTARGET(-800000);
-  //   }
-  //
-  //   driver.VMAX(velocity);
-  //   xVal = readJoystick();
-  // }
-  // driver.XTARGET(driver.XACTUAL());
-  // driver.VMAX(0);
-  //
-  // // // check start/end position adjustment
-  // if (editStartPosition == true && arrowsActive == true) {
-  //   if (prevStartPosition != startPosition) {
-  //     prevStartPosition = startPosition;
-  //   }
-  //   config_screen::setAutoStackPositions(true, false); //set start but not end position
-  // }
-  // if (editEndPosition == true && arrowsActive == true) {
-  //   if (prevEndPosition != endPosition) {
-  //     prevEndPosition = endPosition;
-  //   }
-  //   config_screen::setAutoStackPositions(false, true); //set end but not start position
-  // }
-  // if (getCurrentScreen() == "Manual") {
-  //   manual_screen::displayPosition();
-  // }
-  // else if (getCurrentScreen() == "AutoConfig") {
-  //   config_screen::displayPosition();
-  // }
-  // // update prev position
-  // prevStepperPosition = driver.XACTUAL();
+  long velocity = calcVelocity(xVal);
+  unsigned long velocityCheck = millis();
+  
+  // wake stepper from sleep
+  if (stepperDisabled == true) {
+    toggleStepper(true);
+  }
+  
+  while (xVal >= xPosUpper || xVal <= xPosLower) {
+    long currentPos = driver.XACTUAL();
+    long targetPos = driver.XTARGET();
+  
+    if (homedRail == true) {
+      // don't allow movement if within 1000 steps of forward stop
+      // values are inverse so high xStickPos = reverse
+      if (xVal >= xPosUpper && (abs(minRailPosition - driver.XACTUAL()) <= 1000)) {
+        break;
+      }
+      // don't allow movement if within 1000 steps of backward stop
+      // values are inverse so low xStickPos = forward
+      if (xVal <= xPosLower && (abs(maxRailPosition - driver.XACTUAL()) <= 1000)) {
+        break;
+      }
+    }
+  
+    if (millis() - velocityCheck >= 100) {
+      velocity = calcVelocity(xVal);
+      Serial.print(" xVal: "); Serial.print(xVal);
+      Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
+      Serial.print(" | currentPos: "); Serial.print(currentPos);
+      Serial.print(" | targetPos: "); Serial.print(targetPos);
+      Serial.print(" | velocity: "); Serial.println(velocity);
+      velocityCheck = millis();
+    }
+    if (dir == 1) {
+      driver.XTARGET(800000);
+    }
+    else if (dir == 0) {
+      driver.XTARGET(-800000);
+    }
+  
+    driver.VMAX(velocity);
+    xVal = readJoystick();
+  }
+  driver.XTARGET(driver.XACTUAL());
+  driver.VMAX(0);
+  
+  // // check start/end position adjustment
+  if (editStartPosition == true && arrowsActive == true) {
+    if (prevStartPosition != startPosition) {
+      prevStartPosition = startPosition;
+    }
+    config_screen::setAutoStackPositions(true, false); //set start but not end position
+  }
+  if (editEndPosition == true && arrowsActive == true) {
+    if (prevEndPosition != endPosition) {
+      prevEndPosition = endPosition;
+    }
+    config_screen::setAutoStackPositions(false, true); //set end but not start position
+  }
+  if (getCurrentScreen() == "Manual") {
+    manual_screen::displayPosition();
+  }
+  else if (getCurrentScreen() == "AutoConfig") {
+    config_screen::displayPosition();
+  }
+  // update prev position
+  prevStepperPosition = driver.XACTUAL();
 }
 
 

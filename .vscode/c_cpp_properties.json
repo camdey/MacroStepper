@@ -1,0 +1,99 @@
+{
+    "configurations": [
+        {
+            "name": "!!! WARNING !!! AUTO-GENERATED FILE, PLEASE DO NOT MODIFY IT AND USE https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/include",
+                "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/src",
+                "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/include",
+                "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/src",
+                "C:/Users/deyca/.platformio/lib/Adafruit TouchScreen_ID5430",
+                "C:/Users/deyca/.platformio/lib/TMCStepper/src",
+                "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv",
+                "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv/utility",
+                "C:/Users/deyca/.platformio/lib/Adafruit GFX Library_ID13",
+                "C:/Users/deyca/.platformio/lib/Adafruit BusIO_ID6214",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/libraries/SPI/src",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/libraries/Wire/src",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/cores/arduino",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/system/libsam",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/system/CMSIS/CMSIS/Include",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/system/CMSIS/Device/ATMEL",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/variants/arduino_due_x",
+                "C:/Users/deyca/.platformio/lib/AccelStepper_ID265/src",
+                "C:/Users/deyca/.platformio/lib/Adafruit ILI9341",
+                "C:/Users/deyca/.platformio/lib/Adafruit STMPE610_ID377",
+                "C:/Users/deyca/.platformio/lib/ILI9341_fonts",
+                "C:/Users/deyca/.platformio/lib/ILI9341_t3",
+                "C:/Users/deyca/.platformio/lib/MCUFRIEND_kbv",
+                "C:/Users/deyca/.platformio/lib/MCUFRIEND_kbv/utility",
+                "C:/Users/deyca/.platformio/lib/TFT_ID886/src",
+                "C:/Users/deyca/.platformio/lib/TMC2130Stepper_ID1493/src",
+                "C:/Users/deyca/.platformio/packages/framework-arduino-sam/libraries/HID/src",
+                "C:/Users/deyca/.platformio/packages/tool-unity",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/include",
+                    "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/src",
+                    "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/include",
+                    "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/src",
+                    "C:/Users/deyca/.platformio/lib/Adafruit TouchScreen_ID5430",
+                    "C:/Users/deyca/.platformio/lib/TMCStepper/src",
+                    "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv",
+                    "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv/utility",
+                    "C:/Users/deyca/.platformio/lib/Adafruit GFX Library_ID13",
+                    "C:/Users/deyca/.platformio/lib/Adafruit BusIO_ID6214",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/libraries/SPI/src",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/libraries/Wire/src",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/cores/arduino",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/system/libsam",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/system/CMSIS/CMSIS/Include",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/system/CMSIS/Device/ATMEL",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/variants/arduino_due_x",
+                    "C:/Users/deyca/.platformio/lib/AccelStepper_ID265/src",
+                    "C:/Users/deyca/.platformio/lib/Adafruit ILI9341",
+                    "C:/Users/deyca/.platformio/lib/Adafruit STMPE610_ID377",
+                    "C:/Users/deyca/.platformio/lib/ILI9341_fonts",
+                    "C:/Users/deyca/.platformio/lib/ILI9341_t3",
+                    "C:/Users/deyca/.platformio/lib/MCUFRIEND_kbv",
+                    "C:/Users/deyca/.platformio/lib/MCUFRIEND_kbv/utility",
+                    "C:/Users/deyca/.platformio/lib/TFT_ID886/src",
+                    "C:/Users/deyca/.platformio/lib/TMC2130Stepper_ID1493/src",
+                    "C:/Users/deyca/.platformio/packages/framework-arduino-sam/libraries/HID/src",
+                    "C:/Users/deyca/.platformio/packages/tool-unity",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=40304",
+                "__SAM3X8E__",
+                "ARDUINO_SAM_DUE",
+                "ARDUINO=10805",
+                "F_CPU=84000000L",
+                "USBCON",
+                "USB_VID=0x2341",
+                "USB_PID=0x003E",
+                "USB_PRODUCT=\"Arduino Due\"",
+                "USB_MANUFACTURER=\"Arduino\"",
+                "ARDUINO_ARCH_SAM",
+                ""
+            ],
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "C:/Users/deyca/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc.exe",
+            "compilerArgs": [
+                "-mcpu=cortex-m3",
+                "-mthumb",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}

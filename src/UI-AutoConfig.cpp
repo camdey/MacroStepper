@@ -275,7 +275,7 @@ namespace config_screen {
     if (setEnd == true) {
       // set new end value
       if (autoStackMax == true) {
-        endPosition = maxPosition;
+        endPosition = maxRailPosition;
       }
       else if (autoStackMax == false) {
         endPosition = driver.XACTUAL();
