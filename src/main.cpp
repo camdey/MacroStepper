@@ -75,11 +75,10 @@ bool editFlashOffValue						= false;			// set flash off value
 bool testFlash                    = false;      // flag for testing flash threshold
 bool screenRotated                 = false;      // false means usb in lower left corner
 // --- Input and Output values --- //
-int xStickPos 										= 0;        	// ADC value of x-axis joystick
-int xPosUpper                     = 522; 				// Upper boundary of joystick resting point, calibrated during setup
-int xPosResting                   = 512;				// Resting point of joystick reading, calibrated during setup
-int xPosLower                     = 502;				// Lower boundary of of joystick resting point, calibrated during setup
-int xPosDiff                      = 0;          // Difference between ideal middle (512) and actual resting point
+int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
+int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
+int xStickLower                   = 502;				// Lower boundary of of joystick resting point, calibrated during setup
+int xStickDiff                    = 0;          // Difference between ideal middle (512) and actual resting point
 int zStickVal 										= 1;        	// increment count of z-axis button press
 int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
@@ -133,8 +132,9 @@ int stepperMaxSpeed               = 3000;       // max speed setting for AccelSt
 int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
 
 String currentScreen;
-String stepDist = "0.00125";
-int joystickMaxVelocity = 100000;
+String stepDist                   = "0.003125";
+int joystickMaxVelocity           = 100000;
+long lastMillis                   = 0;          // store readings of millis() to use for checking conditions within loops every X milliseconds
 
 // ***** --- PROGRAM --- ***** //
 
@@ -151,11 +151,11 @@ void setup(void) {
   tft.reset();
 
 	uint16_t identifier = tft.readID();
-	if (identifier == 0x9341) {
-		Serial.println(F("Found ILI9341 LCD driver"));
-	} else {
-		Serial.print(F("No driver found"));
-	}
+	// if (identifier == 0x9341) {
+	// 	Serial.println(F("Found ILI9341 LCD driver"));
+	// } else {
+	// 	Serial.print(F("No driver found"));
+	// }
 
 	tft.begin(identifier);
 	tft.setRotation(1);
@@ -212,16 +212,16 @@ void loop() {
     prevButtonCheck = millis();
   }
 
+
   // take joystick and limit switch reading, put stepper to sleep
-  // if (millis() - prevJoystickCheck >= 250) {
-  //   // Serial.print(millis()); Serial.print(" | free ram: "); Serial.println(FreeRam());
-  //   // check joystick for movement
-  //   readJoystick();
-  //
-  //   // move if past threshold and not in autoStack mode
-  //   if ((xStickPos >= xPosUpper || xStickPos <= xPosLower) && autoStackFlag == false) {
-  //     joystickControl();
-  //   }
+  if (millis() - prevJoystickCheck >= 100) {
+    // check joystick for movement
+    int xStickPos = readJoystick();
+  
+    // move if past threshold and not in autoStack mode
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
+      joystickMotion(xStickPos);
+    }
   //   // sleep if stepper inactive, update position on manual screen
   //   if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
   //     toggleStepper(false); // disable stepper
@@ -245,8 +245,8 @@ void loop() {
   //     autoStackMax = false;
   //   }
   //
-  //   prevJoystickCheck = millis();
-  // }
+    prevJoystickCheck = millis();
+  }
 
   // reset target to currentPosition
   // if (targetFlag == true) {
@@ -257,7 +257,5 @@ void loop() {
   // run homing sequence if first loop
   if (runHomingSequence == true) {
     homeRail(); // run homing routine
-		config_screen::setAutoStackPositions(true, true); // update autoStack positions as rail has moved
-		configStealthChop(); // set config for silentStep
   }
 }

@@ -8,6 +8,7 @@ void autoStack();
 void changeDirection();
 void dryRun();
 void homeRail();
+void debugStallGuard();
 bool detectEndStop();
 void overshootPosition(int position, int numberOfSteps, int direction);
 bool stepMotor(int stepDirection, unsigned long stepperDelay);

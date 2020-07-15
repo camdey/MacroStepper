@@ -68,17 +68,18 @@ extern gfxTouch         gfxT;
 #define CUSTOM_YELLOW                   0xFF46
 
 // touch screen pressure values
-#define minPressure 			5
-#define maxPressure 			2000
+#define minPressure 			    5
+#define maxPressure 			    2000
 // microsteps and positions
-#define nrMicrosteps			16              // number of microsteps per full step
-#define microstepDistance       0.3125          // distance travelled per microstep = 2 / 400 / 16
-#define railLength              200             // total length of actuator rails
-#define stageLength             62              // total length of rail stage minus rubber pads on stage ends
-#define endStoppers             18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
-#define railTravel              120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
-#define minRailPosition         0
-#define maxRailPosition         384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
+#define nrMicrosteps			    16              // number of microsteps per full step
+#define microstepDistance           0.3125          // distance travelled per microstep = 2 / 400 / 16
+#define railLength                  200             // total length of actuator rails
+#define stageLength                 62              // total length of rail stage minus rubber pads on stage ends
+#define endStoppers                 18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
+#define railTravel                  120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
+#define minRailPosition             0
+#define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
+#define safeZone                    12800           // if homed rail, don't allow movement with 2mm of ends (2 * 400 * 16)
 
 // definitions for touch screen orientation
 // Arduino Due + 2.8" TFT
@@ -103,26 +104,26 @@ extern gfxTouch         gfxT;
 // #define TS_MAXY 					220
 
 // pin definitions for touch inputs
-#define YP 								A3 						// must be an analog pin, use "An" notation!
-#define XM 								A2            // must be an analog pin, use "An" notation!
-#define YM 								9             // can be a digital pin
-#define XP 								8             // can be a digital pin
+#define YP 							A3 						// must be an analog pin, use "An" notation!
+#define XM 							A2            // must be an analog pin, use "An" notation!
+#define YM 							9             // can be a digital pin
+#define XP 							8             // can be a digital pin
 
 // pin definitions for tft screen
 #define LCD_CS 						A3
 #define LCD_CD 						A2
 #define LCD_WR 						A1
 #define LCD_RD						A0
-#define LCD_RESET 				A4
+#define LCD_RESET 				    A4
 
 // driver pins
-#define DIAG1_PIN 				24
-#define DIAG0_PIN 				26
+#define DIAG1_PIN 				    24
+#define DIAG0_PIN 				    26
 #define DIR_PIN 					28
 #define STEP_PIN 					30
 #define CS_PIN 						32
 #define EN_PIN 						34
-#define R_SENSE           0.075f       // Watterott TMC5160 uses 0.075
+#define R_SENSE                     0.075f       // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
@@ -132,8 +133,8 @@ extern gfxTouch         gfxT;
 #define XSTICK_PIN 				A6            // joystick X-axis pin (controls fwd and rev)
 #define ZSTICK_PIN 				A7            // button-press from joystick
 #define GODOX_PIN 				A8            // pin for GA1A12S202 light sensor
-#define PIEZO_PIN         22            // pin for Piezo buzzer
-#define SONY_PIN          36            // pin for pulling camera focus and shutter to GND via opto
+#define PIEZO_PIN               22            // pin for Piezo buzzer
+#define SONY_PIN                36            // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
@@ -162,10 +163,10 @@ extern bool screenRotated;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;
-extern int xPosUpper;
-extern int xPosDiff;
-extern int xPosResting;
-extern int xPosLower;
+extern int xStickUpper;
+extern int xStickDiff;
+extern int xStickResting;
+extern int xStickLower;
 extern int prevZStickVal;
 extern int shutterDelay;
 extern int prevDelay;
@@ -222,5 +223,6 @@ extern int rampSteps;
 
 extern String currentScreen;
 extern String stepDist;
+extern long lastMillis;
 
 #endif

@@ -211,29 +211,36 @@ void homeRail() {
   }
 
 	// if back and forward position set, move to middle position
-	if (bwdPosition == 0 && fwdPosition > 380000) {
+	if (bwdPosition == minRailPosition && fwdPosition == maxRailPosition) {
     driver.XTARGET(192000);
+    // wait to reach position before changing driver config after homing completed
     while (driver.XACTUAL() != driver.XTARGET()) {
-      // wait to reach position before changing driver config after homing completed
+      debugStallGuard(); // print to serial monitor
     }
-		runHomingSequence = false;
+
+    config_screen::setAutoStackPositions(true, true); // update autoStack positions as rail has moved
+		configStealthChop(); // set config for silentStep
+    runHomingSequence = false;
     homedRail = true;
 	}
 }
 
 
+void debugStallGuard() {
+  if (millis() - getLastMillis() >= 100) {
+    Serial.print(" | event_stop_sg: "); Serial.print(driver.event_stop_sg());
+    Serial.print(" | sg_result: "); Serial.print(driver.sg_result());
+    Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
+    Serial.print(" | CSACTUAL: "); Serial.print(driver.cs_actual());
+    Serial.print(" | XACTUAL: "); Serial.println(driver.XACTUAL());
+    setLastMillis(millis());
+  }
+}
+
+
 bool detectEndStop() {
-  long lastReadOut = 0;
   while (driver.event_stop_sg() == 0) {
-    // debug
-    if (millis() - lastReadOut >= 100) {
-      Serial.print(" | event_stop_sg: "); Serial.print(driver.event_stop_sg());
-      Serial.print(" | sg_result: "); Serial.print(driver.sg_result());
-      Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
-      Serial.print(" | CSACTUAL: "); Serial.print(driver.cs_actual());
-      Serial.print(" | XACTUAL: "); Serial.println(driver.XACTUAL());
-      lastReadOut = millis();
-    }
+    debugStallGuard(); // print to serial monitor
   }
   return true;
 }
@@ -272,13 +279,13 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
   // trigger stall warning if approaching limits
   if (stepDirection == 1 && (abs(maxRailPosition - driver.XACTUAL()) <= 1000) && homedRail == true) {
     stallWarning = true;
-    return true;
+    return stallWarning;
   }
 
   // trigger stall warning if approaching limits
   if (stepDirection == -1 && (abs(minRailPosition - driver.XACTUAL()) <= 1000) && homedRail == true) {
     stallWarning = true;
-    return true;
+    return stallWarning;
   }
 
   // exit out of autoStack sequence if stall warning encountered

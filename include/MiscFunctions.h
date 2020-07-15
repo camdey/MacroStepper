@@ -11,5 +11,7 @@ void setAutoStackPositions(bool setStart, bool setEnd);
 void setMovementsRequired();
 void setStepDistance();
 int valueCheck(int value, int min, int max);
+void setLastMillis(long millis);
+long getLastMillis();
 
 #endif

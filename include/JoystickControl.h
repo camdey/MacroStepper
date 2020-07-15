@@ -5,7 +5,7 @@
 #include "VariableDeclarations.h"
 
 void calibrateJoyStick();
-void joystickControl();
+void joystickMotion(int xPos);
 int readJoystick();
 long calcVelocity(int xVal);
 

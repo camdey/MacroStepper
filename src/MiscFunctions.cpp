@@ -16,7 +16,6 @@ void rotateScreen() {
 }
 
 
-
 void setMovementsRequired() {
   // calculate number of steps required to cover range
   movementsRequired = ceil((endPosition*1.00 - startPosition*1.00) / stepsPerMovement);
@@ -69,4 +68,14 @@ int valueCheck(int value, int min, int max) {
     value = value;
   }
   return value;
+}
+
+
+void setLastMillis(long millis) {
+  lastMillis = millis;
+}
+
+
+long getLastMillis() {
+  return lastMillis;
 }

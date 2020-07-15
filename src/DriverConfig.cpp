@@ -5,12 +5,12 @@ void configStealthChop() {
   driver.en_pwm_mode(true);
   driver.en_softstop(true);
   driver.PWMCONF();
-  driver.pwm_autoscale(true);     // Needed for stealthChop
+  driver.pwm_autoscale(true); // Needed for stealthChop
   driver.pwm_autograd(true);
-  driver.TZEROWAIT(5000);    // wait time before next movement, approx 300ms, range 0 - 65,536
+  driver.TZEROWAIT(5000);     // wait time before next movement, approx 300ms, range 0 - 65,536
   driver.TPOWERDOWN(10);
-  driver.TPWMTHRS(0);        // TSTEP ≥ TPWMTHRS: StealthChop enabled, DcStep disabled
-  driver.TCOOLTHRS(0);       // TCOOLTHRS ≥ TSTEP ≥ THIGH: CoolStep enabled, StealthChop PWM disabled.
+  driver.TPWMTHRS(0);         // TSTEP ≥ TPWMTHRS: StealthChop enabled, DcStep disabled
+  driver.TCOOLTHRS(0);        // TCOOLTHRS ≥ TSTEP ≥ THIGH: CoolStep enabled, StealthChop PWM disabled.
                               // TCOOLTHRS ≥ TSTEP: Stop on stall enabled.
   driver.THIGH(100);          // TSTEP ≤ THIGH: CoolStep disabled, StealthChop PWM mode disabled. Stall Detection uses DcStep
   driver.VDCMIN(0);          // |VACT| ≥ VDCMIN ≥ 256: same as if THIGH exceeded, DcStep auto commutation
@@ -35,9 +35,8 @@ void configStealthChop() {
   driver.D1(5000);            // Deceleration between V1 and VSTOP
   driver.VSTART(0);           // Motor start velocity (VSTOP >= VSTART)
   driver.VSTOP(10);           // Motor stop velocity
-  driver.XACTUAL(0);          // Actual motor postion (signed)
-  driver.XTARGET(0);          // Target position for ramp mode (signed)
 
+  // STALLGUARD2 PARAMETERS
   driver.sg_stop(false);       // stop by stallguard, disable to release motor after stall event
 }
 
@@ -76,8 +75,6 @@ void configStallGuard() {
   driver.D1(1000);                // Deceleration between V1 and VSTOP
   driver.VSTART(2);               // Motor start velocity (VSTOP >= VSTART)
   driver.VSTOP(12);               // Motor stop velocity
-  driver.XACTUAL(0);              // Actual motor postion (signed)
-  driver.XTARGET(0);              // Target position for ramp mode (signed)
 
   // STALLGUARD2 PARAMETERS
   driver.sg_stop(true);           // stop by stallguard, disable to release motor after stall event
