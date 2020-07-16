@@ -63,21 +63,21 @@ namespace home_screen {
 
 
   void func_Auto(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       populateScreen("Auto");
     }
   }
 
 
   void func_Manual(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       populateScreen("Manual");
     }
   }
 
 
   void func_Home(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       btn_Home.drawButton(tft, CUSTOM_RED);
       runHomingSequence = true;
       homeRail();
@@ -87,14 +87,14 @@ namespace home_screen {
 
 
   void func_Flash(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       populateScreen("Flash");
     }
   }
 
 
   void func_Rotate(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       rotateScreen(); // rotate screen, touch controls, and joystick
       populateScreen("Home");
     }

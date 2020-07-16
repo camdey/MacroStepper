@@ -58,7 +58,7 @@ void joystickMotion(int xPos) {
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   
   // wake stepper from sleep
-  if (stepperDisabled == true) {
+  if (stepperDisabled) {
     toggleStepper(true);
   }
   
@@ -66,7 +66,7 @@ void joystickMotion(int xPos) {
     long currentPos = driver.XACTUAL();
     long targetPos = driver.XTARGET();
   
-    if (homedRail == true) {
+    if (homedRail) {
       // don't allow movement if within 2mm of endstops
       // values are inverse so high xStickPos = reverse
       if (dir == 0 && driver.XACTUAL() <= safeZone) {
@@ -102,13 +102,13 @@ void joystickMotion(int xPos) {
   driver.VMAX(0);
   
   // // check start/end position adjustment
-  if (editStartPosition == true && arrowsActive == true) {
+  if (editStartPosition && getArrowState()) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
     config_screen::setAutoStackPositions(true, false); //set start but not end position
   }
-  if (editEndPosition == true && arrowsActive == true) {
+  if (editEndPosition && getArrowState()) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
@@ -121,19 +121,25 @@ void joystickMotion(int xPos) {
     config_screen::displayPosition();
   }
   // update prev position
-  prevStepperPosition = driver.XACTUAL();
+  setPreviousPosition(driver.XACTUAL());
 }
 
-// IS THIS CAUSING ISSUES WITH forward vs reverse spead - observed one direction had minimum of -7 and went to fullpower, the other direction had max of 1016 and had 2/3 power.
-// Corresponding log val is 2.08, which is 2/3 of the max 6.24
+
 int readJoystick() {
-  int val;
-  val = analogRead(XSTICK_PIN);
-  if (screenRotated == true) {
+  long val, adjVal;
+  int weight = 40;
+
+  // val = (w × XSTICK_PIN + (100 – w) × prevVal)
+  // multiply values by 100 to avoid floating point math, the prevVal part of the formula needs as much precesion as possible
+  adjVal = weight * (analogRead(XSTICK_PIN)*100) + (100 - weight) * getRecursiveFilterValue();
+  setRecursiveFilterValue(adjVal/100);
+  val = round(adjVal*1.00 / 10000);
+
+  if (screenRotated) {
     val = map(val, 0, 1023, 1023, 0);
   }
   // offset reading by difference between resting state and ideal middle point
-  val -= xStickDiff;
+  // val -= xStickDiff;
   return val;
 }
 
@@ -153,4 +159,14 @@ long calcVelocity(int xPos) {
   velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
 
   return velocity;
+}
+
+
+void setRecursiveFilterValue(long val) {
+  recursiveValue = val;
+}
+
+
+long getRecursiveFilterValue() {
+  return recursiveValue;
 }

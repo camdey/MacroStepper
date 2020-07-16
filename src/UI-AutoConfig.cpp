@@ -17,8 +17,8 @@ namespace config_screen {
   gfxButton btn_EndVal        =   gfxB.initButton(       "fillRoundRect",    0,  120,   160,   80,   15, CUSTOM_RED   );
   gfxButton btn_Run           =   gfxB.initButton(       "fillRoundRect",    0,  220,   160,   80,   15, CUSTOM_BLUE  );
   gfxButton btn_RunVal        =   gfxB.initButton(       "fillRoundRect",    0,  220,   160,   80,   15, CUSTOM_BLUE  );
-  gfxButton btn_Delay         =   gfxB.initBitmapButton( timer,       220,   20,    80,   80, WHITE         );
-  gfxButton btn_DelayVal      =   gfxB.initBlankButton(               295,   20,    40,   30                );
+  gfxButton btn_Delay         =   gfxB.initBitmapButton( timer,      220,   20,    80,   80,             WHITE        );
+  gfxButton btn_DelayVal      =   gfxB.initBlankButton(              295,   20,    40,   30                           );
   // don't add btn_Reset to array as its colour depends on the state of autoStack
   gfxButton btn_Reset         =   gfxB.initBitmapButton( cancel,      220,  120,    80,   80, BLACK          );
   gfxButton btn_Back          =   gfxB.initBitmapButton( backArrow,   220,  220,    80,   80, WHITE         );
@@ -70,10 +70,10 @@ namespace config_screen {
       btn_array[i]->drawButton(tft);
     }
 
-    if (autoStackFlag == false) {
+    if (!autoStackRunning) {
       btn_Reset.drawButton(tft, BLACK);
     }
-    else if (autoStackFlag == true) {
+    else if (autoStackRunning) {
       btn_Reset.drawButton(tft, CUSTOM_RED);
     }
 
@@ -100,15 +100,15 @@ namespace config_screen {
 
 
   void func_Start(bool btnActive) {
-    if (btnActive == true && editShutterDelay == false && editEndPosition == false) {
-      arrowsActive = true;
+    if (btnActive && !editShutterDelay && !editEndPosition) {
+      setArrowState(true);
       editStartPosition = true;
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
       btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), YELLOW);
     }
-    else if (btnActive == false && editStartPosition == true) {
-      arrowsActive = false;
+    else if (!btnActive && editStartPosition) {
+      setArrowState(false);
       editStartPosition = false;
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), WHITE);
@@ -118,15 +118,15 @@ namespace config_screen {
 
 
   void func_End(bool btnActive) {
-    if (btnActive == true && editShutterDelay == false && editStartPosition == false) {
-      arrowsActive = true;
+    if (btnActive && !editShutterDelay && !editStartPosition) {
+      setArrowState(true);
       editEndPosition = true;
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
       btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), YELLOW);
     }
-    else if (btnActive == false && editEndPosition == true) {
-      arrowsActive = false;
+    else if (!btnActive && editEndPosition) {
+      setArrowState(false);
       editEndPosition = false;
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), WHITE);
@@ -136,7 +136,7 @@ namespace config_screen {
 
 
   void func_Run(bool btnActive) {
-    if (btnActive == true && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
+    if (btnActive && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
       int currentPosition = driver.XACTUAL();
 
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), YELLOW);
@@ -154,15 +154,15 @@ namespace config_screen {
 
 
   void func_Delay(bool btnActive) {
-    if (btnActive == true) {
-      arrowsActive = true;
+    if (btnActive) {
+      setArrowState(true);
       editShutterDelay = true;
 
       btn_Delay.drawButton(tft, YELLOW);
       btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), YELLOW);
     }
-    else if (btnActive == false && editShutterDelay == true) {
-      arrowsActive = false;
+    else if (!btnActive && editShutterDelay) {
+      setArrowState(false);
       editShutterDelay = false;
 
       btn_Delay.drawButton(tft, WHITE);
@@ -172,11 +172,11 @@ namespace config_screen {
 
 
   void func_Reset(bool btnActive) {
-    if (btnActive == true) {
-      autoStackFlag = false;
+    if (btnActive) {
+      autoStackRunning = false;
       goToStart = true;
       joystickState = true;
-      pauseAutoStack = false;
+      autoStackPaused = false;
       stepCount = 1;
       completedMovements = 0;
       movementsRequired = 0;
@@ -188,16 +188,16 @@ namespace config_screen {
 
 
   void func_Back(bool btnActive) {
-    if (btnActive == true && arrowsActive == false) {
+    if (btnActive && !getArrowState()) {
       populateScreen("Auto");
     }
   }
 
 
   void func_ArrowUp(bool btnActive) {
-    if (btnActive == true && arrowsActive == true) {
+    if (btnActive && getArrowState()) {
       // edit start postion
-      if (editStartPosition == true) {
+      if (editStartPosition) {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
@@ -205,7 +205,7 @@ namespace config_screen {
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
-      else if (editEndPosition == true) {
+      else if (editEndPosition) {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
@@ -213,7 +213,7 @@ namespace config_screen {
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
-      else if (editShutterDelay == true) {
+      else if (editShutterDelay) {
         if (prevDelay != shutterDelay) {
           prevDelay = shutterDelay;
         }
@@ -225,9 +225,9 @@ namespace config_screen {
 
 
   void func_ArrowDown(bool btnActive) {
-    if (btnActive == true && arrowsActive == true) {
+    if (btnActive && getArrowState()) {
       // edit start postion
-      if (editStartPosition == true) {
+      if (editStartPosition) {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
@@ -235,7 +235,7 @@ namespace config_screen {
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
-      else if (editEndPosition == true) {
+      else if (editEndPosition) {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
@@ -243,7 +243,7 @@ namespace config_screen {
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
-      else if (editShutterDelay == true) {
+      else if (editShutterDelay) {
         if (prevDelay != shutterDelay) {
           prevDelay = shutterDelay;
         }
@@ -255,7 +255,7 @@ namespace config_screen {
 
 
   void setAutoStackPositions(bool setStart, bool setEnd) {
-    if (setStart == true) {
+    if (setStart) {
       // lower limit
       if (startPosition < 0) {
         startPosition = 0;
@@ -272,12 +272,12 @@ namespace config_screen {
       goToStart = true;
     }
 
-    if (setEnd == true) {
+    if (setEnd) {
       // set new end value
-      if (autoStackMax == true) {
+      if (autoStackMax) {
         endPosition = maxRailPosition;
       }
-      else if (autoStackMax == false) {
+      else if (!autoStackMax) {
         endPosition = driver.XACTUAL();
       }
       // print end point if changed
@@ -311,12 +311,12 @@ namespace config_screen {
 
 
   void displayPosition() {
-    if (prevStepperPosition != driver.XACTUAL()) {
+    if (getPreviousPosition() != driver.XACTUAL()) {
       int currentPosition = driver.XACTUAL();
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
       btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), WHITE);
 
-      prevStepperPosition = currentPosition;
+      setPreviousPosition(currentPosition);
     }
   }
 

@@ -69,7 +69,7 @@ namespace flash_screen {
   }
 
   void func_FlashOff(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       editFlashOffValue = true;
       btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), YELLOW);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
@@ -83,7 +83,7 @@ namespace flash_screen {
 
 
   void func_FlashOn(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       editFlashOnValue = true;
       btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), YELLOW);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
@@ -97,10 +97,10 @@ namespace flash_screen {
 
 
   void func_FlashTest(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       testFlash = true; // prevents leaving screen while testing flash
       // enable shutter
-      if (shutterEnabled == false) {
+      if (!shutterEnabled) {
         toggleShutter();
       }
       // print as yellow until result returned
@@ -111,11 +111,11 @@ namespace flash_screen {
       shutterTriggered = triggerShutter();
 
       // check result
-      if (shutterTriggered == false) {
+      if (!shutterTriggered) {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_RED);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_RED);
       }
-      else if (shutterTriggered == true) {
+      else if (shutterTriggered) {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_GREEN);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_GREEN);
       }
@@ -125,7 +125,7 @@ namespace flash_screen {
 
 
   void func_Back(bool btnActive) {
-    if (btnActive == true && editFlashOnValue == false && editFlashOffValue == false && testFlash == false) {
+    if (btnActive && !editFlashOnValue && !editFlashOffValue && !testFlash) {
       // go back to start screen
       populateScreen("Home");
     }
@@ -142,12 +142,12 @@ namespace flash_screen {
     flashReady = flashStatus();
 
     // if difference from previous reading > 1, updates value on screen
-    if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue == true) {
+    if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue) {
       func_FlashOff(true);
       // set OFF value for flash
       flashOffValue = flashValue;
       }
-    if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue == true) {
+    if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue) {
       func_FlashOn(true);
       // set ON value for flash
       flashOnValue = flashValue;

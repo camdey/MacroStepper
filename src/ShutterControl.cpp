@@ -52,11 +52,11 @@ bool triggerShutter() {
 	shutterTriggered = false;
 
 
-  if (shutterEnabled == true) {
+  if (shutterEnabled) {
 		unsigned long triggerTime = millis();
 
 		// wait for flash to be ready
-		while (flashReady == false) {
+		while (!flashReady) {
 			flashReady = flashStatus();
       flashReadyDebouncer = flashReady;
       // break if flash not turning on
@@ -74,11 +74,11 @@ bool triggerShutter() {
     // second variable to debounce noisy readings
 
     while (millis() - triggerTime <= 3000) {
-      if (flashReady == true) {
+      if (flashReady) {
         flashReady = flashStatus();
         flashReadyDebouncer = flashStatus();
       }
-      if (flashReady == false && flashReadyDebouncer == false && millis() - triggerTime > 400) {
+      if (!flashReady && !flashReadyDebouncer && millis() - triggerTime > 400) {
         shutterTriggered = true;
         break;
       }

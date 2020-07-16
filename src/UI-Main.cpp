@@ -59,11 +59,11 @@ void checkButtons(String screen) {
   int touch_y;
   int touch_z = point.z;
 
-  if (screenRotated == false) {
+  if (!screenRotated) {
     touch_x = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());    // rotate & scale to TFT boundaries
     touch_y = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());   //   ... USB port at upper left
   }
-  else if (screenRotated == true) {
+  else if (screenRotated) {
     touch_x = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);    // rotate & scale to TFT boundaries
     touch_y = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);   //   ... USB port at lower right
   }
@@ -87,7 +87,7 @@ void checkButtons(String screen) {
       }
     }
   }
-  else if (touch_z == 0 && gfxT.getToggleFlag() == true) {
+  else if (touch_z == 0 && gfxT.getToggleFlag()) {
     // if toggle active, reset flag to false when
     // no touch is recorded
     gfxT.setToggleFlag(false);

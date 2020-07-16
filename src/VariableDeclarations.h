@@ -72,14 +72,14 @@ extern gfxTouch         gfxT;
 #define maxPressure 			    2000
 // microsteps and positions
 #define nrMicrosteps			    16              // number of microsteps per full step
-#define microstepDistance           0.3125          // distance travelled per microstep = 2 / 400 / 16
+#define microstepLength           0.3125          // distance travelled per microstep in um = 2 / 400 / 16
 #define railLength                  200             // total length of actuator rails
 #define stageLength                 62              // total length of rail stage minus rubber pads on stage ends
 #define endStoppers                 18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
 #define railTravel                  120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
 #define minRailPosition             0
 #define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
-#define safeZone                    12800           // if homed rail, don't allow movement with 2mm of ends (2 * 400 * 16)
+#define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
 
 // definitions for touch screen orientation
 // Arduino Due + 2.8" TFT
@@ -130,11 +130,11 @@ extern gfxTouch         gfxT;
 // #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define XSTICK_PIN 				A6            // joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				A7            // button-press from joystick
-#define GODOX_PIN 				A8            // pin for GA1A12S202 light sensor
-#define PIEZO_PIN               22            // pin for Piezo buzzer
-#define SONY_PIN                36            // pin for pulling camera focus and shutter to GND via opto
+#define XSTICK_PIN 				    A6            // joystick X-axis pin (controls fwd and rev)
+#define ZSTICK_PIN 				    A7            // button-press from joystick
+#define GODOX_PIN 				    A8            // pin for GA1A12S202 light sensor
+#define PIEZO_PIN                   22            // pin for Piezo buzzer
+#define SONY_PIN                    36            // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long currentTime;
@@ -182,8 +182,8 @@ extern bool runHomingSequence;
 extern bool homedRail;
 extern bool goToStart;
 extern bool joystickState;
-extern bool autoStackFlag;
-extern bool pauseAutoStack;
+extern bool autoStackRunning;
+extern bool autoStackPaused;
 extern bool shutterEnabled;
 extern bool targetFlag;
 extern bool flashReady;
@@ -195,8 +195,6 @@ extern long prevStartPosition;
 extern long endPosition;
 extern long prevEndPosition;
 extern long prevStepperPosition;
-extern int manualMovementCount;
-extern int prevManualMovementCount;
 extern volatile long moveDist;
 extern volatile bool stepperDisabled;
 extern volatile bool directionFwd;
@@ -208,8 +206,7 @@ extern int stepsPerMovement;
 extern int movementsRequired;
 extern int prevMovementsRequired;
 extern int stepCount;
-extern double distancePerMovement;
-extern double prevDistance;
+extern float stepSize;
 extern int completedMovements;
 extern int prevCompletedMovements;
 extern char prevAutoStackProgress[10];
@@ -222,7 +219,7 @@ extern int stepperMaxSpeed;
 extern int rampSteps;
 
 extern String currentScreen;
-extern String stepDist;
 extern long lastMillis;
+extern long recursiveValue;
 
 #endif

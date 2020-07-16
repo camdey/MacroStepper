@@ -9,9 +9,13 @@ void resetAutoStack();
 void rotateScreen();
 void setAutoStackPositions(bool setStart, bool setEnd);
 void setMovementsRequired();
-void setStepDistance();
+void calculateStepSize();
+void setStepSize(float size);
+float getStepSize();
 int valueCheck(int value, int min, int max);
 void setLastMillis(long millis);
 long getLastMillis();
+void setArrowState(bool state);
+bool getArrowState();
 
 #endif

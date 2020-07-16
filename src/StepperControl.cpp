@@ -18,12 +18,12 @@ the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void autoStack() {
   // wake stepper from sleep
-  if (stepperDisabled == true) {
+  if (stepperDisabled) {
     toggleStepper(true);
   }
 
   // move stepper to start if not already there
-  if (goToStart == true) {
+  if (goToStart) {
     if (driver.XACTUAL() != startPosition) {
       int distanceToStart = (driver.XACTUAL() - startPosition);
       // if current position is in front of start position
@@ -52,23 +52,23 @@ void autoStack() {
   }
 
   // take photo and increment progress for first step of each movement
-  if (completedMovements <= movementsRequired && stepperMoved == false) {
+  if (completedMovements <= movementsRequired && !stepperMoved) {
 
     // if shutter enabled, take photo
-		if (shutterEnabled == true && shutterTriggered == false) {
+		if (shutterEnabled && !shutterTriggered) {
 
 	    shutterTriggered = triggerShutter(); // take photo
 
       // pause autoStack if flash failing
-      if (shutterTriggered == false) {
+      if (!shutterTriggered) {
         long failTime = millis();
         triggerFailed = true; // used to set one-off delay later
         // Serial.println("fail to trigger");
 
-        while (shutterTriggered == false) {
+        while (!shutterTriggered) {
           shutterTriggered = triggerShutter();
           // if retry successful, break
-          if (shutterTriggered == true) {
+          if (shutterTriggered) {
             // Serial.println("retry successful");
             break;
           }
@@ -84,12 +84,12 @@ void autoStack() {
 		}
 
     // only move if autoStack hasn't been paused by flash failure
-    if (pauseAutoStack != true) {
+    if (autoStackPaused != true) {
   		// move stepper
   		stepperMoved = stepMotor(1, shutterDelay*1000); // forward direction, shutterdelay
     }
 
-		if (stepperMoved == true) {
+		if (stepperMoved) {
 			completedMovements++;
 	    // make sure correct screen is displaying
 	    if (getCurrentScreen() == "Auto") { // auto screen
@@ -101,7 +101,7 @@ void autoStack() {
 			stepperMoved = false; // reset stepper move
 		}
 
-    if (triggerFailed == true) {
+    if (triggerFailed) {
       // 10 second delay to prevent trying to take another photo immediately after
       delay(10000);
     }
@@ -109,24 +109,24 @@ void autoStack() {
   // stop AutoStack sequence if end reached
   if (completedMovements >= movementsRequired) {
 		auto_screen::estimateDuration(1); // force refresh
-    autoStackFlag = false;
+    autoStackRunning = false;
     goToStart = true;
     completedMovements = 0;
     joystickState = true;
 		stepperMoved = false;
 		shutterTriggered = false;
     auto_screen::pauseStack(); // reset PlayPause button to "paused" mode"
-    pauseAutoStack = false; // autoStack is completed but not paused
+    autoStackPaused = false; // autoStack is completed but not paused
   }
 }
 
 
 void changeDirection() {
-  if (directionFwd == true) {
+  if (directionFwd) {
     moveDist = -500000;
     directionFwd = false;
   }
-  else if (directionFwd == false) {
+  else if (!directionFwd) {
     moveDist = 500000;
     directionFwd = true;
   }
@@ -172,7 +172,7 @@ void dryRun() {
 
 void homeRail() {
   bool hitRearStop, hitForwardStop = false;
-  if (stepperDisabled == true) {
+  if (stepperDisabled) {
     toggleStepper(true);
   }
 	// set configuration for stallGuard
@@ -277,26 +277,26 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
   currentTime = millis();
 
   // trigger stall warning if approaching limits
-  if (stepDirection == 1 && (abs(maxRailPosition - driver.XACTUAL()) <= 1000) && homedRail == true) {
+  if (stepDirection == 1 && (abs(maxRailPosition - driver.XACTUAL()) <= 1000) && homedRail) {
     stallWarning = true;
     return stallWarning;
   }
 
   // trigger stall warning if approaching limits
-  if (stepDirection == -1 && (abs(minRailPosition - driver.XACTUAL()) <= 1000) && homedRail == true) {
+  if (stepDirection == -1 && (abs(minRailPosition - driver.XACTUAL()) <= 1000) && homedRail) {
     stallWarning = true;
     return stallWarning;
   }
 
   // exit out of autoStack sequence if stall warning encountered
-  if (autoStackFlag == true && stallWarning == true) {
-    autoStackFlag = false;
+  if (autoStackRunning && stallWarning) {
+    autoStackRunning = false;
   }
 
   // step after elapsed amount of time
-  if ((currentTime - prevStepTime > stepperDelay) && stallWarning == false) {
+  if ((currentTime - prevStepTime > stepperDelay) && !stallWarning) {
     // wake stepper from sleep
-		if (stepperDisabled == true) {
+		if (stepperDisabled) {
 	    toggleStepper(true);
 	  }
 
@@ -319,17 +319,29 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
 
 
 void toggleStepper(bool enable) {
-	if (enable == true) {
+	if (enable) {
 		// delay(10); // give time for last step to complete, may need to make optional as called during ISR
 		// stepper.enableOutputs();
 		// stepperDisabled = false;
 		// delay(10); // breathing space
 	}
 
-	if (enable == false) {
+	if (!enable) {
 		// stepper.setSpeed(0);
 		// stepper.move(0);
 		// stepper.disableOutputs();
 		// stepperDisabled = true;
 	}
+}
+
+
+// Set previous position of stepper motor
+void setPreviousPosition(long position) {
+  prevStepperPosition = position;
+}
+
+
+// Get previous position of stepper motor
+long getPreviousPosition() {
+  return prevStepperPosition;
 }

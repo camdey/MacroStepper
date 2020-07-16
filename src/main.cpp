@@ -95,8 +95,8 @@ bool runHomingSequence 						= true;       // runs rehoming sequence
 bool homedRail										= false;			// true if homeRail() run successfully
 bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
-bool autoStackFlag 								= false;      // enables function for stack procedure
-bool pauseAutoStack 							= false;      // pause stack procedure
+bool autoStackRunning 								= false;      // enables function for stack procedure
+bool autoStackPaused 							= false;      // pause stack procedure
 bool shutterEnabled 							= false;      // disabled/enabled
 bool targetFlag 									= false;      // resets stepper target
 bool flashReady 									= false;			// flash ready for next photo
@@ -107,9 +107,7 @@ long startPosition 								= 0;        	// start position for stack procedure
 long prevStartPosition 						= 0;
 long endPosition 									= 0;        	// end position for stack procedure
 long prevEndPosition 							= 0;
-long prevStepperPosition 					= 1;    			// used for showing position of stepper if changed
-int manualMovementCount 					= 0;    			// count of manual movements
-int prevManualMovementCount 			= 0;
+long prevStepperPosition 					= 1;    			// used for showing position of stepper if changed    
 volatile long moveDist 						= 60000; 			// distance for homing to ensure it reaches end stop
 volatile bool stepperDisabled 		= false;      // is stepper disabled? in ISR
 volatile bool directionFwd 				= true;       // is stepper in fwd direction? in ISR
@@ -117,11 +115,10 @@ volatile long fwdPosition 				= 1;          // fwdPosition of rail, set to non-z
 volatile long bwdPosition 				= 1;          // bwdPosition of rail, set to non-zero number initially, in ISR
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
+float stepSize                    = 0.3125;     // distance travelled per movement in micrometres
 int movementsRequired 						= 0;        	// equals total distance / step multiplier
 int prevMovementsRequired 				= 1;       		// previous movementsRequired value
 int stepCount 										= 0;        	// number of steps taken in a given movement
-double distancePerMovement 				= 1.25; 			// distance in micrometres travelled per movement
-double prevDistance 							= 0;     			// previous step distance in micrometres
 int completedMovements 						= 0;       		// number of completed movements
 int prevCompletedMovements 				= 1;   				// used for overwriting prev movement progress
 char prevAutoStackProgress[10]  	= "0/0";			// prev progress value, global to prevent overwriting each loop
@@ -132,9 +129,9 @@ int stepperMaxSpeed               = 3000;       // max speed setting for AccelSt
 int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
 
 String currentScreen;
-String stepDist                   = "0.003125";
 int joystickMaxVelocity           = 100000;
 long lastMillis                   = 0;          // store readings of millis() to use for checking conditions within loops every X milliseconds
+long recursiveValue               = 51200;      // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 
 // ***** --- PROGRAM --- ***** //
 
@@ -185,7 +182,7 @@ void setup(void) {
   digitalWrite(SONY_PIN, LOW);
 
   // find stable resting point of joystick
-  calibrateJoyStick();
+  // calibrateJoyStick();
 
 	// if holding down ZSTICK_PIN, don't home rail
 	// if (digitalRead(ZSTICK_PIN) == LOW) {
@@ -203,7 +200,7 @@ void loop() {
 	currentTime = millis();
 
   // run AutoStack sequence if enabled
-  // if (autoStackFlag == true && pauseAutoStack == false) {
+  // if (autoStackRunning && !autoStackPaused) {
   //   autoStack();
   // }
   // // take touch reading
@@ -219,27 +216,27 @@ void loop() {
     int xStickPos = readJoystick();
   
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && autoStackFlag == false) {
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackRunning) {
       joystickMotion(xStickPos);
     }
   //   // sleep if stepper inactive, update position on manual screen
-  //   if (stepper.distanceToGo() == 0 && (autoStackFlag == false || pauseAutoStack == true) && digitalRead(EN_PIN) == LOW) {
+  //   if (stepper.distanceToGo() == 0 && (!autoStackRunning || autoStackPaused) && digitalRead(EN_PIN) == LOW) {
   //     toggleStepper(false); // disable stepper
   //     // refresh position on manual screen after stepping completed
-  //     if (prevStepperPosition != driver.XACTUAL() && getCurrentScreen() == "Manual") {
+  //     if (getPreviousPosition() != driver.XACTUAL() && getCurrentScreen() == "Manual") {
   //       manual_screen::displayPosition();
   //     }
   //   }
 	// 	// configure SilentStep if not homing rail
-	// 	if (stallGuardConfigured == true && runHomingSequence == false) {
+	// 	if (stallGuardConfigured && !runHomingSequence) {
 	// 		configStealthChop();
   //   }
 	// 	// update flashValue if on right screen
-	// 	if (getCurrentScreen() == "Flash" && (editFlashOffValue == true || editFlashOnValue == true)) {
+	// 	if (getCurrentScreen() == "Flash" && (editFlashOffValue || editFlashOnValue)) {
 	// 		flash_screen::updateFlashValue();
 	// 	}
   //   // set END as maxRailPosition if Z Stick depressed
-  //   if (getCurrentScreen() == "AutoConfig" && editEndPosition == true && digitalRead(ZSTICK_PIN) == LOW) {
+  //   if (getCurrentScreen() == "AutoConfig" && editEndPosition && digitalRead(ZSTICK_PIN) == LOW) {
   //     autoStackMax = true;
   //     config_screen::setAutoStackPositions(false, true);
   //     autoStackMax = false;
@@ -249,13 +246,13 @@ void loop() {
   }
 
   // reset target to currentPosition
-  // if (targetFlag == true) {
+  // if (targetFlag) {
   //   stepper.move(0);
   //   stepper.setSpeed(0);
   //   targetFlag = false;
   // }
   // run homing sequence if first loop
-  if (runHomingSequence == true) {
+  if (runHomingSequence) {
     homeRail(); // run homing routine
   }
 }
