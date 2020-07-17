@@ -38,6 +38,8 @@ void configStealthChop() {
 
   // STALLGUARD2 PARAMETERS
   driver.sg_stop(false);       // stop by stallguard, disable to release motor after stall event
+
+  stallGuardConfigured = false;
 }
 
 void configStallGuard() {
@@ -82,4 +84,6 @@ void configStallGuard() {
   driver.semin(2);                // If the StallGuard2 result falls below SEMIN*32, the motor current is increased
   driver.semax(1);                // If the StallGuard2 result is equal to or above (SEMIN+SEMAX+1)*32, the motor current becomes decreased to save energy.
   driver.sedn(0b00);              // For each 8 StallGuard2 values decrease current down step speed by one
+
+  stallGuardConfigured = true;
 }

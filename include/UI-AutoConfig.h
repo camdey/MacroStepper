@@ -7,7 +7,7 @@
 namespace config_screen {
   void initAutoConfigButtons();
   void populateAutoConfigScreen();
-  void checkAutoConfigButtons(int touch_x, int touch_y, int touch_z);
+  void checkAutoConfigButtons(int touch_x, int touch_y);
   void func_Start(bool btnActive);
   void func_End(bool btnActive);
   void func_Config(bool btnActive);

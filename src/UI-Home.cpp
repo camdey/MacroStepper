@@ -56,7 +56,7 @@ namespace home_screen {
   }
 
 
-  void checkHomeButtons(int touch_x, int touch_y, int touch_z) {
+  void checkHomeButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Home", touch_x, touch_y);
     }

@@ -89,7 +89,7 @@ namespace manual_screen {
   }
 
 
-  void checkManualButtons(int touch_x, int touch_y, int touch_z) {
+  void checkManualButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Manual", touch_x, touch_y);
     }
@@ -159,7 +159,7 @@ namespace manual_screen {
         if (shutterEnabled) {
           shutterTriggered = triggerShutter();
         }
-        stepperMoved = stepMotor(1, 200); // forward
+        executeMovement(1, 400); // forward
         displayPosition();
       }
     }
@@ -180,7 +180,7 @@ namespace manual_screen {
         if (shutterEnabled) {
           shutterTriggered = triggerShutter();
         }
-        stepperMoved = stepMotor(-1, 500); // reverse
+        executeMovement(-1, 400); // reverse
         displayPosition();
       }
     }

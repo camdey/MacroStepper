@@ -7,7 +7,7 @@
 namespace manual_screen {
   void initManualButtons();
   void populateManualScreen();
-  void checkManualButtons(int touch_x, int touch_y, int touch_z);
+  void checkManualButtons(int touch_x, int touch_y);
   void func_StepDistance(bool btnActive);
   void func_Flash(bool btnActive);
   void func_Reset(bool btnActive);

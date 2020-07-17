@@ -1,4 +1,5 @@
 #include "GlobalVariables.h"
+#include "DriverConfig.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
@@ -55,12 +56,16 @@ void joystickMotion(int xPos) {
   long velocity = calcVelocity(xPos);
   unsigned long velocityCheck = millis();
 
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
+
   // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   
   // wake stepper from sleep
   if (!isStepperEnabled()) {
-    toggleStepper(true);
+    setStepperEnabled(true);
   }
   
   while (xPos >= xStickUpper || xPos <= xStickLower) {
@@ -96,13 +101,17 @@ void joystickMotion(int xPos) {
       driver.XTARGET(800000);
     }
   
-    driver.VMAX(velocity);
+    setTargetVelocity(velocity);
     xPos = readJoystick();
   }
-  driver.XTARGET(driver.XACTUAL());
-  driver.VMAX(0);
+  setTargetVelocity(0); // ensure stepper has stopped
+  driver.XTARGET(driver.XACTUAL()); // reset target to actual
+  delay(10);
+  setTargetVelocity(200000); // default for stealthChop
   
-  // // check start/end position adjustment
+
+  // TODO - can this be moved to the velocity subroutine to update more frequently?
+  // check start/end position adjustment
   if (canEditStartPosition() && isArrowsEnabled()) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;

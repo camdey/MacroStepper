@@ -90,7 +90,7 @@ namespace auto_screen {
   }
 
 
-  void checkAutoButtons(int touch_x, int touch_y, int touch_z) {
+  void checkAutoButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Auto", touch_x, touch_y);
     }

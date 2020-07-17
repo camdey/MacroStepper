@@ -52,17 +52,14 @@ gfxTouch        gfxT;
 
 
 // --- currentTimes and elapsed times --- //
-unsigned long currentTime 				= 0;        	// current time in millis()
 unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
 unsigned long prevJoystickCheck 	= 0;    			// time subroutine2 last ran
-unsigned long prevStepTime 				= 0;       		// previous step time reading
 unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
 unsigned long genericTouchDelay 	= 200; 				// 200ms touch delay for toggles
 unsigned long lastReadFlash				= 0;					// previous time at which the light sensor was polled
 int prevMinutes 									= 1;        	// duration of autoStack
 int prevSeconds 									= 1;        	// duration of autoStack
-char prevTimeMinutesSeconds[6] 		= "00:00"; 		// previous duration time, global to prevent overwrite on loop
 
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
@@ -70,24 +67,19 @@ int xStickResting                 = 512;				// Resting point of joystick reading
 int xStickLower                   = 502;				// Lower boundary of of joystick resting point, calibrated during setup
 int xStickDiff                    = 0;          // Difference between ideal middle (512) and actual resting point
 int zStickVal 										= 1;        	// increment count of z-axis button press
-int prevZStickVal 								= 1;        	// only increment per button press
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
 int prevDelay 										= 1;        	// previous delay value
-int joyStickSpeed 								= 0;					// joystick speed value
 int flashValue										= 10;					// reading from light sensor on flash LED
-int prevFlashValue								= 0;					// previous reading of flash light sensor
 int flashThreshold                = 280;        // threshold value for flash being ready to fire
-int prevFlashThreshold            = 0;          // previous threshold value for flash being ready
 int flashOnValue                  = 300;        // initial value for flash considered as being ready
 int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool runHomingSequence 						= true;       // runs rehoming sequence
 bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
-bool autoStackRunning 								= false;      // enables function for stack procedure
+bool autoStackRunning 						= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
 bool shutterEnabled 							= false;      // disabled/enabled
-bool targetFlag 									= false;      // resets stepper target
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set endPosition to max for indetermine autoStack procedure
@@ -96,33 +88,17 @@ long startPosition 								= 0;        	// start position for stack procedure
 long prevStartPosition 						= 0;
 long endPosition 									= 0;        	// end position for stack procedure
 long prevEndPosition 							= 0;  
-volatile long moveDist 						= 60000; 			// distance for homing to ensure it reaches end stop
-volatile bool directionFwd 				= true;       // is stepper in fwd direction? in ISR
-volatile long fwdPosition 				= 1;          // fwdPosition of rail, set to non-zero number initially, in ISR
-volatile long bwdPosition 				= 1;          // bwdPosition of rail, set to non-zero number initially, in ISR
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
 int movementsRequired 						= 0;        	// equals total distance / step multiplier
 int prevMovementsRequired 				= 1;       		// previous movementsRequired value
-int stepCount 										= 0;        	// number of steps taken in a given movement
 int completedMovements 						= 0;       		// number of completed movements
 int prevCompletedMovements 				= 1;   				// used for overwriting prev movement progress
-char prevAutoStackProgress[10]  	= "0/0";			// prev progress value, global to prevent overwriting each loop
-bool stepperMoved 								= false; 			// did stepMotor actually step or not
 bool shutterTriggered 						= false;			// did the shutter trigger or not
 bool triggerFailed                = false;      // record state if shutter trigger has failed
-int stepperMaxSpeed               = 3000;       // max speed setting for AccelStepper
-int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
-
 int joystickMaxVelocity           = 100000;   
 
 // ***** --- PROGRAM --- ***** //
-
-// TODO
-// - add reduced speed option for joystick (z button press?)
-// - remove serialTuple and functions for sending new speed/accel settings
-// - fix bug with rampSteps where hovering at low speed will use up all rampSteps and
-//    moving to a much higher speed will cause the motor to stall
 
 
 void setup(void) {
@@ -142,7 +118,7 @@ void setup(void) {
   setScreenRotated(false);
 
 	driver.begin();
-	driver.rms_current(900);
+	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
 	driver.microsteps(nrMicrosteps);
   driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
   setStepperEnabled(true);
@@ -180,8 +156,6 @@ void setup(void) {
 }
 
 void loop() {
-	currentTime = millis();
-
   // run AutoStack sequence if enabled
   // if (autoStackRunning && !autoStackPaused) {
   //   autoStack();
@@ -204,7 +178,7 @@ void loop() {
     }
   //   // sleep if stepper inactive, update position on manual screen
   //   if (stepper.distanceToGo() == 0 && (!autoStackRunning || autoStackPaused) && digitalRead(EN_PIN) == LOW) {
-  //     toggleStepper(false); // disable stepper
+  //     setStepperEnabled(false); // disable stepper
   //     // refresh position on manual screen after stepping completed
   //     if (getPreviousPosition() != driver.XACTUAL() && getCurrentScreen() == "Manual") {
   //       manual_screen::displayPosition();
@@ -224,16 +198,11 @@ void loop() {
   //     config_screen::setAutoStackPositions(false, true);
   //     autoStackMax = false;
   //   }
-  //
+    Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
+    Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
     prevJoystickCheck = millis();
   }
 
-  // reset target to currentPosition
-  // if (targetFlag) {
-  //   stepper.move(0);
-  //   stepper.setSpeed(0);
-  //   targetFlag = false;
-  // }
   // run homing sequence if first loop
   if (runHomingSequence) {
     homeRail(); // run homing routine

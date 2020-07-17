@@ -8,10 +8,10 @@
             "includePath": [
                 "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/include",
                 "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/src",
+                "C:/Users/deyca/.platformio/lib/TMCStepper/src",
                 "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/include",
                 "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/src",
                 "C:/Users/deyca/.platformio/lib/Adafruit TouchScreen_ID5430",
-                "C:/Users/deyca/.platformio/lib/TMCStepper/src",
                 "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv",
                 "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv/utility",
                 "C:/Users/deyca/.platformio/lib/Adafruit GFX Library_ID13",
@@ -41,10 +41,10 @@
                 "path": [
                     "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/include",
                     "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/src",
+                    "C:/Users/deyca/.platformio/lib/TMCStepper/src",
                     "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/include",
                     "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/gfxButton/src",
                     "C:/Users/deyca/.platformio/lib/Adafruit TouchScreen_ID5430",
-                    "C:/Users/deyca/.platformio/lib/TMCStepper/src",
                     "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv",
                     "c:/Users/deyca/OneDrive/Documents/PlatformIO/MacroStepper/.pio/libdeps/due/MCUFRIEND_kbv/utility",
                     "C:/Users/deyca/.platformio/lib/Adafruit GFX Library_ID13",

@@ -137,17 +137,14 @@ extern gfxTouch         gfxT;
 #define SONY_PIN                    36            // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
-extern unsigned long currentTime;
 extern unsigned long prevButtonCheck;
 extern unsigned long prevJoystickCheck;
-extern unsigned long prevStepTime;
 extern unsigned long recycleTime;
 extern unsigned long prevGenericTime;
 extern unsigned long genericTouchDelay;
 extern unsigned long lastReadFlash;
 extern int prevMinutes;
 extern int prevSeconds;
-extern char prevTimeMinutesSeconds[6];
 
 // --- Input and Output values --- //
 extern int xStickPos;
@@ -156,14 +153,10 @@ extern int xStickUpper;
 extern int xStickDiff;
 extern int xStickResting;
 extern int xStickLower;
-extern int prevZStickVal;
 extern int shutterDelay;
 extern int prevDelay;
-extern int joyStickSpeed;
 extern int flashValue;
-extern int prevFlashValue;
 extern int flashThreshold;
-extern int prevFlashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
@@ -173,7 +166,6 @@ extern bool joystickState;
 extern bool autoStackRunning;
 extern bool autoStackPaused;
 extern bool shutterEnabled;
-extern bool targetFlag;
 extern bool flashReady;
 extern bool stallGuardConfigured;
 extern bool autoStackMax;
@@ -182,26 +174,16 @@ extern long startPosition;
 extern long prevStartPosition;
 extern long endPosition;
 extern long prevEndPosition;
-extern volatile long moveDist;
-extern volatile bool directionFwd;
-extern volatile long fwdPosition;
-extern volatile long bwdPosition;
 extern bool firstFwdStall;
 // --- Stepper motor variables --- //
 extern int stepsPerMovement;
 extern int movementsRequired;
 extern int prevMovementsRequired;
-extern int stepCount;
 extern int completedMovements;
 extern int prevCompletedMovements;
-extern char prevAutoStackProgress[10];
-extern bool stepperMoved;
 extern bool shutterTriggered;
 extern bool triggerFailed;
-
 extern int joystickMaxVelocity;
-extern int stepperMaxSpeed;
-extern int rampSteps;
 
 
 #endif

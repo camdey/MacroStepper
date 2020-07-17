@@ -93,7 +93,7 @@ namespace config_screen {
   }
 
 
-  void checkAutoConfigButtons(int touch_x, int touch_y, int touch_z) {
+  void checkAutoConfigButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("AutoConfig", touch_x, touch_y);
     }
@@ -178,7 +178,6 @@ namespace config_screen {
       goToStart = true;
       joystickState = true;
       autoStackPaused = false;
-      stepCount = 1;
       completedMovements = 0;
       movementsRequired = 0;
       startPosition = driver.XACTUAL();
@@ -202,7 +201,7 @@ namespace config_screen {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
-        stepperMoved = stepMotor(1, 150); // forward
+        executeMovement(1, 150); // forward
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
@@ -210,7 +209,7 @@ namespace config_screen {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
-        stepperMoved = stepMotor(1, 150); // forward
+         executeMovement(1, 150); // forward
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
@@ -232,7 +231,7 @@ namespace config_screen {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
-        stepperMoved = stepMotor(-1, 150); // backwards
+        executeMovement(-1, 150); // backwards
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
@@ -240,7 +239,7 @@ namespace config_screen {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
-        stepperMoved = stepMotor(-1, 150); // forward
+        executeMovement(-1, 150); // forward
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay

@@ -37,10 +37,6 @@ void calculateStepSize() {
     stepsPerMovement = 80;
   }
 
-  // stepper is 400 steps/rev, linear rail has 2mm pitch
-  // 1 step = 2/400 = 0.005mm
-	// microsteps = 16
-	// 0.005 / 16 = 0.3125μm
   distancePerMovement = microstepLength * stepsPerMovement;
 
   if (distancePerMovement != getStepSize()) {

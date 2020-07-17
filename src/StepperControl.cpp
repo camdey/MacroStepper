@@ -20,7 +20,7 @@ the autoStack will be completed and ceased to be called.
 void autoStack() {
   // wake stepper from sleep
   if (!isStepperEnabled()) {
-    toggleStepper(true);
+    setStepperEnabled(true);
   }
 
   // move stepper to start if not already there
@@ -46,14 +46,14 @@ void autoStack() {
 		goToStart = false;
 		completedMovements = 0;
 		joystickState = false;
-		stepperMoved = false;
+		setExecutedMovement(false);
 		shutterTriggered = false;
-    prevStepTime = millis();
+    setLastStepTime(millis());
     // Serial.println("0. Start");
   }
 
   // take photo and increment progress for first step of each movement
-  if (completedMovements <= movementsRequired && !stepperMoved) {
+  if (completedMovements <= movementsRequired && !hasExecutedMovement()) {
 
     // if shutter enabled, take photo
 		if (shutterEnabled && !shutterTriggered) {
@@ -85,12 +85,12 @@ void autoStack() {
 		}
 
     // only move if autoStack hasn't been paused by flash failure
-    if (autoStackPaused != true) {
+    if (!autoStackPaused) {
   		// move stepper
-  		stepperMoved = stepMotor(1, shutterDelay*1000); // forward direction, shutterdelay
+  		executeMovement(1, shutterDelay*1000); // forward direction, shutterdelay
     }
 
-		if (stepperMoved) {
+		if (hasExecutedMovement()) {
 			completedMovements++;
 	    // make sure correct screen is displaying
 	    if (getCurrentScreen() == "Auto") { // auto screen
@@ -99,7 +99,7 @@ void autoStack() {
 	    }
 
 			shutterTriggered = false; // reset shutter
-			stepperMoved = false; // reset stepper move
+			setExecutedMovement(false); // reset stepper move
 		}
 
     if (triggerFailed) {
@@ -114,7 +114,7 @@ void autoStack() {
     goToStart = true;
     completedMovements = 0;
     joystickState = true;
-		stepperMoved = false;
+		setExecutedMovement(false);
 		shutterTriggered = false;
     auto_screen::pauseStack(); // reset PlayPause button to "paused" mode"
     autoStackPaused = false; // autoStack is completed but not paused
@@ -122,23 +122,10 @@ void autoStack() {
 }
 
 
-void changeDirection() {
-  if (directionFwd) {
-    moveDist = -500000;
-    directionFwd = false;
-  }
-  else if (!directionFwd) {
-    moveDist = 500000;
-    directionFwd = true;
-  }
-  // stepper.moveTo(moveDist);
-}
-
-
 void dryRun() {
   // // wake stepper from sleep
 	// if (digitalRead(EN_PIN) == HIGH) {
-  //   toggleStepper(true);
+  //   setStepperEnabled(true);
   // }
 
   // // move backwards to start
@@ -165,7 +152,6 @@ void dryRun() {
 
   // // stops motor instantly
   // // stepper.setSpeed(0);
-  // targetFlag = true;
   // completedMovements = 0;
   // config_screen::displayPosition();
 }
@@ -174,13 +160,13 @@ void dryRun() {
 void homeRail() {
   bool hitRearStop, hitForwardStop = false;
   if (!isStepperEnabled()) {
-    toggleStepper(true);
+    setStepperEnabled(true);
   }
 	// set configuration for stallGuard
 	configStallGuard();
   // reset positions
-  fwdPosition = 1;
-  bwdPosition = 1;
+  setForwardEndStop(1);
+  setBackwardEndStop(1);
 
   // move to rear end stop + 100,000 just to ensure it over-runs without decelerating
 	driver.XTARGET(-maxRailPosition - 100000);
@@ -194,7 +180,7 @@ void homeRail() {
     Serial.print("Actual: "); Serial.println(driver.XACTUAL());
 
     driver.XACTUAL(0); // set rear end stop position as 0
-    bwdPosition = driver.XACTUAL(); // set backward position
+    setBackwardEndStop(driver.XACTUAL()); // set backward position
   }
   // move to forward end stop
   driver.XTARGET(maxRailPosition + 100000);
@@ -208,11 +194,11 @@ void homeRail() {
     Serial.print("Actual: "); Serial.println(driver.XACTUAL());
 
     driver.XACTUAL(maxRailPosition); // set front end stop position as 0
-    fwdPosition = driver.XACTUAL(); // set forward position
+    setForwardEndStop(driver.XACTUAL()); // set forward position
   }
 
 	// if back and forward position set, move to middle position
-	if (bwdPosition == minRailPosition && fwdPosition == maxRailPosition) {
+	if (getBackwardEndStop() == minRailPosition && getForwardEndStop() == maxRailPosition) {
     driver.XTARGET(192000);
     // wait to reach position before changing driver config after homing completed
     while (driver.XACTUAL() != driver.XTARGET()) {
@@ -273,63 +259,32 @@ this function returns false and the calling function should loop
 until it receives a response of true. Prevents stall if rail has
 been homed and will exit autoStack if running.
 ******************************************************************/
-bool stepMotor(int stepDirection, unsigned long stepperDelay) {
-  bool stallWarning = false;
-
-  // trigger stall warning if approaching limits
-  if (stepDirection == 1 && (abs(maxRailPosition - driver.XACTUAL()) <= 1000) && isRailHomed()) {
-    stallWarning = true;
-    return stallWarning;
-  }
-
-  // trigger stall warning if approaching limits
-  if (stepDirection == -1 && (abs(minRailPosition - driver.XACTUAL()) <= 1000) && isRailHomed()) {
-    stallWarning = true;
-    return stallWarning;
-  }
-
-  // exit out of autoStack sequence if stall warning encountered
-  if (autoStackRunning && stallWarning) {
-    autoStackRunning = false;
+void executeMovement(int stepDirection, unsigned long stepperDelay) {
+  // change to StealthChop is StallGuard is configured
+  if (stallGuardConfigured) {
+    configStealthChop();
   }
 
   // step after elapsed amount of time
-  if ((millis() - getLastStepTime() > stepperDelay) && !stallWarning) {
-    // wake stepper from sleep
+  if ((millis() - getLastStepTime() > stepperDelay)) {
+    // enable stepper if currently disabled
 		if (!isStepperEnabled()) {
-	    toggleStepper(true);
+	    setStepperEnabled(true);
 	  }
 
     int stepVelocity = stepDirection * stepsPerMovement;
+    long targetPosition = driver.XACTUAL() + stepVelocity;
 
-    // stepper.move(stepVelocity);
-		// stepper.setSpeed(200*stepDirection);
-		// while (stepper.distanceToGo() != 0) {
-	    // stepper.runSpeed();
-		// }
-
+    // set new target position
+    driver.XTARGET(targetPosition);
+    // while(driver.XACTUAL() != driver.XTARGET()) {
+    //   Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
+    //   Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
+    // }
+    setExecutedMovement(true);  
     setLastStepTime(millis());
-		// return true;
-//   }
-//   else {
-// 		return false; // no step taken
-	}
-  return true; // placeholder for function to work during testing
-}
-
-
-void toggleStepper(bool enable) {
-	if (enable) {
-		// delay(10); // give time for last step to complete, may need to make optional as called during ISR
-		// stepper.enableOutputs();
-		// setStepperEnabled(false);
-		// delay(10); // breathing space
-	}
-
-	if (!enable) {
-		// stepper.setSpeed(0);
-		// stepper.move(0);
-		// stepper.disableOutputs();
-		// setStepperEnabled(true);
+  }
+  else {
+		setExecutedMovement(false); // no step taken
 	}
 }

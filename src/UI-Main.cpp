@@ -72,19 +72,19 @@ void checkButtons(String screen) {
   if (touch_z >= 50 && touch_z <= 1000) {
     if ((touch_x > 0 && touch_x <= tft.width()) && (touch_y > 0 && touch_y <= tft.height())) {
       if (screen == "Home") {
-        checkHomeButtons(touch_x, touch_y, touch_z);
+        checkHomeButtons(touch_x, touch_y);
       }
       else if (screen == "Flash") {
-        checkFlashButtons(touch_x, touch_y, touch_z);
+        checkFlashButtons(touch_x, touch_y);
       }
       else if (screen == "Manual") {
-        checkManualButtons(touch_x, touch_y, touch_z);
+        checkManualButtons(touch_x, touch_y);
       }
       else if (screen == "Auto") {
-        checkAutoButtons(touch_x, touch_y, touch_z);
+        checkAutoButtons(touch_x, touch_y);
       }
       else if (screen == "AutoConfig") {
-        checkAutoConfigButtons(touch_x, touch_y, touch_z);
+        checkAutoConfigButtons(touch_x, touch_y);
       }
     }
   }
