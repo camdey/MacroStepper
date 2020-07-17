@@ -8,7 +8,5 @@ void calibrateJoyStick();
 void joystickMotion(int xPos);
 int readJoystick();
 long calcVelocity(int xVal);
-void setRecursiveFilterValue(long val);
-long getRecursiveFilterValue();
 
 #endif

@@ -29,6 +29,7 @@
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
+#include "GlobalVariables.h"
 #include "JoystickControl.h"                  // joystick control functions
 #include "MiscFunctions.h"										// miscellaneous functions
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
@@ -53,7 +54,7 @@ gfxTouch        gfxT;
 // --- currentTimes and elapsed times --- //
 unsigned long currentTime 				= 0;        	// current time in millis()
 unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
-unsigned long prevJoystickCheck 		= 0;    			// time subroutine2 last ran
+unsigned long prevJoystickCheck 	= 0;    			// time subroutine2 last ran
 unsigned long prevStepTime 				= 0;       		// previous step time reading
 unsigned long recycleTime 				= 1000;    		// duration to take photo
 unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
@@ -63,17 +64,6 @@ int prevMinutes 									= 1;        	// duration of autoStack
 int prevSeconds 									= 1;        	// duration of autoStack
 char prevTimeMinutesSeconds[6] 		= "00:00"; 		// previous duration time, global to prevent overwrite on loop
 
-// --- Screen flags --- //
-int activeScreen 									= 1;        	// currently displayed screen
-bool arrowsActive 								= false;      // take arrow touch readings
-bool editShutterDelay 						= false;     	// set shutter delay time
-bool editStartPosition 						= false;     	// set start point for auto mode
-bool editEndPosition 							= false;      // set end point for auto mode
-bool editMovementDistance 				= false;  		// set step distance in any mode
-bool editFlashOnValue							= false;			// set flash on value
-bool editFlashOffValue						= false;			// set flash off value
-bool testFlash                    = false;      // flag for testing flash threshold
-bool screenRotated                 = false;      // false means usb in lower left corner
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
 int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
@@ -92,7 +82,6 @@ int flashOnValue                  = 300;        // initial value for flash consi
 int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool runHomingSequence 						= true;       // runs rehoming sequence
-bool homedRail										= false;			// true if homeRail() run successfully
 bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
 bool autoStackRunning 								= false;      // enables function for stack procedure
@@ -106,16 +95,13 @@ bool autoStackMax                 = false;      // set endPosition to max for in
 long startPosition 								= 0;        	// start position for stack procedure
 long prevStartPosition 						= 0;
 long endPosition 									= 0;        	// end position for stack procedure
-long prevEndPosition 							= 0;
-long prevStepperPosition 					= 1;    			// used for showing position of stepper if changed    
+long prevEndPosition 							= 0;  
 volatile long moveDist 						= 60000; 			// distance for homing to ensure it reaches end stop
-volatile bool stepperDisabled 		= false;      // is stepper disabled? in ISR
 volatile bool directionFwd 				= true;       // is stepper in fwd direction? in ISR
 volatile long fwdPosition 				= 1;          // fwdPosition of rail, set to non-zero number initially, in ISR
 volatile long bwdPosition 				= 1;          // bwdPosition of rail, set to non-zero number initially, in ISR
 // --- Stepper motor variables --- //
 int stepsPerMovement 							= 1;       		// number of steps required for a given distance
-float stepSize                    = 0.3125;     // distance travelled per movement in micrometres
 int movementsRequired 						= 0;        	// equals total distance / step multiplier
 int prevMovementsRequired 				= 1;       		// previous movementsRequired value
 int stepCount 										= 0;        	// number of steps taken in a given movement
@@ -128,10 +114,7 @@ bool triggerFailed                = false;      // record state if shutter trigg
 int stepperMaxSpeed               = 3000;       // max speed setting for AccelStepper
 int rampSteps                     = 50000;      // number of steps in ramp profile for joystick control
 
-String currentScreen;
-int joystickMaxVelocity           = 100000;
-long lastMillis                   = 0;          // store readings of millis() to use for checking conditions within loops every X milliseconds
-long recursiveValue               = 51200;      // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
+int joystickMaxVelocity           = 100000;   
 
 // ***** --- PROGRAM --- ***** //
 
@@ -156,13 +139,13 @@ void setup(void) {
 
 	tft.begin(identifier);
 	tft.setRotation(1);
-  screenRotated = false;
+  setScreenRotated(false);
 
 	driver.begin();
 	driver.rms_current(900);
 	driver.microsteps(nrMicrosteps);
   driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
-  stepperDisabled = false;
+  setStepperEnabled(true);
   configStealthChop();
 
 	pinMode(EN_PIN, OUTPUT);
@@ -232,11 +215,11 @@ void loop() {
 	// 		configStealthChop();
   //   }
 	// 	// update flashValue if on right screen
-	// 	if (getCurrentScreen() == "Flash" && (editFlashOffValue || editFlashOnValue)) {
+	// 	if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
 	// 		flash_screen::updateFlashValue();
 	// 	}
   //   // set END as maxRailPosition if Z Stick depressed
-  //   if (getCurrentScreen() == "AutoConfig" && editEndPosition && digitalRead(ZSTICK_PIN) == LOW) {
+  //   if (getCurrentScreen() == "AutoConfig" && canEditEndPosition() && digitalRead(ZSTICK_PIN) == LOW) {
   //     autoStackMax = true;
   //     config_screen::setAutoStackPositions(false, true);
   //     autoStackMax = false;

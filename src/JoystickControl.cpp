@@ -1,3 +1,4 @@
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
@@ -58,7 +59,7 @@ void joystickMotion(int xPos) {
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   
   // wake stepper from sleep
-  if (stepperDisabled) {
+  if (!isStepperEnabled()) {
     toggleStepper(true);
   }
   
@@ -66,7 +67,7 @@ void joystickMotion(int xPos) {
     long currentPos = driver.XACTUAL();
     long targetPos = driver.XTARGET();
   
-    if (homedRail) {
+    if (isRailHomed()) {
       // don't allow movement if within 2mm of endstops
       // values are inverse so high xStickPos = reverse
       if (dir == 0 && driver.XACTUAL() <= safeZone) {
@@ -102,13 +103,13 @@ void joystickMotion(int xPos) {
   driver.VMAX(0);
   
   // // check start/end position adjustment
-  if (editStartPosition && getArrowState()) {
+  if (canEditStartPosition() && isArrowsEnabled()) {
     if (prevStartPosition != startPosition) {
       prevStartPosition = startPosition;
     }
     config_screen::setAutoStackPositions(true, false); //set start but not end position
   }
-  if (editEndPosition && getArrowState()) {
+  if (canEditEndPosition() && isArrowsEnabled()) {
     if (prevEndPosition != endPosition) {
       prevEndPosition = endPosition;
     }
@@ -135,7 +136,7 @@ int readJoystick() {
   setRecursiveFilterValue(adjVal/100);
   val = round(adjVal*1.00 / 10000);
 
-  if (screenRotated) {
+  if (isScreenRotated()) {
     val = map(val, 0, 1023, 1023, 0);
   }
   // offset reading by difference between resting state and ideal middle point
@@ -159,14 +160,4 @@ long calcVelocity(int xPos) {
   velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
 
   return velocity;
-}
-
-
-void setRecursiveFilterValue(long val) {
-  recursiveValue = val;
-}
-
-
-long getRecursiveFilterValue() {
-  return recursiveValue;
 }

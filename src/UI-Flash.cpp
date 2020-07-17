@@ -1,6 +1,7 @@
+#include "GlobalVariables.h"
+#include "ShutterControl.h"
 #include "UI-Main.h"
 #include "UI-Flash.h"
-#include "ShutterControl.h"
 
 namespace flash_screen {
 
@@ -70,12 +71,12 @@ namespace flash_screen {
 
   void func_FlashOff(bool btnActive) {
     if (btnActive) {
-      editFlashOffValue = true;
+      setEditFlashOffValue(true);
       btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), YELLOW);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
     else {
-      editFlashOffValue = false;
+      setEditFlashOffValue(false);
       btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), WHITE);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
@@ -84,12 +85,12 @@ namespace flash_screen {
 
   void func_FlashOn(bool btnActive) {
     if (btnActive) {
-      editFlashOnValue = true;
+      setEditFlashOnValue(true);
       btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), YELLOW);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
     else {
-      editFlashOnValue = false;
+      setEditFlashOnValue(false);
       btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), WHITE);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
@@ -98,7 +99,7 @@ namespace flash_screen {
 
   void func_FlashTest(bool btnActive) {
     if (btnActive) {
-      testFlash = true; // prevents leaving screen while testing flash
+     setTestingFlash(true); // prevents leaving screen while testing flash
       // enable shutter
       if (!shutterEnabled) {
         toggleShutter();
@@ -119,13 +120,13 @@ namespace flash_screen {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_GREEN);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_GREEN);
       }
-      testFlash = false;
+      setTestingFlash(false);
     }
   }
 
 
   void func_Back(bool btnActive) {
-    if (btnActive && !editFlashOnValue && !editFlashOffValue && !testFlash) {
+    if (btnActive && !canEditFlashOnValue() && !canEditFlashOffValue() && !isTestingFlash()) {
       // go back to start screen
       populateScreen("Home");
     }
@@ -142,12 +143,12 @@ namespace flash_screen {
     flashReady = flashStatus();
 
     // if difference from previous reading > 1, updates value on screen
-    if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue) {
+    if (abs(flashValue - flashOffValue) > 1 && canEditFlashOffValue()) {
       func_FlashOff(true);
       // set OFF value for flash
       flashOffValue = flashValue;
       }
-    if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue) {
+    if (abs(flashValue - flashOnValue) > 1 && canEditFlashOnValue()) {
       func_FlashOn(true);
       // set ON value for flash
       flashOnValue = flashValue;

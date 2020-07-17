@@ -1,7 +1,8 @@
-#include "UI-Main.h"
-#include "UI-AutoConfig.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
+#include "UI-Main.h"
+#include "UI-AutoConfig.h"
 
 namespace config_screen {
   #define num_btns 11
@@ -100,16 +101,16 @@ namespace config_screen {
 
 
   void func_Start(bool btnActive) {
-    if (btnActive && !editShutterDelay && !editEndPosition) {
-      setArrowState(true);
-      editStartPosition = true;
+    if (btnActive && !canEditShutterDelay() && !canEditEndPosition()) {
+      setArrowsEnabled(true);
+      setEditStartPosition(true);
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
       btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), YELLOW);
     }
-    else if (!btnActive && editStartPosition) {
-      setArrowState(false);
-      editStartPosition = false;
+    else if (!btnActive && canEditStartPosition()) {
+      setArrowsEnabled(false);
+      setEditStartPosition(false);
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), WHITE);
       btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), WHITE);
@@ -118,16 +119,16 @@ namespace config_screen {
 
 
   void func_End(bool btnActive) {
-    if (btnActive && !editShutterDelay && !editStartPosition) {
-      setArrowState(true);
-      editEndPosition = true;
+    if (btnActive && !canEditShutterDelay() && !canEditStartPosition()) {
+      setArrowsEnabled(true);
+      setEditEndPosition(true);
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
       btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), YELLOW);
     }
-    else if (!btnActive && editEndPosition) {
-      setArrowState(false);
-      editEndPosition = false;
+    else if (!btnActive && canEditEndPosition()) {
+      setArrowsEnabled(false);
+      setEditEndPosition(false);
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), WHITE);
       btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), WHITE);
@@ -136,7 +137,7 @@ namespace config_screen {
 
 
   void func_Run(bool btnActive) {
-    if (btnActive && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
+    if (btnActive && (canEditShutterDelay() + canEditStartPosition() + canEditEndPosition()) == 0) {
       int currentPosition = driver.XACTUAL();
 
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), YELLOW);
@@ -155,15 +156,15 @@ namespace config_screen {
 
   void func_Delay(bool btnActive) {
     if (btnActive) {
-      setArrowState(true);
-      editShutterDelay = true;
+      setArrowsEnabled(true);
+      setEditShutterDelay(true);
 
       btn_Delay.drawButton(tft, YELLOW);
       btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), YELLOW);
     }
-    else if (!btnActive && editShutterDelay) {
-      setArrowState(false);
-      editShutterDelay = false;
+    else if (!btnActive && canEditShutterDelay()) {
+      setArrowsEnabled(false);
+      setEditShutterDelay(false);
 
       btn_Delay.drawButton(tft, WHITE);
       btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), WHITE);
@@ -188,16 +189,16 @@ namespace config_screen {
 
 
   void func_Back(bool btnActive) {
-    if (btnActive && !getArrowState()) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("Auto");
     }
   }
 
 
   void func_ArrowUp(bool btnActive) {
-    if (btnActive && getArrowState()) {
+    if (btnActive && isArrowsEnabled()) {
       // edit start postion
-      if (editStartPosition) {
+      if (canEditStartPosition()) {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
@@ -205,7 +206,7 @@ namespace config_screen {
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
-      else if (editEndPosition) {
+      else if (canEditEndPosition()) {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
@@ -213,7 +214,7 @@ namespace config_screen {
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
-      else if (editShutterDelay) {
+      else if (canEditShutterDelay()) {
         if (prevDelay != shutterDelay) {
           prevDelay = shutterDelay;
         }
@@ -225,9 +226,9 @@ namespace config_screen {
 
 
   void func_ArrowDown(bool btnActive) {
-    if (btnActive && getArrowState()) {
+    if (btnActive && isArrowsEnabled()) {
       // edit start postion
-      if (editStartPosition) {
+      if (canEditStartPosition()) {
         if (prevStartPosition != startPosition) {
           prevStartPosition = startPosition;
         }
@@ -235,7 +236,7 @@ namespace config_screen {
         setAutoStackPositions(true, false); //set start but not end position
       }
       // edit end postion
-      else if (editEndPosition) {
+      else if (canEditEndPosition()) {
         if (prevEndPosition != endPosition) {
           prevEndPosition = endPosition;
         }
@@ -243,7 +244,7 @@ namespace config_screen {
         setAutoStackPositions(false, true); //set end but not start position
       }
       // edit shutter delay
-      else if (editShutterDelay) {
+      else if (canEditShutterDelay()) {
         if (prevDelay != shutterDelay) {
           prevDelay = shutterDelay;
         }

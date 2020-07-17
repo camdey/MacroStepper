@@ -1,3 +1,4 @@
+#include "GlobalVariables.h"
 #include "UI-Main.h"
 #include "UI-Home.h"
 #include "UI-Flash.h"
@@ -59,11 +60,11 @@ void checkButtons(String screen) {
   int touch_y;
   int touch_z = point.z;
 
-  if (!screenRotated) {
+  if (!isScreenRotated()) {
     touch_x = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());    // rotate & scale to TFT boundaries
     touch_y = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());   //   ... USB port at upper left
   }
-  else if (screenRotated) {
+  else if (isScreenRotated()) {
     touch_x = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);    // rotate & scale to TFT boundaries
     touch_y = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);   //   ... USB port at lower right
   }
@@ -94,12 +95,3 @@ void checkButtons(String screen) {
   }
 }
 
-
-void setCurrentScreen(String screen) {
-  currentScreen = screen;
-}
-
-
-String getCurrentScreen() {
-  return currentScreen;
-}

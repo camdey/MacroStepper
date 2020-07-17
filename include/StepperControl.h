@@ -13,7 +13,5 @@ bool detectEndStop();
 void overshootPosition(int position, int numberOfSteps, int direction);
 bool stepMotor(int stepDirection, unsigned long stepperDelay);
 void toggleStepper(bool enable);
-void setPreviousPosition(long position);
-long getPreviousPosition();
 
 #endif

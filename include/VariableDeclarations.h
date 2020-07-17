@@ -72,7 +72,7 @@ extern gfxTouch         gfxT;
 #define maxPressure 			    2000
 // microsteps and positions
 #define nrMicrosteps			    16              // number of microsteps per full step
-#define microstepLength           0.3125          // distance travelled per microstep in um = 2 / 400 / 16
+#define microstepLength             0.3125          // distance travelled per microstep in um = 2 / 400 / 16
 #define railLength                  200             // total length of actuator rails
 #define stageLength                 62              // total length of rail stage minus rubber pads on stage ends
 #define endStoppers                 18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
@@ -149,17 +149,6 @@ extern int prevMinutes;
 extern int prevSeconds;
 extern char prevTimeMinutesSeconds[6];
 
-// --- Screen flags --- //
-extern int activeScreen;
-extern bool arrowsActive;
-extern bool editShutterDelay;
-extern bool editStartPosition;
-extern bool editEndPosition;
-extern bool editMovementDistance;
-extern bool editFlashOnValue;
-extern bool editFlashOffValue;
-extern bool testFlash;
-extern bool screenRotated;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int zStickVal;
@@ -179,7 +168,6 @@ extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
 extern bool runHomingSequence;
-extern bool homedRail;
 extern bool goToStart;
 extern bool joystickState;
 extern bool autoStackRunning;
@@ -194,9 +182,7 @@ extern long startPosition;
 extern long prevStartPosition;
 extern long endPosition;
 extern long prevEndPosition;
-extern long prevStepperPosition;
 extern volatile long moveDist;
-extern volatile bool stepperDisabled;
 extern volatile bool directionFwd;
 extern volatile long fwdPosition;
 extern volatile long bwdPosition;
@@ -206,7 +192,6 @@ extern int stepsPerMovement;
 extern int movementsRequired;
 extern int prevMovementsRequired;
 extern int stepCount;
-extern float stepSize;
 extern int completedMovements;
 extern int prevCompletedMovements;
 extern char prevAutoStackProgress[10];
@@ -218,8 +203,5 @@ extern int joystickMaxVelocity;
 extern int stepperMaxSpeed;
 extern int rampSteps;
 
-extern String currentScreen;
-extern long lastMillis;
-extern long recursiveValue;
 
 #endif

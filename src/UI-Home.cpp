@@ -1,7 +1,8 @@
-#include "UI-Main.h"
-#include "UI-Home.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
+#include "UI-Main.h"
+#include "UI-Home.h"
 
 namespace home_screen {
   #define num_btns 6

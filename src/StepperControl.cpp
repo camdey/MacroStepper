@@ -1,4 +1,5 @@
 #include "DriverConfig.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "ShutterControl.h"
@@ -18,7 +19,7 @@ the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void autoStack() {
   // wake stepper from sleep
-  if (stepperDisabled) {
+  if (!isStepperEnabled()) {
     toggleStepper(true);
   }
 
@@ -172,7 +173,7 @@ void dryRun() {
 
 void homeRail() {
   bool hitRearStop, hitForwardStop = false;
-  if (stepperDisabled) {
+  if (!isStepperEnabled()) {
     toggleStepper(true);
   }
 	// set configuration for stallGuard
@@ -221,7 +222,7 @@ void homeRail() {
     config_screen::setAutoStackPositions(true, true); // update autoStack positions as rail has moved
 		configStealthChop(); // set config for silentStep
     runHomingSequence = false;
-    homedRail = true;
+    setRailHomed(true);
 	}
 }
 
@@ -274,16 +275,15 @@ been homed and will exit autoStack if running.
 ******************************************************************/
 bool stepMotor(int stepDirection, unsigned long stepperDelay) {
   bool stallWarning = false;
-  currentTime = millis();
 
   // trigger stall warning if approaching limits
-  if (stepDirection == 1 && (abs(maxRailPosition - driver.XACTUAL()) <= 1000) && homedRail) {
+  if (stepDirection == 1 && (abs(maxRailPosition - driver.XACTUAL()) <= 1000) && isRailHomed()) {
     stallWarning = true;
     return stallWarning;
   }
 
   // trigger stall warning if approaching limits
-  if (stepDirection == -1 && (abs(minRailPosition - driver.XACTUAL()) <= 1000) && homedRail) {
+  if (stepDirection == -1 && (abs(minRailPosition - driver.XACTUAL()) <= 1000) && isRailHomed()) {
     stallWarning = true;
     return stallWarning;
   }
@@ -294,9 +294,9 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
   }
 
   // step after elapsed amount of time
-  if ((currentTime - prevStepTime > stepperDelay) && !stallWarning) {
+  if ((millis() - getLastStepTime() > stepperDelay) && !stallWarning) {
     // wake stepper from sleep
-		if (stepperDisabled) {
+		if (!isStepperEnabled()) {
 	    toggleStepper(true);
 	  }
 
@@ -308,7 +308,7 @@ bool stepMotor(int stepDirection, unsigned long stepperDelay) {
 	    // stepper.runSpeed();
 		// }
 
-    prevStepTime = currentTime;
+    setLastStepTime(millis());
 		// return true;
 //   }
 //   else {
@@ -322,7 +322,7 @@ void toggleStepper(bool enable) {
 	if (enable) {
 		// delay(10); // give time for last step to complete, may need to make optional as called during ISR
 		// stepper.enableOutputs();
-		// stepperDisabled = false;
+		// setStepperEnabled(false);
 		// delay(10); // breathing space
 	}
 
@@ -330,18 +330,6 @@ void toggleStepper(bool enable) {
 		// stepper.setSpeed(0);
 		// stepper.move(0);
 		// stepper.disableOutputs();
-		// stepperDisabled = true;
+		// setStepperEnabled(true);
 	}
-}
-
-
-// Set previous position of stepper motor
-void setPreviousPosition(long position) {
-  prevStepperPosition = position;
-}
-
-
-// Get previous position of stepper motor
-long getPreviousPosition() {
-  return prevStepperPosition;
 }

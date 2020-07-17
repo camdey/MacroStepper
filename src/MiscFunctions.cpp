@@ -1,3 +1,4 @@
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "UI-Main.h"
 #include "UI-Manual.h"
@@ -5,13 +6,13 @@
 
 
 void rotateScreen() {
-  if (!screenRotated) {
+  if (!isScreenRotated()) {
     tft.setRotation(3);
-    screenRotated = true;
+    setScreenRotated(true);
   }
-  else if (screenRotated) {
+  else if (isScreenRotated()) {
     tft.setRotation(1);
-    screenRotated = false;
+    setScreenRotated(false);
   }
 }
 
@@ -58,17 +59,6 @@ void calculateStepSize() {
   }
 }
 
-// set float value of distance travelled per movement in μm, call from calculateStepSize()
-void setStepSize(float size) {
-  stepSize = size;
-}
-
-
-// return float value of distance travelled per movement in μm
-float getStepSize() {
-  return stepSize;
-}
-
 
 // check whether a given value is in a specified range
 // if not change value to min or max, whichever is closest
@@ -83,28 +73,4 @@ int valueCheck(int value, int min, int max) {
     value = value;
   }
   return value;
-}
-
-
-// Set the last millis() reading, useful for doing things within loops every X ms 
-void setLastMillis(long millis) {
-  lastMillis = millis;
-}
-
-
-// Get the last millis() reading, useful for doing things within loops every X ms
-long getLastMillis() {
-  return lastMillis;
-}
-
-
-// Set the state of the GUI arrows to on/off 
-void setArrowState(bool state) {
-  arrowsActive = state;
-}
-
-
-// Get the state of the GUI arrows
-bool getArrowState() {
-  return arrowsActive;
 }

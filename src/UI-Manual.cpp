@@ -1,8 +1,10 @@
-#include "UI-Main.h"
-#include "UI-Manual.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
 #include "StepperControl.h"
+#include "UI-Main.h"
+#include "UI-Manual.h"
+
 
 namespace manual_screen {
   #define num_btns 10
@@ -96,15 +98,15 @@ namespace manual_screen {
 
   void func_StepDistance(bool btnActive) {
     if (btnActive) {
-      setArrowState(true);
-      editMovementDistance = true;
+      setArrowsEnabled(true);
+      setEditMovementDistance(true);
 
       btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), YELLOW);
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
     else {
-      setArrowState(false);
-      editMovementDistance = false;
+      setArrowsEnabled(false);
+      setEditMovementDistance(false);
 
       // TODO would be nice to not re-write the top line on every arrow press
       btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), WHITE);
@@ -137,7 +139,7 @@ namespace manual_screen {
 
 
   void func_Back(bool btnActive) {
-    if (btnActive && !getArrowState()) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("Home");
     }
   }
@@ -146,13 +148,13 @@ namespace manual_screen {
   void func_ArrowUp(bool btnActive) {
     if (btnActive) {
       // if setting step size
-      if (editMovementDistance && getArrowState()) {
+      if (canEditMovementDistance() && isArrowsEnabled()) {
         stepsPerMovement++; // increment
         calculateStepSize();
         btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
       }
       // if not setting step size, move the stepper forward
-      else if (!editMovementDistance) {
+      else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
         if (shutterEnabled) {
           shutterTriggered = triggerShutter();
@@ -167,13 +169,13 @@ namespace manual_screen {
   void func_ArrowDown(bool btnActive) {
     if (btnActive) {
       // if setting step size
-      if (editMovementDistance && getArrowState()) {
+      if (canEditMovementDistance() && isArrowsEnabled()) {
         stepsPerMovement--; // decrement
         calculateStepSize();
         btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
       }
       // if not setting step size, move the stepper forward
-      else if (!editMovementDistance) {
+      else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
         if (shutterEnabled) {
           shutterTriggered = triggerShutter();

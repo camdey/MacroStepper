@@ -32,7 +32,7 @@ bool flashStatus() {
 }
 
 void toggleShutter() {
-  if ((currentTime - prevGenericTime) >= genericTouchDelay) {
+  if ((millis() - prevGenericTime) >= genericTouchDelay) {
     shutterEnabled = !shutterEnabled;
     prevGenericTime = millis();
   }

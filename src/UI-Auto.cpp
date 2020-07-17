@@ -1,7 +1,8 @@
-#include "UI-Main.h"
-#include "UI-Auto.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
+#include "UI-Main.h"
+#include "UI-Auto.h"
 
 namespace auto_screen {
   #define num_btns 8
@@ -94,10 +95,10 @@ namespace auto_screen {
       tch_array[i]->checkButton("Auto", touch_x, touch_y);
     }
     // check play/pause and up/down arrow separately, depending which is active
-    if (!getArrowState()) {
+    if (!isArrowsEnabled()) {
       tch_PlayPause.checkButton("Auto", touch_x, touch_y);
     }
-    else if (getArrowState()) {
+    else if (isArrowsEnabled()) {
       tch_ArrowUp.checkButton("Auto", touch_x, touch_y);
       tch_ArrowDown.checkButton("Auto", touch_x, touch_y);
     }
@@ -106,8 +107,8 @@ namespace auto_screen {
 
   void func_StepDistance(bool btnActive) {
     if (btnActive && (!autoStackRunning || autoStackPaused)) {
-      setArrowState(true);
-      editMovementDistance = true;
+      setArrowsEnabled(true);
+      setEditMovementDistance(true);
 
       // clear play/pause button
       btn_PlayPause.drawNewBitmap(tft, play, BLACK);
@@ -119,8 +120,8 @@ namespace auto_screen {
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
     else if (!btnActive && (!autoStackRunning || autoStackPaused)) {
-      setArrowState(false);
-      editMovementDistance = false;
+      setArrowsEnabled(false);
+      setEditMovementDistance(false);
 
       btn_ArrowUp.drawButton(tft, BLACK);
       btn_ArrowDown.drawButton(tft, BLACK);
@@ -151,26 +152,26 @@ namespace auto_screen {
 
 
   void func_Config(bool btnActive) {
-    if (btnActive && !getArrowState()) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("AutoConfig");
     }
   }
 
 
   void func_Back(bool btnActive) {
-    if (btnActive && !getArrowState()) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("Home");
     }
   }
 
 
   void func_PlayPause(bool btnActive) {
-    if (btnActive && !getArrowState()) {
+    if (btnActive && !isArrowsEnabled()) {
       autoStackRunning = true;   // start autoStack sequence
       autoStackPaused = false;
       btn_PlayPause.drawNewBitmap(tft, pause, CUSTOM_BLUE);
     }
-    else if (!btnActive && !getArrowState()) {
+    else if (!btnActive && !isArrowsEnabled()) {
       autoStackPaused = true;  // autoStack paused
       btn_PlayPause.drawNewBitmap(tft, play, CUSTOM_GREEN);
     }
@@ -188,7 +189,7 @@ namespace auto_screen {
 
 
   void func_ArrowUp(bool btnActive) {
-    if (btnActive && editMovementDistance && getArrowState()) {
+    if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
       stepsPerMovement++; // increment
       calculateStepSize();
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
@@ -197,7 +198,7 @@ namespace auto_screen {
 
 
   void func_ArrowDown(bool btnActive) {
-    if (btnActive && editMovementDistance && getArrowState()) {
+    if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
       stepsPerMovement--; // decrement
       calculateStepSize();
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
