@@ -81,7 +81,7 @@ extern gfxTouch         gfxT;
 #define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
 
-// definitions for touch screen orientation
+//=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT
 // #define TS_MINX 					160
 // #define TS_MAXX 					850
@@ -97,17 +97,17 @@ extern gfxTouch         gfxT;
 // #define TS_MAXX 					760
 // #define TS_MINY 					235
 // #define TS_MAXY 					810
-// grand central M4 + 3.5" TFT
+// Grand Central M4 + 3.5" TFT
 // #define TS_MINX 					760
 // #define TS_MAXX 					315
 // #define TS_MINY 					852
 // #define TS_MAXY 					220
 
 // pin definitions for touch inputs
-#define YP 							A3 						// must be an analog pin, use "An" notation!
-#define XM 							A2            // must be an analog pin, use "An" notation!
-#define YM 							9             // can be a digital pin
-#define XP 							8             // can be a digital pin
+#define YP 							A3              // must be an analog pin, use "An" notation!
+#define XM 							A2              // must be an analog pin, use "An" notation!
+#define YM 							9               // can be a digital pin
+#define XP 							8               // can be a digital pin
 
 // pin definitions for tft screen
 #define LCD_CS 						A3
@@ -119,22 +119,22 @@ extern gfxTouch         gfxT;
 // driver pins
 #define DIAG1_PIN 				    24
 #define DIAG0_PIN 				    26
-#define DIR_PIN 					28
-#define STEP_PIN 					30
+// #define DIR_PIN 					28              // use SPI stepping with TMC5160
+// #define STEP_PIN 				30              // use SPI stepping with TMC5160
 #define CS_PIN 						32
 #define EN_PIN 						34
-#define R_SENSE                     0.075f       // Watterott TMC5160 uses 0.075
+#define R_SENSE                     0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
 // #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define XSTICK_PIN 				    A6            // joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				    A7            // button-press from joystick
-#define GODOX_PIN 				    A8            // pin for GA1A12S202 light sensor
-#define PIEZO_PIN                   22            // pin for Piezo buzzer
-#define SONY_PIN                    36            // pin for pulling camera focus and shutter to GND via opto
+#define XSTICK_PIN 				    A6              // joystick X-axis pin (controls fwd and rev)
+#define ZSTICK_PIN 				    A7              // button-press from joystick
+#define GODOX_PIN 				    A8              // pin for GA1A12S202 light sensor
+#define PIEZO_PIN                   22              // pin for Piezo buzzer
+#define SONY_PIN                    36              // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long prevButtonCheck;
@@ -176,11 +176,7 @@ extern long endPosition;
 extern long prevEndPosition;
 extern bool firstFwdStall;
 // --- Stepper motor variables --- //
-extern int stepsPerMovement;
-extern int movementsRequired;
 extern int prevMovementsRequired;
-extern int completedMovements;
-extern int prevCompletedMovements;
 extern bool shutterTriggered;
 extern bool triggerFailed;
 extern int joystickMaxVelocity;

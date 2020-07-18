@@ -16,7 +16,7 @@ namespace auto_screen {
   void func_ArrowUp(bool btnActive);
   void func_ArrowDown(bool btnActive);
   void pauseStack();
-  void estimateDuration(bool screenRefresh);
-  void updateProgress(bool screenRefresh);
+  void estimateDuration();
+  void updateProgress();
 }
 #endif

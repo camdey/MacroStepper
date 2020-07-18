@@ -53,8 +53,11 @@ jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
 void joystickMotion(int xPos) {
+  // TODO
+  // start/end position updates independently of run position - results in small discrepancies
+  // "recoil" of stage back to target position after suddenly stopping accelerating via joystick control
+  // joystick creep - may need button press constantly during movement
   long velocity = calcVelocity(xPos);
-  unsigned long velocityCheck = millis();
 
   if (stallGuardConfigured) {
     configStealthChop();
@@ -92,8 +95,22 @@ void joystickMotion(int xPos) {
       Serial.print(" | currentPos: "); Serial.print(currentPos);
       Serial.print(" | targetPos: "); Serial.print(targetPos);
       Serial.print(" | velocity: "); Serial.println(velocity);
+
+      if (canEditStartPosition()) {
+        config_screen::setAutoStackStartPosition(); //set start but not end position
+      }
+      if (canEditEndPosition()) {
+        config_screen::setAutoStackEndPosition(); //set end but not start position
+      }
+      if (getCurrentScreen() == "Manual") {
+        manual_screen::displayPosition();
+      }
+      else if (getCurrentScreen() == "AutoConfig") {
+        config_screen::displayPosition();
+      }
       setLastMillis(millis());
     }
+    // set target to move stepper
     if (dir == 0) {
       driver.XTARGET(-800000);
     }
@@ -104,34 +121,11 @@ void joystickMotion(int xPos) {
     setTargetVelocity(velocity);
     xPos = readJoystick();
   }
-  setTargetVelocity(0); // ensure stepper has stopped
-  driver.XTARGET(driver.XACTUAL()); // reset target to actual
+  driver.XTARGET(driver.XACTUAL());       // reset target to actual
+  setTargetVelocity(0);                   // ensure stepper has stopped
+  setPreviousPosition(driver.XACTUAL());  // update prev position
   delay(10);
-  setTargetVelocity(200000); // default for stealthChop
-  
-
-  // TODO - can this be moved to the velocity subroutine to update more frequently?
-  // check start/end position adjustment
-  if (canEditStartPosition() && isArrowsEnabled()) {
-    if (prevStartPosition != startPosition) {
-      prevStartPosition = startPosition;
-    }
-    config_screen::setAutoStackPositions(true, false); //set start but not end position
-  }
-  if (canEditEndPosition() && isArrowsEnabled()) {
-    if (prevEndPosition != endPosition) {
-      prevEndPosition = endPosition;
-    }
-    config_screen::setAutoStackPositions(false, true); //set end but not start position
-  }
-  if (getCurrentScreen() == "Manual") {
-    manual_screen::displayPosition();
-  }
-  else if (getCurrentScreen() == "AutoConfig") {
-    config_screen::displayPosition();
-  }
-  // update prev position
-  setPreviousPosition(driver.XACTUAL());
+  setTargetVelocity(200000);              // default for stealthChop
 }
 
 

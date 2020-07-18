@@ -44,7 +44,7 @@ void autoStack() {
       }
     }
 		goToStart = false;
-		completedMovements = 0;
+		setNrMovementsCompleted(0);
 		joystickState = false;
 		setExecutedMovement(false);
 		shutterTriggered = false;
@@ -53,7 +53,7 @@ void autoStack() {
   }
 
   // take photo and increment progress for first step of each movement
-  if (completedMovements <= movementsRequired && !hasExecutedMovement()) {
+  if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
 
     // if shutter enabled, take photo
 		if (shutterEnabled && !shutterTriggered) {
@@ -91,11 +91,11 @@ void autoStack() {
     }
 
 		if (hasExecutedMovement()) {
-			completedMovements++;
+			setNrMovementsCompleted(getNrMovementsCompleted()+1);
 	    // make sure correct screen is displaying
 	    if (getCurrentScreen() == "Auto") { // auto screen
-	      auto_screen::updateProgress(0); // don't force refresh
-				auto_screen::estimateDuration(0); // don't force refresh
+	      auto_screen::updateProgress();
+				auto_screen::estimateDuration();
 	    }
 
 			shutterTriggered = false; // reset shutter
@@ -108,16 +108,19 @@ void autoStack() {
     }
   }
   // stop AutoStack sequence if end reached
-  if (completedMovements >= movementsRequired) {
-		auto_screen::estimateDuration(1); // force refresh
+  if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
+    if (getCurrentScreen() != "Auto") {
+      populateScreen("Auto");           // go back to Auto screen if not already on it
+    }
+		auto_screen::estimateDuration();    // update estimate
     autoStackRunning = false;
     goToStart = true;
-    completedMovements = 0;
-    joystickState = true;
+    joystickState = true;               // re-enable joystick control
+    shutterTriggered = false;
+    autoStackPaused = false;            // autoStack is completed but not paused
+    setNrMovementsCompleted(0);         // reset completed movements count
 		setExecutedMovement(false);
-		shutterTriggered = false;
-    auto_screen::pauseStack(); // reset PlayPause button to "paused" mode"
-    autoStackPaused = false; // autoStack is completed but not paused
+    auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
   }
 }
 
@@ -152,7 +155,7 @@ void dryRun() {
 
   // // stops motor instantly
   // // stepper.setSpeed(0);
-  // completedMovements = 0;
+  // setNrMovementsCompleted(0)
   // config_screen::displayPosition();
 }
 
@@ -205,7 +208,8 @@ void homeRail() {
       debugStallGuard(); // print to serial monitor
     }
 
-    config_screen::setAutoStackPositions(true, true); // update autoStack positions as rail has moved
+    config_screen::setAutoStackStartPosition(); // update autoStack positions as rail has moved
+    config_screen::setAutoStackEndPosition(); // update autoStack positions as rail has moved
 		configStealthChop(); // set config for silentStep
     runHomingSequence = false;
     setRailHomed(true);
@@ -272,7 +276,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 	    setStepperEnabled(true);
 	  }
 
-    int stepVelocity = stepDirection * stepsPerMovement;
+    int stepVelocity = stepDirection * getStepsPerMovement();
     long targetPosition = driver.XACTUAL() + stepVelocity;
 
     // set new target position

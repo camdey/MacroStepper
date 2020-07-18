@@ -17,7 +17,8 @@ namespace config_screen {
   void func_Back(bool btnActive);
   void func_ArrowUp(bool btnActive);
   void func_ArrowDown(bool btnActive);
-  void setAutoStackPositions(bool setStart, bool setEnd);
+  void setAutoStackStartPosition();
+  void setAutoStackEndPosition();
   void setShutterDelay();
   void displayPosition();
 }

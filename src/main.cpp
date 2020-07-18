@@ -89,11 +89,7 @@ long prevStartPosition 						= 0;
 long endPosition 									= 0;        	// end position for stack procedure
 long prevEndPosition 							= 0;  
 // --- Stepper motor variables --- //
-int stepsPerMovement 							= 1;       		// number of steps required for a given distance
-int movementsRequired 						= 0;        	// equals total distance / step multiplier
 int prevMovementsRequired 				= 1;       		// previous movementsRequired value
-int completedMovements 						= 0;       		// number of completed movements
-int prevCompletedMovements 				= 1;   				// used for overwriting prev movement progress
 bool shutterTriggered 						= false;			// did the shutter trigger or not
 bool triggerFailed                = false;      // record state if shutter trigger has failed
 int joystickMaxVelocity           = 100000;   
@@ -121,6 +117,7 @@ void setup(void) {
 	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
 	driver.microsteps(nrMicrosteps);
   driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+  driver.diag1_stall(0);
   setStepperEnabled(true);
   configStealthChop();
 
@@ -128,8 +125,8 @@ void setup(void) {
   digitalWrite(EN_PIN, LOW);
   pinMode(CS_PIN, OUTPUT);
   digitalWrite(CS_PIN, HIGH); // unselect SPI slave
-  pinMode(DIR_PIN, OUTPUT);
-  digitalWrite(DIR_PIN, LOW);
+  // pinMode(DIR_PIN, OUTPUT);
+  // digitalWrite(DIR_PIN, LOW);
   pinMode(DIAG1_PIN, INPUT);
   pinMode(PIEZO_PIN, OUTPUT);
   
@@ -171,19 +168,20 @@ void loop() {
   if (millis() - prevJoystickCheck >= 100) {
     // check joystick for movement
     int xStickPos = readJoystick();
+    bool isJoystickBtnPressed = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not pressed and 0 is pressed
   
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackRunning) {
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackRunning && isJoystickBtnPressed) {
       joystickMotion(xStickPos);
     }
   //   // sleep if stepper inactive, update position on manual screen
-  //   if (stepper.distanceToGo() == 0 && (!autoStackRunning || autoStackPaused) && digitalRead(EN_PIN) == LOW) {
-  //     setStepperEnabled(false); // disable stepper
-  //     // refresh position on manual screen after stepping completed
-  //     if (getPreviousPosition() != driver.XACTUAL() && getCurrentScreen() == "Manual") {
-  //       manual_screen::displayPosition();
-  //     }
-  //   }
+    // if (driver.distanceToGo() == 0 && (!autoStackRunning || autoStackPaused) && digitalRead(EN_PIN) == LOW) {
+    //   setStepperEnabled(false); // disable stepper
+    //   // refresh position on manual screen after stepping completed
+    //   if (getPreviousPosition() != driver.XACTUAL() && getCurrentScreen() == "Manual") {
+    //     manual_screen::displayPosition();
+    //   }
+    // }
 	// 	// configure SilentStep if not homing rail
 	// 	if (stallGuardConfigured && !runHomingSequence) {
 	// 		configStealthChop();
@@ -195,11 +193,12 @@ void loop() {
   //   // set END as maxRailPosition if Z Stick depressed
   //   if (getCurrentScreen() == "AutoConfig" && canEditEndPosition() && digitalRead(ZSTICK_PIN) == LOW) {
   //     autoStackMax = true;
-  //     config_screen::setAutoStackPositions(false, true);
+  //     config_screen::setAutoStackEndPosition();
   //     autoStackMax = false;
   //   }
     Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
-    Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
+    Serial.print(" | TARGET: "); Serial.print(driver.XTARGET());
+    Serial.print(" | X_COMPARE: "); Serial.println(digitalRead(DIAG1_PIN));
     prevJoystickCheck = millis();
   }
 

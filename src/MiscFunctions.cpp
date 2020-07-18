@@ -19,10 +19,11 @@ void rotateScreen() {
 
 void setMovementsRequired() {
   // calculate number of steps required to cover range
-  movementsRequired = ceil((endPosition*1.00 - startPosition*1.00) / stepsPerMovement);
-
+  int nrMovements = ceil((endPosition*1.00 - startPosition*1.00) / getStepsPerMovement());
   // prevent screen under/overflow of value
-  movementsRequired = valueCheck(movementsRequired, 0, 999);
+  nrMovements = valueCheck(nrMovements, 0, 999);
+  setNrMovementsRequired(nrMovements);
+  prevMovementsRequired = getNrMovementsRequired();
 }
 
 
@@ -31,13 +32,13 @@ void calculateStepSize() {
   float distancePerMovement;
 
   // constrain multiplier range
-  if (stepsPerMovement < 1) {
-    stepsPerMovement = 1;
-  } else if (stepsPerMovement > 80) {
-    stepsPerMovement = 80;
+  if (getStepsPerMovement() < 1) {
+    setStepsPerMovement(1);
+  } else if (getStepsPerMovement() > 100) {
+    setStepsPerMovement(100);
   }
 
-  distancePerMovement = microstepLength * stepsPerMovement;
+  distancePerMovement = microstepLength * getStepsPerMovement();
 
   if (distancePerMovement != getStepSize()) {
     // print new delay value
@@ -46,12 +47,10 @@ void calculateStepSize() {
 
     if (getCurrentScreen() == "Auto") {
       // update estimated time
-      auto_screen::estimateDuration(0); // don't force refresh
+      auto_screen::estimateDuration();
       // update progress
-      auto_screen::updateProgress(0); // don't force refresh
+      auto_screen::updateProgress();
     }
-
-    prevMovementsRequired = movementsRequired;
   }
 }
 

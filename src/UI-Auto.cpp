@@ -84,9 +84,9 @@ namespace auto_screen {
     btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), WHITE);
     btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), WHITE);
     btn_EstTime.writeTextTopCentre(tft, Arimo_Regular_30, String("Est. Time"), WHITE);
-    estimateDuration(true);
+    estimateDuration();
     btn_Progress.writeTextTopCentre(tft, Arimo_Regular_30, String("Progress"), WHITE);
-    updateProgress(true);
+    updateProgress();
   }
 
 
@@ -190,7 +190,7 @@ namespace auto_screen {
 
   void func_ArrowUp(bool btnActive) {
     if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
-      stepsPerMovement++; // increment
+      incrementStepsPerMovement();
       calculateStepSize();
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
@@ -199,7 +199,7 @@ namespace auto_screen {
 
   void func_ArrowDown(bool btnActive) {
     if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
-      stepsPerMovement--; // decrement
+      decrementStepsPerMovement();
       calculateStepSize();
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
@@ -211,9 +211,9 @@ namespace auto_screen {
   Uses sprintf_P function to concatenate minutes and seconds and format
   them as "mm:ss" on the screen.
   ***********************************************************************/
-  void estimateDuration(bool screenRefresh) {
-    float duration = movementsRequired * (shutterDelay + (recycleTime/1000));
-    float elapsed = completedMovements * (shutterDelay + (recycleTime/1000));
+  void estimateDuration() {
+    float duration = getNrMovementsRequired() * (shutterDelay + (recycleTime/1000));
+    float elapsed = getNrMovementsCompleted() * (shutterDelay + (recycleTime/1000));
     float remaining = duration - elapsed;
     int minutes = floor(remaining / 60);
     int seconds = int(remaining) % 60;
@@ -222,14 +222,10 @@ namespace auto_screen {
     // prevent screen overflow
     minutes = valueCheck(minutes, 0, 299);
 
+    // format time as "mm:ss" string
     sprintf_P(timeMinutesSeconds, PSTR("%02d:%02d"), minutes, seconds);
-
-    if ((minutes != prevMinutes || seconds != prevSeconds || screenRefresh == 1) && getCurrentScreen() == "Auto") {
-      btn_EstTimeVal.writeTextBottomCentre(tft, Arimo_Bold_30, timeMinutesSeconds, WHITE);
-
-      prevMinutes = minutes;
-      prevSeconds = seconds;
-    }
+    // print to screen
+    btn_EstTimeVal.writeTextBottomCentre(tft, Arimo_Bold_30, timeMinutesSeconds, WHITE);
   }
 
 
@@ -238,18 +234,12 @@ namespace auto_screen {
   Uses sprintf_P function to concatenate two values and format them as
   "completed / remaining" on the screen.
   ***********************************************************************/
-  void updateProgress(bool screenRefresh) {
+  void updateProgress() {
     char autoStackProgress[10]  = "0/0";
 
-    // displays progress in "Completed / Total" format
-    sprintf_P(autoStackProgress, PSTR("%02d/%02d"), completedMovements, movementsRequired);
-
-    if ((completedMovements != prevCompletedMovements) || movementsRequired != prevMovementsRequired || screenRefresh == 1) {
-      btn_ProgressVal.writeTextBottomCentre(tft, Arimo_Bold_30, autoStackProgress, WHITE);
-
-      prevMovementsRequired = movementsRequired;
-      prevCompletedMovements = completedMovements;
-    }
+    // format progress in "Completed / Total" string
+    sprintf_P(autoStackProgress, PSTR("%02d/%02d"), getNrMovementsCompleted(), getNrMovementsRequired());
+    // print to screen
+    btn_ProgressVal.writeTextBottomCentre(tft, Arimo_Bold_30, autoStackProgress, WHITE);
   }
-
 }

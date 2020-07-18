@@ -149,7 +149,7 @@ namespace manual_screen {
     if (btnActive) {
       // if setting step size
       if (canEditMovementDistance() && isArrowsEnabled()) {
-        stepsPerMovement++; // increment
+        incrementStepsPerMovement();
         calculateStepSize();
         btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
       }
@@ -170,7 +170,7 @@ namespace manual_screen {
     if (btnActive) {
       // if setting step size
       if (canEditMovementDistance() && isArrowsEnabled()) {
-        stepsPerMovement--; // decrement
+        decrementStepsPerMovement();
         calculateStepSize();
         btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
       }
@@ -188,13 +188,12 @@ namespace manual_screen {
 
 
   void displayPosition() {
+    int currentPosition = driver.XACTUAL();
     // update for new values
-    if (getPreviousPosition() != driver.XACTUAL()) {
-      int currentPosition = driver.XACTUAL();
+    if (getPreviousPosition() != currentPosition) {
       railPos = String(currentPosition*(microstepLength/1000), 5);
       // update rail position value
       btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);
-
 
       movementCount++;
       stepNr = String(movementCount);

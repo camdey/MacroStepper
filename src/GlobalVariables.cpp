@@ -13,12 +13,15 @@ long BackwardEndStopPosition    = 1;
 long lastMillis                 = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
 long lastStepTime               = 0;
 bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
+int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
+int nrMovementsRequired         = 0;            // number of movements (multiples of steps) required for an AutoStack procedure
 long prevStepperPosition        = 1;            // used for showing position of stepper if changed 
 bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
 long recursiveValue             = 51200;        // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 bool screenRotated              = false;        // check whether screen has been rotated or not
 bool stepperEnabled             = true;         // current state of stepper motor
-float stepSize                  = 0.3125;       // distance travelled per movement in micrometres
+float stepSize                  = 5.0000;       // distance travelled per movement in micrometres, default to 5um
+int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
 
@@ -179,6 +182,30 @@ long getLastStepTime() {
 }
 
 
+// set how many movements have been completed in an AutoStack procedure
+void setNrMovementsCompleted(int nrMovements) {
+  nrCompletedMovements = nrMovements;
+}
+
+
+// get how many movements have been completed in an AutoStack procedure
+int getNrMovementsCompleted() {
+  return nrCompletedMovements;
+}
+
+
+// set how many movements are required for a specified AutoStack procedure
+void setNrMovementsRequired(int nrMovements) {
+  nrMovementsRequired = nrMovements;
+}
+
+
+// get how many movements are required for a specified AutoStack procedure
+int getNrMovementsRequired() {
+  return nrMovementsRequired;
+}
+
+
 // Set previous position of stepper motor
 void setPreviousPosition(long position) {
   prevStepperPosition = position;
@@ -249,6 +276,30 @@ void setStepperEnabled(bool enable) {
 // Check current state of stepper
 bool isStepperEnabled() {
     return stepperEnabled;
+}
+
+
+// Set number of microsteps taken per movement
+void setStepsPerMovement(int nrSteps) {
+  stepsPerMovement = nrSteps;
+}
+
+
+// Increment number of microsteps taken per movement by 1
+void incrementStepsPerMovement() {
+  stepsPerMovement++;
+}
+
+
+// Decrement number of microsteps taken per movement by 1
+void decrementStepsPerMovement() {
+  stepsPerMovement--;
+}
+
+
+// Get number of microsteps taken per movement
+int getStepsPerMovement() {
+  return stepsPerMovement;
 }
 
 
