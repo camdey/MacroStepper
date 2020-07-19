@@ -73,10 +73,10 @@ namespace auto_screen {
       btn_PlayPause.drawButton(tft);
     }
 
-    if (!shutterEnabled) {
+    if (!isCameraEnabled()) {
       btn_Flash.drawButton(tft);
     }
-    else if (shutterEnabled) {
+    else if (isCameraEnabled()) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
@@ -141,11 +141,11 @@ namespace auto_screen {
 
   void func_Flash(bool btnActive) {
     if (btnActive) {
-      toggleShutter();
+      setCameraEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
     else if (!btnActive) {
-      toggleShutter();
+      setCameraEnabled(false);
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
   }

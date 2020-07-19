@@ -56,9 +56,13 @@ void joystickMotion(int xPos) {
   // TODO
   // start/end position updates independently of run position - results in small discrepancies
   // "recoil" of stage back to target position after suddenly stopping accelerating via joystick control
-  // joystick creep - may need button press constantly during movement
   long velocity = calcVelocity(xPos);
 
+  // enable stepper if disabled
+  if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+  // configure stepper for stealth chop
   if (stallGuardConfigured) {
     configStealthChop();
   }
@@ -66,12 +70,7 @@ void joystickMotion(int xPos) {
   // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   
-  // wake stepper from sleep
-  if (!isStepperEnabled()) {
-    setStepperEnabled(true);
-  }
-  
-  while (xPos >= xStickUpper || xPos <= xStickLower) {
+  while ((xPos >= xStickUpper || xPos <= xStickLower) && isJoystickBtnActive) {
     long currentPos = driver.XACTUAL();
     long targetPos = driver.XTARGET();
   
@@ -80,10 +79,12 @@ void joystickMotion(int xPos) {
       // values are inverse so high xStickPos = reverse
       if (dir == 0 && driver.XACTUAL() <= safeZone) {
         Serial.print("WARNING: hit safeZone (within 2mm of rear end stop): "); Serial.println(driver.XACTUAL());
+         produceTone(1, 250, 0);
         break;
       }
       else if (dir == 1 && maxRailPosition - driver.XACTUAL() <= safeZone) {
         Serial.print("WARNING: hit safeZone (within 2mm of front end stop): "); Serial.println(driver.XACTUAL());
+        produceTone(1, 250, 0);
         break;
       }
     }
@@ -96,11 +97,13 @@ void joystickMotion(int xPos) {
       Serial.print(" | targetPos: "); Serial.print(targetPos);
       Serial.print(" | velocity: "); Serial.println(velocity);
 
+      isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
+
       if (canEditStartPosition()) {
-        config_screen::setAutoStackStartPosition(); //set start but not end position
+        config_screen::updateStartPosition(); // set start but not end position
       }
       if (canEditEndPosition()) {
-        config_screen::setAutoStackEndPosition(); //set end but not start position
+        config_screen::updateEndPosition(); // set end but not start position
       }
       if (getCurrentScreen() == "Manual") {
         manual_screen::displayPosition();
@@ -123,12 +126,13 @@ void joystickMotion(int xPos) {
   }
   driver.XTARGET(driver.XACTUAL());       // reset target to actual
   setTargetVelocity(0);                   // ensure stepper has stopped
-  setPreviousPosition(driver.XACTUAL());  // update prev position
   delay(10);
   setTargetVelocity(200000);              // default for stealthChop
 }
 
 
+// read value from XSTICK_PIN and use recursive filtering to minimize noise
+// the previous filtered value from the joystick is used with a weight constant
 int readJoystick() {
   long val, adjVal;
   int weight = 40;
@@ -148,6 +152,8 @@ int readJoystick() {
 }
 
 
+// calculate new velocity (VMAX) value while using joystick motion
+// velocity value is a log-transformation of the joystick position
 long calcVelocity(int xPos) {
   long velocity;
   int xAdj;

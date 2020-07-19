@@ -1,3 +1,4 @@
+#include "GlobalVariables.h"
 #include "ShutterControl.h"
 
 
@@ -31,12 +32,6 @@ bool flashStatus() {
   return flashReady;
 }
 
-void toggleShutter() {
-  if ((millis() - prevGenericTime) >= genericTouchDelay) {
-    shutterEnabled = !shutterEnabled;
-    prevGenericTime = millis();
-  }
-}
 
 /******************************************************************
 Triggers the camera shutter and flash, if enabled.
@@ -52,7 +47,7 @@ bool triggerShutter() {
 	shutterTriggered = false;
 
 
-  if (shutterEnabled) {
+  if (isCameraEnabled()) {
 		unsigned long triggerTime = millis();
 
 		// wait for flash to be ready

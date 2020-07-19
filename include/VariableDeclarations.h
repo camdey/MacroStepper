@@ -7,6 +7,7 @@
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
 #include <gfxButton.h>
+#include "TimerFreeTone.h"
 #include <Fonts/Arimo_Regular_10.h>
 #include <Fonts/Arimo_Regular_16.h>
 #include <Fonts/Arimo_Regular_18.h>
@@ -67,9 +68,6 @@ extern gfxTouch         gfxT;
 #define CUSTOM_GREY_LITE		        0xDEFB
 #define CUSTOM_YELLOW                   0xFF46
 
-// touch screen pressure values
-#define minPressure 			    5
-#define maxPressure 			    2000
 // microsteps and positions
 #define nrMicrosteps			    16              // number of microsteps per full step
 #define microstepLength             0.3125          // distance travelled per microstep in um = 2 / 400 / 16
@@ -80,6 +78,7 @@ extern gfxTouch         gfxT;
 #define minRailPosition             0
 #define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
+#define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement 
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT
@@ -140,19 +139,14 @@ extern gfxTouch         gfxT;
 extern unsigned long prevButtonCheck;
 extern unsigned long prevJoystickCheck;
 extern unsigned long recycleTime;
-extern unsigned long prevGenericTime;
-extern unsigned long genericTouchDelay;
 extern unsigned long lastReadFlash;
-extern int prevMinutes;
-extern int prevSeconds;
-
 // --- Input and Output values --- //
 extern int xStickPos;
-extern int zStickVal;
 extern int xStickUpper;
 extern int xStickDiff;
 extern int xStickResting;
 extern int xStickLower;
+extern bool isJoystickBtnActive;
 extern int shutterDelay;
 extern int prevDelay;
 extern int flashValue;
@@ -165,21 +159,11 @@ extern bool goToStart;
 extern bool joystickState;
 extern bool autoStackRunning;
 extern bool autoStackPaused;
-extern bool shutterEnabled;
 extern bool flashReady;
 extern bool stallGuardConfigured;
 extern bool autoStackMax;
-// --- Position values --- //
-extern long startPosition;
-extern long prevStartPosition;
-extern long endPosition;
-extern long prevEndPosition;
-extern bool firstFwdStall;
 // --- Stepper motor variables --- //
-extern int prevMovementsRequired;
 extern bool shutterTriggered;
 extern bool triggerFailed;
-extern int joystickMaxVelocity;
-
 
 #endif

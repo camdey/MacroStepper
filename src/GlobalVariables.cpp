@@ -1,21 +1,24 @@
 #include "GlobalVariables.h"
+#include "MiscFunctions.h"
 
 bool arrowsEnabled              = false;
+bool cameraEnabled              = false;        // if true, will try to take a photo during autoStack or manual movement
 String currentScreen            = "Home";       // set current screen shown to user
-bool editShutterDelay           = false;     	// set shutter delay time
-bool editStartPosition          = false;     	// set start point for auto mode
+bool editShutterDelay           = false;        // set shutter delay time
+bool editStartPosition          = false;        // set start point for auto mode
 bool editEndPosition            = false;        // set end point for auto mode
-bool editMovementDistance       = false;  		// set step distance in any mode
+bool editMovementDistance       = false;        // set step distance in any mode
 bool editFlashOnValue           = false;        // set flash on value
-bool editFlashOffValue          = false;		// set flash off value
-long ForwardEndStopPosition     = 1;
-long BackwardEndStopPosition    = 1;
+bool editFlashOffValue          = false;        // set flash off value
+long ForwardEndStopPosition     = 1;            // position of the forward end stop (opposite end from stepper)
+long BackwardEndStopPosition    = 1;            // position of the backward end stop (same end as stepper)
+long startPosition              = 0;            // starting position of an AutoStack sequence
+long endPosition                = 0;            // end position of an AutoStack sequence
 long lastMillis                 = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
-long lastStepTime               = 0;
+long lastStepTime               = 0;            // last millis time a step was executed
 bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
 int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
 int nrMovementsRequired         = 0;            // number of movements (multiples of steps) required for an AutoStack procedure
-long prevStepperPosition        = 1;            // used for showing position of stepper if changed 
 bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
 long recursiveValue             = 51200;        // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 bool screenRotated              = false;        // check whether screen has been rotated or not
@@ -37,6 +40,17 @@ bool isArrowsEnabled() {
   return arrowsEnabled;
 }
 
+
+// Set camera state, if true program will try to trigger the camera shutter after a step
+void setCameraEnabled(bool enabled) {
+    cameraEnabled = enabled;
+}
+
+
+// Check if camera is enabled, if true program will try to trigger the camera shutter after a step
+bool isCameraEnabled() {
+    return cameraEnabled;
+}
 
 // Set the current screen displayed to the user
 void setCurrentScreen(String screen) {
@@ -158,6 +172,39 @@ long getBackwardEndStop() {
 }
 
 
+// set the start position for AutoStack, also updates movementsRequired
+void setStartPosition(long position) {
+    startPosition = position;
+    setMovementsRequired(); // update movementsRequired as calculation has changed
+}
+
+
+// get the start position for AutoStack
+long getStartPosition() {
+    return startPosition;
+}
+
+
+// set the end position for AutoStack, also updates movementsRequired
+void setEndPosition(long position) {
+    endPosition = position;
+    setMovementsRequired(); // update movementsRequired as calculation has changed
+}
+
+
+// get the end position for AutoStack
+long getEndPosition() {
+    return endPosition;
+}
+
+
+// check if the stepper's current position is the same as the target position
+bool hasReachedTargetPosition() {
+    bool hasReachedTarget = (driver.XACTUAL() == driver.XTARGET());
+    return hasReachedTarget;
+}
+
+
 // Set the last millis() reading, useful for doing things within loops every X ms 
 void setLastMillis(long millis) {
   lastMillis = millis;
@@ -206,18 +253,6 @@ int getNrMovementsRequired() {
 }
 
 
-// Set previous position of stepper motor
-void setPreviousPosition(long position) {
-  prevStepperPosition = position;
-}
-
-
-// Get previous position of stepper motor
-long getPreviousPosition() {
-  return prevStepperPosition;
-}
-
-
 // Set whether the rail has been homed or not
 void setRailHomed(bool homed) {
     railHomed = homed;
@@ -257,19 +292,17 @@ bool isScreenRotated() {
 // Set current state of stepper
 void setStepperEnabled(bool enable) {
 	if (enable) {
-		// delay(10); // give time for last step to complete, may need to make optional as called during ISR
-		// stepper.enableOutputs();
-		// setStepperEnabled(false);
-		// delay(10); // breathing space
+		delay(10);
+		digitalWrite(EN_PIN, LOW); // enable
+		delay(10);
 	}
 
 	if (!enable) {
-		// stepper.setSpeed(0);
-		// stepper.move(0);
-		// stepper.disableOutputs();
-		// setStepperEnabled(true);
+		delay(10);
+		digitalWrite(EN_PIN, HIGH); // disable
+		delay(10);
 	}
-    stepperEnabled = enable;
+  stepperEnabled = enable;
 }
 
 

@@ -6,7 +6,6 @@
 
 bool flashStatus();
 void setShutterDelay();
-void toggleShutter();
 bool triggerShutter();
 
 #endif

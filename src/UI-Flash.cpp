@@ -101,8 +101,8 @@ namespace flash_screen {
     if (btnActive) {
      setTestingFlash(true); // prevents leaving screen while testing flash
       // enable shutter
-      if (!shutterEnabled) {
-        toggleShutter();
+      if (!isCameraEnabled()) {
+        setCameraEnabled(true);
       }
       // print as yellow until result returned
       btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), YELLOW);

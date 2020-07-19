@@ -25,7 +25,7 @@
 #include "TouchScreen.h"											// touchscreen library
 #include "MCUFRIEND_kbv.h"										// display driver for IL9481
 #include "TMCStepper.h"
-// #include "TimerFreeTone.h"                    // produces beep tone for piezo
+#include "TimerFreeTone.h"                    // produces beep tone for piezo
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
 #include "DriverConfig.h"											// functions for configuring TMC2130 profiles
@@ -55,18 +55,13 @@ gfxTouch        gfxT;
 unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
 unsigned long prevJoystickCheck 	= 0;    			// time subroutine2 last ran
 unsigned long recycleTime 				= 1000;    		// duration to take photo
-unsigned long prevGenericTime 		= 0;    			// generic timer for toggles and such
-unsigned long genericTouchDelay 	= 200; 				// 200ms touch delay for toggles
 unsigned long lastReadFlash				= 0;					// previous time at which the light sensor was polled
-int prevMinutes 									= 1;        	// duration of autoStack
-int prevSeconds 									= 1;        	// duration of autoStack
-
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
 int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
 int xStickLower                   = 502;				// Lower boundary of of joystick resting point, calibrated during setup
 int xStickDiff                    = 0;          // Difference between ideal middle (512) and actual resting point
-int zStickVal 										= 1;        	// increment count of z-axis button press
+bool isJoystickBtnActive          = 0;          // check if joystick button is pressed (ZSTICK_PIN)
 int shutterDelay 									= 1;        	// delay between step and shutter trigger
 int prevDelay 										= 1;        	// previous delay value
 int flashValue										= 10;					// reading from light sensor on flash LED
@@ -79,20 +74,12 @@ bool goToStart 										= true;       // move to start for autoStack procedure
 bool joystickState 								= true;       // enabled/disabled
 bool autoStackRunning 						= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
-bool shutterEnabled 							= false;      // disabled/enabled
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
-bool autoStackMax                 = false;      // set endPosition to max for indetermine autoStack procedure
-// --- Position values --- //
-long startPosition 								= 0;        	// start position for stack procedure
-long prevStartPosition 						= 0;
-long endPosition 									= 0;        	// end position for stack procedure
-long prevEndPosition 							= 0;  
+bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
 // --- Stepper motor variables --- //
-int prevMovementsRequired 				= 1;       		// previous movementsRequired value
 bool shutterTriggered 						= false;			// did the shutter trigger or not
-bool triggerFailed                = false;      // record state if shutter trigger has failed
-int joystickMaxVelocity           = 100000;   
+bool triggerFailed                = false;      // record state if shutter trigger has failed  
 
 // ***** --- PROGRAM --- ***** //
 
@@ -103,12 +90,6 @@ void setup(void) {
   tft.reset();
 
 	uint16_t identifier = tft.readID();
-	// if (identifier == 0x9341) {
-	// 	Serial.println(F("Found ILI9341 LCD driver"));
-	// } else {
-	// 	Serial.print(F("No driver found"));
-	// }
-
 	tft.begin(identifier);
 	tft.setRotation(1);
   setScreenRotated(false);
@@ -117,7 +98,7 @@ void setup(void) {
 	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
 	driver.microsteps(nrMicrosteps);
   driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
-  driver.diag1_stall(0);
+
   setStepperEnabled(true);
   configStealthChop();
 
@@ -125,15 +106,10 @@ void setup(void) {
   digitalWrite(EN_PIN, LOW);
   pinMode(CS_PIN, OUTPUT);
   digitalWrite(CS_PIN, HIGH); // unselect SPI slave
-  // pinMode(DIR_PIN, OUTPUT);
-  // digitalWrite(DIR_PIN, LOW);
-  pinMode(DIAG1_PIN, INPUT);
   pinMode(PIEZO_PIN, OUTPUT);
   
-  // TimerFreeTone(PIEZO_PIN, 4000, 500, 10);
-  
   // declare analog pin as digital input
-  pinMode(ZSTICK_PIN, INPUT_PULLUP);
+  pinMode(ZSTICK_PIN, INPUT_PULLUP);  // pullup needed for consistent readings
   pinMode(SONY_PIN, OUTPUT);
   digitalWrite(SONY_PIN, LOW);
 
@@ -154,51 +130,40 @@ void setup(void) {
 
 void loop() {
   // run AutoStack sequence if enabled
-  // if (autoStackRunning && !autoStackPaused) {
-  //   autoStack();
-  // }
-  // // take touch reading
+  if (autoStackRunning && !autoStackPaused) {
+    autoStack();
+  }
+  // take touch reading
   if (millis() - prevButtonCheck >= 50) {
     checkButtons(getCurrentScreen());
     prevButtonCheck = millis();
   }
-
-
   // take joystick and limit switch reading, put stepper to sleep
   if (millis() - prevJoystickCheck >= 100) {
     // check joystick for movement
     int xStickPos = readJoystick();
-    bool isJoystickBtnPressed = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not pressed and 0 is pressed
+    isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
   
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackRunning && isJoystickBtnPressed) {
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackRunning && isJoystickBtnActive) {
       joystickMotion(xStickPos);
     }
-  //   // sleep if stepper inactive, update position on manual screen
-    // if (driver.distanceToGo() == 0 && (!autoStackRunning || autoStackPaused) && digitalRead(EN_PIN) == LOW) {
-    //   setStepperEnabled(false); // disable stepper
-    //   // refresh position on manual screen after stepping completed
-    //   if (getPreviousPosition() != driver.XACTUAL() && getCurrentScreen() == "Manual") {
-    //     manual_screen::displayPosition();
-    //   }
-    // }
-	// 	// configure SilentStep if not homing rail
-	// 	if (stallGuardConfigured && !runHomingSequence) {
-	// 		configStealthChop();
-  //   }
-	// 	// update flashValue if on right screen
-	// 	if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
-	// 		flash_screen::updateFlashValue();
-	// 	}
+    // sleep if stepper inactive, update position on manual screen
+    if (hasReachedTargetPosition() && (!autoStackRunning || autoStackPaused) && isStepperEnabled()) {
+      setStepperEnabled(false); // disable stepper
+    }
+		// update flashValue if on Flash screen
+		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
+			flash_screen::updateFlashValue();
+		}
   //   // set END as maxRailPosition if Z Stick depressed
   //   if (getCurrentScreen() == "AutoConfig" && canEditEndPosition() && digitalRead(ZSTICK_PIN) == LOW) {
   //     autoStackMax = true;
-  //     config_screen::setAutoStackEndPosition();
+  //     config_screen::updateEndPosition();
   //     autoStackMax = false;
   //   }
     Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
-    Serial.print(" | TARGET: "); Serial.print(driver.XTARGET());
-    Serial.print(" | X_COMPARE: "); Serial.println(digitalRead(DIAG1_PIN));
+    Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
     prevJoystickCheck = millis();
   }
 

@@ -15,7 +15,6 @@ namespace manual_screen {
   String stepNr;
   String railPos;
   int movementCount 					= 0;    			// count of manual movements
-  int prevMovementCount 			= 0;
 
 
   gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",     0,   20,   160,   80,   15, CUSTOM_BLUE  );
@@ -72,10 +71,10 @@ namespace manual_screen {
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton(tft);
     }
-    if (!shutterEnabled) {
+    if (!isCameraEnabled()) {
       btn_Flash.drawButton(tft, CUSTOM_RED);
     }
-    else if (shutterEnabled) {
+    else if (isCameraEnabled()) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
@@ -117,11 +116,11 @@ namespace manual_screen {
 
   void func_Flash(bool btnActive) {
     if (btnActive) {
-      toggleShutter();
+      setCameraEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
     else if (!btnActive) {
-      toggleShutter();
+      setCameraEnabled(false);
       // use drawNewButton so previous bitmap is filled over
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
@@ -131,7 +130,6 @@ namespace manual_screen {
   void func_Reset(bool btnActive) {
     if (btnActive) {
       movementCount = 0; // reset
-      prevMovementCount = 0; // reset
       stepNr = String(movementCount); // get latest value
       btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
     }
@@ -156,11 +154,13 @@ namespace manual_screen {
       // if not setting step size, move the stepper forward
       else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
-        if (shutterEnabled) {
+        if (isCameraEnabled()) {
           shutterTriggered = triggerShutter();
         }
         executeMovement(1, 400); // forward
-        displayPosition();
+        if (hasExecutedMovement()) {
+          displayPosition();
+        }
       }
     }
   }
@@ -177,32 +177,28 @@ namespace manual_screen {
       // if not setting step size, move the stepper forward
       else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
-        if (shutterEnabled) {
+        if (isCameraEnabled()) {
           shutterTriggered = triggerShutter();
         }
         executeMovement(-1, 400); // reverse
-        displayPosition();
+        if (hasExecutedMovement()) {
+          displayPosition();
+        }
       }
     }
   }
 
 
+  // print new position of rail and movementCount
+  // TODO ignore changes to movementCount from joystick motion???
   void displayPosition() {
-    int currentPosition = driver.XACTUAL();
-    // update for new values
-    if (getPreviousPosition() != currentPosition) {
-      railPos = String(currentPosition*(microstepLength/1000), 5);
-      // update rail position value
-      btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);
-
-      movementCount++;
-      stepNr = String(movementCount);
-      // update movement count for manual screen
-      btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
-
-      prevMovementCount = movementCount;
-      setPreviousPosition(currentPosition);
-    }
+    // print new position of rail
+    railPos = String(driver.XACTUAL()*(microstepLength/1000), 5);
+    btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);
+    // increment movementCount and print to screen
+    movementCount++;
+    stepNr = String(movementCount);
+    btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
   }
 
 }

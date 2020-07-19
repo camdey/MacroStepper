@@ -17,13 +17,21 @@ void rotateScreen() {
 }
 
 
+// sound a tone with a given number of repetitions each for a specified length of time (ms) separated by an interval (ms)
+void produceTone(int reps, int duration, int interval) {
+  for (int i = 0; i < reps; i++) {
+    TimerFreeTone(PIEZO_PIN, 4000, duration, 10);
+    delay(interval);
+  }
+}
+
+
 void setMovementsRequired() {
   // calculate number of steps required to cover range
-  int nrMovements = ceil((endPosition*1.00 - startPosition*1.00) / getStepsPerMovement());
+  int nrMovements = ceil((getEndPosition()*1.00 - getStartPosition()*1.00) / getStepsPerMovement());
   // prevent screen under/overflow of value
   nrMovements = valueCheck(nrMovements, 0, 999);
   setNrMovementsRequired(nrMovements);
-  prevMovementsRequired = getNrMovementsRequired();
 }
 
 

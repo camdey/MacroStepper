@@ -25,20 +25,20 @@ void autoStack() {
 
   // move stepper to start if not already there
   if (goToStart) {
-    if (driver.XACTUAL() != startPosition) {
-      int distanceToStart = (driver.XACTUAL() - startPosition);
+    if (driver.XACTUAL() != getStartPosition()) {
+      int distanceToStart = (driver.XACTUAL() - getStartPosition());
       // if current position is in front of start position
       if (distanceToStart > 0) {
         // move backwards to start postion
         // overshoot by 200 steps and return to start
-        overshootPosition(startPosition, 200, -1);
+        overshootPosition(getStartPosition(), 200, -1);
       }
       // if current position is behind start position
       else if (distanceToStart < 0) {
         // move forward to start postion
-        while (driver.XACTUAL() != startPosition) {
+        while (driver.XACTUAL() != getStartPosition()) {
           // stepper.setSpeed(600);
-          // stepper.moveTo(startPosition);
+          // stepper.moveTo(getStartPosition());
           // stepper.runSpeedToPosition();
         }
       }
@@ -56,7 +56,7 @@ void autoStack() {
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
 
     // if shutter enabled, take photo
-		if (shutterEnabled && !shutterTriggered) {
+		if (isCameraEnabled() && !shutterTriggered) {
 
 	    shutterTriggered = triggerShutter(); // take photo
 
@@ -121,102 +121,12 @@ void autoStack() {
     setNrMovementsCompleted(0);         // reset completed movements count
 		setExecutedMovement(false);
     auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
+    produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
   }
 }
 
 
-void dryRun() {
-  // // wake stepper from sleep
-	// if (digitalRead(EN_PIN) == HIGH) {
-  //   setStepperEnabled(true);
-  // }
-
-  // // move backwards to start
-  // while (driver.XACTUAL() > startPosition) {
-  //   // stepper.setSpeed(-600);
-  //   // stepper.moveTo(startPosition);
-  //   // stepper.runSpeedToPosition();
-  // }
-  // config_screen::displayPosition();
-
-  // // step slow through procedure
-  // while (driver.XACTUAL() < endPosition) {
-  //   // stepper.setSpeed(100);
-  //   // stepper.moveTo(endPosition);
-  //   // stepper.runSpeedToPosition();
-  // }
-  // config_screen::displayPosition();
-
-  // // return to start
-  // if (driver.XACTUAL() > startPosition) {
-  //   // overshoot by 200 steps and return to start
-  //   overshootPosition(startPosition, 200, -1);
-  // }
-
-  // // stops motor instantly
-  // // stepper.setSpeed(0);
-  // setNrMovementsCompleted(0)
-  // config_screen::displayPosition();
-}
-
-
-void homeRail() {
-  bool hitRearStop, hitForwardStop = false;
-  if (!isStepperEnabled()) {
-    setStepperEnabled(true);
-  }
-	// set configuration for stallGuard
-	configStallGuard();
-  // reset positions
-  setForwardEndStop(1);
-  setBackwardEndStop(1);
-
-  // move to rear end stop + 100,000 just to ensure it over-runs without decelerating
-	driver.XTARGET(-maxRailPosition - 100000);
-  hitRearStop = detectEndStop(); // wait until end stop detected
-  // if endstop detected... 
-  if (hitRearStop) {
-    delay(100);
-    driver.sg_stop(false);
-    driver.sg_stop(true);
-
-    Serial.print("Actual: "); Serial.println(driver.XACTUAL());
-
-    driver.XACTUAL(0); // set rear end stop position as 0
-    setBackwardEndStop(driver.XACTUAL()); // set backward position
-  }
-  // move to forward end stop
-  driver.XTARGET(maxRailPosition + 100000);
-  hitForwardStop = detectEndStop(); // wait until end stop detected
-  // if endstop detected...
-  if (hitForwardStop) {
-    delay(100);
-    driver.sg_stop(false);
-    driver.sg_stop(true);
-
-    Serial.print("Actual: "); Serial.println(driver.XACTUAL());
-
-    driver.XACTUAL(maxRailPosition); // set front end stop position as 0
-    setForwardEndStop(driver.XACTUAL()); // set forward position
-  }
-
-	// if back and forward position set, move to middle position
-	if (getBackwardEndStop() == minRailPosition && getForwardEndStop() == maxRailPosition) {
-    driver.XTARGET(192000);
-    // wait to reach position before changing driver config after homing completed
-    while (driver.XACTUAL() != driver.XTARGET()) {
-      debugStallGuard(); // print to serial monitor
-    }
-
-    config_screen::setAutoStackStartPosition(); // update autoStack positions as rail has moved
-    config_screen::setAutoStackEndPosition(); // update autoStack positions as rail has moved
-		configStealthChop(); // set config for silentStep
-    runHomingSequence = false;
-    setRailHomed(true);
-	}
-}
-
-
+// print various diagnostics to serial monitor
 void debugStallGuard() {
   if (millis() - getLastMillis() >= 100) {
     Serial.print(" | event_stop_sg: "); Serial.print(driver.event_stop_sg());
@@ -229,6 +139,7 @@ void debugStallGuard() {
 }
 
 
+// run stepper until stall triggered
 bool detectEndStop() {
   while (driver.event_stop_sg() == 0) {
     debugStallGuard(); // print to serial monitor
@@ -237,21 +148,52 @@ bool detectEndStop() {
 }
 
 
-void overshootPosition(int position, int numberOfSteps, int direction) {
-  // int speed = 600 * direction;
-  // int offsetPosition = position - numberOfSteps;
+// run through the specified AutoStack procedure using the current start and end values
+void dryRun() {
+  // enable stepper if disabled
+	if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+    // change to StealthChop is StallGuard is configured
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
 
-  // while (driver.XACTUAL() != offsetPosition) {
-  //   // stepper.setSpeed(speed);
-  //   // stepper.moveTo(offsetPosition); // move past start
-  //   // stepper.runSpeedToPosition();
-  // }
-  // delay(50);
-  // while (driver.XACTUAL() != position) {
-  //   // stepper.setSpeed(-speed); // reverse direcyion
-  //   // stepper.moveTo(position); // move to start
-  //   // stepper.runSpeedToPosition();
-  // }
+  // reduce stepper velocity
+  setTargetVelocity(10000);
+
+  // move to start position
+  driver.XTARGET(getStartPosition());
+  while (driver.XACTUAL() != getStartPosition()) {
+    if (millis() - getLastMillis() >= 100) {
+      config_screen::displayPosition(); // update position
+      setLastMillis(millis());
+    }
+  }
+
+  // move to end position
+  driver.XTARGET(getEndPosition());
+  // step slow through procedure
+  setTargetVelocity(2000);
+  while (driver.XACTUAL() != getEndPosition()) {
+    if (millis() - getLastMillis() >= 100) {
+      config_screen::displayPosition(); // update position
+      setLastMillis(millis());
+    }
+  }
+
+  // return to start
+  driver.XTARGET(getStartPosition());
+  setTargetVelocity(10000);
+  while (driver.XACTUAL() != getStartPosition()) {
+    if (millis() - getLastMillis() >= 100) {
+      config_screen::displayPosition(); // update position
+      setLastMillis(millis());
+    }
+  }
+  // overshoot by 200 steps and return to start
+  // overshootPosition(getStartPosition(), 200, -1);
+  setTargetVelocity(200000);
 }
 
 
@@ -291,4 +233,83 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
   else {
 		setExecutedMovement(false); // no step taken
 	}
+}
+
+
+// find the forward and backward end stops of the linear rail using StallGuard
+// moves stepper backwards until stall detected, records position
+// moves stepper forwards until stall detected, records position and sets position as maximum value (384,000)
+// moves stepper to middle of the rail (192,000)
+void homeRail() {
+  bool hitRearStop, hitForwardStop = false;
+  if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+	// set configuration for stallGuard
+	configStallGuard();
+  // reset positions
+  setForwardEndStop(1);
+  setBackwardEndStop(1);
+
+  // move to rear end stop + 100,000 just to ensure it over-runs without decelerating
+	driver.XTARGET(-maxRailPosition - 100000);
+  hitRearStop = detectEndStop(); // wait until end stop detected
+  // if endstop detected... 
+  if (hitRearStop) {
+    delay(100);
+    driver.sg_stop(false);
+    driver.sg_stop(true);
+
+    // Serial.print("Actual: "); Serial.println(driver.XACTUAL());
+
+    driver.XACTUAL(0); // set rear end stop position as 0
+    setBackwardEndStop(driver.XACTUAL()); // set backward position
+  }
+  // move to forward end stop
+  driver.XTARGET(maxRailPosition + 100000);
+  hitForwardStop = detectEndStop(); // wait until end stop detected
+  // if endstop detected...
+  if (hitForwardStop) {
+    delay(100);
+    driver.sg_stop(false);
+    driver.sg_stop(true);
+
+    // Serial.print("Actual: "); Serial.println(driver.XACTUAL());
+
+    driver.XACTUAL(maxRailPosition); // set front end stop position as 0
+    setForwardEndStop(driver.XACTUAL()); // set forward position
+  }
+
+	// if back and forward position set, move to middle position
+	if (getBackwardEndStop() == minRailPosition && getForwardEndStop() == maxRailPosition) {
+    driver.XTARGET(192000);
+    // wait to reach position before changing driver config after homing completed
+    while (driver.XACTUAL() != driver.XTARGET()) {
+      debugStallGuard(); // print to serial monitor
+    }
+
+    setStartPosition(driver.XACTUAL());   // update autoStack positions as rail has moved
+    setEndPosition(driver.XACTUAL());     // update autoStack positions as rail has moved
+		configStealthChop();  // set config for silentStep
+    runHomingSequence = false;
+    setRailHomed(true);
+	}
+}
+
+
+void overshootPosition(int position, int numberOfSteps, int direction) {
+  // int speed = 600 * direction;
+  // int offsetPosition = position - numberOfSteps;
+
+  // while (driver.XACTUAL() != offsetPosition) {
+  //   // stepper.setSpeed(speed);
+  //   // stepper.moveTo(offsetPosition); // move past start
+  //   // stepper.runSpeedToPosition();
+  // }
+  // delay(50);
+  // while (driver.XACTUAL() != position) {
+  //   // stepper.setSpeed(-speed); // reverse direcyion
+  //   // stepper.moveTo(position); // move to start
+  //   // stepper.runSpeedToPosition();
+  // }
 }

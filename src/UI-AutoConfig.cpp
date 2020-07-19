@@ -84,9 +84,9 @@ namespace config_screen {
 
     // draw text
     btn_Start.writeTextTopCentre(       tft, Arimo_Regular_30,  String("START"),         WHITE);
-    btn_StartVal.writeTextBottomCentre( tft, Arimo_Bold_30,     String(startPosition),   WHITE);
+    btn_StartVal.writeTextBottomCentre( tft, Arimo_Bold_30,     String(getStartPosition()),   WHITE);
     btn_End.writeTextTopCentre(         tft, Arimo_Regular_30,  String("END"),           WHITE);
-    btn_EndVal.writeTextBottomCentre(   tft, Arimo_Bold_30,     String(endPosition),     WHITE);
+    btn_EndVal.writeTextBottomCentre(   tft, Arimo_Bold_30,     String(getEndPosition()),     WHITE);
     btn_Run.writeTextTopCentre(         tft, Arimo_Regular_30,  String("RUN"),           WHITE);
     btn_RunVal.writeTextBottomCentre(   tft, Arimo_Bold_30,     String(currentPosition), WHITE);
     btn_DelayVal.writeTextCentre(       tft, Arimo_Bold_30,     String(shutterDelay),    WHITE);
@@ -106,14 +106,14 @@ namespace config_screen {
       setEditStartPosition(true);
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
-      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), YELLOW);
+      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStartPosition()), YELLOW);
     }
     else if (!btnActive && canEditStartPosition()) {
       setArrowsEnabled(false);
       setEditStartPosition(false);
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), WHITE);
-      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), WHITE);
+      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStartPosition()), WHITE);
     }
   }
 
@@ -124,14 +124,14 @@ namespace config_screen {
       setEditEndPosition(true);
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
-      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), YELLOW);
+      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getEndPosition()), YELLOW);
     }
     else if (!btnActive && canEditEndPosition()) {
       setArrowsEnabled(false);
       setEditEndPosition(false);
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), WHITE);
-      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), WHITE);
+      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getEndPosition()), WHITE);
     }
   }
 
@@ -148,8 +148,6 @@ namespace config_screen {
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
       btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), WHITE);
       tch_Run.setState(false); // reset button state to false
-
-      displayPosition();
     }
   }
 
@@ -180,8 +178,8 @@ namespace config_screen {
       autoStackPaused = false;
       setNrMovementsCompleted(0);
       setNrMovementsRequired(0);
-      startPosition = driver.XACTUAL();
-      endPosition = driver.XACTUAL();
+      setStartPosition(driver.XACTUAL());
+      setEndPosition(driver.XACTUAL());
       btn_Reset.drawButton(tft, BLACK);
     }
   }
@@ -198,19 +196,13 @@ namespace config_screen {
     if (btnActive && isArrowsEnabled()) {
       // edit start postion
       if (canEditStartPosition()) {
-        if (prevStartPosition != startPosition) {
-          prevStartPosition = startPosition;
-        }
         executeMovement(1, 150); // forward
-        setAutoStackStartPosition(); //set start but not end position
+        updateStartPosition(); //set start but not end position
       }
       // edit end postion
       else if (canEditEndPosition()) {
-        if (prevEndPosition != endPosition) {
-          prevEndPosition = endPosition;
-        }
-         executeMovement(1, 150); // forward
-        setAutoStackEndPosition(); //set end but not start position
+        executeMovement(1, 150); // forward
+        updateEndPosition(); //set end but not start position
       }
       // edit shutter delay
       else if (canEditShutterDelay()) {
@@ -228,19 +220,13 @@ namespace config_screen {
     if (btnActive && isArrowsEnabled()) {
       // edit start postion
       if (canEditStartPosition()) {
-        if (prevStartPosition != startPosition) {
-          prevStartPosition = startPosition;
-        }
         executeMovement(-1, 150); // backwards
-        setAutoStackStartPosition(); //set start position
+        updateStartPosition(); //set start position
       }
       // edit end postion
       else if (canEditEndPosition()) {
-        if (prevEndPosition != endPosition) {
-          prevEndPosition = endPosition;
-        }
         executeMovement(-1, 150); // forward
-        setAutoStackEndPosition(); //set end position
+        updateEndPosition(); //set end position
       }
       // edit shutter delay
       else if (canEditShutterDelay()) {
@@ -254,43 +240,33 @@ namespace config_screen {
   }
 
 
-  void setAutoStackStartPosition() {
+  // sets and prints new Start position for AutoStack
+  void updateStartPosition() {
     // lower limit
-    if (startPosition < 0) {
-      startPosition = 0;
+    if (getStartPosition() < 0) {
+      setStartPosition(0);
     }
     // get new value
-    startPosition = driver.XACTUAL();
-    // print start point if changed
-    if (prevStartPosition != startPosition) {
-      btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
-      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), YELLOW);
-      prevStartPosition = startPosition;
-    }
+    setStartPosition(driver.XACTUAL());
+    btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
+    btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStartPosition()), YELLOW);
     // reset macroStepping
     goToStart = true;
-
-    setMovementsRequired();
   }
 
 
-  void setAutoStackEndPosition() {
+  // sets and prints new End position for AutoStack
+  void updateEndPosition() {
     // set new end value
     if (autoStackMax) {
-      endPosition = maxRailPosition;
+      setEndPosition(maxRailPosition);
     }
     else if (!autoStackMax) {
-      endPosition = driver.XACTUAL();
+      setEndPosition(driver.XACTUAL());
     }
-    // print end point if changed
-    if (prevEndPosition != endPosition) {
-      btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
-      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), YELLOW);
-      prevEndPosition = endPosition;
-    }
-
-  setMovementsRequired();
-}
+    btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
+    btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getEndPosition()), YELLOW);
+  }
 
 
   void setShutterDelay() {
@@ -310,14 +286,9 @@ namespace config_screen {
   }
 
 
+  // print current position of stepper under RUN text
   void displayPosition() {
-    int currentPosition = driver.XACTUAL();
-    if (getPreviousPosition() != currentPosition) {
-      btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
-      btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), WHITE);
-
-      setPreviousPosition(currentPosition);
-    }
+    btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
+    btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(driver.XACTUAL()), WHITE);
   }
-
 }
