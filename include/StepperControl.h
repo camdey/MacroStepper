@@ -9,7 +9,8 @@ void dryRun();
 void homeRail();
 void debugStallGuard();
 bool detectEndStop();
-void overshootPosition(int position, int numberOfSteps, int direction);
 void executeMovement(int stepDirection, unsigned long stepperDelay);
+void goToStart();
+void overshootPosition(int startPosition, int numberOfSteps);
 
 #endif

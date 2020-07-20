@@ -62,23 +62,19 @@ int xStickResting                 = 512;				// Resting point of joystick reading
 int xStickLower                   = 502;				// Lower boundary of of joystick resting point, calibrated during setup
 int xStickDiff                    = 0;          // Difference between ideal middle (512) and actual resting point
 bool isJoystickBtnActive          = 0;          // check if joystick button is pressed (ZSTICK_PIN)
-int shutterDelay 									= 1;        	// delay between step and shutter trigger
-int prevDelay 										= 1;        	// previous delay value
 int flashValue										= 10;					// reading from light sensor on flash LED
 int flashThreshold                = 280;        // threshold value for flash being ready to fire
 int flashOnValue                  = 300;        // initial value for flash considered as being ready
 int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool runHomingSequence 						= true;       // runs rehoming sequence
-bool goToStart 										= true;       // move to start for autoStack procedure
-bool joystickState 								= true;       // enabled/disabled
+bool isNewAutoStack 						  = true;       // move to start for autoStack procedure
 bool autoStackRunning 						= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
 bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
 // --- Stepper motor variables --- //
-bool shutterTriggered 						= false;			// did the shutter trigger or not
 bool triggerFailed                = false;      // record state if shutter trigger has failed  
 
 // ***** --- PROGRAM --- ***** //

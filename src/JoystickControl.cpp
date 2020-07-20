@@ -106,10 +106,10 @@ void joystickMotion(int xPos) {
         config_screen::updateEndPosition(); // set end but not start position
       }
       if (getCurrentScreen() == "Manual") {
-        manual_screen::displayPosition();
+        manual_screen::printPosition();
       }
       else if (getCurrentScreen() == "AutoConfig") {
-        config_screen::displayPosition();
+        config_screen::printPosition();
       }
       setLastMillis(millis());
     }
@@ -127,7 +127,7 @@ void joystickMotion(int xPos) {
   driver.XTARGET(driver.XACTUAL());       // reset target to actual
   setTargetVelocity(0);                   // ensure stepper has stopped
   delay(10);
-  setTargetVelocity(200000);              // default for stealthChop
+  setTargetVelocity(stealthChopMaxVelocity);              // default for stealthChop
 }
 
 

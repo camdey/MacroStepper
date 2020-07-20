@@ -71,10 +71,10 @@ namespace manual_screen {
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton(tft);
     }
-    if (!isCameraEnabled()) {
+    if (!isShutterEnabled()) {
       btn_Flash.drawButton(tft, CUSTOM_RED);
     }
-    else if (isCameraEnabled()) {
+    else if (isShutterEnabled()) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
@@ -116,11 +116,11 @@ namespace manual_screen {
 
   void func_Flash(bool btnActive) {
     if (btnActive) {
-      setCameraEnabled(true);
+      setShutterEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
     else if (!btnActive) {
-      setCameraEnabled(false);
+      setShutterEnabled(false);
       // use drawNewButton so previous bitmap is filled over
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
@@ -154,12 +154,13 @@ namespace manual_screen {
       // if not setting step size, move the stepper forward
       else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
-        if (isCameraEnabled()) {
-          shutterTriggered = triggerShutter();
+        if (isShutterEnabled()) {
+          triggerShutter();
         }
         executeMovement(1, 400); // forward
         if (hasExecutedMovement()) {
-          displayPosition();
+          printPosition();
+          updateMovementCount();
         }
       }
     }
@@ -177,24 +178,29 @@ namespace manual_screen {
       // if not setting step size, move the stepper forward
       else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
-        if (isCameraEnabled()) {
-          shutterTriggered = triggerShutter();
+        if (isShutterEnabled()) {
+          triggerShutter();
         }
         executeMovement(-1, 400); // reverse
         if (hasExecutedMovement()) {
-          displayPosition();
+          printPosition();
+          updateMovementCount();
         }
       }
     }
   }
 
 
-  // print new position of rail and movementCount
-  // TODO ignore changes to movementCount from joystick motion???
-  void displayPosition() {
+  // print new position of rail
+  void printPosition() {
     // print new position of rail
     railPos = String(driver.XACTUAL()*(microstepLength/1000), 5);
     btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);
+  }
+
+
+  // print new movementCount
+  void updateMovementCount() {
     // increment movementCount and print to screen
     movementCount++;
     stepNr = String(movementCount);

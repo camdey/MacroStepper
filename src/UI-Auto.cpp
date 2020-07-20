@@ -73,10 +73,10 @@ namespace auto_screen {
       btn_PlayPause.drawButton(tft);
     }
 
-    if (!isCameraEnabled()) {
+    if (!isShutterEnabled()) {
       btn_Flash.drawButton(tft);
     }
-    else if (isCameraEnabled()) {
+    else if (isShutterEnabled()) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
@@ -141,11 +141,11 @@ namespace auto_screen {
 
   void func_Flash(bool btnActive) {
     if (btnActive) {
-      setCameraEnabled(true);
+      setShutterEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
     else if (!btnActive) {
-      setCameraEnabled(false);
+      setShutterEnabled(false);
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
   }
@@ -212,8 +212,8 @@ namespace auto_screen {
   them as "mm:ss" on the screen.
   ***********************************************************************/
   void estimateDuration() {
-    float duration = getNrMovementsRequired() * (shutterDelay + (recycleTime/1000));
-    float elapsed = getNrMovementsCompleted() * (shutterDelay + (recycleTime/1000));
+    float duration = getNrMovementsRequired() * (getShutterDelay() + (recycleTime/1000));
+    float elapsed = getNrMovementsCompleted() * (getShutterDelay() + (recycleTime/1000));
     float remaining = duration - elapsed;
     int minutes = floor(remaining / 60);
     int seconds = int(remaining) % 60;

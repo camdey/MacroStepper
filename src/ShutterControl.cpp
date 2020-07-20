@@ -41,13 +41,12 @@ continually checked to see if it has triggered (red LED goes off)
 but it must stay in this loop for a minimum of 1000ms to ensure
 enough time for the camera to take the photo.
 ******************************************************************/
-bool triggerShutter() {
+void triggerShutter() {
 	flashReady = flashStatus();
   bool flashReadyDebouncer = false;
-	shutterTriggered = false;
+	setShutterTriggered(false);
 
-
-  if (isCameraEnabled()) {
+  if (isShutterEnabled()) {
 		unsigned long triggerTime = millis();
 
 		// wait for flash to be ready
@@ -74,10 +73,10 @@ bool triggerShutter() {
         flashReadyDebouncer = flashStatus();
       }
       if (!flashReady && !flashReadyDebouncer && millis() - triggerTime > 400) {
-        shutterTriggered = true;
+        setShutterTriggered(true);
         break;
       }
-      shutterTriggered = false;
+      setShutterTriggered(false);
       delay(10);
     }
 
@@ -86,5 +85,4 @@ bool triggerShutter() {
 		// reset shutter signal
     digitalWrite(SONY_PIN, LOW);
 	}
-	return shutterTriggered;
 }

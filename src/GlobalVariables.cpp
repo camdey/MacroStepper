@@ -2,7 +2,7 @@
 #include "MiscFunctions.h"
 
 bool arrowsEnabled              = false;
-bool cameraEnabled              = false;        // if true, will try to take a photo during autoStack or manual movement
+bool shutterEnabled              = false;        // if true, will try to take a photo during autoStack or manual movement
 String currentScreen            = "Home";       // set current screen shown to user
 bool editShutterDelay           = false;        // set shutter delay time
 bool editStartPosition          = false;        // set start point for auto mode
@@ -22,6 +22,8 @@ int nrMovementsRequired         = 0;            // number of movements (multiple
 bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
 long recursiveValue             = 51200;        // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 bool screenRotated              = false;        // check whether screen has been rotated or not
+int shutterDelay                = 1;            // delay in seconds between a movement and taking a photo via the shutter pin
+bool shutterTriggered           = true;         // shutter successfully triggered or not
 bool stepperEnabled             = true;         // current state of stepper motor
 float stepSize                  = 5.0000;       // distance travelled per movement in micrometres, default to 5um
 int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
@@ -42,14 +44,14 @@ bool isArrowsEnabled() {
 
 
 // Set camera state, if true program will try to trigger the camera shutter after a step
-void setCameraEnabled(bool enabled) {
-    cameraEnabled = enabled;
+void setShutterEnabled(bool enabled) {
+    shutterEnabled = enabled;
 }
 
 
 // Check if camera is enabled, if true program will try to trigger the camera shutter after a step
-bool isCameraEnabled() {
-    return cameraEnabled;
+bool isShutterEnabled() {
+    return shutterEnabled;
 }
 
 // Set the current screen displayed to the user
@@ -172,6 +174,18 @@ long getBackwardEndStop() {
 }
 
 
+// set whether shutter was successfully triggered or not
+void setShutterTriggered(bool triggered) {
+  shutterTriggered = triggered;
+}
+
+
+// check whether the shutter was triggered when called
+bool hasShutterTriggered() {
+  return shutterTriggered;
+}
+
+
 // set the start position for AutoStack, also updates movementsRequired
 void setStartPosition(long position) {
     startPosition = position;
@@ -235,6 +249,12 @@ void setNrMovementsCompleted(int nrMovements) {
 }
 
 
+// increment how many movements have been completed in an AutoStack procedure by 1
+void incrementNrMovementsCompleted() {
+  nrCompletedMovements++;
+}
+
+
 // get how many movements have been completed in an AutoStack procedure
 int getNrMovementsCompleted() {
   return nrCompletedMovements;
@@ -286,6 +306,32 @@ void setScreenRotated(bool rotated) {
 // Check screen rotation
 bool isScreenRotated() {
     return screenRotated;
+}
+
+
+// Set delay between a movement and taking a photo via shutter pin
+void setShutterDelay(int delay) {
+  shutterDelay = valueCheck(delay, 1, 59);
+}
+
+
+// Increment delay between a movement and taking a photo via shutter pin
+void incrementShutterDelay() {
+  shutterDelay++;
+  shutterDelay = valueCheck(shutterDelay, 1, 59);
+}
+
+
+// Decrement delay between a movement and taking a photo via shutter pin
+void decrementShutterDelay() {
+  shutterDelay--;
+  shutterDelay = valueCheck(shutterDelay, 1, 59);
+}
+
+
+// Get delay between a movement and taking a photo via shutter pin
+int getShutterDelay() {
+  return shutterDelay;
 }
 
 

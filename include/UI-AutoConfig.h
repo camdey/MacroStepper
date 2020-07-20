@@ -19,7 +19,7 @@ namespace config_screen {
   void func_ArrowDown(bool btnActive);
   void updateStartPosition();
   void updateEndPosition();
-  void setShutterDelay();
-  void displayPosition();
+  void printShutterDelay();
+  void printPosition();
 }
 #endif

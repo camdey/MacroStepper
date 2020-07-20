@@ -101,22 +101,22 @@ namespace flash_screen {
     if (btnActive) {
      setTestingFlash(true); // prevents leaving screen while testing flash
       // enable shutter
-      if (!isCameraEnabled()) {
-        setCameraEnabled(true);
+      if (!isShutterEnabled()) {
+        setShutterEnabled(true);
       }
       // print as yellow until result returned
       btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), YELLOW);
       btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), YELLOW);
 
       // trigger shutter
-      shutterTriggered = triggerShutter();
+      triggerShutter();
 
       // check result
-      if (!shutterTriggered) {
+      if (!hasShutterTriggered()) {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_RED);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_RED);
       }
-      else if (shutterTriggered) {
+      else if (hasShutterTriggered()) {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_GREEN);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_GREEN);
       }

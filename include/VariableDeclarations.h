@@ -79,6 +79,7 @@ extern gfxTouch         gfxT;
 #define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
 #define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement 
+#define stealthChopMaxVelocity      200000          // max target velocity (VMAX) during StealthChop movements 
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT
@@ -147,23 +148,19 @@ extern int xStickDiff;
 extern int xStickResting;
 extern int xStickLower;
 extern bool isJoystickBtnActive;
-extern int shutterDelay;
-extern int prevDelay;
 extern int flashValue;
 extern int flashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
 extern bool runHomingSequence;
-extern bool goToStart;
-extern bool joystickState;
+extern bool isNewAutoStack;
 extern bool autoStackRunning;
 extern bool autoStackPaused;
 extern bool flashReady;
 extern bool stallGuardConfigured;
 extern bool autoStackMax;
 // --- Stepper motor variables --- //
-extern bool shutterTriggered;
 extern bool triggerFailed;
 
 #endif

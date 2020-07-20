@@ -22,54 +22,33 @@ void autoStack() {
   if (!isStepperEnabled()) {
     setStepperEnabled(true);
   }
-
-  // move stepper to start if not already there
-  if (goToStart) {
-    if (driver.XACTUAL() != getStartPosition()) {
-      int distanceToStart = (driver.XACTUAL() - getStartPosition());
-      // if current position is in front of start position
-      if (distanceToStart > 0) {
-        // move backwards to start postion
-        // overshoot by 200 steps and return to start
-        overshootPosition(getStartPosition(), 200, -1);
-      }
-      // if current position is behind start position
-      else if (distanceToStart < 0) {
-        // move forward to start postion
-        while (driver.XACTUAL() != getStartPosition()) {
-          // stepper.setSpeed(600);
-          // stepper.moveTo(getStartPosition());
-          // stepper.runSpeedToPosition();
-        }
-      }
-    }
-		goToStart = false;
-		setNrMovementsCompleted(0);
-		joystickState = false;
-		setExecutedMovement(false);
-		shutterTriggered = false;
+  // move to start position if beginning AutoStack
+  if (isNewAutoStack) {
+    // reduce max velocity to minimize vibration
+    setTargetVelocity(10000);
+    goToStart();
+    setNrMovementsCompleted(0);
+    setExecutedMovement(false);
+    setShutterTriggered(false);
     setLastStepTime(millis());
-    // Serial.println("0. Start");
   }
+  // Serial.println("0. Start");
 
   // take photo and increment progress for first step of each movement
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
-
     // if shutter enabled, take photo
-		if (isCameraEnabled() && !shutterTriggered) {
-
-	    shutterTriggered = triggerShutter(); // take photo
-
+		if (isShutterEnabled() && !hasShutterTriggered()) {
+	    triggerShutter(); // take photo
       // pause autoStack if flash failing
-      if (!shutterTriggered) {
+      if (!hasShutterTriggered()) {
         long failTime = millis();
         triggerFailed = true; // used to set one-off delay later
         // Serial.println("fail to trigger");
 
-        while (!shutterTriggered) {
-          shutterTriggered = triggerShutter();
+        while (!hasShutterTriggered()) {
+          triggerShutter();
           // if retry successful, break
-          if (shutterTriggered) {
+          if (hasShutterTriggered()) {
             // Serial.println("retry successful");
             break;
           }
@@ -87,19 +66,19 @@ void autoStack() {
     // only move if autoStack hasn't been paused by flash failure
     if (!autoStackPaused) {
   		// move stepper
-  		executeMovement(1, shutterDelay*1000); // forward direction, shutterdelay
+  		executeMovement(1, getShutterDelay()*1000); // forward direction, shutterdelay
     }
 
 		if (hasExecutedMovement()) {
-			setNrMovementsCompleted(getNrMovementsCompleted()+1);
+			incrementNrMovementsCompleted();
 	    // make sure correct screen is displaying
 	    if (getCurrentScreen() == "Auto") { // auto screen
 	      auto_screen::updateProgress();
 				auto_screen::estimateDuration();
 	    }
 
-			shutterTriggered = false; // reset shutter
-			setExecutedMovement(false); // reset stepper move
+			setShutterTriggered(false); // reset shutter
+			setExecutedMovement(false); // reset stepper movement
 		}
 
     if (triggerFailed) {
@@ -114,14 +93,15 @@ void autoStack() {
     }
 		auto_screen::estimateDuration();    // update estimate
     autoStackRunning = false;
-    goToStart = true;
-    joystickState = true;               // re-enable joystick control
-    shutterTriggered = false;
+    isNewAutoStack = true;
+    setShutterTriggered(false);
     autoStackPaused = false;            // autoStack is completed but not paused
     setNrMovementsCompleted(0);         // reset completed movements count
 		setExecutedMovement(false);
     auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
     produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
+    // change max velocity back to normal
+    setTargetVelocity(stealthChopMaxVelocity);
   }
 }
 
@@ -161,39 +141,38 @@ void dryRun() {
 
   // reduce stepper velocity
   setTargetVelocity(10000);
-
   // move to start position
   driver.XTARGET(getStartPosition());
-  while (driver.XACTUAL() != getStartPosition()) {
+  while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::displayPosition(); // update position
+      config_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
 
-  // move to end position
-  driver.XTARGET(getEndPosition());
   // step slow through procedure
   setTargetVelocity(2000);
-  while (driver.XACTUAL() != getEndPosition()) {
+  // move to end position
+  driver.XTARGET(getEndPosition());
+  while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::displayPosition(); // update position
+      config_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
 
+  setTargetVelocity(10000);
   // return to start
   driver.XTARGET(getStartPosition());
-  setTargetVelocity(10000);
-  while (driver.XACTUAL() != getStartPosition()) {
+  while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::displayPosition(); // update position
+      config_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
-  // overshoot by 200 steps and return to start
-  // overshootPosition(getStartPosition(), 200, -1);
-  setTargetVelocity(200000);
+  // overshoot by 3200 steps/1mm and return to start
+  overshootPosition(getStartPosition(), 3200);
+  setTargetVelocity(stealthChopMaxVelocity);
 }
 
 
@@ -223,10 +202,8 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
     // set new target position
     driver.XTARGET(targetPosition);
-    // while(driver.XACTUAL() != driver.XTARGET()) {
-    //   Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
-    //   Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
-    // }
+    // wait for stepper to reach target position
+    while(driver.XACTUAL() != driver.XTARGET()) {}
     setExecutedMovement(true);  
     setLastStepTime(millis());
   }
@@ -296,20 +273,41 @@ void homeRail() {
 	}
 }
 
+// move stepper to start for AutoStack sequence
+// if current position in front of start, overshoot to remove backlash and return
+// otherwise move forward to start
+void goToStart() {
+  if (driver.XACTUAL() != getStartPosition()) {
+    int distanceToStart = (driver.XACTUAL() - getStartPosition());
+    // if current position is in front of start position
+    if (distanceToStart > 0) {
+      // move backwards to start postion
+      // overshoot by 3200 steps/1mm and return to start to remove backlash
+      overshootPosition(getStartPosition(), 3200);
+    }
+    // if current position is behind start position
+    else if (distanceToStart < 0) {
+      // move forward to start postion
+      driver.XTARGET(getStartPosition());
+      // wait for stepper to reach position
+      while (driver.XACTUAL() != driver.XTARGET()) {}
+    }
+  }
+  isNewAutoStack = false;
+}
 
-void overshootPosition(int position, int numberOfSteps, int direction) {
-  // int speed = 600 * direction;
-  // int offsetPosition = position - numberOfSteps;
 
-  // while (driver.XACTUAL() != offsetPosition) {
-  //   // stepper.setSpeed(speed);
-  //   // stepper.moveTo(offsetPosition); // move past start
-  //   // stepper.runSpeedToPosition();
-  // }
-  // delay(50);
-  // while (driver.XACTUAL() != position) {
-  //   // stepper.setSpeed(-speed); // reverse direcyion
-  //   // stepper.moveTo(position); // move to start
-  //   // stepper.runSpeedToPosition();
-  // }
+void overshootPosition(int startPosition, int numberOfSteps) {
+  int offsetPosition = startPosition - numberOfSteps;
+  // overshoot start position
+  driver.XTARGET(offsetPosition);
+  // wait for stepper to reach position
+  while (driver.XACTUAL() != driver.XTARGET()) {}
+
+  delay(50);
+
+  // move to start
+  driver.XTARGET(startPosition);
+  // wait for stepper to reach position
+  while (driver.XACTUAL() != driver.XTARGET()) {}
 }
