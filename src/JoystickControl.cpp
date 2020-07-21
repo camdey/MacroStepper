@@ -7,6 +7,26 @@
 #include "UI-Manual.h"
 #include "UI-AutoConfig.h"
 
+
+// calculate new velocity (VMAX) value while using joystick motion
+// velocity value is a log-transformation of the joystick position
+long calcVelocity(int xPos) {
+  long velocity;
+  int xAdj;
+
+  if (xPos < 512) {
+    xAdj = xPos + 1; // prevent taking log of 0
+  }
+  else if (xPos >= 512) {
+    xAdj = (1024 - xPos);
+  }
+  xAdj = round(log(xAdj)*100); // multiply by 100 as value will be truncated to integer
+  // 624 = log(512)*100 rounded
+  velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
+
+  return velocity;
+}
+
 /******************************************************************
 Take 10 readings form the joystick X axis during setup and average
 the result. This becomes the resting value for the joystick. If
@@ -71,12 +91,7 @@ void joystickMotion(int xPos) {
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   
   while ((xPos >= xStickUpper || xPos <= xStickLower) && isJoystickBtnActive) {
-    long currentPos = driver.XACTUAL();
-    long targetPos = driver.XTARGET();
-  
-    if (isRailHomed()) {
-      // don't allow movement if within 2mm of endstops
-      // values are inverse so high xStickPos = reverse
+    if (isRailHomed()) {                              // don't allow movement if within 2mm of endstops
       if (dir == 0 && driver.XACTUAL() <= safeZone) {
         Serial.print("WARNING: hit safeZone (within 2mm of rear end stop): "); Serial.println(driver.XACTUAL());
          produceTone(1, 250, 0);
@@ -92,25 +107,14 @@ void joystickMotion(int xPos) {
     if (millis() - getLastMillis() >= 100) {
       velocity = calcVelocity(xPos);
       Serial.print(" xPos: "); Serial.print(xPos);
-      Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
-      Serial.print(" | currentPos: "); Serial.print(currentPos);
-      Serial.print(" | targetPos: "); Serial.print(targetPos);
+      Serial.print(" | currentPos: "); Serial.print(driver.XACTUAL());
+      Serial.print(" | targetPos: "); Serial.print(driver.XTARGET());
+      Serial.print(" | VACTUAL: "); Serial.print(driver.VACTUAL());
       Serial.print(" | velocity: "); Serial.println(velocity);
 
       isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
 
-      if (canEditStartPosition()) {
-        config_screen::updateStartPosition(); // set start but not end position
-      }
-      if (canEditEndPosition()) {
-        config_screen::updateEndPosition(); // set end but not start position
-      }
-      if (getCurrentScreen() == "Manual") {
-        manual_screen::printPosition();
-      }
-      else if (getCurrentScreen() == "AutoConfig") {
-        config_screen::printPosition();
-      }
+      printNewPositions();                            // print new positions on the display
       setLastMillis(millis());
     }
     // set target to move stepper
@@ -124,10 +128,36 @@ void joystickMotion(int xPos) {
     setTargetVelocity(velocity);
     xPos = readJoystick();
   }
-  driver.XTARGET(driver.XACTUAL());       // reset target to actual
-  setTargetVelocity(0);                   // ensure stepper has stopped
-  delay(10);
-  setTargetVelocity(stealthChopMaxVelocity);              // default for stealthChop
+  setTargetVelocity(0);                               // bring stepper to a stop
+  while (driver.VACTUAL() != 0) {                     // wait for stepper to decelerate
+    // if (millis() - getLastMillis() >= 100) {
+    //   Serial.print("VACTUAL: "); Serial.println(driver.VACTUAL());
+    //   setLastMillis(millis());
+    // }
+  }
+  printNewPositions();                                // print final positions now that stepper has stopped
+  driver.XTARGET(driver.XACTUAL());                   // reset target to actual
+  setTargetVelocity(stealthChopMaxVelocity);          // reset VMAX to stealthChop default
+}
+
+
+// Print new rail positions depending on what screen and buttons are active
+// Called during joystick movement and after joystick movement when stepper has stopped
+// otherwise the position values will be out of sync across different fields
+void printNewPositions() {
+  if (getCurrentScreen() == "Manual") {             // if on Manual screen, print new positon
+    manual_screen::printPosition();
+  }
+  else if (getCurrentScreen() == "AutoConfig") {    // else if Auto Config screen, print new position
+    config_screen::printPosition();
+
+    if (canEditStartPosition()) {
+    config_screen::updateStartPosition();           // if editing Start position, set start but not end position
+    }
+    else if (canEditEndPosition()) {
+      config_screen::updateEndPosition();           // if editing End position, set end but not start position
+    }
+  }
 }
 
 
@@ -149,24 +179,4 @@ int readJoystick() {
   // offset reading by difference between resting state and ideal middle point
   // val -= xStickDiff;
   return val;
-}
-
-
-// calculate new velocity (VMAX) value while using joystick motion
-// velocity value is a log-transformation of the joystick position
-long calcVelocity(int xPos) {
-  long velocity;
-  int xAdj;
-
-  if (xPos < 512) {
-    xAdj = xPos + 1; // prevent taking log of 0
-  }
-  else if (xPos >= 512) {
-    xAdj = (1024 - xPos);
-  }
-  xAdj = round(log(xAdj)*100); // multiply by 100 as value will be truncated to integer
-  // 624 = log(512)*100 rounded
-  velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
-
-  return velocity;
 }

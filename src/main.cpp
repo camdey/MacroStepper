@@ -159,6 +159,7 @@ void loop() {
   //     autoStackMax = false;
   //   }
     Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
+    Serial.print(" | VACTUAL: "); Serial.print(driver.VACTUAL());
     Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
     prevJoystickCheck = millis();
   }
