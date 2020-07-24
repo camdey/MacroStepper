@@ -1,7 +1,8 @@
-#include "UI-Main.h"
-#include "UI-Auto.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
+#include "UI-Main.h"
+#include "UI-Auto.h"
 
 namespace auto_screen {
   #define num_btns 8
@@ -62,42 +63,42 @@ namespace auto_screen {
       btn_array[i]->drawButton(tft);
     }
     // draw play/pause separately
-    if (pauseAutoStack == true && autoStackFlag == true) {
+    if (autoStackPaused && autoStackRunning) {
       btn_PlayPause.drawButton(tft);
     }
-    else if (pauseAutoStack == false && autoStackFlag == true) {
+    else if (!autoStackPaused && autoStackRunning) {
       btn_PlayPause.drawNewBitmap(tft, pause, CUSTOM_BLUE);
     }
-    else if (pauseAutoStack == false && autoStackFlag == false) {
+    else if (!autoStackPaused && !autoStackRunning) {
       btn_PlayPause.drawButton(tft);
     }
 
-    if (shutterEnabled == false) {
+    if (!isShutterEnabled()) {
       btn_Flash.drawButton(tft);
     }
-    else if (shutterEnabled == true) {
+    else if (isShutterEnabled()) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
     // draw text
-    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
-    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
+    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), WHITE);
+    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), WHITE);
     btn_EstTime.writeTextTopCentre(tft, Arimo_Regular_30, String("Est. Time"), WHITE);
-    estimateDuration(true);
+    estimateDuration();
     btn_Progress.writeTextTopCentre(tft, Arimo_Regular_30, String("Progress"), WHITE);
-    updateProgress(true);
+    updateProgress();
   }
 
 
-  void checkAutoButtons(int touch_x, int touch_y, int touch_z) {
+  void checkAutoButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Auto", touch_x, touch_y);
     }
     // check play/pause and up/down arrow separately, depending which is active
-    if (arrowsActive == false) {
+    if (!isArrowsEnabled()) {
       tch_PlayPause.checkButton("Auto", touch_x, touch_y);
     }
-    else if (arrowsActive == true) {
+    else if (isArrowsEnabled()) {
       tch_ArrowUp.checkButton("Auto", touch_x, touch_y);
       tch_ArrowDown.checkButton("Auto", touch_x, touch_y);
     }
@@ -105,9 +106,9 @@ namespace auto_screen {
 
 
   void func_StepDistance(bool btnActive) {
-    if (btnActive == true && (autoStackFlag == false || pauseAutoStack == true)) {
-      arrowsActive = true;
-      editMovementDistance = true;
+    if (btnActive && (!autoStackRunning || autoStackPaused)) {
+      setArrowsEnabled(true);
+      setEditMovementDistance(true);
 
       // clear play/pause button
       btn_PlayPause.drawNewBitmap(tft, play, BLACK);
@@ -115,12 +116,12 @@ namespace auto_screen {
       btn_ArrowUp.drawButton(tft, CUSTOM_GREEN);
       btn_ArrowDown.drawButton(tft, CUSTOM_RED);
 
-      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), YELLOW);
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), YELLOW);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
-    else if (btnActive == false && (autoStackFlag == false || pauseAutoStack == true)) {
-      arrowsActive = false;
-      editMovementDistance = false;
+    else if (!btnActive && (!autoStackRunning || autoStackPaused)) {
+      setArrowsEnabled(false);
+      setEditMovementDistance(false);
 
       btn_ArrowUp.drawButton(tft, BLACK);
       btn_ArrowDown.drawButton(tft, BLACK);
@@ -128,8 +129,8 @@ namespace auto_screen {
       btn_PlayPause.drawNewBitmap(tft, play, CUSTOM_GREEN);
 
       // TODO would be nice to not re-write the top line on every arrow press
-      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), WHITE);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), WHITE);
     }
     else {
       // set back to off if conditions above not met
@@ -139,39 +140,39 @@ namespace auto_screen {
 
 
   void func_Flash(bool btnActive) {
-    if (btnActive == true) {
-      toggleShutter();
+    if (btnActive) {
+      setShutterEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
-    else if (btnActive == false) {
-      toggleShutter();
+    else if (!btnActive) {
+      setShutterEnabled(false);
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
   }
 
 
   void func_Config(bool btnActive) {
-    if (btnActive == true && arrowsActive == false) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("AutoConfig");
     }
   }
 
 
   void func_Back(bool btnActive) {
-    if (btnActive == true && arrowsActive == false) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("Home");
     }
   }
 
 
   void func_PlayPause(bool btnActive) {
-    if (btnActive == true && arrowsActive == false) {
-      autoStackFlag = true;   // start autoStack sequence
-      pauseAutoStack = false;
+    if (btnActive && !isArrowsEnabled()) {
+      autoStackRunning = true;   // start autoStack sequence
+      autoStackPaused = false;
       btn_PlayPause.drawNewBitmap(tft, pause, CUSTOM_BLUE);
     }
-    else if (btnActive == false && arrowsActive == false) {
-      pauseAutoStack = true;  // autoStack paused
+    else if (!btnActive && !isArrowsEnabled()) {
+      autoStackPaused = true;  // autoStack paused
       btn_PlayPause.drawNewBitmap(tft, play, CUSTOM_GREEN);
     }
   }
@@ -181,34 +182,26 @@ namespace auto_screen {
   Used to pause autostack when needing to be called from another file.
   ***********************************************************************/
   void pauseStack() {
-    pauseAutoStack = true; // pause autostack
+    autoStackPaused = true; // pause autostack
     btn_PlayPause.drawNewBitmap(tft, play, CUSTOM_GREEN);
     tch_PlayPause.setState(false); // set button state to "pause" mode
   }
 
 
   void func_ArrowUp(bool btnActive) {
-    if (btnActive == true && editMovementDistance == true && arrowsActive == true) {
-      if (prevDistance != distancePerMovement) {
-        prevDistance = distancePerMovement;
-      }
-
-      stepsPerMovement++; // increment
-      setStepDistance();
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+    if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
+      incrementStepsPerMovement();
+      calculateStepSize();
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
   }
 
 
   void func_ArrowDown(bool btnActive) {
-    if (btnActive == true && editMovementDistance == true && arrowsActive == true) {
-      if (prevDistance != distancePerMovement) {
-        prevDistance = distancePerMovement;
-      }
-
-      stepsPerMovement--; // decrement
-      setStepDistance();
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+    if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
+      decrementStepsPerMovement();
+      calculateStepSize();
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
   }
 
@@ -218,9 +211,9 @@ namespace auto_screen {
   Uses sprintf_P function to concatenate minutes and seconds and format
   them as "mm:ss" on the screen.
   ***********************************************************************/
-  void estimateDuration(bool screenRefresh) {
-    float duration = movementsRequired * (shutterDelay + (recycleTime/1000));
-    float elapsed = completedMovements * (shutterDelay + (recycleTime/1000));
+  void estimateDuration() {
+    float duration = getNrMovementsRequired() * (getShutterDelay() + (recycleTime/1000));
+    float elapsed = getNrMovementsCompleted() * (getShutterDelay() + (recycleTime/1000));
     float remaining = duration - elapsed;
     int minutes = floor(remaining / 60);
     int seconds = int(remaining) % 60;
@@ -229,14 +222,10 @@ namespace auto_screen {
     // prevent screen overflow
     minutes = valueCheck(minutes, 0, 299);
 
+    // format time as "mm:ss" string
     sprintf_P(timeMinutesSeconds, PSTR("%02d:%02d"), minutes, seconds);
-
-    if ((minutes != prevMinutes || seconds != prevSeconds || screenRefresh == 1) && getCurrentScreen() == "Auto") {
-      btn_EstTimeVal.writeTextBottomCentre(tft, Arimo_Bold_30, timeMinutesSeconds, WHITE);
-
-      prevMinutes = minutes;
-      prevSeconds = seconds;
-    }
+    // print to screen
+    btn_EstTimeVal.writeTextBottomCentre(tft, Arimo_Bold_30, timeMinutesSeconds, WHITE);
   }
 
 
@@ -245,18 +234,12 @@ namespace auto_screen {
   Uses sprintf_P function to concatenate two values and format them as
   "completed / remaining" on the screen.
   ***********************************************************************/
-  void updateProgress(bool screenRefresh) {
+  void updateProgress() {
     char autoStackProgress[10]  = "0/0";
 
-    // displays progress in "Completed / Total" format
-    sprintf_P(autoStackProgress, PSTR("%02d/%02d"), completedMovements, movementsRequired);
-
-    if ((completedMovements != prevCompletedMovements) || movementsRequired != prevMovementsRequired || screenRefresh == 1) {
-      btn_ProgressVal.writeTextBottomCentre(tft, Arimo_Bold_30, autoStackProgress, WHITE);
-
-      prevMovementsRequired = movementsRequired;
-      prevCompletedMovements = completedMovements;
-    }
+    // format progress in "Completed / Total" string
+    sprintf_P(autoStackProgress, PSTR("%02d/%02d"), getNrMovementsCompleted(), getNrMovementsRequired());
+    // print to screen
+    btn_ProgressVal.writeTextBottomCentre(tft, Arimo_Bold_30, autoStackProgress, WHITE);
   }
-
 }

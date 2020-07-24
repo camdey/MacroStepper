@@ -5,8 +5,6 @@
 #include "VariableDeclarations.h"
 
 bool flashStatus();
-void setShutterDelay();
-void toggleShutter();
-bool triggerShutter();
+void triggerShutter();
 
 #endif

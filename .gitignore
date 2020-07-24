@@ -6,3 +6,4 @@
 .DS_Store
 lib/gfxButton/
 lib/
+.vscode/

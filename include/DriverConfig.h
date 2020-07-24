@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void stallGuardConfig();
-void silentStepConfig();
+void configStealthChop();
+void configStallGuard();
 
 #endif

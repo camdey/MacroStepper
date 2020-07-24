@@ -1,7 +1,8 @@
-#include "UI-Main.h"
-#include "UI-Home.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
+#include "UI-Main.h"
+#include "UI-Home.h"
 
 namespace home_screen {
   #define num_btns 6
@@ -55,7 +56,7 @@ namespace home_screen {
   }
 
 
-  void checkHomeButtons(int touch_x, int touch_y, int touch_z) {
+  void checkHomeButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Home", touch_x, touch_y);
     }
@@ -63,21 +64,21 @@ namespace home_screen {
 
 
   void func_Auto(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       populateScreen("Auto");
     }
   }
 
 
   void func_Manual(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       populateScreen("Manual");
     }
   }
 
 
   void func_Home(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       btn_Home.drawButton(tft, CUSTOM_RED);
       runHomingSequence = true;
       homeRail();
@@ -87,14 +88,14 @@ namespace home_screen {
 
 
   void func_Flash(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       populateScreen("Flash");
     }
   }
 
 
   void func_Rotate(bool btnActive) {
-    if (btnActive == true) {
+    if (btnActive) {
       rotateScreen(); // rotate screen, touch controls, and joystick
       populateScreen("Home");
     }

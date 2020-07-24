@@ -7,7 +7,7 @@
 namespace auto_screen {
   void initAutoButtons();
   void populateAutoScreen();
-  void checkAutoButtons(int touch_x, int touch_y, int touch_z);
+  void checkAutoButtons(int touch_x, int touch_y);
   void func_StepDistance(bool btnActive);
   void func_Flash(bool btnActive);
   void func_Config(bool btnActive);
@@ -16,7 +16,7 @@ namespace auto_screen {
   void func_ArrowUp(bool btnActive);
   void func_ArrowDown(bool btnActive);
   void pauseStack();
-  void estimateDuration(bool screenRefresh);
-  void updateProgress(bool screenRefresh);
+  void estimateDuration();
+  void updateProgress();
 }
 #endif

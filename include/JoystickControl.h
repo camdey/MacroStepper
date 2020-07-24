@@ -4,9 +4,11 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
+long calcVelocity(int xVal);
 void calibrateJoyStick();
-void joystickControl();
-void readJoystick();
-int speedControl(long loopNr);
+void joystickMotion(int xPos);
+void printNewPositions(); 
+int readJoystick();
+
 
 #endif

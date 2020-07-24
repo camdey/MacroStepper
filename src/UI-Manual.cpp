@@ -1,8 +1,10 @@
-#include "UI-Main.h"
-#include "UI-Manual.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
 #include "StepperControl.h"
+#include "UI-Main.h"
+#include "UI-Manual.h"
+
 
 namespace manual_screen {
   #define num_btns 10
@@ -10,8 +12,9 @@ namespace manual_screen {
   gfxButton *btn_array[num_btns];
   gfxTouch  *tch_array[num_tchs];
 
-  String stepNr   = String(manualMovementCount);
-  String railPos  = String(stepper.currentPosition()*(microstepDistance/1000), 5);
+  String stepNr;
+  String railPos;
+  int movementCount 					= 0;    			// count of manual movements
 
 
   gfxButton btn_StepDistance =   gfxB.initButton(       "fillRoundRect",     0,   20,   160,   80,   15, CUSTOM_BLUE  );
@@ -61,23 +64,23 @@ namespace manual_screen {
 
   void populateManualScreen() {
     setCurrentScreen("Manual");
-    stepNr = String(manualMovementCount);
-    railPos = String(stepper.currentPosition()*(microstepDistance/1000), 5);
+    stepNr = String(movementCount);
+    railPos = String(driver.XACTUAL()*(microstepLength/1000), 5);
 
     // draw buttons
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton(tft);
     }
-    if (shutterEnabled == false) {
+    if (!isShutterEnabled()) {
       btn_Flash.drawButton(tft, CUSTOM_RED);
     }
-    else if (shutterEnabled == true) {
+    else if (isShutterEnabled()) {
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
 
     // draw text
-    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."),  WHITE);
-    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist,  WHITE);
+    btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"),  WHITE);
+    btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4),  WHITE);
     btn_StepNr.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Nr."),    WHITE);
     btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr,    WHITE);
     btn_RailPos.writeTextTopCentre(tft, Arimo_Regular_30, String("Rail Pos."),   WHITE);
@@ -85,7 +88,7 @@ namespace manual_screen {
   }
 
 
-  void checkManualButtons(int touch_x, int touch_y, int touch_z) {
+  void checkManualButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Manual", touch_x, touch_y);
     }
@@ -93,31 +96,31 @@ namespace manual_screen {
 
 
   void func_StepDistance(bool btnActive) {
-    if (btnActive == true) {
-      arrowsActive = true;
-      editMovementDistance = true;
+    if (btnActive) {
+      setArrowsEnabled(true);
+      setEditMovementDistance(true);
 
-      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), YELLOW);
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), YELLOW);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
     else {
-      arrowsActive = false;
-      editMovementDistance = false;
+      setArrowsEnabled(false);
+      setEditMovementDistance(false);
 
       // TODO would be nice to not re-write the top line on every arrow press
-      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Dist."), WHITE);
-      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, WHITE);
+      btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), WHITE);
+      btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), WHITE);
     }
   }
 
 
   void func_Flash(bool btnActive) {
-    if (btnActive == true) {
-      toggleShutter();
+    if (btnActive) {
+      setShutterEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
-    else if (btnActive == false) {
-      toggleShutter();
+    else if (!btnActive) {
+      setShutterEnabled(false);
       // use drawNewButton so previous bitmap is filled over
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }
@@ -125,89 +128,83 @@ namespace manual_screen {
 
 
   void func_Reset(bool btnActive) {
-    if (btnActive == true) {
-      manualMovementCount = 0; // reset
-      prevManualMovementCount = 0; // reset
-      stepNr = String(manualMovementCount); // get latest value
+    if (btnActive) {
+      movementCount = 0; // reset
+      stepNr = String(movementCount); // get latest value
       btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
     }
   }
 
 
   void func_Back(bool btnActive) {
-    if (btnActive == true && arrowsActive == false) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("Home");
     }
   }
 
 
   void func_ArrowUp(bool btnActive) {
-    if (btnActive == true) {
-      // if setting step dist.
-      if (editMovementDistance == true && arrowsActive == true) {
-        if (prevDistance != distancePerMovement) {
-          prevDistance = distancePerMovement;
-        }
-
-        stepsPerMovement++; // increment
-        setStepDistance();
-        btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+    if (btnActive) {
+      // if setting step size
+      if (canEditMovementDistance() && isArrowsEnabled()) {
+        incrementStepsPerMovement();
+        calculateStepSize();
+        btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
       }
-      // if not setting step dist., move the stepper forward
-      else if (editMovementDistance == false) {
+      // if not setting step size, move the stepper forward
+      else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
-        if (shutterEnabled == true) {
-          shutterTriggered = triggerShutter();
+        if (isShutterEnabled()) {
+          triggerShutter();
         }
-        stepperMoved = stepMotor(1, 200); // forward
-        displayPosition();
+        executeMovement(1, 400); // forward
+        if (hasExecutedMovement()) {
+          printPosition();
+          updateMovementCount();
+        }
       }
     }
   }
 
 
   void func_ArrowDown(bool btnActive) {
-    if (btnActive == true) {
-      // if setting step dist.
-      if (editMovementDistance == true && arrowsActive == true) {
-        if (prevDistance != distancePerMovement) {
-          prevDistance = distancePerMovement;
-        }
-
-        stepsPerMovement--; // decrement
-        setStepDistance();
-        btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepDist, YELLOW);
+    if (btnActive) {
+      // if setting step size
+      if (canEditMovementDistance() && isArrowsEnabled()) {
+        decrementStepsPerMovement();
+        calculateStepSize();
+        btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
       }
-      // if not setting step dist., move the stepper forward
-      else if (editMovementDistance == false) {
+      // if not setting step size, move the stepper forward
+      else if (!canEditMovementDistance()) {
         // take photo if shutter enabled
-        if (shutterEnabled == true) {
-          shutterTriggered = triggerShutter();
+        if (isShutterEnabled()) {
+          triggerShutter();
         }
-        stepperMoved = stepMotor(-1, 500); // reverse
-        displayPosition();
+        executeMovement(-1, 400); // reverse
+        if (hasExecutedMovement()) {
+          printPosition();
+          updateMovementCount();
+        }
       }
     }
   }
 
 
-  void displayPosition() {
-    // update for new values
-    if (prevStepperPosition != stepper.currentPosition()) {
-      int currentPosition = stepper.currentPosition();
-      railPos = String(currentPosition*(microstepDistance/1000), 5);
-      // update rail position value
-      btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);
+  // print new position of rail
+  void printPosition() {
+    // print new position of rail
+    railPos = String(driver.XACTUAL()*(microstepLength/1000), 5);
+    btn_RailPosVal.writeTextBottomCentre(tft, Arimo_Bold_30, railPos, WHITE);
+  }
 
 
-      manualMovementCount++;
-      stepNr = String(manualMovementCount);
-      // update movement count for manual screen
-      btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
-
-      prevManualMovementCount = manualMovementCount;
-      prevStepperPosition = currentPosition;
-    }
+  // print new movementCount
+  void updateMovementCount() {
+    // increment movementCount and print to screen
+    movementCount++;
+    stepNr = String(movementCount);
+    btn_StepNrVal.writeTextBottomCentre(tft, Arimo_Bold_30, stepNr, WHITE);
   }
 
 }

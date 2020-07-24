@@ -1,6 +1,7 @@
+#include "GlobalVariables.h"
+#include "ShutterControl.h"
 #include "UI-Main.h"
 #include "UI-Flash.h"
-#include "ShutterControl.h"
 
 namespace flash_screen {
 
@@ -62,20 +63,20 @@ namespace flash_screen {
   }
 
 
-  void checkFlashButtons(int touch_x, int touch_y, int touch_z) {
+  void checkFlashButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("Flash", touch_x, touch_y);
     }
   }
 
   void func_FlashOff(bool btnActive) {
-    if (btnActive == true) {
-      editFlashOffValue = true;
+    if (btnActive) {
+      setEditFlashOffValue(true);
       btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), YELLOW);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
     else {
-      editFlashOffValue = false;
+      setEditFlashOffValue(false);
       btn_OffValue.writeTextBottomCentre( tft, Arimo_Bold_30, String(flashOffValue), WHITE);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
@@ -83,13 +84,13 @@ namespace flash_screen {
 
 
   void func_FlashOn(bool btnActive) {
-    if (btnActive == true) {
-      editFlashOnValue = true;
+    if (btnActive) {
+      setEditFlashOnValue(true);
       btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), YELLOW);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
     else {
-      editFlashOnValue = false;
+      setEditFlashOnValue(false);
       btn_OnValue.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashOnValue), WHITE);
       btn_ThreshVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(flashThreshold), WHITE);
     }
@@ -97,35 +98,35 @@ namespace flash_screen {
 
 
   void func_FlashTest(bool btnActive) {
-    if (btnActive == true) {
-      testFlash = true; // prevents leaving screen while testing flash
+    if (btnActive) {
+     setTestingFlash(true); // prevents leaving screen while testing flash
       // enable shutter
-      if (shutterEnabled == false) {
-        toggleShutter();
+      if (!isShutterEnabled()) {
+        setShutterEnabled(true);
       }
       // print as yellow until result returned
       btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), YELLOW);
       btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), YELLOW);
 
       // trigger shutter
-      shutterTriggered = triggerShutter();
+      triggerShutter();
 
       // check result
-      if (shutterTriggered == false) {
+      if (!hasShutterTriggered()) {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_RED);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_RED);
       }
-      else if (shutterTriggered == true) {
+      else if (hasShutterTriggered()) {
         btn_FlashTest.writeTextTopCentre(tft, Arimo_Bold_30, String("TEST"), CUSTOM_GREEN);
         btn_FlashTest.writeTextBottomCentre(tft, Arimo_Bold_30, String("FLASH"), CUSTOM_GREEN);
       }
-      testFlash = false;
+      setTestingFlash(false);
     }
   }
 
 
   void func_Back(bool btnActive) {
-    if (btnActive == true && editFlashOnValue == false && editFlashOffValue == false && testFlash == false) {
+    if (btnActive && !canEditFlashOnValue() && !canEditFlashOffValue() && !isTestingFlash()) {
       // go back to start screen
       populateScreen("Home");
     }
@@ -142,12 +143,12 @@ namespace flash_screen {
     flashReady = flashStatus();
 
     // if difference from previous reading > 1, updates value on screen
-    if (abs(flashValue - flashOffValue) > 1 && editFlashOffValue == true) {
+    if (abs(flashValue - flashOffValue) > 1 && canEditFlashOffValue()) {
       func_FlashOff(true);
       // set OFF value for flash
       flashOffValue = flashValue;
       }
-    if (abs(flashValue - flashOnValue) > 1 && editFlashOnValue == true) {
+    if (abs(flashValue - flashOnValue) > 1 && canEditFlashOnValue()) {
       func_FlashOn(true);
       // set ON value for flash
       flashOnValue = flashValue;

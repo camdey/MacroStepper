@@ -5,12 +5,12 @@
 #include "VariableDeclarations.h"
 
 void autoStack();
-void changeDirection();
 void dryRun();
 void homeRail();
-void overshootPosition(int position, int numberOfSteps, int direction);
-void stallDetection();
-bool stepMotor(int stepDirection, unsigned long stepperDelay);
-void toggleStepper(bool enable);
+void debugStallGuard();
+bool detectEndStop();
+void executeMovement(int stepDirection, unsigned long stepperDelay);
+void goToStart();
+void overshootPosition(int startPosition, int numberOfSteps);
 
 #endif

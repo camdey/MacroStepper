@@ -7,7 +7,7 @@
 namespace flash_screen {
   void initFlashButtons();
   void populateFlashScreen();
-  void checkFlashButtons(int touch_x, int touch_y, int touch_z);
+  void checkFlashButtons(int touch_x, int touch_y);
   void func_FlashOff(bool btnActive);
   void func_FlashOn(bool btnActive);
   void func_FlashTest(bool btnActive);

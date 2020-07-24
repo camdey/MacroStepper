@@ -64,7 +64,7 @@ The MacroStepper is a fully automated macrophotography rig designed to enable a 
  - Rail Pos: _current position of the camera on the rail_
  - Aperture icon: _press to enable/disable automated shutter_
  - X icon: _press to clear step count_
- - Arrows: _for increment/decrementing the Step Dist. if enabled or moving the rail forward/back otherwise_
+ - Arrows: _for increment/decrementing the Step Size if enabled or moving the rail forward/back otherwise_
 
 **Auto Screen**
  - Step Dist: _press to set distance per movement of the motor_
@@ -73,8 +73,8 @@ The MacroStepper is a fully automated macrophotography rig designed to enable a 
  - Progress: _number of movements completed out of total number of movements in procedure_
  - Aperture icon: _press to enable/disable automated shutter_
  - Cog icon: _opens the config menu for the auto mode_
- - Play symbol: _used to increment Step Dist. if enabled, otherwise used for starting the autoStack procedure_
- - Pause symbol: _used to decrement Step Dist. if enabled, otherwise used for pausing the autoStack procedure_
+ - Play symbol: _used to increment Step Size if enabled, otherwise used for starting the autoStack procedure_
+ - Pause symbol: _used to decrement Step Size if enabled, otherwise used for pausing the autoStack procedure_
 
 **Config Screen**
 
@@ -92,7 +92,7 @@ The camera shutter is controlled by the Arduino via cable where a HIGH signal is
 **Distance settings**
 The step distance setting refers to the distance travelled by the rail per movement. A movement is the sequence of steps required by the stepper motor to travel the set distance. The default distance per step in my case was 25μm, calculated by the following: screw pitch / steps per revolution / gear reduction. My rail had a 1mm pitch and 1:2 gear reduction, while the motor takes 200 steps per revolution.
 
-If the step dist. is set to 100μm, this equates to four steps at 25μm each. The sequence of these four steps is termed a movement in this project.
+If the step size is set to 100μm, this equates to four steps at 25μm each. The sequence of these four steps is termed a movement in this project.
 
 **AutoStack Procedure**
 The autoStack procedure will increment a range by a given number of movements, determined by the step distance and the start and end positions determined by the user. With a 100μm step distance and 180 steps required to go from the start position to the end position, 45 (180/4) movements are required and thus 45 photos will be taken. The procedure can be paused or reset at any stage and after completion the procedure can be restarted. Both step distance and the end position can be changed during the procedure once paused.

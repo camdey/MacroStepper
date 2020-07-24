@@ -1,7 +1,8 @@
-#include "UI-Main.h"
-#include "UI-AutoConfig.h"
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
+#include "UI-Main.h"
+#include "UI-AutoConfig.h"
 
 namespace config_screen {
   #define num_btns 11
@@ -9,7 +10,6 @@ namespace config_screen {
   gfxButton *btn_array[num_btns];
   gfxTouch  *tch_array[num_tchs];
 
- // TODO implement toggle touch reset
 
   gfxButton btn_Start         =   gfxB.initButton(       "fillRoundRect",    0,   20,   160,   80,   15, CUSTOM_GREEN );
   gfxButton btn_StartVal      =   gfxB.initButton(       "fillRoundRect",    0,   20,   160,   80,   15, CUSTOM_GREEN );
@@ -17,8 +17,8 @@ namespace config_screen {
   gfxButton btn_EndVal        =   gfxB.initButton(       "fillRoundRect",    0,  120,   160,   80,   15, CUSTOM_RED   );
   gfxButton btn_Run           =   gfxB.initButton(       "fillRoundRect",    0,  220,   160,   80,   15, CUSTOM_BLUE  );
   gfxButton btn_RunVal        =   gfxB.initButton(       "fillRoundRect",    0,  220,   160,   80,   15, CUSTOM_BLUE  );
-  gfxButton btn_Delay         =   gfxB.initBitmapButton( timer,       220,   20,    80,   80, WHITE         );
-  gfxButton btn_DelayVal      =   gfxB.initBlankButton(               295,   20,    40,   30                );
+  gfxButton btn_Delay         =   gfxB.initBitmapButton( timer,      220,   20,    80,   80,             WHITE        );
+  gfxButton btn_DelayVal      =   gfxB.initBlankButton(              295,   20,    40,   30                           );
   // don't add btn_Reset to array as its colour depends on the state of autoStack
   gfxButton btn_Reset         =   gfxB.initBitmapButton( cancel,      220,  120,    80,   80, BLACK          );
   gfxButton btn_Back          =   gfxB.initBitmapButton( backArrow,   220,  220,    80,   80, WHITE         );
@@ -70,29 +70,27 @@ namespace config_screen {
       btn_array[i]->drawButton(tft);
     }
 
-    if (autoStackFlag == false) {
+    if (!autoStackRunning) {
       btn_Reset.drawButton(tft, BLACK);
     }
-    else if (autoStackFlag == true) {
+    else if (autoStackRunning) {
       btn_Reset.drawButton(tft, CUSTOM_RED);
     }
 
-    int currentPosition = stepper.currentPosition();
-    // char delaySeconds[6];
-    // sprintf_P(delaySeconds, PSTR("%02d:%02d"), 0, shutterDelay);
+    int currentPosition = driver.XACTUAL();
 
     // draw text
     btn_Start.writeTextTopCentre(       tft, Arimo_Regular_30,  String("START"),         WHITE);
-    btn_StartVal.writeTextBottomCentre( tft, Arimo_Bold_30,     String(startPosition),   WHITE);
+    btn_StartVal.writeTextBottomCentre( tft, Arimo_Bold_30,     String(getStartPosition()),   WHITE);
     btn_End.writeTextTopCentre(         tft, Arimo_Regular_30,  String("END"),           WHITE);
-    btn_EndVal.writeTextBottomCentre(   tft, Arimo_Bold_30,     String(endPosition),     WHITE);
+    btn_EndVal.writeTextBottomCentre(   tft, Arimo_Bold_30,     String(getEndPosition()),     WHITE);
     btn_Run.writeTextTopCentre(         tft, Arimo_Regular_30,  String("RUN"),           WHITE);
     btn_RunVal.writeTextBottomCentre(   tft, Arimo_Bold_30,     String(currentPosition), WHITE);
-    btn_DelayVal.writeTextCentre(       tft, Arimo_Bold_30,     String(shutterDelay),    WHITE);
+    btn_DelayVal.writeTextCentre(       tft, Arimo_Bold_30,     String(getShutterDelay()),    WHITE);
   }
 
 
-  void checkAutoConfigButtons(int touch_x, int touch_y, int touch_z) {
+  void checkAutoConfigButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_tchs; i++) {
       tch_array[i]->checkButton("AutoConfig", touch_x, touch_y);
     }
@@ -100,44 +98,46 @@ namespace config_screen {
 
 
   void func_Start(bool btnActive) {
-    if (btnActive == true && editShutterDelay == false && editEndPosition == false) {
-      arrowsActive = true;
-      editStartPosition = true;
+    if (btnActive && !canEditShutterDelay() && !canEditEndPosition()) {
+      setArrowsEnabled(true);
+      setEditStartPosition(true);
+      setStartPosition(driver.XACTUAL()); // set start position to current position
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
-      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), YELLOW);
+      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStartPosition()), YELLOW);
     }
-    else if (btnActive == false && editStartPosition == true) {
-      arrowsActive = false;
-      editStartPosition = false;
+    else if (!btnActive && canEditStartPosition()) {
+      setArrowsEnabled(false);
+      setEditStartPosition(false);
 
       btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), WHITE);
-      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), WHITE);
+      btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStartPosition()), WHITE);
     }
   }
 
 
   void func_End(bool btnActive) {
-    if (btnActive == true && editShutterDelay == false && editStartPosition == false) {
-      arrowsActive = true;
-      editEndPosition = true;
+    if (btnActive && !canEditShutterDelay() && !canEditStartPosition()) {
+      setArrowsEnabled(true);
+      setEditEndPosition(true);
+      setEndPosition(driver.XACTUAL()); // set end position to current position
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
-      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), YELLOW);
+      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getEndPosition()), YELLOW);
     }
-    else if (btnActive == false && editEndPosition == true) {
-      arrowsActive = false;
-      editEndPosition = false;
+    else if (!btnActive && canEditEndPosition()) {
+      setArrowsEnabled(false);
+      setEditEndPosition(false);
 
       btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), WHITE);
-      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), WHITE);
+      btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getEndPosition()), WHITE);
     }
   }
 
 
   void func_Run(bool btnActive) {
-    if (btnActive == true && (editShutterDelay + editStartPosition + editEndPosition) == 0) {
-      int currentPosition = stepper.currentPosition();
+    if (btnActive && (canEditShutterDelay() + canEditStartPosition() + canEditEndPosition()) == 0) {
+      int currentPosition = driver.XACTUAL();
 
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), YELLOW);
       btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), YELLOW);
@@ -147,177 +147,137 @@ namespace config_screen {
       btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
       btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), WHITE);
       tch_Run.setState(false); // reset button state to false
-
-      displayPosition();
     }
   }
 
 
   void func_Delay(bool btnActive) {
-    if (btnActive == true) {
-      arrowsActive = true;
-      editShutterDelay = true;
+    if (btnActive) {
+      setArrowsEnabled(true);
+      setEditShutterDelay(true);
 
       btn_Delay.drawButton(tft, YELLOW);
-      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), YELLOW);
+      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(getShutterDelay()), YELLOW);
     }
-    else if (btnActive == false && editShutterDelay == true) {
-      arrowsActive = false;
-      editShutterDelay = false;
+    else if (!btnActive && canEditShutterDelay()) {
+      setArrowsEnabled(false);
+      setEditShutterDelay(false);
 
       btn_Delay.drawButton(tft, WHITE);
-      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), WHITE);
+      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(getShutterDelay()), WHITE);
     }
   }
 
 
+  // reset AutoStack procedure to default values
   void func_Reset(bool btnActive) {
-    if (btnActive == true) {
-      autoStackFlag = false;
-      goToStart = true;
-      joystickState = true;
-      pauseAutoStack = false;
-      stepCount = 1;
-      completedMovements = 0;
-      movementsRequired = 0;
-      startPosition = stepper.currentPosition();
-      endPosition = stepper.currentPosition();
+    if (btnActive) {
+      autoStackRunning = false;
+      isNewAutoStack = true;
+      autoStackPaused = false;
+      setNrMovementsCompleted(0);
+      setNrMovementsRequired(0);
+      setStartPosition(driver.XACTUAL());
+      setEndPosition(driver.XACTUAL());
       btn_Reset.drawButton(tft, BLACK);
     }
   }
 
 
+  // called when back arrow is pressed
   void func_Back(bool btnActive) {
-    if (btnActive == true && arrowsActive == false) {
+    if (btnActive && !isArrowsEnabled()) {
       populateScreen("Auto");
     }
   }
 
 
+  // called when up arrow is pressed, either updates start/end or shutterDelay
   void func_ArrowUp(bool btnActive) {
-    if (btnActive == true && arrowsActive == true) {
+    if (btnActive && isArrowsEnabled()) {
       // edit start postion
-      if (editStartPosition == true) {
-        if (prevStartPosition != startPosition) {
-          prevStartPosition = startPosition;
-        }
-        stepperMoved = stepMotor(1, 150); // forward
-        setAutoStackPositions(true, false); //set start but not end position
+      if (canEditStartPosition()) {
+        executeMovement(1, 150); // forward
+        updateStartPosition(); //set start but not end position
+        printPosition(); // update rail positon
       }
       // edit end postion
-      else if (editEndPosition == true) {
-        if (prevEndPosition != endPosition) {
-          prevEndPosition = endPosition;
-        }
-        stepperMoved = stepMotor(1, 150); // forward
-        setAutoStackPositions(false, true); //set end but not start position
+      else if (canEditEndPosition()) {
+        executeMovement(1, 150); // forward
+        updateEndPosition(); //set end but not start position
+        printPosition(); // update rail positon
       }
       // edit shutter delay
-      else if (editShutterDelay == true) {
-        if (prevDelay != shutterDelay) {
-          prevDelay = shutterDelay;
-        }
-        shutterDelay++;
-        setShutterDelay();
+      else if (canEditShutterDelay()) {
+        incrementShutterDelay();
+        printShutterDelay();
       }
     }
   }
 
 
+  // called when down arrow is pressed, either updates start/end or shutterDelay
   void func_ArrowDown(bool btnActive) {
-    if (btnActive == true && arrowsActive == true) {
+    if (btnActive && isArrowsEnabled()) {
       // edit start postion
-      if (editStartPosition == true) {
-        if (prevStartPosition != startPosition) {
-          prevStartPosition = startPosition;
-        }
-        stepperMoved = stepMotor(-1, 150); // backwards
-        setAutoStackPositions(true, false); //set start but not end position
+      if (canEditStartPosition()) {
+        executeMovement(-1, 150); // backwards
+        updateStartPosition(); //set start position
+        printPosition(); // update rail positon
       }
       // edit end postion
-      else if (editEndPosition == true) {
-        if (prevEndPosition != endPosition) {
-          prevEndPosition = endPosition;
-        }
-        stepperMoved = stepMotor(-1, 150); // forward
-        setAutoStackPositions(false, true); //set end but not start position
+      else if (canEditEndPosition()) {
+        executeMovement(-1, 150); // forward
+        updateEndPosition(); //set end position
+        printPosition(); // update rail positon
       }
       // edit shutter delay
-      else if (editShutterDelay == true) {
-        if (prevDelay != shutterDelay) {
-          prevDelay = shutterDelay;
-        }
-        shutterDelay--;
-        setShutterDelay();
+      else if (canEditShutterDelay()) {
+        decrementShutterDelay();
+        printShutterDelay();
       }
     }
   }
 
 
-  void setAutoStackPositions(bool setStart, bool setEnd) {
-    if (setStart == true) {
-      // lower limit
-      if (startPosition < 0) {
-        startPosition = 0;
-      }
-      // get new value
-      startPosition = stepper.currentPosition();
-      // print start point if changed
-      if (prevStartPosition != startPosition && getCurrentScreen() == "AutoConfig") {
-        btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
-        btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(startPosition), YELLOW);
-        prevStartPosition = startPosition;
-      }
-      // reset macroStepping
-      goToStart = true;
+  // sets and prints new Start position for AutoStack
+  void updateStartPosition() {
+    // lower limit
+    if (getStartPosition() < 0) {
+      setStartPosition(0);
     }
-
-    if (setEnd == true) {
-      // set new end value
-      if (autoStackMax == true) {
-        endPosition = maxPosition;
-      }
-      else if (autoStackMax == false) {
-        endPosition = stepper.currentPosition();
-      }
-      // print end point if changed
-      if (prevEndPosition != endPosition && getCurrentScreen() == "AutoConfig") {
-        btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
-        btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(endPosition), YELLOW);
-        prevEndPosition = endPosition;
-      }
-    }
-
-    setMovementsRequired();
-    prevMovementsRequired = movementsRequired;
+    // get new value
+    setStartPosition(driver.XACTUAL());
+    btn_Start.writeTextTopCentre(tft, Arimo_Regular_30, String("START"), YELLOW);
+    btn_StartVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStartPosition()), YELLOW);
+    // reset AutoStack
+    isNewAutoStack = true;
   }
 
 
-  void setShutterDelay() {
-
-    if (shutterDelay < 1) {
-      shutterDelay = 1;
+  // sets and prints new End position for AutoStack
+  void updateEndPosition() {
+    // set new end value
+    if (autoStackMax) {
+      setEndPosition(maxRailPosition);
     }
-    else if (shutterDelay > 59) {
-      shutterDelay = 59;
+    else if (!autoStackMax) {
+      setEndPosition(driver.XACTUAL());
     }
-
-    if (prevDelay != shutterDelay) {
-      // char delaySeconds[6];
-      // sprintf_P(delaySeconds, PSTR("%02d"), 0, shutterDelay);
-      btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(shutterDelay), YELLOW);
-    }
+    btn_End.writeTextTopCentre(tft, Arimo_Regular_30, String("END"), YELLOW);
+    btn_EndVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getEndPosition()), YELLOW);
   }
 
 
-  void displayPosition() {
-    if (prevStepperPosition != stepper.currentPosition()) {
-      int currentPosition = stepper.currentPosition();
-      btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
-      btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(currentPosition), WHITE);
-
-      prevStepperPosition = currentPosition;
-    }
+  // print the new shutterDelay value to screen
+  void printShutterDelay() {
+    btn_DelayVal.writeTextCentre(tft, Arimo_Bold_30, String(getShutterDelay()), YELLOW);
   }
 
+
+  // print current position of stepper under RUN text
+  void printPosition() {
+    btn_Run.writeTextTopCentre(tft, Arimo_Regular_30, String("RUN"), WHITE);
+    btn_RunVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(driver.XACTUAL()), WHITE);
+  }
 }

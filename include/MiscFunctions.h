@@ -4,12 +4,10 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void estimateDuration(bool screenRefresh);
-void resetAutoStack();
 void rotateScreen();
-void setAutoStackPositions(bool setStart, bool setEnd);
+void produceTone(int reps, int duration, int delay);
 void setMovementsRequired();
-void setStepDistance();
+void calculateStepSize();
 int valueCheck(int value, int min, int max);
 
 #endif

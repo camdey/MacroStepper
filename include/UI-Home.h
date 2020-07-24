@@ -7,7 +7,7 @@
 namespace home_screen {
   void initHomeButtons();
   void populateHomeScreen();
-  void checkHomeButtons(int touch_x, int touch_y, int touch_z);
+  void checkHomeButtons(int touch_x, int touch_y);
   void func_Auto(bool btnActive);
   void func_Manual(bool btnActive);
   void func_Home(bool btnActive);

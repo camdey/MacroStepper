@@ -1,3 +1,4 @@
+#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "UI-Main.h"
 #include "UI-Manual.h"
@@ -5,59 +6,65 @@
 
 
 void rotateScreen() {
-  if (screenRotated == false) {
+  if (!isScreenRotated()) {
     tft.setRotation(3);
-    screenRotated = true;
+    setScreenRotated(true);
   }
-  else if (screenRotated == true) {
+  else if (isScreenRotated()) {
     tft.setRotation(1);
-    screenRotated = false;
+    setScreenRotated(false);
   }
 }
 
+
+// sound a tone with a given number of repetitions each for a specified length of time (ms) separated by an interval (ms)
+void produceTone(int reps, int duration, int interval) {
+  for (int i = 0; i < reps; i++) {
+    TimerFreeTone(PIEZO_PIN, 4000, duration, 10);
+    delay(interval);
+  }
+}
 
 
 void setMovementsRequired() {
   // calculate number of steps required to cover range
-  movementsRequired = ceil((endPosition*1.00 - startPosition*1.00) / stepsPerMovement);
-
+  int nrMovements = ceil((getEndPosition()*1.00 - getStartPosition()*1.00) / getStepsPerMovement());
   // prevent screen under/overflow of value
-  movementsRequired = valueCheck(movementsRequired, 0, 999);
+  nrMovements = valueCheck(nrMovements, 0, 999);
+  setNrMovementsRequired(nrMovements);
 }
 
 
-void setStepDistance() {
+// calculate and set the step size in μm that is travelled per movement
+void calculateStepSize() {
+  float distancePerMovement;
 
   // constrain multiplier range
-  if (stepsPerMovement < 1) {
-    stepsPerMovement = 1;
-  } else if (stepsPerMovement > 80) {
-    stepsPerMovement = 80;
+  if (getStepsPerMovement() < 1) {
+    setStepsPerMovement(1);
+  } else if (getStepsPerMovement() > 100) {
+    setStepsPerMovement(100);
   }
 
-  // stepper is 200 steps/rev, linear rail has 1mm pitch, 1:1 gear ratio
-  // 1 step = 1/200 = 0.005mm
-	// microsteps = 4
-	// 0.005 / 4 = 1.25μm
-  distancePerMovement = microstepDistance * stepsPerMovement;
-  stepDist = String(distancePerMovement/1000, 5);
+  distancePerMovement = microstepLength * getStepsPerMovement();
 
-  if (prevDistance != distancePerMovement) {
+  if (distancePerMovement != getStepSize()) {
     // print new delay value
     setMovementsRequired();
+    setStepSize(distancePerMovement);
 
     if (getCurrentScreen() == "Auto") {
       // update estimated time
-      auto_screen::estimateDuration(0); // don't force refresh
+      auto_screen::estimateDuration();
       // update progress
-      auto_screen::updateProgress(0); // don't force refresh
+      auto_screen::updateProgress();
     }
-
-    prevMovementsRequired = movementsRequired;
   }
 }
 
 
+// check whether a given value is in a specified range
+// if not change value to min or max, whichever is closest
 int valueCheck(int value, int min, int max) {
   if (value > max) {
     value = max;

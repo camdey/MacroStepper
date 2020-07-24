@@ -1,9 +1,31 @@
+#include "GlobalVariables.h"
+#include "DriverConfig.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
 #include "UI-Main.h"
 #include "UI-Manual.h"
 #include "UI-AutoConfig.h"
+
+
+// calculate new velocity (VMAX) value while using joystick motion
+// velocity value is a log-transformation of the joystick position
+long calcVelocity(int xPos) {
+  long velocity;
+  int xAdj;
+
+  if (xPos < 512) {
+    xAdj = xPos + 1; // prevent taking log of 0
+  }
+  else if (xPos >= 512) {
+    xAdj = (1024 - xPos);
+  }
+  xAdj = round(log(xAdj)*100); // multiply by 100 as value will be truncated to integer
+  // 624 = log(512)*100 rounded
+  velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
+
+  return velocity;
+}
 
 /******************************************************************
 Take 10 readings form the joystick X axis during setup and average
@@ -17,22 +39,24 @@ by in other functions that use this variable.
 void calibrateJoyStick() {
   int numReadings = 10;
   int sumReadings = 0;
+  xStickDiff = 0; // ensure reset to 0 when this function is called
 
   for (int xth_reading = 0; xth_reading < numReadings; xth_reading++) {
-    readJoystick();
+    int xStickPos = readJoystick();
     sumReadings += xStickPos; // add reading to total
-    delay(10); // wait 10ms
+    delay(20); // wait 20ms
   }
 
-  xPosResting = (sumReadings / numReadings) + 0.5; // "round" to nearest whole number
+  xStickResting = (sumReadings / numReadings) + 0.5; // "round" to nearest whole number
 
-  // if xPosresting below/above these values, set at middle point to be safe
-  if (xPosResting < 500 || xPosResting > 524) {
-    xPosResting = 512;
+  // if xStickresting below/above these values, set at middle point to be safe
+  if (xStickResting < 500 || xStickResting > 524) {
+    xStickResting = 512;
   }
-  xPosUpper = xPosResting + 10;
-  xPosLower = xPosResting - 10;
-  xPosDiff = 512 - xPosResting;
+  xStickUpper = xStickResting + 10;
+  xStickLower = xStickResting - 10;
+  xStickDiff = 512 - xStickResting;
+  Serial.print("xStick Calib. Diff: "); Serial.println(xStickDiff);
 }
 
 
@@ -48,106 +72,111 @@ used to reduce the initial acceleration of the stepper to control
 jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
-void joystickControl() {
-  // count nr of loops in while() clause
-  long loopNr = 0;
-  int stepperSpeed = 0;
+void joystickMotion(int xPos) {
+  // TODO
+  // start/end position updates independently of run position - results in small discrepancies
+  // "recoil" of stage back to target position after suddenly stopping accelerating via joystick control
+  long velocity = calcVelocity(xPos);
 
-  // wake stepper from sleep
-	if (stepperDisabled == true) {
-    toggleStepper(true);
+  // enable stepper if disabled
+  if (!isStepperEnabled()) {
+    setStepperEnabled(true);
   }
-  // while joystick is operated
-  while (xStickPos >= xPosUpper || xStickPos <= xPosLower) {
-    // if rail min/max postions have been set...
-    if (homedRail == true) {
-      // don't allow movement if within 1000 steps of forward stop
-      // values are inverse so high xStickPos = reverse
-      if (xStickPos >= xPosUpper && (abs(minPosition - stepper.currentPosition()) <= 1000)) {
+  // configure stepper for stealth chop
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
+
+  // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
+  int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
+  
+  while ((xPos >= xStickUpper || xPos <= xStickLower) && isJoystickBtnActive) {
+    if (isRailHomed()) {                              // don't allow movement if within 2mm of endstops
+      if (dir == 0 && driver.XACTUAL() <= safeZone) {
+        Serial.print("WARNING: hit safeZone (within 2mm of rear end stop): "); Serial.println(driver.XACTUAL());
+         produceTone(1, 250, 0);
         break;
       }
-      // don't allow movement if within 1000 steps of backward stop
-      // values are inverse so low xStickPos = forward
-      if (xStickPos <= xPosLower && (abs(maxPosition - stepper.currentPosition()) <= 1000)) {
+      else if (dir == 1 && maxRailPosition - driver.XACTUAL() <= safeZone) {
+        Serial.print("WARNING: hit safeZone (within 2mm of front end stop): "); Serial.println(driver.XACTUAL());
+        produceTone(1, 250, 0);
         break;
       }
     }
-    // move either -1, 0, or 1 steps
-    int step_dir = 0;
-    if (xStickPos >= xPosUpper) step_dir = 1;
-    else if (xStickPos <= xPosLower) step_dir = 1;
-    else step_dir = 0;
-    stepper.move(step_dir);
+  
+    if (millis() - getLastMillis() >= 100) {
+      velocity = calcVelocity(xPos);
+      Serial.print(" xPos: "); Serial.print(xPos);
+      Serial.print(" | currentPos: "); Serial.print(driver.XACTUAL());
+      Serial.print(" | targetPos: "); Serial.print(driver.XTARGET());
+      Serial.print(" | VACTUAL: "); Serial.print(driver.VACTUAL());
+      Serial.print(" | velocity: "); Serial.println(velocity);
 
-    // check stick position again and set speed
-    if (millis() % 50 == 0) {
-       readJoystick();
-       stepperSpeed = speedControl(loopNr);
+      isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
 
-       // prevent overflow
-       if (abs(loopNr) > 2000000000) {
-         loopNr = rampSteps;
-       }
+      printNewPositions();                            // print new positions on the display
+      setLastMillis(millis());
     }
-
-    stepper.setSpeed(stepperSpeed);
-    stepper.runSpeed();
-
-    loopNr++;
-  }
-
-  // // check start/end position adjustment
-  if (editStartPosition == true && arrowsActive == true) {
-    if (prevStartPosition != startPosition) {
-      prevStartPosition = startPosition;
+    // set target to move stepper
+    if (dir == 0) {
+      driver.XTARGET(-800000);
     }
-    config_screen::setAutoStackPositions(true, false); //set start but not end position
-  }
-  if (editEndPosition == true && arrowsActive == true) {
-    if (prevEndPosition != endPosition) {
-      prevEndPosition = endPosition;
+    else if (dir == 1) {
+      driver.XTARGET(800000);
     }
-    config_screen::setAutoStackPositions(false, true); //set end but not start position
+  
+    setTargetVelocity(velocity);
+    xPos = readJoystick();
   }
-  if (getCurrentScreen() == "Manual") {
-    manual_screen::displayPosition();
+  setTargetVelocity(0);                               // bring stepper to a stop
+  while (driver.VACTUAL() != 0) {                     // wait for stepper to decelerate
+    // if (millis() - getLastMillis() >= 100) {
+    //   Serial.print("VACTUAL: "); Serial.println(driver.VACTUAL());
+    //   setLastMillis(millis());
+    // }
   }
-  else if (getCurrentScreen() == "AutoConfig") {
-    config_screen::displayPosition();
-  }
-  // update prev position
-  prevStepperPosition = stepper.currentPosition();
+  printNewPositions();                                // print final positions now that stepper has stopped
+  driver.XTARGET(driver.XACTUAL());                   // reset target to actual
+  setTargetVelocity(stealthChopMaxVelocity);          // reset VMAX to stealthChop default
 }
 
 
-void readJoystick() {
-  if (screenRotated == false) {
-    xStickPos = analogRead(XSTICK_PIN);
+// Print new rail positions depending on what screen and buttons are active
+// Called during joystick movement and after joystick movement when stepper has stopped
+// otherwise the position values will be out of sync across different fields
+void printNewPositions() {
+  if (getCurrentScreen() == "Manual") {             // if on Manual screen, print new positon
+    manual_screen::printPosition();
   }
-  else if (screenRotated == true) {
-    xStickPos = map(analogRead(XSTICK_PIN), 0, 1023, 1023, 0);
-  }
+  else if (getCurrentScreen() == "AutoConfig") {    // else if Auto Config screen, print new position
+    config_screen::printPosition();
 
+    if (canEditStartPosition()) {
+    config_screen::updateStartPosition();           // if editing Start position, set start but not end position
+    }
+    else if (canEditEndPosition()) {
+      config_screen::updateEndPosition();           // if editing End position, set end but not start position
+    }
+  }
+}
+
+
+// read value from XSTICK_PIN and use recursive filtering to minimize noise
+// the previous filtered value from the joystick is used with a weight constant
+int readJoystick() {
+  long val, adjVal;
+  int weight = 40;
+
+  // val = (w × XSTICK_PIN + (100 – w) × prevVal)
+  // multiply values by 100 to avoid floating point math, the prevVal part of the formula needs as much precesion as possible
+  adjVal = weight * (analogRead(XSTICK_PIN)*100) + (100 - weight) * getRecursiveFilterValue();
+  setRecursiveFilterValue(adjVal/100);
+  val = round(adjVal*1.00 / 10000);
+
+  if (isScreenRotated()) {
+    val = map(val, 0, 1023, 1023, 0);
+  }
   // offset reading by difference between resting state and ideal middle point
-  xStickPos -= xPosDiff;
-}
-
-
-int speedControl(long loopNr) {
-  int jerkControl = rampSteps;
-  int adjustedSpeed = 0;
-
-  // if exceeded 5000 loops, jerkControl multiplier = 1
-  if (loopNr >= jerkControl) {
-    loopNr = jerkControl;
-  }
-
-  // adjust input range based on diff between resting point and ideal middle
-  joyStickSpeed = map(xStickPos, (0 - xPosDiff), (1023 - xPosDiff), stepperMaxSpeed, -stepperMaxSpeed);
-
-  // adjust speed based on jerkControl multiplier;
-  float speedModifier = loopNr*1.00 / jerkControl*1.00;
-  adjustedSpeed = joyStickSpeed * speedModifier;
-
-  return adjustedSpeed;
+  // val -= xStickDiff;
+  return val;
 }

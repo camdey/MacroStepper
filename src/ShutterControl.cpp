@@ -1,3 +1,4 @@
+#include "GlobalVariables.h"
 #include "ShutterControl.h"
 
 
@@ -31,12 +32,6 @@ bool flashStatus() {
   return flashReady;
 }
 
-void toggleShutter() {
-  if ((currentTime - prevGenericTime) >= genericTouchDelay) {
-    shutterEnabled = !shutterEnabled;
-    prevGenericTime = millis();
-  }
-}
 
 /******************************************************************
 Triggers the camera shutter and flash, if enabled.
@@ -46,17 +41,16 @@ continually checked to see if it has triggered (red LED goes off)
 but it must stay in this loop for a minimum of 1000ms to ensure
 enough time for the camera to take the photo.
 ******************************************************************/
-bool triggerShutter() {
+void triggerShutter() {
 	flashReady = flashStatus();
   bool flashReadyDebouncer = false;
-	shutterTriggered = false;
+	setShutterTriggered(false);
 
-
-  if (shutterEnabled == true) {
+  if (isShutterEnabled()) {
 		unsigned long triggerTime = millis();
 
 		// wait for flash to be ready
-		while (flashReady == false) {
+		while (!flashReady) {
 			flashReady = flashStatus();
       flashReadyDebouncer = flashReady;
       // break if flash not turning on
@@ -74,15 +68,15 @@ bool triggerShutter() {
     // second variable to debounce noisy readings
 
     while (millis() - triggerTime <= 3000) {
-      if (flashReady == true) {
+      if (flashReady) {
         flashReady = flashStatus();
         flashReadyDebouncer = flashStatus();
       }
-      if (flashReady == false && flashReadyDebouncer == false && millis() - triggerTime > 400) {
-        shutterTriggered = true;
+      if (!flashReady && !flashReadyDebouncer && millis() - triggerTime > 400) {
+        setShutterTriggered(true);
         break;
       }
-      shutterTriggered = false;
+      setShutterTriggered(false);
       delay(10);
     }
 
@@ -91,5 +85,4 @@ bool triggerShutter() {
 		// reset shutter signal
     digitalWrite(SONY_PIN, LOW);
 	}
-	return shutterTriggered;
 }
