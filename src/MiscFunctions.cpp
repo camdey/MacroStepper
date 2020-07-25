@@ -57,7 +57,7 @@ void calculateStepSize() {
       // update estimated time
       auto_screen::estimateDuration();
       // update progress
-      auto_screen::updateProgress();
+      auto_screen::printAutoStackProgress();
     }
   }
 }

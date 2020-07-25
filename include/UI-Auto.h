@@ -17,6 +17,6 @@ namespace auto_screen {
   void func_ArrowDown(bool btnActive);
   void pauseStack();
   void estimateDuration();
-  void updateProgress();
+  void printAutoStackProgress();
 }
 #endif

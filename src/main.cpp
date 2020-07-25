@@ -55,31 +55,27 @@ gfxTouch        gfxT;
 unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
 unsigned long prevJoystickCheck 	= 0;    			// time subroutine2 last ran
 unsigned long recycleTime 				= 1000;    		// duration to take photo
-unsigned long lastReadFlash				= 0;					// previous time at which the light sensor was polled
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
 int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
 int xStickLower                   = 502;				// Lower boundary of of joystick resting point, calibrated during setup
 int xStickDiff                    = 0;          // Difference between ideal middle (512) and actual resting point
 bool isJoystickBtnActive          = 0;          // check if joystick button is pressed (ZSTICK_PIN)
-int flashValue										= 10;					// reading from light sensor on flash LED
 int flashThreshold                = 280;        // threshold value for flash being ready to fire
 int flashOnValue                  = 300;        // initial value for flash considered as being ready
 int flashOffValue                 = 30;         // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool runHomingSequence 						= true;       // runs rehoming sequence
 bool isNewAutoStack 						  = true;       // move to start for autoStack procedure
-bool autoStackRunning 						= false;      // enables function for stack procedure
+bool autoStackInitiated 						= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
-bool flashReady 									= false;			// flash ready for next photo
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
 // --- Stepper motor variables --- //
 bool triggerFailed                = false;      // record state if shutter trigger has failed  
 
-// ***** --- PROGRAM --- ***** //
 
-
+// ***** --- MAIN PROGRAM --- ***** //
 void setup(void) {
   Serial.begin(250000);
 	SPI.begin();
@@ -112,10 +108,6 @@ void setup(void) {
   // find stable resting point of joystick
   // calibrateJoyStick();
 
-	// if holding down ZSTICK_PIN, don't home rail
-	// if (digitalRead(ZSTICK_PIN) == LOW) {
-	// 	runHomingSequence = false;
-	// }
   // don't home rail on start up
   runHomingSequence = false;
 
@@ -125,8 +117,8 @@ void setup(void) {
 }
 
 void loop() {
-  // run AutoStack sequence if enabled
-  if (autoStackRunning && !autoStackPaused) {
+  // run AutoStack sequence if enabled and time since last step >= 500ms
+  if (autoStackInitiated && !autoStackPaused && (millis() - getLastStepTime() >= 500)) {
     autoStack();
   }
   // take touch reading
@@ -141,16 +133,16 @@ void loop() {
     isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
   
     // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackRunning && isJoystickBtnActive) {
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && isJoystickBtnActive) {
       joystickMotion(xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && (!autoStackRunning || autoStackPaused) && isStepperEnabled()) {
+    if (hasReachedTargetPosition() && (!autoStackInitiated || autoStackPaused) && isStepperEnabled()) {
       setStepperEnabled(false); // disable stepper
     }
-		// update flashValue if on Flash screen
+		// update godoxValue if on Flash screen
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
-			flash_screen::updateFlashValue();
+			flash_screen::updateGodoxValue();
 		}
   //   // set END as maxRailPosition if Z Stick depressed
   //   if (getCurrentScreen() == "AutoConfig" && canEditEndPosition() && digitalRead(ZSTICK_PIN) == LOW) {
@@ -158,9 +150,6 @@ void loop() {
   //     config_screen::updateEndPosition();
   //     autoStackMax = false;
   //   }
-    Serial.print("ACTUAL: "); Serial.print(driver.XACTUAL());
-    Serial.print(" | VACTUAL: "); Serial.print(driver.VACTUAL());
-    Serial.print(" | TARGET: "); Serial.println(driver.XTARGET());
     prevJoystickCheck = millis();
   }
 

@@ -140,7 +140,6 @@ extern gfxTouch         gfxT;
 extern unsigned long prevButtonCheck;
 extern unsigned long prevJoystickCheck;
 extern unsigned long recycleTime;
-extern unsigned long lastReadFlash;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int xStickUpper;
@@ -148,16 +147,14 @@ extern int xStickDiff;
 extern int xStickResting;
 extern int xStickLower;
 extern bool isJoystickBtnActive;
-extern int flashValue;
 extern int flashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
 extern bool runHomingSequence;
 extern bool isNewAutoStack;
-extern bool autoStackRunning;
+extern bool autoStackInitiated;
 extern bool autoStackPaused;
-extern bool flashReady;
 extern bool stallGuardConfigured;
 extern bool autoStackMax;
 // --- Stepper motor variables --- //

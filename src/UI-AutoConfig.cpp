@@ -70,10 +70,10 @@ namespace config_screen {
       btn_array[i]->drawButton(tft);
     }
 
-    if (!autoStackRunning) {
+    if (!autoStackInitiated) {
       btn_Reset.drawButton(tft, BLACK);
     }
-    else if (autoStackRunning) {
+    else if (autoStackInitiated) {
       btn_Reset.drawButton(tft, CUSTOM_RED);
     }
 
@@ -172,7 +172,7 @@ namespace config_screen {
   // reset AutoStack procedure to default values
   void func_Reset(bool btnActive) {
     if (btnActive) {
-      autoStackRunning = false;
+      autoStackInitiated = false;
       isNewAutoStack = true;
       autoStackPaused = false;
       setNrMovementsCompleted(0);

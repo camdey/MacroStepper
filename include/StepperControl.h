@@ -12,5 +12,6 @@ bool detectEndStop();
 void executeMovement(int stepDirection, unsigned long stepperDelay);
 void goToStart();
 void overshootPosition(int startPosition, int numberOfSteps);
+void terminateAutoStack();
 
 #endif

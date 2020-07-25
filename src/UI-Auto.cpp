@@ -63,13 +63,13 @@ namespace auto_screen {
       btn_array[i]->drawButton(tft);
     }
     // draw play/pause separately
-    if (autoStackPaused && autoStackRunning) {
+    if (autoStackPaused && autoStackInitiated) {
       btn_PlayPause.drawButton(tft);
     }
-    else if (!autoStackPaused && autoStackRunning) {
+    else if (!autoStackPaused && autoStackInitiated) {
       btn_PlayPause.drawNewBitmap(tft, pause, CUSTOM_BLUE);
     }
-    else if (!autoStackPaused && !autoStackRunning) {
+    else if (!autoStackPaused && !autoStackInitiated) {
       btn_PlayPause.drawButton(tft);
     }
 
@@ -86,7 +86,7 @@ namespace auto_screen {
     btn_EstTime.writeTextTopCentre(tft, Arimo_Regular_30, String("Est. Time"), WHITE);
     estimateDuration();
     btn_Progress.writeTextTopCentre(tft, Arimo_Regular_30, String("Progress"), WHITE);
-    updateProgress();
+    printAutoStackProgress();
   }
 
 
@@ -106,7 +106,7 @@ namespace auto_screen {
 
 
   void func_StepDistance(bool btnActive) {
-    if (btnActive && (!autoStackRunning || autoStackPaused)) {
+    if (btnActive && (!autoStackInitiated || autoStackPaused)) {
       setArrowsEnabled(true);
       setEditMovementDistance(true);
 
@@ -119,7 +119,7 @@ namespace auto_screen {
       btn_StepDistance.writeTextTopCentre(tft, Arimo_Regular_30, String("Step Size"), YELLOW);
       btn_DistanceVal.writeTextBottomCentre(tft, Arimo_Bold_30, String(getStepSize(), 4), YELLOW);
     }
-    else if (!btnActive && (!autoStackRunning || autoStackPaused)) {
+    else if (!btnActive && (!autoStackInitiated || autoStackPaused)) {
       setArrowsEnabled(false);
       setEditMovementDistance(false);
 
@@ -167,7 +167,7 @@ namespace auto_screen {
 
   void func_PlayPause(bool btnActive) {
     if (btnActive && !isArrowsEnabled()) {
-      autoStackRunning = true;   // start autoStack sequence
+      autoStackInitiated = true;   // start autoStack sequence
       autoStackPaused = false;
       btn_PlayPause.drawNewBitmap(tft, pause, CUSTOM_BLUE);
     }
@@ -234,7 +234,7 @@ namespace auto_screen {
   Uses sprintf_P function to concatenate two values and format them as
   "completed / remaining" on the screen.
   ***********************************************************************/
-  void updateProgress() {
+  void printAutoStackProgress() {
     char autoStackProgress[10]  = "0/0";
 
     // format progress in "Completed / Total" string

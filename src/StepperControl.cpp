@@ -32,7 +32,6 @@ void autoStack() {
     setShutterTriggered(false);
     setLastStepTime(millis());
   }
-  // Serial.println("0. Start");
 
   // take photo and increment progress for first step of each movement
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
@@ -43,18 +42,15 @@ void autoStack() {
       if (!hasShutterTriggered()) {
         long failTime = millis();
         triggerFailed = true; // used to set one-off delay later
-        // Serial.println("fail to trigger");
-
+        // retry triggering shutter
         while (!hasShutterTriggered()) {
           triggerShutter();
           // if retry successful, break
           if (hasShutterTriggered()) {
-            // Serial.println("retry successful");
             break;
           }
           // go to flashScreen if can't trigger after 10 seconds
           else if (millis() - failTime >= 10000) {
-            // Serial.println("go to flash screen");
             auto_screen::pauseStack();
             populateScreen("Flash"); // load screen for checking flash settings/functionality
             break;
@@ -73,35 +69,23 @@ void autoStack() {
 			incrementNrMovementsCompleted();
 	    // make sure correct screen is displaying
 	    if (getCurrentScreen() == "Auto") { // auto screen
-	      auto_screen::updateProgress();
+	      auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
 	    }
 
-			setShutterTriggered(false); // reset shutter
-			setExecutedMovement(false); // reset stepper movement
+			setShutterTriggered(false); // reset shutter triggered flag
+			setExecutedMovement(false); // reset executed movement flag
 		}
 
     if (triggerFailed) {
+      triggerFailed = false;
       // 10 second delay to prevent trying to take another photo immediately after
       delay(10000);
     }
   }
   // stop AutoStack sequence if end reached
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
-    if (getCurrentScreen() != "Auto") {
-      populateScreen("Auto");           // go back to Auto screen if not already on it
-    }
-		auto_screen::estimateDuration();    // update estimate
-    autoStackRunning = false;
-    isNewAutoStack = true;
-    setShutterTriggered(false);
-    autoStackPaused = false;            // autoStack is completed but not paused
-    setNrMovementsCompleted(0);         // reset completed movements count
-		setExecutedMovement(false);
-    auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
-    produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
-    // change max velocity back to normal
-    setTargetVelocity(stealthChopMaxVelocity);
+    terminateAutoStack();
   }
 }
 
@@ -310,4 +294,22 @@ void overshootPosition(int startPosition, int numberOfSteps) {
   driver.XTARGET(startPosition);
   // wait for stepper to reach position
   while (driver.XACTUAL() != driver.XTARGET()) {}
+}
+
+// clean up variables etc after completing AutoStack sequence
+void terminateAutoStack() {
+  if (getCurrentScreen() != "Auto") {
+    populateScreen("Auto");           // go back to Auto screen if not already on it
+  }
+  auto_screen::estimateDuration();    // update estimate
+  autoStackInitiated = false;
+  isNewAutoStack = true;
+  setShutterTriggered(false);
+  autoStackPaused = false;            // autoStack is completed but not paused
+  setNrMovementsCompleted(0);         // reset completed movements count
+  setExecutedMovement(false);
+  auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
+  produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
+  // change max velocity back to normal
+  setTargetVelocity(stealthChopMaxVelocity);
 }

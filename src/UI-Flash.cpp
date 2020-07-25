@@ -46,7 +46,7 @@ namespace flash_screen {
 
   void populateFlashScreen() {
     setCurrentScreen("Flash");
-    flashReady = flashStatus(); // get latest values
+    checkFlashStatus(); // get latest values
     // draw buttons
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton(tft);
@@ -138,20 +138,20 @@ namespace flash_screen {
   to calibrate optimal trigger point for flash given lighting conditions
   at the time that may affect the light sensor.
   ***********************************************************************/
-  void updateFlashValue() {
-    // get latest flashValue reading
-    flashReady = flashStatus();
+  void updateGodoxValue() {
+    // get latest godoxValue reading
+    checkFlashStatus();
 
     // if difference from previous reading > 1, updates value on screen
-    if (abs(flashValue - flashOffValue) > 1 && canEditFlashOffValue()) {
+    if (abs(getGodoxValue() - flashOffValue) > 1 && canEditFlashOffValue()) {
       func_FlashOff(true);
       // set OFF value for flash
-      flashOffValue = flashValue;
+      flashOffValue = getGodoxValue();
       }
-    if (abs(flashValue - flashOnValue) > 1 && canEditFlashOnValue()) {
+    if (abs(getGodoxValue() - flashOnValue) > 1 && canEditFlashOnValue()) {
       func_FlashOn(true);
       // set ON value for flash
-      flashOnValue = flashValue;
+      flashOnValue = getGodoxValue();
     }
   }
 

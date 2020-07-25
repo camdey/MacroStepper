@@ -10,6 +10,9 @@ bool editEndPosition            = false;        // set end point for auto mode
 bool editMovementDistance       = false;        // set step distance in any mode
 bool editFlashOnValue           = false;        // set flash on value
 bool editFlashOffValue          = false;        // set flash off value
+bool flashAvailable             = false;        // check whether flash is available to trigger or not
+int godoxValue                  = 0;            // light sensor reading from the godox flash LED
+long godoxFilterValue           = 10000;        // recursive filter value of light sensor reading from the godox flash LED
 long ForwardEndStopPosition     = 1;            // position of the forward end stop (opposite end from stepper)
 long BackwardEndStopPosition    = 1;            // position of the backward end stop (same end as stepper)
 long startPosition              = 0;            // starting position of an AutoStack sequence
@@ -147,6 +150,42 @@ void setExecutedMovement(bool executed) {
 // Check whether the stepper moved when moveStepper() was last called
 bool hasExecutedMovement() {
     return executedMovement;
+}
+
+
+// Set flash availability
+void setFlashAvailable(bool available) {
+    flashAvailable = available;
+}
+
+
+// Check if flash is available to trigger or not
+bool isFlashAvailable() {
+    return flashAvailable;
+}
+
+
+// Set the light sensor reading from the godox pin
+void setGodoxValue(int value) {
+    godoxValue = value;
+}
+
+
+// Get the last light sensor reading from the godox pin
+int getGodoxValue() {
+    return godoxValue;
+}
+
+
+// Set the recursive filter value of the light sensor reading from the godox pin
+void setGodoxFilterValue(long value) {
+    godoxFilterValue = value;
+}
+
+
+// Get the recursive filter value of the last light sensor reading from the godox pin
+long getGodoxFilterValue() {
+    return godoxFilterValue;
 }
 
 
