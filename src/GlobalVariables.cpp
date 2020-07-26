@@ -18,6 +18,7 @@ long BackwardEndStopPosition    = 1;            // position of the backward end 
 long startPosition              = 0;            // starting position of an AutoStack sequence
 long endPosition                = 0;            // end position of an AutoStack sequence
 long lastMillis                 = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
+long lastFlashTime              = 0;            // last millis time flash was triggered successfully
 long lastStepTime               = 0;            // last millis time a step was executed
 bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
 int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
@@ -267,6 +268,18 @@ void setLastMillis(long millis) {
 // Get the last millis() reading, useful for doing things within loops every X ms
 long getLastMillis() {
   return lastMillis;
+}
+
+
+// Set the last millis() reading when flash was triggered successfully
+void setLastFlashTime(long millis) {
+  lastFlashTime = millis;
+}
+
+
+// Get the last millis() reading when flash was triggered successfully
+long getLastFlashTime() {
+  return lastFlashTime;
 }
 
 

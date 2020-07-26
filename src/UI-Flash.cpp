@@ -2,6 +2,7 @@
 #include "ShutterControl.h"
 #include "UI-Main.h"
 #include "UI-Flash.h"
+#include "UI-Manual.h"
 
 namespace flash_screen {
 

@@ -73,9 +73,6 @@ jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
 void joystickMotion(int xPos) {
-  // TODO
-  // start/end position updates independently of run position - results in small discrepancies
-  // "recoil" of stage back to target position after suddenly stopping accelerating via joystick control
   long velocity = calcVelocity(xPos);
 
   // enable stepper if disabled
@@ -129,12 +126,7 @@ void joystickMotion(int xPos) {
     xPos = readJoystick();
   }
   setTargetVelocity(0);                               // bring stepper to a stop
-  while (driver.VACTUAL() != 0) {                     // wait for stepper to decelerate
-    // if (millis() - getLastMillis() >= 100) {
-    //   Serial.print("VACTUAL: "); Serial.println(driver.VACTUAL());
-    //   setLastMillis(millis());
-    // }
-  }
+  while (driver.VACTUAL() != 0) {}                    // wait for stepper to decelerate
   printNewPositions();                                // print final positions now that stepper has stopped
   driver.XTARGET(driver.XACTUAL());                   // reset target to actual
   setTargetVelocity(stealthChopMaxVelocity);          // reset VMAX to stealthChop default

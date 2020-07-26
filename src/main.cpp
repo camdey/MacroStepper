@@ -71,8 +71,6 @@ bool autoStackInitiated 						= false;      // enables function for stack proced
 bool autoStackPaused 							= false;      // pause stack procedure
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
-// --- Stepper motor variables --- //
-bool triggerFailed                = false;      // record state if shutter trigger has failed  
 
 
 // ***** --- MAIN PROGRAM --- ***** //
@@ -117,8 +115,8 @@ void setup(void) {
 }
 
 void loop() {
-  // run AutoStack sequence if enabled and time since last step >= 500ms
-  if (autoStackInitiated && !autoStackPaused && (millis() - getLastStepTime() >= 500)) {
+  // run AutoStack sequence if enabled
+  if (autoStackInitiated && !autoStackPaused) {
     autoStack();
   }
   // take touch reading

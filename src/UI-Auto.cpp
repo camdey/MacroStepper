@@ -140,11 +140,11 @@ namespace auto_screen {
 
 
   void func_Flash(bool btnActive) {
-    if (btnActive) {
+    if (!isShutterEnabled()) {
       setShutterEnabled(true);
       btn_Flash.drawNewBitmap(tft, flashOn, CUSTOM_GREEN);
     }
-    else if (!btnActive) {
+    else if (isShutterEnabled()) {
       setShutterEnabled(false);
       btn_Flash.drawNewBitmap(tft, flashOff, CUSTOM_RED);
     }

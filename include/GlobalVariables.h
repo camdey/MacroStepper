@@ -43,6 +43,8 @@ long getEndPosition();
 bool hasReachedTargetPosition();
 void setLastMillis(long millis);
 long getLastMillis();
+void setLastFlashTime(long millis);
+long getLastFlashTime();
 void setLastStepTime(long millis);
 long getLastStepTime();
 void setNrMovementsCompleted(int nrMovements);

@@ -18,14 +18,12 @@ another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void autoStack() {
-  // wake stepper from sleep
   if (!isStepperEnabled()) {
-    setStepperEnabled(true);
+    setStepperEnabled(true);                // wake stepper from sleep
   }
-  // move to start position if beginning AutoStack
-  if (isNewAutoStack) {
-    // reduce max velocity to minimize vibration
-    setTargetVelocity(10000);
+  
+  if (isNewAutoStack) {                     // move to start position if beginning AutoStack
+    setTargetVelocity(10000);               // reduce max velocity to minimize vibration
     goToStart();
     setNrMovementsCompleted(0);
     setExecutedMovement(false);
@@ -33,59 +31,49 @@ void autoStack() {
     setLastStepTime(millis());
   }
 
-  // take photo and increment progress for first step of each movement
+  bool shutterFailed = false;               // store result of shutter trigger attempt
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
-    // if shutter enabled, take photo
-		if (isShutterEnabled() && !hasShutterTriggered()) {
-	    triggerShutter(); // take photo
-      // pause autoStack if flash failing
+     // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
+		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
+	    triggerShutter();                     // take photo
       if (!hasShutterTriggered()) {
-        long failTime = millis();
-        triggerFailed = true; // used to set one-off delay later
-        // retry triggering shutter
-        while (!hasShutterTriggered()) {
+        long retryStart = millis();
+        shutterFailed = true;               // used to set one-off delay later
+        while (!hasShutterTriggered()) {    // retry triggering shutter
           triggerShutter();
-          // if retry successful, break
           if (hasShutterTriggered()) {
-            break;
+            break;                          // if retry successful, break
           }
-          // go to flashScreen if can't trigger after 10 seconds
-          else if (millis() - failTime >= 10000) {
-            auto_screen::pauseStack();
-            populateScreen("Flash"); // load screen for checking flash settings/functionality
+          else if (millis() - retryStart >= 10000) {
+            auto_screen::pauseStack();      // pause autostack so user can troubleshoot flash issue
+            populateScreen("Flash");        // go to flashScreen if can't trigger after 10 seconds
             break;
           }
         }
       }
 		}
-
     // only move if autoStack hasn't been paused by flash failure
-    if (!autoStackPaused) {
-  		// move stepper
-  		executeMovement(1, getShutterDelay()*1000); // forward direction, shutterdelay
+    // and there's been >= 500ms since the flash was triggered successfully (gives time for vibration to settle)
+    if (!autoStackPaused && millis() - getLastFlashTime() >= 500) {
+  		executeMovement(1, getShutterDelay()*1000);
     }
 
 		if (hasExecutedMovement()) {
 			incrementNrMovementsCompleted();
-	    // make sure correct screen is displaying
-	    if (getCurrentScreen() == "Auto") { // auto screen
+	    if (getCurrentScreen() == "Auto") {   // make sure correct screen is displaying
 	      auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
 	    }
-
-			setShutterTriggered(false); // reset shutter triggered flag
-			setExecutedMovement(false); // reset executed movement flag
+			setShutterTriggered(false);           // reset shutter triggered flag
+			setExecutedMovement(false);           // reset executed movement flag
 		}
 
-    if (triggerFailed) {
-      triggerFailed = false;
-      // 10 second delay to prevent trying to take another photo immediately after
-      delay(10000);
+    if (shutterFailed) {
+      delay(10000);                         // 10 second delay to prevent trying to take another photo immediately after
     }
   }
-  // stop AutoStack sequence if end reached
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
-    terminateAutoStack();
+    terminateAutoStack();                   // stop AutoStack sequence if end reached
   }
 }
 
@@ -124,7 +112,7 @@ void dryRun() {
   }
 
   // reduce stepper velocity
-  setTargetVelocity(10000);
+  setTargetVelocity(5000);
   // move to start position
   driver.XTARGET(getStartPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
@@ -135,7 +123,7 @@ void dryRun() {
   }
 
   // step slow through procedure
-  setTargetVelocity(2000);
+  setTargetVelocity(500);
   // move to end position
   driver.XTARGET(getEndPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
@@ -145,7 +133,7 @@ void dryRun() {
     }
   }
 
-  setTargetVelocity(10000);
+  setTargetVelocity(5000);
   // return to start
   driver.XTARGET(getStartPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
@@ -305,10 +293,10 @@ void terminateAutoStack() {
   autoStackInitiated = false;
   isNewAutoStack = true;
   setShutterTriggered(false);
+  auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
   autoStackPaused = false;            // autoStack is completed but not paused
   setNrMovementsCompleted(0);         // reset completed movements count
   setExecutedMovement(false);
-  auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
   produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
   setTargetVelocity(stealthChopMaxVelocity);

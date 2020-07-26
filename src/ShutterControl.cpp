@@ -38,39 +38,37 @@ continually checked to see if it has triggered (red LED goes off)
 ******************************************************************/
 void triggerShutter() {
 	setShutterTriggered(false);
+  unsigned long startTime = millis();
 
-  if (isShutterEnabled()) {
-		unsigned long startTime = millis();
-
-		// wait for flash to be ready first
-		while (!isFlashAvailable()) {
-      if (millis() - getLastMillis() >= 10) {
-        checkFlashStatus();
-        // break if flash not available after 5s
-        if (millis() - startTime >= 5000) {
-          break;
-        }
-        setLastMillis(millis());
+  // wait for flash to be ready first
+  while (!isFlashAvailable()) {
+    if (millis() - getLastMillis() >= 10) {
+      checkFlashStatus();
+      // break if flash not available after 5s
+      if (millis() - startTime >= 5000) {
+        break;
       }
-		}
-
-		// trigger flash
-    digitalWrite(SONY_PIN, HIGH);
-
-    // wait for flash to be fired, isFlashAvailable() will be false as godox LED will briefly turn off
-    while (millis() - startTime <= 3000 && isFlashAvailable()) {
-      if (millis() - getLastMillis() >= 10) {
-        checkFlashStatus();
-        setLastMillis(millis());
-      }
+      setLastMillis(millis());
     }
-    if (!isFlashAvailable()) {
-      setShutterTriggered(true);
+  }
+
+  // trigger flash
+  digitalWrite(SONY_PIN, HIGH);
+
+  // wait for flash to be fired, isFlashAvailable() will be false as godox LED will briefly turn off
+  while (millis() - startTime <= 3000 && isFlashAvailable()) {
+    if (millis() - getLastMillis() >= 10) {
+      checkFlashStatus();
+      setLastMillis(millis());
     }
+  }
+  if (!isFlashAvailable()) {
+    setShutterTriggered(true);
+    setLastFlashTime(millis());
+  }
 
-		recycleTime = (millis() - startTime);
+  recycleTime = (millis() - startTime);
 
-		// reset shutter signal
-    digitalWrite(SONY_PIN, LOW);
-	}
+  // reset shutter signal
+  digitalWrite(SONY_PIN, LOW);
 }

@@ -157,7 +157,5 @@ extern bool autoStackInitiated;
 extern bool autoStackPaused;
 extern bool stallGuardConfigured;
 extern bool autoStackMax;
-// --- Stepper motor variables --- //
-extern bool triggerFailed;
 
 #endif
