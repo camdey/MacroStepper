@@ -5,7 +5,7 @@
 #include "UI-AutoConfig.h"
 
 namespace config_screen {
-  #define num_btns 7
+  #define num_btns 8
   gfxButton *btn_array[num_btns];
 
 
@@ -13,6 +13,7 @@ namespace config_screen {
   gfxButton btn_End           =   btn.initButton("END",   "fillRoundRect",  0,  120,  160,  80, 15, CUSTOM_RED,   true  );
   gfxButton btn_Run           =   btn.initButton("RUN",   "fillRoundRect",  0,  220,  160,  80, 15, CUSTOM_BLUE,  true  );
   gfxButton btn_Delay         =   btn.initBitmapButton(timer,     220,  20,   80,   80,   WHITE,        true  );
+  gfxButton btn_DelayVal      =   btn.initTransparentButton(      295,  20,   40,   30,                 false );
   gfxButton btn_Reset         =   btn.initBitmapButton(cancel,    220,  120,  80,   80,   BLACK,        true  ); // don't add btn_Reset to array as its colour depends on the state of autoStack
   gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 220,  220,  80,   80,   WHITE,        true  );
   gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,  20,   120,  120,  CUSTOM_GREEN, true  );
@@ -24,14 +25,15 @@ namespace config_screen {
     btn_array[1] = &btn_End;
     btn_array[2] = &btn_Run;
     btn_array[3] = &btn_Delay;
-    btn_array[4] = &btn_Back;
-    btn_array[5] = &btn_ArrowUp;
-    btn_array[6] = &btn_ArrowDown;
+    btn_array[4] = &btn_DelayVal;
+    btn_array[5] = &btn_Back;
+    btn_array[6] = &btn_ArrowUp;
+    btn_array[7] = &btn_ArrowDown;
 
     btn_Start.addToggle(func_Start,             0 );
     btn_End.addToggle(func_End,                 0 );
     btn_Run.addToggle(func_Run,                 0 );
-    btn_Delay.addToggle( func_Delay,            0 );
+    btn_Delay.addToggle(func_Delay,             0 );
     btn_Reset.addMomentary(func_Reset,          0 );
     btn_Back.addMomentary(func_Back,            0 );
     btn_ArrowUp.addMomentary(func_ArrowUp,      0 );
@@ -67,7 +69,7 @@ namespace config_screen {
     btn_End.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(getEndPosition()));
     btn_Run.writeTextTopCentre(Arimo_Regular_30,    WHITE);
     btn_Run.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(currentPosition));
-    btn_Delay.writeTextCentre(Arimo_Bold_30,        WHITE,  String(getShutterDelay()));
+    btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  String(getShutterDelay()));
   }
 
 
@@ -140,14 +142,14 @@ namespace config_screen {
       setEditShutterDelay(true);
 
       btn_Delay.drawButton(YELLOW);
-      btn_Delay.writeTextCentre(Arimo_Bold_30, YELLOW, String(getShutterDelay()));
+      btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, String(getShutterDelay()));
     }
     else if (!btnActive && canEditShutterDelay()) {
       setArrowsEnabled(false);
       setEditShutterDelay(false);
 
       btn_Delay.drawButton(WHITE);
-      btn_Delay.writeTextCentre(Arimo_Bold_30, WHITE, String(getShutterDelay()));
+      btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, String(getShutterDelay()));
     }
   }
 
@@ -254,7 +256,7 @@ namespace config_screen {
 
   // print the new shutterDelay value to screen
   void printShutterDelay() {
-    btn_Delay.writeTextCentre(Arimo_Bold_30, YELLOW, String(getShutterDelay()));
+    btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, String(getShutterDelay()));
   }
 
 

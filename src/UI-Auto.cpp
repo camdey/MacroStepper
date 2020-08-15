@@ -3,17 +3,18 @@
 #include "ShutterControl.h"
 #include "UI-Main.h"
 #include "UI-Auto.h"
+#include "UI-Global.h"
 
 namespace auto_screen {
-  #define num_btns 5
+  #define num_btns 6
   gfxButton *btn_array[num_btns];
 
 
-  gfxButton btn_StepSize     =   btn.initButton("Step Size",  "fillRoundRect",  0,  20,   160,  80, 15, CUSTOM_BLUE, true   );
-  gfxButton btn_EstTime      =   btn.initButton("Est. Time",  "fillRoundRect",  0,  120,  160,  80, 15, CUSTOM_BLUE,  false );
-  gfxButton btn_Progress     =   btn.initButton("Progress",   "fillRoundRect",  0,  220,  160,  80, 15, CUSTOM_BLUE,  false );
-  gfxButton btn_Flash        =   btn.initBitmapButton(flashOff, 220,    20,   80, 80, CUSTOM_RED, true  );
-  gfxButton btn_Config       =   btn.initBitmapButton(cogWheel, 220,    120,  80, 80, WHITE,      true  );
+  gfxButton btn_StepSize     =   btn.initButton("Step Size",  "fillRoundRect",  0,  20,   160,  80, 15, DARKGRAY, true  );
+  gfxButton btn_EstTime      =   btn.initButton("Est. Time",  "fillRoundRect",  0,  120,  160,  80, 15, DARKGRAY, false );
+  gfxButton btn_Progress     =   btn.initButton("Progress",   "fillRoundRect",  0,  220,  160,  80, 15, DARKGRAY, false );
+  // gfxButton btn_Flash        =   btn.initBitmapButton(flashOff,   220,  20,   80, 80, CUSTOM_RED, true  ); // added to global buttons
+  gfxButton btn_Config       =   btn.initBitmapButton(cogWheel,   220,  120,  80, 80, WHITE,      true  );
   gfxButton btn_Back         =   btn.initBitmapButton(backArrow,  220,  220,  80, 80, WHITE,      true  );
   // don't add these buttons to an array as they depend on logic as to which symbol appears and in which colour
   gfxButton btn_PlayPause    =   btn.initBitmapButton(play,       350,  100,  120,  120,  CUSTOM_GREEN, true);
@@ -25,11 +26,11 @@ namespace auto_screen {
     btn_array[0] = &btn_StepSize;
     btn_array[1] = &btn_EstTime;
     btn_array[2] = &btn_Progress;
-    btn_array[3] = &btn_Config;
-    btn_array[4] = &btn_Back;
+    btn_array[3] = &global::btn_Flash;
+    btn_array[4] = &btn_Config;
+    btn_array[5] = &btn_Back;
 
     btn_StepSize.addToggle(func_StepDistance,   0 );
-    btn_Flash.addToggle(func_Flash,             0 );
     btn_Config.addMomentary(func_Config,        0 );
     btn_Back.addMomentary(func_Back,            0 );
     btn_PlayPause.addToggle(func_PlayPause,     0 );
@@ -58,13 +59,6 @@ namespace auto_screen {
     }
     else if (!autoStackPaused && !autoStackInitiated) {
       btn_PlayPause.drawButton();
-    }
-
-    if (!isShutterEnabled()) {
-      btn_Flash.drawButton();
-    }
-    else if (isShutterEnabled()) {
-      btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
     }
 
     // draw text
@@ -99,43 +93,31 @@ namespace auto_screen {
       setArrowsEnabled(true);
       setEditMovementDistance(true);
 
+      btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+
       // clear play/pause button
       btn_PlayPause.drawNewBitmap(play, BLACK);
 
       btn_ArrowUp.drawButton(CUSTOM_GREEN);
       btn_ArrowDown.drawButton(CUSTOM_RED);
-
-      btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
     }
     else if (!btnActive && (!autoStackInitiated || autoStackPaused)) {
       setArrowsEnabled(false);
       setEditMovementDistance(false);
 
+      // TODO would be nice to not re-write the top line on every arrow press
+      btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
+
       btn_ArrowUp.drawButton(BLACK);
       btn_ArrowDown.drawButton(BLACK);
 
       btn_PlayPause.drawNewBitmap(play, CUSTOM_GREEN);
-
-      // TODO would be nice to not re-write the top line on every arrow press
-      btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
     }
     else {
       // set back to off if conditions above not met
       btn_StepSize.setToggleActive(false);
-    }
-  }
-
-
-  void func_Flash(bool btnActive) {
-    if (!isShutterEnabled()) {
-      setShutterEnabled(true);
-      btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
-    }
-    else if (isShutterEnabled()) {
-      setShutterEnabled(false);
-      btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
     }
   }
 

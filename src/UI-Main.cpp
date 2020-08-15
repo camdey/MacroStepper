@@ -1,11 +1,13 @@
 #include "GlobalVariables.h"
 #include "UI-Main.h"
+#include "UI-Global.h"
 #include "UI-Home.h"
 #include "UI-Flash.h"
 #include "UI-Manual.h"
 #include "UI-Auto.h"
 #include "UI-AutoConfig.h"
 
+using namespace global;
 using namespace manual_screen;
 using namespace home_screen;
 using namespace flash_screen;
@@ -18,6 +20,7 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
   btn.setToggleDelay(toggleDebounce);
   btn.setMomentaryDelay(momentaryDebounce);
 
+  initGlobalButtons();
   initHomeButtons();
   initFlashButtons();
   initManualButtons();

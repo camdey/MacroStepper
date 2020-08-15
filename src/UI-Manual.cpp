@@ -4,6 +4,7 @@
 #include "StepperControl.h"
 #include "UI-Main.h"
 #include "UI-Manual.h"
+#include "UI-Global.h"
 
 
 namespace manual_screen {
@@ -17,7 +18,7 @@ namespace manual_screen {
   gfxButton btn_StepSize    =   btn.initButton("Step Size", "fillRoundRect", 0,   20,  160,  80,  15,  DARKGRAY, true  );
   gfxButton btn_StepNr      =   btn.initButton("Step Nr.",  "fillRoundRect", 0,  120,  160,  80,  15,  DARKGRAY, false );
   gfxButton btn_RailPos     =   btn.initButton("Rail Pos.", "fillRoundRect", 0,  220,  160,  80,  15,  DARKGRAY, false );
-  gfxButton btn_Flash       =   btn.initBitmapButton(flashOff,   220,  20,   80,   80,   CUSTOM_RED,   true  );
+  // gfxButton btn_Flash       =   btn.initBitmapButton(flashOff,   220,  20,   80,   80,   CUSTOM_RED,   true  ); // added to global buttons
   gfxButton btn_Reset       =   btn.initBitmapButton(cancel,     220,  120,  80,   80,   WHITE,        true  );
   gfxButton btn_Back        =   btn.initBitmapButton(backArrow,  220,  220,  80,   80,   WHITE,        true  );
   gfxButton btn_ArrowUp     =   btn.initBitmapButton(arrowUp,    350,  20,   120,  120,  CUSTOM_GREEN, true  );
@@ -26,16 +27,15 @@ namespace manual_screen {
 
   void initManualButtons() {
     btn_array[0] = &btn_StepSize;
-    btn_array[1] = &btn_Flash;
-    btn_array[2] = &btn_ArrowUp;
-    btn_array[3] = &btn_StepNr;
+    btn_array[1] = &btn_StepNr;
+    btn_array[2] = &btn_RailPos;
+    btn_array[3] = &global::btn_Flash;
     btn_array[4] = &btn_Reset;
-    btn_array[5] = &btn_RailPos;
-    btn_array[6] = &btn_Back;
+    btn_array[5] = &btn_Back;
+    btn_array[6] = &btn_ArrowUp;
     btn_array[7] = &btn_ArrowDown;
 
     btn_StepSize.addToggle(func_StepDistance, 0);
-    btn_Flash.addToggle(func_Flash, 0);
     btn_Reset.addMomentary(func_Reset, 0);
     btn_Back.addMomentary(func_Back, 0);
     btn_ArrowUp.addMomentary(func_ArrowUp, 0);
@@ -49,6 +49,7 @@ namespace manual_screen {
 
   void populateManualScreen() {
     setCurrentScreen("Manual");
+
     stepNr  = String(movementCount);
     railPos = String(driver.XACTUAL()*(microstepLength/1000), 5);
 
@@ -56,12 +57,7 @@ namespace manual_screen {
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton();
     }
-    if (!isShutterEnabled()) {
-      btn_Flash.drawButton(CUSTOM_RED);
-    }
-    else if (isShutterEnabled()) {
-      btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
-    }
+
     // draw text
     btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
     btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
@@ -96,19 +92,6 @@ namespace manual_screen {
       // TODO would be nice to not re-write the top line on every arrow press
       btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
       btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
-    }
-  }
-
-
-  void func_Flash(bool btnActive) {
-    if (!isShutterEnabled()) {
-      setShutterEnabled(true);
-      btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
-    }
-    else if (isShutterEnabled()) {
-      setShutterEnabled(false);
-      // use drawNewButton so previous bitmap is filled over
-      btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
     }
   }
 
