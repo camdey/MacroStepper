@@ -52,8 +52,8 @@ gfxTouch        gfxT;
 
 
 // --- currentTimes and elapsed times --- //
-unsigned long prevButtonCheck 		= 0;    			// time subroutine1 last ran
-unsigned long prevJoystickCheck 	= 0;    			// time subroutine2 last ran
+unsigned long prevButtonCheck 		= 0;    		
+unsigned long prevJoystickCheck 	= 0;    			
 unsigned long recycleTime 				= 1000;    		// duration to take photo
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup

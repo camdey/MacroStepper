@@ -2,7 +2,7 @@
 #include "MiscFunctions.h"
 
 bool arrowsEnabled              = false;
-bool shutterEnabled              = false;        // if true, will try to take a photo during autoStack or manual movement
+bool shutterEnabled             = false;        // if true, will try to take a photo during autoStack or manual movement
 String currentScreen            = "Home";       // set current screen shown to user
 bool editShutterDelay           = false;        // set shutter delay time
 bool editStartPosition          = false;        // set start point for auto mode
@@ -271,7 +271,7 @@ long getLastMillis() {
 }
 
 
-// Set the last millis() reading when flash was triggered successfully
+// Set the last millis() reading when a step was taken during AutoStack
 void setLastFlashTime(long millis) {
   lastFlashTime = millis;
 }
