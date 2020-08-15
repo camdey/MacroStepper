@@ -45,8 +45,7 @@
 extern TouchScreen      ts;
 extern TMC5160Stepper   driver;
 extern MCUFRIEND_kbv 	tft;
-extern gfxButton        gfxB;
-extern gfxTouch         gfxT;
+extern gfxButton        btn;
 
 // Definitions for some common 16-bit color values:
 #define	BLACK   						0x0000

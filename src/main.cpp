@@ -1,7 +1,7 @@
-// ********* Macro Stepper v2.1 *********
+// ********* Macro Stepper v2.2 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2020-04-10
+// *** UPDATED: 2020-08-15
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -47,8 +47,7 @@
 TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
 TMC5160Stepper  driver(CS_PIN, R_SENSE);
 MCUFRIEND_kbv 	tft;
-gfxButton       gfxB;
-gfxTouch        gfxT;
+gfxButton       btn;
 
 
 // --- currentTimes and elapsed times --- //
@@ -108,10 +107,10 @@ void setup(void) {
 
   // don't home rail on start up
   runHomingSequence = false;
-
+  btn.begin(&tft);
+  btn.setScreenSize(480, 320);
   initButtons(200, 75);
   populateScreen("Home");
-
 }
 
 void loop() {
@@ -121,7 +120,7 @@ void loop() {
   }
   // take touch reading
   if (millis() - prevButtonCheck >= 50) {
-    checkButtons(getCurrentScreen());
+    readTouchScreen(getCurrentScreen());
     prevButtonCheck = millis();
   }
   // take joystick and limit switch reading, put stepper to sleep
