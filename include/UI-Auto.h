@@ -18,5 +18,6 @@ namespace auto_screen {
   void pauseStack();
   void estimateDuration();
   void printAutoStackProgress();
+  void hideArrows(bool hide);
 }
 #endif

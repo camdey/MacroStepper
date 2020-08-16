@@ -1,11 +1,13 @@
 #include "GlobalVariables.h"
 #include "UI-Main.h"
+#include "UI-Global.h"
 #include "UI-Home.h"
 #include "UI-Flash.h"
 #include "UI-Manual.h"
 #include "UI-Auto.h"
 #include "UI-AutoConfig.h"
 
+using namespace global;
 using namespace manual_screen;
 using namespace home_screen;
 using namespace flash_screen;
@@ -14,10 +16,11 @@ using namespace config_screen;
 
 
 void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) {
-  gfxB.setBackgroundColour(BLACK);
-  gfxT.setToggleDebounce(toggleDebounce);
-  gfxT.setMomentaryDebounce(momentaryDebounce);
+  btn.setBackgroundColour(BLACK);
+  btn.setToggleDelay(toggleDebounce);
+  btn.setMomentaryDelay(momentaryDebounce);
 
+  initGlobalButtons();
   initHomeButtons();
   initFlashButtons();
   initManualButtons();
@@ -49,7 +52,7 @@ void populateScreen(String screen) {
 }
 
 
-void checkButtons(String screen) {
+void readTouchScreen(String screen) {
   TSPoint point = ts.getPoint();
 
   // reset pinModes for tft (otherwise can't draw!)
@@ -88,10 +91,10 @@ void checkButtons(String screen) {
       }
     }
   }
-  else if (touch_z == 0 && gfxT.getToggleFlag()) {
+  else if (touch_z == 0 && btn.isToggleActive()) {
     // if toggle active, reset flag to false when
     // no touch is recorded
-    gfxT.setToggleFlag(false);
+    btn.setToggleActive(false);
   }
 }
 
