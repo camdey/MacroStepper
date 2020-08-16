@@ -5,7 +5,7 @@
 #include "VariableDeclarations.h"
 
 void setArrowsEnabled(bool state);
-bool isArrowsEnabled();
+bool areArrowsEnabled();
 void setShutterEnabled(bool enabled);
 bool isShutterEnabled();
 void setCurrentScreen(String screen);

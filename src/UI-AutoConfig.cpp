@@ -171,7 +171,7 @@ namespace config_screen {
 
   // called when back arrow is pressed
   void func_Back(bool btnActive) {
-    if (btnActive && !isArrowsEnabled()) {
+    if (btnActive && !areArrowsEnabled()) {
       populateScreen("Auto");
     }
   }
@@ -179,7 +179,7 @@ namespace config_screen {
 
   // called when up arrow is pressed, either updates start/end or shutterDelay
   void func_ArrowUp(bool btnActive) {
-    if (btnActive && isArrowsEnabled()) {
+    if (btnActive && areArrowsEnabled()) {
       // edit start postion
       if (canEditStartPosition()) {
         executeMovement(1, 150); // forward
@@ -203,7 +203,7 @@ namespace config_screen {
 
   // called when down arrow is pressed, either updates start/end or shutterDelay
   void func_ArrowDown(bool btnActive) {
-    if (btnActive && isArrowsEnabled()) {
+    if (btnActive && areArrowsEnabled()) {
       // edit start postion
       if (canEditStartPosition()) {
         executeMovement(-1, 150); // backwards

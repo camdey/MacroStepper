@@ -78,10 +78,10 @@ namespace auto_screen {
       }
     }
     // check play/pause and up/down arrow separately, depending which is active
-    if (!isArrowsEnabled()) {
+    if (!areArrowsEnabled()) {
       btn_PlayPause.contains(touch_x, touch_y);
     }
-    else if (isArrowsEnabled()) {
+    else if (areArrowsEnabled()) {
       btn_ArrowUp.contains(touch_x, touch_y);
       btn_ArrowDown.contains(touch_x, touch_y);
     }
@@ -123,26 +123,26 @@ namespace auto_screen {
 
 
   void func_Config(bool btnActive) {
-    if (btnActive && !isArrowsEnabled()) {
+    if (btnActive && !areArrowsEnabled()) {
       populateScreen("AutoConfig");
     }
   }
 
 
   void func_Back(bool btnActive) {
-    if (btnActive && !isArrowsEnabled()) {
+    if (btnActive && !areArrowsEnabled()) {
       populateScreen("Home");
     }
   }
 
 
   void func_PlayPause(bool btnActive) {
-    if (btnActive && !isArrowsEnabled()) {
+    if (btnActive && !areArrowsEnabled()) {
       autoStackInitiated = true;   // start autoStack sequence
       autoStackPaused = false;
       btn_PlayPause.drawNewBitmap(pause, CUSTOM_BLUE);
     }
-    else if (!btnActive && !isArrowsEnabled()) {
+    else if (!btnActive && !areArrowsEnabled()) {
       autoStackPaused = true;  // autoStack paused
       btn_PlayPause.drawNewBitmap(play, CUSTOM_GREEN);
     }
@@ -160,7 +160,7 @@ namespace auto_screen {
 
 
   void func_ArrowUp(bool btnActive) {
-    if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
+    if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
       incrementStepsPerMovement();
       calculateStepSize();
       btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
@@ -169,7 +169,7 @@ namespace auto_screen {
 
 
   void func_ArrowDown(bool btnActive) {
-    if (btnActive && canEditMovementDistance() && isArrowsEnabled()) {
+    if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
       decrementStepsPerMovement();
       calculateStepSize();
       btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));

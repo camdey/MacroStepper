@@ -106,7 +106,7 @@ namespace manual_screen {
 
 
   void func_Back(bool btnActive) {
-    if (btnActive && !isArrowsEnabled()) {
+    if (btnActive && !areArrowsEnabled()) {
       populateScreen("Home");
     }
   }
@@ -115,7 +115,7 @@ namespace manual_screen {
   void func_ArrowUp(bool btnActive) {
     if (btnActive) {
       // if setting step size
-      if (canEditMovementDistance() && isArrowsEnabled()) {
+      if (canEditMovementDistance() && areArrowsEnabled()) {
         incrementStepsPerMovement();
         calculateStepSize();
         btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
@@ -139,7 +139,7 @@ namespace manual_screen {
   void func_ArrowDown(bool btnActive) {
     if (btnActive) {
       // if setting step size
-      if (canEditMovementDistance() && isArrowsEnabled()) {
+      if (canEditMovementDistance() && areArrowsEnabled()) {
         decrementStepsPerMovement();
         calculateStepSize();
         btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));

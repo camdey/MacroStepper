@@ -42,7 +42,7 @@ void setArrowsEnabled(bool state) {
 
 
 // Get the state of the GUI arrows
-bool isArrowsEnabled() {
+bool areArrowsEnabled() {
   return arrowsEnabled;
 }
 
