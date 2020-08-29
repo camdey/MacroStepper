@@ -16,7 +16,6 @@ namespace auto_screen {
   // gfxButton btn_Flash        =   btn.initBitmapButton(flashOff,   220,  20,   80, 80, CUSTOM_RED, true  ); // added to global buttons
   gfxButton btn_Config       =   btn.initBitmapButton(cogWheel,   220,  120,  80, 80, WHITE,      true  );
   gfxButton btn_Back         =   btn.initBitmapButton(backArrow,  220,  220,  80, 80, WHITE,      true  );
-  // don't add these buttons to an array as they depend on logic as to which symbol appears and in which colour
   gfxButton btn_PlayPause    =   btn.initBitmapButton(play,       350,  100,  120,  120,  CUSTOM_GREEN, true);
   gfxButton btn_ArrowUp      =   btn.initBitmapButton(arrowUp,    350,  20,   120,  120,  CUSTOM_GREEN, true);
   gfxButton btn_ArrowDown    =   btn.initBitmapButton(arrowDown,  350,  180,  120,  120,  CUSTOM_RED,   true);

@@ -35,9 +35,11 @@
 #include <Icons/FlashBulb.h>
 #include <Icons/FlashOn.h>
 #include <Icons/FlashOff.h>
+#include <Icons/Home.h>
 #include <Icons/MainLogo.h>
 #include <Icons/Play.h>
 #include <Icons/Pause.h>
+#include <Icons/Rocket.h>
 #include <Icons/Rotate.h>
 #include <Icons/Target.h>
 #include <Icons/Timer.h>

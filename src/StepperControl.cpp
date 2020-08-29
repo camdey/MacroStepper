@@ -185,6 +185,24 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 }
 
 
+// execute a predetermined number of steps
+void executeSteps(long nrSteps) {
+  // change to StealthChop is StallGuard is configured
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
+  if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+
+  long targetPosition = driver.XACTUAL() + nrSteps;
+  // set new target position
+  driver.XTARGET(targetPosition);
+  // wait for stepper to reach target position
+  while(driver.XACTUAL() != driver.XTARGET()) {}
+}
+
+
 // find the forward and backward end stops of the linear rail using StallGuard
 // moves stepper backwards until stall detected, records position
 // moves stepper forwards until stall detected, records position and sets position as maximum value (384,000)

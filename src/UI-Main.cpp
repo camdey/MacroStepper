@@ -2,6 +2,7 @@
 #include "UI-Main.h"
 #include "UI-Global.h"
 #include "UI-Home.h"
+#include "UI-Target.h"
 #include "UI-Flash.h"
 #include "UI-Manual.h"
 #include "UI-Auto.h"
@@ -10,6 +11,7 @@
 using namespace global;
 using namespace manual_screen;
 using namespace home_screen;
+using namespace target_screen;
 using namespace flash_screen;
 using namespace auto_screen;
 using namespace config_screen;
@@ -22,11 +24,11 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
 
   initGlobalButtons();
   initHomeButtons();
+  initTargetButtons();
   initFlashButtons();
   initManualButtons();
   initAutoButtons();
   initAutoConfigButtons();
-
 }
 
 
@@ -36,6 +38,9 @@ void populateScreen(String screen) {
   tft.fillScreen(BLACK);
   if (screen == "Home") {
     populateHomeScreen();
+  }
+  if (screen == "Target") {
+    populateTargetScreen();
   }
   else if (screen == "Flash") {
     populateFlashScreen();
@@ -76,6 +81,9 @@ void readTouchScreen(String screen) {
     if ((touch_x > 0 && touch_x <= tft.width()) && (touch_y > 0 && touch_y <= tft.height())) {
       if (screen == "Home") {
         checkHomeButtons(touch_x, touch_y);
+      }
+      else if (screen == "Target") {
+        checkTargetButtons(touch_x, touch_y);
       }
       else if (screen == "Flash") {
         checkFlashButtons(touch_x, touch_y);

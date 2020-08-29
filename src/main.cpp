@@ -38,6 +38,7 @@
 #include "UI-Main.h"
 #include "UI-Home.h"
 #include "UI-Manual.h"
+#include "UI-Target.h"
 #include "UI-Flash.h"
 #include "UI-Auto.h"
 #include "UI-AutoConfig.h"

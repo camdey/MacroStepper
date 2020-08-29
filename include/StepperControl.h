@@ -10,6 +10,7 @@ void homeRail();
 void debugStallGuard();
 bool detectEndStop();
 void executeMovement(int stepDirection, unsigned long stepperDelay);
+void executeSteps(long nrSteps);
 void goToStart();
 void overshootPosition(int startPosition, int numberOfSteps);
 void terminateAutoStack();
