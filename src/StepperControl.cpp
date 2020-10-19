@@ -6,6 +6,7 @@
 #include "UI-Main.h"
 #include "UI-Auto.h"
 #include "UI-AutoConfig.h"
+#include "UI-Global.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -29,33 +30,27 @@ void autoStack() {
     setExecutedMovement(false);
     setShutterTriggered(false);
     setLastStepTime(millis());
+    global::func_Reset(false);              // change reset button to red
   }
 
-  bool shutterFailed = false;               // store result of shutter trigger attempt
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
-	    triggerShutter();                     // take photo
-      if (!hasShutterTriggered()) {
-        long retryStart = millis();
-        shutterFailed = true;               // used to set one-off delay later
-        while (!hasShutterTriggered()) {    // retry triggering shutter
-          triggerShutter();
-          if (hasShutterTriggered()) {
-            break;                          // if retry successful, break
-          }
-          else if (millis() - retryStart >= 10000) {
-            auto_screen::pauseStack();      // pause autostack so user can troubleshoot flash issue
-            populateScreen("Flash");        // go to flashScreen if can't trigger after 10 seconds
-            break;
-          }
-        }
+      if (flashStep == start) {
+        triggerShutter();                   // take photo and fire flash
+      }
+      else {
+        runFlashProcedure(false);           // keep trying to fire flash
+      }
+      if (flashStep == isUnresponsive) {
+        auto_screen::pauseStack();          // pause autostack so user can troubleshoot flash issue
+        populateScreen("Flash");            // go to flashScreen if can't trigger after 10 seconds
       }
 		}
     // only move if autoStack hasn't been paused by flash failure
-    // and there's been >= 500ms since the flash was triggered successfully (gives time for vibration to settle)
-    if (!autoStackPaused && millis() - getLastFlashTime() >= 500) {
-  		executeMovement(1, getShutterDelay()*1000);
+    if (!autoStackPaused && (!isShutterEnabled() || hasShutterTriggered())) {
+      unsigned long delay = getShutterDelay()*1000 + recycleTime;
+  		executeMovement(1, delay);
     }
 
 		if (hasExecutedMovement()) {
@@ -67,10 +62,6 @@ void autoStack() {
 			setShutterTriggered(false);           // reset shutter triggered flag
 			setExecutedMovement(false);           // reset executed movement flag
 		}
-
-    if (shutterFailed) {
-      delay(10000);                         // 10 second delay to prevent trying to take another photo immediately after
-    }
   }
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
     terminateAutoStack();                   // stop AutoStack sequence if end reached
@@ -305,17 +296,18 @@ void overshootPosition(int startPosition, int numberOfSteps) {
 // clean up variables etc after completing AutoStack sequence
 void terminateAutoStack() {
   if (getCurrentScreen() != "Auto") {
-    populateScreen("Auto");           // go back to Auto screen if not already on it
+    populateScreen("Auto");                   // go back to Auto screen if not already on it
   }
-  auto_screen::estimateDuration();    // update estimate
+  auto_screen::estimateDuration();            // update estimate
   autoStackInitiated = false;
   isNewAutoStack = true;
   setShutterTriggered(false);
-  auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
-  autoStackPaused = false;            // autoStack is completed but not paused
-  setNrMovementsCompleted(0);         // reset completed movements count
+  auto_screen::pauseStack();                  // reset PlayPause button to "paused" mode"
+  autoStackPaused = false;                    // autoStack is completed but not paused
+  setNrMovementsCompleted(0);                 // reset completed movements count
   setExecutedMovement(false);
-  produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
+  global::btn_Reset.updateColour(BLACK);      // change reset button back to black
+  produceTone(4, 300, 200);                   // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
   setTargetVelocity(stealthChopMaxVelocity);
 }

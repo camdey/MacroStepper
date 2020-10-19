@@ -13,7 +13,7 @@ namespace home_screen {
   gfxButton btn_Auto      =   btn.initButton("Auto",   "fillRoundRect",  270,  120,  180,  80, 15, CUSTOM_GREEN, true  );
   gfxButton btn_Logo      =   btn.initBitmapButton(logo,        50,   5,    380,  105,  CUSTOM_YELLOW,  true  );
   gfxButton btn_Home      =   btn.initBitmapButton(home,        20,   230,  80,   80,   WHITE,          true  );
-  gfxButton btn_Target     =   btn.initBitmapButton(target,      140,  230,  80,   80,   WHITE,          true  );
+  gfxButton btn_Target    =   btn.initBitmapButton(target,      140,  230,  80,   80,   WHITE,          true  );
   gfxButton btn_Flash     =   btn.initBitmapButton(flashBulb,   260,  230,  80,   80,   WHITE,          true  );
   gfxButton btn_Rotate    =   btn.initBitmapButton(rotate,      380,  230,  80,   80,   WHITE,          true  );
 

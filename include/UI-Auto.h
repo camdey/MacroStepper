@@ -9,7 +9,6 @@ namespace auto_screen {
   void populateAutoScreen();
   void checkAutoButtons(int touch_x, int touch_y);
   void func_StepDistance(bool btnActive);
-  void func_Flash(bool btnActive);
   void func_Config(bool btnActive);
   void func_Back(bool btnActive);
   void func_PlayPause(bool btnActive);

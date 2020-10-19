@@ -4,7 +4,18 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void checkFlashStatus();
+bool isFlashReady();
 void triggerShutter();
+void runFlashProcedure(bool restart);
+enum fireFlashStep {
+    start,
+    isFlashAvailable,
+    enableShutter,
+    isFlashUnavailable,
+    disableShutter,
+    isSuccessful,
+    isUnresponsive
+};
+fireFlashStep flashStep = start;
 
 #endif

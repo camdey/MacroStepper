@@ -3,11 +3,13 @@
 #include "UI-Main.h"
 
 namespace global {
-  gfxButton btn_Flash = btn.initBitmapButton(flashOff,  220,    20, 80, 80, CUSTOM_RED, true);
+  gfxButton btn_Flash = btn.initBitmapButton(flashOff,  220,  20,   80, 80, CUSTOM_RED, true  );
+  gfxButton btn_Reset = btn.initBitmapButton(cancel,    220,  120,  80, 80, BLACK,      true  );
 
 
   void initGlobalButtons() {
     btn_Flash.addToggle(func_Flash, 0);
+    btn_Reset.addMomentary(func_Reset, 0);
   }
 
   void func_Flash(bool btnActive) {
@@ -22,6 +24,26 @@ namespace global {
       btn_Flash.updateBitmap(flashOff);
       btn_Flash.updateColour(CUSTOM_RED);
       btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
+    }
+  }
+
+  // reset AutoStack procedure to default values
+  void func_Reset(bool btnActive) {
+    // if button pressed and autostack active...
+    if (btnActive && autoStackInitiated) {
+      autoStackInitiated = false;
+      isNewAutoStack = true;
+      autoStackPaused = false;
+      setNrMovementsCompleted(0);
+      setNrMovementsRequired(0);
+      setStartPosition(driver.XACTUAL());
+      setEndPosition(driver.XACTUAL());
+      btn_Reset.updateColour(BLACK);
+      btn_Reset.drawButton(BLACK);
+    }
+    // if function called from elsewhere...
+    else if (autoStackInitiated) {
+      btn_Reset.updateColour(CUSTOM_RED);
     }
   }
 }

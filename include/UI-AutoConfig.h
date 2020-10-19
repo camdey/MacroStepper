@@ -13,7 +13,6 @@ namespace config_screen {
   void func_Config(bool btnActive);
   void func_Run(bool btnActive);
   void func_Delay(bool btnActive);
-  void func_Reset(bool btnActive);
   void func_Back(bool btnActive);
   void func_ArrowUp(bool btnActive);
   void func_ArrowDown(bool btnActive);

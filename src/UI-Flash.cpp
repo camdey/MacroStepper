@@ -6,26 +6,29 @@
 
 namespace flash_screen {
 
-  #define num_btns 5
+  #define num_btns 6
   gfxButton *btn_array[num_btns];
 
   // TODO maybe only have one button to set values and just record the max and min value
-  gfxButton btn_FlashOff   =   btn.initButton("Off Value",  "fillRoundRect",  0,    20,   160,  80, 15, CUSTOM_RED,   true  );
-  gfxButton btn_FlashOn    =   btn.initButton("On Value",   "fillRoundRect",  0,    120,  160,  80, 15, CUSTOM_GREEN, true  );
-  gfxButton btn_Threshold  =   btn.initButton("Threshold",  "fillRoundRect",  320,  20,   160,  80, 15, CUSTOM_BLUE,  true  );
-  gfxButton btn_FlashTest  =   btn.initTransparentButton(       320,  120,  160,  80,         true  );
-  gfxButton btn_Back       =   btn.initBitmapButton(backArrow,  220,  220,  80,   80, WHITE,  true  );
+  gfxButton btn_FlashOff    =   btn.initButton("Off Value",  "fillRoundRect",  0,    20,   160,  80, 15, CUSTOM_RED,   true  );
+  gfxButton btn_FlashOn     =   btn.initButton("On Value",   "fillRoundRect",  0,    120,  160,  80, 15, CUSTOM_GREEN, true  );
+  gfxButton btn_Threshold   =   btn.initButton("Threshold",  "fillRoundRect",  320,  20,   160,  80, 15, CUSTOM_BLUE,  true  );
+  gfxButton btn_FlashTest   =   btn.initTransparentButton(        320,  120,  160,  80,                 true  );
+  gfxButton btn_BulbState   =   btn.initBitmapButton(flashBulb,   220,  20,   80,   80, CUSTOM_GREEN,   true  );
+  gfxButton btn_Back        =   btn.initBitmapButton(backArrow,   220,  220,  80,   80, WHITE,          true  );
 
   void initFlashButtons() {
     btn_array[0] = &btn_FlashOff;
     btn_array[1] = &btn_FlashOn;
     btn_array[2] = &btn_Threshold;
-    btn_array[3] = &btn_FlashTest;
-    btn_array[4] = &btn_Back;
+    btn_array[3] = &btn_BulbState;
+    btn_array[4] = &btn_FlashTest;
+    btn_array[5] = &btn_Back;
 
     btn_FlashOff.addToggle(func_FlashOff,0);
     btn_FlashOn.addToggle(func_FlashOn, 0);
     btn_FlashTest.addMomentary(func_FlashTest, 0);
+    btn_BulbState.addToggle(func_BulbState, 0);
     btn_Back.addMomentary(func_Back, 0);
 
     btn_FlashOff.addBorder(3, WHITE);
@@ -36,7 +39,7 @@ namespace flash_screen {
 
   void populateFlashScreen() {
     setCurrentScreen("Flash");
-    checkFlashStatus(); // get latest values
+    isFlashReady(); // get latest values
     // draw buttons
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton();
@@ -89,6 +92,20 @@ namespace flash_screen {
   }
 
 
+  void func_BulbState(bool btnActive) {
+    if (btnActive) {
+      btn_BulbState.updateColour(CUSTOM_RED);
+      btn_BulbState.drawButton();
+      setBulbEnabled(false);
+    }
+    else if (!btnActive) {
+      btn_BulbState.updateColour(CUSTOM_GREEN);
+      btn_BulbState.drawButton();
+      setBulbEnabled(true);
+    }
+  }
+
+
   void func_FlashTest(bool btnActive) {
     if (btnActive) {
      setTestingFlash(true); // prevents leaving screen while testing flash
@@ -132,7 +149,7 @@ namespace flash_screen {
   ***********************************************************************/
   void updateGodoxValue() {
     // get latest godoxValue reading
-    checkFlashStatus();
+    isFlashReady();
 
     // if difference from previous reading > 1, updates value on screen
     if (abs(getGodoxValue() - flashOffValue) > 1 && canEditFlashOffValue()) {

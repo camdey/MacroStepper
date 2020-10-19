@@ -43,8 +43,8 @@ long getEndPosition();
 bool hasReachedTargetPosition();
 void setLastMillis(long millis);
 long getLastMillis();
-void setLastFlashTime(long millis);
-long getLastFlashTime();
+void setFlashTriggerTime(long millis);
+long getFlashTriggerTime();
 void setLastStepTime(long millis);
 long getLastStepTime();
 void setNrMovementsCompleted(int nrMovements);
@@ -74,5 +74,7 @@ void setTargetVelocity(long velocity);
 long getTargetVelocity();
 void setTestingFlash(bool state);
 bool isTestingFlash();
+void setBulbEnabled(bool enabled);
+bool isBulbEnabled();
 
 #endif

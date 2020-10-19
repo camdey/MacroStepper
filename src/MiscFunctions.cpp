@@ -42,8 +42,8 @@ void calculateStepSize() {
   // constrain multiplier range
   if (getStepsPerMovement() < 1) {
     setStepsPerMovement(1);
-  } else if (getStepsPerMovement() > 100) {
-    setStepsPerMovement(100);
+  } else if (getStepsPerMovement() > maxStepsPerMovement) {
+    setStepsPerMovement(maxStepsPerMovement);
   }
 
   distancePerMovement = microstepLength * getStepsPerMovement();

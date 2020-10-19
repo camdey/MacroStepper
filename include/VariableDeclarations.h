@@ -81,6 +81,7 @@ extern gfxButton        btn;
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
 #define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement 
 #define stealthChopMaxVelocity      200000          // max target velocity (VMAX) during StealthChop movements 
+#define maxStepsPerMovement         300             // maximum number of steps allowed per movement
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT

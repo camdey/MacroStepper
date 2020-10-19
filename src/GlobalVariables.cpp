@@ -18,7 +18,7 @@ long BackwardEndStopPosition    = 1;            // position of the backward end 
 long startPosition              = 0;            // starting position of an AutoStack sequence
 long endPosition                = 0;            // end position of an AutoStack sequence
 long lastMillis                 = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
-long lastFlashTime              = 0;            // last millis time flash was triggered successfully
+long flashTriggerTime              = 0;            // last millis time flash was triggered successfully
 long lastStepTime               = 0;            // last millis time a step was executed
 bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
 int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
@@ -33,6 +33,7 @@ float stepSize                  = 5.0000;       // distance travelled per moveme
 int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
+bool bulbEnabled                = true;        // is flash bulb enabled, or only take photos without flash?
 
  
 // Set the state of the GUI arrows to on/off 
@@ -271,15 +272,15 @@ long getLastMillis() {
 }
 
 
-// Set the last millis() reading when a step was taken during AutoStack
-void setLastFlashTime(long millis) {
-  lastFlashTime = millis;
+// Set the last millis() reading when flash triggering began
+void setFlashTriggerTime(long millis) {
+  flashTriggerTime = millis;
 }
 
 
-// Get the last millis() reading when flash was triggered successfully
-long getLastFlashTime() {
-  return lastFlashTime;
+// Get the last millis() reading when flash triggering began
+long getFlashTriggerTime() {
+  return flashTriggerTime;
 }
 
 
@@ -468,4 +469,13 @@ void setTargetVelocity(long velocity) {
 // get target velocity for stepper (VMAX)
 long getTargetVelocity() {
   return targetVelocity;
+}
+
+
+void setBulbEnabled(bool enabled) {
+  bulbEnabled = enabled;
+}
+
+bool isBulbEnabled() {
+  return bulbEnabled;
 }

@@ -54,7 +54,7 @@ gfxButton       btn;
 // --- currentTimes and elapsed times --- //
 unsigned long prevButtonCheck 		= 0;    		
 unsigned long prevJoystickCheck 	= 0;    			
-unsigned long recycleTime 				= 1000;    		// duration to take photo
+unsigned long recycleTime 				= 0;    		// duration to take photo
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
 int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
@@ -142,12 +142,6 @@ void loop() {
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
 			flash_screen::updateGodoxValue();
 		}
-  //   // set END as maxRailPosition if Z Stick depressed
-  //   if (getCurrentScreen() == "AutoConfig" && canEditEndPosition() && digitalRead(ZSTICK_PIN) == LOW) {
-  //     autoStackMax = true;
-  //     config_screen::updateEndPosition();
-  //     autoStackMax = false;
-  //   }
     prevJoystickCheck = millis();
   }
 
