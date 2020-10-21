@@ -20,7 +20,7 @@ bool isFlashReady() {
   setGodoxValue(round(adjustedVal*1.00 / 10000));
   // update threshold, e.g. ((310-50)*0.75)+50 = 245
   flashThreshold = int(((flashOnValue - flashOffValue) * 0.75) + flashOffValue);
-  Serial.print("godoxVal: "); Serial.println(getGodoxValue());
+  // Serial.print("godoxVal: "); Serial.println(getGodoxValue());
   if (getGodoxValue() >= flashThreshold) {
     setFlashAvailable(true);
   }
@@ -42,11 +42,11 @@ continually checked to see if it has triggered (red LED goes off)
 // 	setShutterTriggered(false);
 
 //   // if flash bulb enabled
-//   if (isBulbEnabled()) {
+//   if (isFlashSensorEnabled()) {
 //     unsigned long startTime = millis();
 
 //     // wait for flash to be ready first
-//     while (!isFlashAvailable()) {
+//     while (!isFlashAvailableOld()) {
 //       if (millis() - getLastMillis() >= 10) {
 //         isFlashReady();
 //         // break if flash not available after 5s
@@ -58,14 +58,14 @@ continually checked to see if it has triggered (red LED goes off)
 //     }
 //     // trigger flash
 //     digitalWrite(SONY_PIN, HIGH);
-//     // wait for flash to be fired, isFlashAvailable() will be false as godox LED will briefly turn off
-//     while (millis() - startTime <= 1500 && isFlashAvailable()) {
+//     // wait for flash to be fired, isFlashAvailableOld() will be false as godox LED will briefly turn off
+//     while (millis() - startTime <= 1500 && isFlashAvailableOld()) {
 //       if (millis() - getLastMillis() >= 10) {
 //         isFlashReady();
 //         setLastMillis(millis());
 //       }
 //     }
-//     if (!isFlashAvailable()) {
+//     if (!isFlashAvailableOld()) {
 //       setShutterTriggered(true);
 //       setFlashTriggerTime(millis());
 //     }
@@ -84,7 +84,7 @@ continually checked to see if it has triggered (red LED goes off)
 // }
 
 void triggerShutter() {
-  if (isBulbEnabled()) {
+  if (isFlashSensorEnabled()) {
     runFlashProcedure(true);
   }
   else {
@@ -104,33 +104,41 @@ void triggerShutter() {
 
 void runFlashProcedure(bool restart) {
   if (restart) {
-    flashStep = isFlashAvailable;
+    flashProcedureStage = checkFlashAvailable;
     setFlashTriggerTime(millis());
     setShutterTriggered(false);
+    Serial.println("checkFlashAvailable");
   }
   // begin flash sequence
-  if (flashStep == isFlashAvailable) {
+  if (flashProcedureStage == checkFlashAvailable) {
     if (isFlashReady()) {
-      flashStep = enableShutter;
+      flashProcedureStage = enableShutter;
+      Serial.println("enableShutter");
     }
   }
-  else if (flashStep == enableShutter) {
+  else if (flashProcedureStage == enableShutter) {
     digitalWrite(SONY_PIN, HIGH);
-    flashStep = isFlashUnavailable;
+    flashProcedureStage = checkFlashUnavailable;
+    Serial.println("checkFlashUnavailable");
   }
-  else if (flashStep == isFlashUnavailable) {
+  else if (flashProcedureStage == checkFlashUnavailable) {
     if (!isFlashReady()) {
-      flashStep = disableShutter;
+      flashProcedureStage = disableShutter;
+      Serial.println("disableShutter");
     }
   }
-  else if (flashStep == disableShutter) {
+  else if (flashProcedureStage == disableShutter) {
     digitalWrite(SONY_PIN, LOW);
-    flashStep = isSuccessful;
+    flashProcedureStage = isSuccessful;
+    Serial.println("isSuccessful");
     recycleTime = (millis() - getFlashTriggerTime());
     setShutterTriggered(true);
   }
-  else if (millis() - getFlashTriggerTime() >= 6000) {
-    flashStep = isUnresponsive;
+  // fail over
+  if (millis() - getFlashTriggerTime() >= 6000 && (flashProcedureStage == checkFlashUnavailable || flashProcedureStage == checkFlashAvailable)) {
+    flashProcedureStage = isUnresponsive;
+    digitalWrite(SONY_PIN, LOW);
+    Serial.println("isUnresponsive");
   }
 }
 

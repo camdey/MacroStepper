@@ -33,7 +33,7 @@ float stepSize                  = 5.0000;       // distance travelled per moveme
 int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
-bool bulbEnabled                = true;        // is flash bulb enabled, or only take photos without flash?
+bool flashSensorEnabled                = true;        // is flash bulb enabled, or only take photos without flash?
 
  
 // Set the state of the GUI arrows to on/off 
@@ -162,7 +162,7 @@ void setFlashAvailable(bool available) {
 
 
 // Check if flash is available to trigger or not
-bool isFlashAvailable() {
+bool isFlashAvailableOld() {
     return flashAvailable;
 }
 
@@ -472,10 +472,10 @@ long getTargetVelocity() {
 }
 
 
-void setBulbEnabled(bool enabled) {
-  bulbEnabled = enabled;
+void setFlashSensorEnabled(bool enabled) {
+  flashSensorEnabled = enabled;
 }
 
-bool isBulbEnabled() {
-  return bulbEnabled;
+bool isFlashSensorEnabled() {
+  return flashSensorEnabled;
 }

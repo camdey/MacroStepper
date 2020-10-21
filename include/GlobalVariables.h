@@ -25,7 +25,7 @@ bool canEditFlashOffValue();
 void setExecutedMovement(bool executed);
 bool hasExecutedMovement();
 void setFlashAvailable(bool available);
-bool isFlashAvailable();
+bool isFlashAvailableOld();
 void setGodoxValue(int value);
 int getGodoxValue();
 void setGodoxFilterValue(long value);
@@ -74,7 +74,7 @@ void setTargetVelocity(long velocity);
 long getTargetVelocity();
 void setTestingFlash(bool state);
 bool isTestingFlash();
-void setBulbEnabled(bool enabled);
-bool isBulbEnabled();
+void setFlashSensorEnabled(bool enabled);
+bool isFlashSensorEnabled();
 
 #endif

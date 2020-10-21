@@ -49,6 +49,7 @@ TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
 TMC5160Stepper  driver(CS_PIN, R_SENSE);
 MCUFRIEND_kbv 	tft;
 gfxButton       btn;
+flashProcedureEnum flashProcedureStage = flashIdle;
 
 
 // --- currentTimes and elapsed times --- //
@@ -67,7 +68,7 @@ int flashOffValue                 = 30;         // initial value for flash consi
 // --- Enable/Disable functionality --- //
 bool runHomingSequence 						= true;       // runs rehoming sequence
 bool isNewAutoStack 						  = true;       // move to start for autoStack procedure
-bool autoStackInitiated 						= false;      // enables function for stack procedure
+bool autoStackInitiated 					= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
@@ -118,6 +119,10 @@ void loop() {
   // run AutoStack sequence if enabled
   if (autoStackInitiated && !autoStackPaused) {
     autoStack();
+    // update duration if on Auto screen
+    if (getCurrentScreen() == "Auto") {
+		  auto_screen::estimateDuration();
+    }
   }
   // take touch reading
   if (millis() - prevButtonCheck >= 50) {

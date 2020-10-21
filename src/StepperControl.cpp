@@ -36,13 +36,15 @@ void autoStack() {
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
-      if (flashStep == start) {
-        triggerShutter();                   // take photo and fire flash
+      // if flashProcedure idle or is successful, begin new procedure or trigger flash if !isFlashSensorEnabled
+      if (flashProcedureStage == flashIdle || flashProcedureStage == isSuccessful) {
+        triggerShutter();                   // take photo and trigger flash immediately or begin flash procedure
       }
       else {
         runFlashProcedure(false);           // keep trying to fire flash
       }
-      if (flashStep == isUnresponsive) {
+      if (flashProcedureStage == isUnresponsive) {
+        flashProcedureStage = flashIdle;    // reset flash procedure
         auto_screen::pauseStack();          // pause autostack so user can troubleshoot flash issue
         populateScreen("Flash");            // go to flashScreen if can't trigger after 10 seconds
       }
@@ -298,15 +300,12 @@ void terminateAutoStack() {
   if (getCurrentScreen() != "Auto") {
     populateScreen("Auto");                   // go back to Auto screen if not already on it
   }
+  auto_screen::resetStack();                  // update button and reset button bitmap
   auto_screen::estimateDuration();            // update estimate
-  autoStackInitiated = false;
-  isNewAutoStack = true;
+  global::btn_Reset.updateColour(BLACK);      // change reset button back to black
   setShutterTriggered(false);
-  auto_screen::pauseStack();                  // reset PlayPause button to "paused" mode"
-  autoStackPaused = false;                    // autoStack is completed but not paused
   setNrMovementsCompleted(0);                 // reset completed movements count
   setExecutedMovement(false);
-  global::btn_Reset.updateColour(BLACK);      // change reset button back to black
   produceTone(4, 300, 200);                   // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
   setTargetVelocity(stealthChopMaxVelocity);

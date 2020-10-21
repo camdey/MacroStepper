@@ -165,6 +165,20 @@ namespace auto_screen {
   }
 
 
+  /***********************************************************************
+  Used to reset autostack after completed stack.
+  ***********************************************************************/
+  void resetStack() {
+    autoStackPaused = false;
+    autoStackInitiated = false;
+    isNewAutoStack = true;
+    btn_PlayPause.drawButton(BLACK); // replace existing button
+    btn_PlayPause.updateBitmap(play); // update to show play button
+    btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
+    btn_PlayPause.drawButton(); // draw button
+  }
+
+
   void func_ArrowUp(bool btnActive) {
     if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
       incrementStepsPerMovement();

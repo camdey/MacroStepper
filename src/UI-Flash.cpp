@@ -14,21 +14,21 @@ namespace flash_screen {
   gfxButton btn_FlashOn     =   btn.initButton("On Value",   "fillRoundRect",  0,    120,  160,  80, 15, CUSTOM_GREEN, true  );
   gfxButton btn_Threshold   =   btn.initButton("Threshold",  "fillRoundRect",  320,  20,   160,  80, 15, CUSTOM_BLUE,  true  );
   gfxButton btn_FlashTest   =   btn.initTransparentButton(        320,  120,  160,  80,                 true  );
-  gfxButton btn_BulbState   =   btn.initBitmapButton(flashBulb,   220,  20,   80,   80, CUSTOM_GREEN,   true  );
+  gfxButton btn_FlashSensor   =   btn.initBitmapButton(flashBulb,   220,  20,   80,   80, CUSTOM_GREEN,   true  );
   gfxButton btn_Back        =   btn.initBitmapButton(backArrow,   220,  220,  80,   80, WHITE,          true  );
 
   void initFlashButtons() {
     btn_array[0] = &btn_FlashOff;
     btn_array[1] = &btn_FlashOn;
     btn_array[2] = &btn_Threshold;
-    btn_array[3] = &btn_BulbState;
+    btn_array[3] = &btn_FlashSensor;
     btn_array[4] = &btn_FlashTest;
     btn_array[5] = &btn_Back;
 
     btn_FlashOff.addToggle(func_FlashOff,0);
     btn_FlashOn.addToggle(func_FlashOn, 0);
     btn_FlashTest.addMomentary(func_FlashTest, 0);
-    btn_BulbState.addToggle(func_BulbState, 0);
+    btn_FlashSensor.addToggle(func_FlashSensor, 0);
     btn_Back.addMomentary(func_Back, 0);
 
     btn_FlashOff.addBorder(3, WHITE);
@@ -92,16 +92,19 @@ namespace flash_screen {
   }
 
 
-  void func_BulbState(bool btnActive) {
+  void func_FlashSensor(bool btnActive) {
     if (btnActive) {
-      btn_BulbState.updateColour(CUSTOM_RED);
-      btn_BulbState.drawButton();
-      setBulbEnabled(false);
+      btn_FlashSensor.updateColour(CUSTOM_RED);
+      btn_FlashSensor.drawButton();
+      setFlashSensorEnabled(false);
+      flashProcedureStage = flashIdle; // always reset in case switched mid-procedure
+
     }
     else if (!btnActive) {
-      btn_BulbState.updateColour(CUSTOM_GREEN);
-      btn_BulbState.drawButton();
-      setBulbEnabled(true);
+      btn_FlashSensor.updateColour(CUSTOM_GREEN);
+      btn_FlashSensor.drawButton();
+      setFlashSensorEnabled(true);
+      flashProcedureStage = flashIdle; // always reset in case switched mid-procedure
     }
   }
 
@@ -119,6 +122,13 @@ namespace flash_screen {
 
       // trigger shutter
       triggerShutter();
+      // wait for result
+      setLastMillis(millis());
+      while (millis() - getLastMillis() <= 6500) {
+        runFlashProcedure(false);
+      }
+      // reset flashProcedureStage
+      flashProcedureStage = flashIdle;
 
       // check result
       if (!hasShutterTriggered()) {

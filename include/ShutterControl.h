@@ -7,15 +7,15 @@
 bool isFlashReady();
 void triggerShutter();
 void runFlashProcedure(bool restart);
-enum fireFlashStep {
-    start,
-    isFlashAvailable,
+enum flashProcedureEnum {
+    flashIdle,
+    checkFlashAvailable,
     enableShutter,
-    isFlashUnavailable,
+    checkFlashUnavailable,
     disableShutter,
     isSuccessful,
     isUnresponsive
 };
-fireFlashStep flashStep = start;
+
 
 #endif
