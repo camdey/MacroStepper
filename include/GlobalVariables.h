@@ -77,4 +77,22 @@ bool isTestingFlash();
 void setFlashSensorEnabled(bool enabled);
 bool isFlashSensorEnabled();
 
+enum stackProcedureEnum {
+    stackBegin,
+    checkFlashIsAvailable,
+    pullShutter,
+    checkFlashIsUnavailable,
+    releaseShutter,
+    flashSuccessful,
+    flashUnresponsive,
+    stepTaken,
+    stepDelay,
+    newStep,
+    stackCompleted
+};
+// extern stackProcedureEnum   stackProcedureStage;
+void setStackProcedureStage(stackProcedureEnum stage);
+stackProcedureEnum getStackProcedureStage();
+
+
 #endif

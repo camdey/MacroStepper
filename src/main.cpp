@@ -49,7 +49,6 @@ TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
 TMC5160Stepper  driver(CS_PIN, R_SENSE);
 MCUFRIEND_kbv 	tft;
 gfxButton       btn;
-flashProcedureEnum flashProcedureStage = flashIdle;
 
 
 // --- currentTimes and elapsed times --- //

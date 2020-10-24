@@ -1,6 +1,7 @@
 #include "GlobalVariables.h"
 #include "UI-Global.h"
 #include "UI-Main.h"
+#include "UI-Auto.h"
 
 namespace global {
   gfxButton btn_Flash = btn.initBitmapButton(flashOff,  220,  20,   80, 80, CUSTOM_RED, true  );
@@ -18,12 +19,14 @@ namespace global {
       btn_Flash.updateBitmap(flashOn);
       btn_Flash.updateColour(CUSTOM_GREEN);
       btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
+      auto_screen::stackStatus(newStep);
     }
     else if (!btnActive) {
       setShutterEnabled(false);
       btn_Flash.updateBitmap(flashOff);
       btn_Flash.updateColour(CUSTOM_RED);
       btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
+      auto_screen::stackStatus(newStep);
     }
   }
 
@@ -35,9 +38,9 @@ namespace global {
       isNewAutoStack = true;
       autoStackPaused = false;
       setNrMovementsCompleted(0);
-      setNrMovementsRequired(0);
-      setStartPosition(driver.XACTUAL());
-      setEndPosition(driver.XACTUAL());
+      // setNrMovementsRequired(0);
+      // setStartPosition(driver.XACTUAL());
+      // setEndPosition(driver.XACTUAL());
       btn_Reset.updateColour(BLACK);
       btn_Reset.drawButton(BLACK);
     }

@@ -31,20 +31,21 @@ void autoStack() {
     setShutterTriggered(false);
     setLastStepTime(millis());
     global::func_Reset(false);              // change reset button to red
+    auto_screen::stackStatus(stackBegin);
   }
 
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
       // if flashProcedure idle or is successful, begin new procedure or trigger flash if !isFlashSensorEnabled
-      if (flashProcedureStage == flashIdle || flashProcedureStage == isSuccessful) {
+      if (getStackProcedureStage() == stackBegin || getStackProcedureStage() == newStep) {
         triggerShutter();                   // take photo and trigger flash immediately or begin flash procedure
       }
       else {
         runFlashProcedure(false);           // keep trying to fire flash
       }
-      if (flashProcedureStage == isUnresponsive) {
-        flashProcedureStage = flashIdle;    // reset flash procedure
+      if (getStackProcedureStage() == flashUnresponsive) {
+        auto_screen::stackStatus(newStep);  // reset flash procedure
         auto_screen::pauseStack();          // pause autostack so user can troubleshoot flash issue
         populateScreen("Flash");            // go to flashScreen if can't trigger after 10 seconds
       }
@@ -57,6 +58,7 @@ void autoStack() {
 
 		if (hasExecutedMovement()) {
 			incrementNrMovementsCompleted();
+      auto_screen::stackStatus(newStep);
 	    if (getCurrentScreen() == "Auto") {   // make sure correct screen is displaying
 	      auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
@@ -66,6 +68,7 @@ void autoStack() {
 		}
   }
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
+    auto_screen::stackStatus(stackCompleted);
     terminateAutoStack();                   // stop AutoStack sequence if end reached
   }
 }
@@ -157,6 +160,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
   // step after elapsed amount of time
   if ((millis() - getLastStepTime() > stepperDelay)) {
+    auto_screen::stackStatus(stepTaken);
     // enable stepper if currently disabled
 		if (!isStepperEnabled()) {
 	    setStepperEnabled(true);
@@ -174,6 +178,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
   }
   else {
 		setExecutedMovement(false); // no step taken
+    auto_screen::stackStatus(stepDelay);
 	}
 }
 

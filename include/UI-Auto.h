@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
+#include "GlobalVariables.h"
+
 
 namespace auto_screen {
   void initAutoButtons();
@@ -19,5 +21,7 @@ namespace auto_screen {
   void estimateDuration();
   void printAutoStackProgress();
   void hideArrows(bool hide);
+  void stackStatus(stackProcedureEnum stage);
 }
+
 #endif

@@ -33,7 +33,18 @@ float stepSize                  = 5.0000;       // distance travelled per moveme
 int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
-bool flashSensorEnabled                = true;        // is flash bulb enabled, or only take photos without flash?
+bool flashSensorEnabled         = true;        // is flash bulb enabled, or only take photos without flash?
+stackProcedureEnum stackProcedureStage = checkFlashIsAvailable;
+
+
+void setStackProcedureStage(stackProcedureEnum stage) {
+  stackProcedureStage = stage;
+}
+
+
+stackProcedureEnum getStackProcedureStage() {
+  return stackProcedureStage;
+}
 
  
 // Set the state of the GUI arrows to on/off 

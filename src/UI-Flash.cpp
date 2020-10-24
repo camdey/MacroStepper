@@ -3,6 +3,7 @@
 #include "UI-Main.h"
 #include "UI-Flash.h"
 #include "UI-Manual.h"
+#include "UI-Auto.h"
 
 namespace flash_screen {
 
@@ -14,7 +15,7 @@ namespace flash_screen {
   gfxButton btn_FlashOn     =   btn.initButton("On Value",   "fillRoundRect",  0,    120,  160,  80, 15, CUSTOM_GREEN, true  );
   gfxButton btn_Threshold   =   btn.initButton("Threshold",  "fillRoundRect",  320,  20,   160,  80, 15, CUSTOM_BLUE,  true  );
   gfxButton btn_FlashTest   =   btn.initTransparentButton(        320,  120,  160,  80,                 true  );
-  gfxButton btn_FlashSensor   =   btn.initBitmapButton(flashBulb,   220,  20,   80,   80, CUSTOM_GREEN,   true  );
+  gfxButton btn_FlashSensor =   btn.initBitmapButton(flashBulb,   220,  20,   80,   80, CUSTOM_GREEN,   true  );
   gfxButton btn_Back        =   btn.initBitmapButton(backArrow,   220,  220,  80,   80, WHITE,          true  );
 
   void initFlashButtons() {
@@ -97,14 +98,13 @@ namespace flash_screen {
       btn_FlashSensor.updateColour(CUSTOM_RED);
       btn_FlashSensor.drawButton();
       setFlashSensorEnabled(false);
-      flashProcedureStage = flashIdle; // always reset in case switched mid-procedure
-
+      auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
     }
     else if (!btnActive) {
       btn_FlashSensor.updateColour(CUSTOM_GREEN);
       btn_FlashSensor.drawButton();
       setFlashSensorEnabled(true);
-      flashProcedureStage = flashIdle; // always reset in case switched mid-procedure
+      auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
     }
   }
 
@@ -127,8 +127,8 @@ namespace flash_screen {
       while (millis() - getLastMillis() <= 6500) {
         runFlashProcedure(false);
       }
-      // reset flashProcedureStage
-      flashProcedureStage = flashIdle;
+      // reset stackProcedureStage
+      auto_screen::stackStatus(newStep);
 
       // check result
       if (!hasShutterTriggered()) {

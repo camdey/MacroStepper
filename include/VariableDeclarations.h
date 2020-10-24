@@ -2,7 +2,6 @@
 #define VARIABLEDECLARATIONS_H
 
 #include <Arduino.h>
-#include "ShutterControl.h"
 #include "TMCStepper.h"
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
@@ -49,7 +48,6 @@ extern TouchScreen          ts;
 extern TMC5160Stepper       driver;
 extern MCUFRIEND_kbv 	    tft;
 extern gfxButton            btn;
-extern flashProcedureEnum   flashProcedureStage;
 
 // Definitions for some common 16-bit color values:
 #define	BLACK   						0x0000
