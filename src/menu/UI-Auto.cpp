@@ -144,7 +144,7 @@ namespace auto_screen {
 
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
-      populateScreen("Home");
+      populateScreen("Stack");
     }
   }
 

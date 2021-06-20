@@ -40,7 +40,7 @@
 #include <icons/Play.h>
 #include <icons/Pause.h>
 #include <icons/Rocket.h>
-#include <icons/Rotate.h>
+#include <icons/Direction.h>
 #include <icons/Save.h>
 #include <icons/Target.h>
 #include <icons/Timer.h>

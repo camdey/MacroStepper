@@ -37,6 +37,8 @@
 #include "VariableDeclarations.h"							// external variable declarations
 #include "menu/UI-Main.h"
 #include "menu/UI-Home.h"
+#include "menu/UI-Stack.h"
+#include "menu/UI-Orbis.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"
