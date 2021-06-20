@@ -13,5 +13,6 @@ namespace target_screen {
   void decrementIndex();
   void func_Back(bool active);
   void func_Run(bool active);
+  void func_saveStepDist(bool active);
 }
 #endif

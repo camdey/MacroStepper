@@ -1,11 +1,11 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "UI-Main.h"
-#include "UI-AutoConfig.h"
-#include "UI-Global.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-AutoConfig.h"
+#include "menu/UI-Global.h"
 
-namespace config_screen {
+namespace autoconfig_screen {
   #define num_btns 9
   gfxButton *btn_array[num_btns];
 

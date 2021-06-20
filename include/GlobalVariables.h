@@ -79,9 +79,9 @@ bool isFlashSensorEnabled();
 
 enum stackProcedureEnum {
     stackBegin,
-    checkFlashIsAvailable,
+    isFlashAvailable,
     pullShutter,
-    checkFlashIsUnavailable,
+    isFlashUnavailable,
     releaseShutter,
     flashSuccessful,
     flashUnresponsive,

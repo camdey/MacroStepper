@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
-#include "UI-Global.h"
-#include "UI-Main.h"
-#include "UI-Auto.h"
+#include "menu/UI-Global.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Auto.h"
 
 namespace global {
   gfxButton btn_Flash = btn.initBitmapButton(flashOff,  220,  20,   80, 80, CUSTOM_RED, true  );

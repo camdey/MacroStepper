@@ -1,12 +1,13 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
-#include "UI-Main.h"
-#include "UI-Target.h"
+#include "MiscFunctions.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Target.h"
 
 namespace target_screen {
-  #define num_btns 17
-  #define totalRows 4
-  #define totalCols 4
+  #define num_btns 18
+  // #define totalRows 4
+  // #define totalCols 4
  
   char targetValues[7] = {'0'};
   int targetValueIndex = 0;
@@ -32,6 +33,7 @@ namespace target_screen {
   gfxButton btn_Nine      =   btn.initButton("9",  "fillRoundRect", 408,  22,   60, 60,  5,   CUSTOM_BLUE,  true  );
   gfxButton btn_Back      =   btn.initBitmapButton(backArrow,       172,  220,  80, 80,       WHITE,        true  );
   gfxButton btn_Run       =   btn.initBitmapButton(rocket,          172,  20,   80, 80,       WHITE,        true  );
+  gfxButton btn_Save      =   btn.initBitmapButton(save,            172,  120,  80, 80,       WHITE,        true  );
 
 
   gfxButton *btn_array[num_btns];
@@ -55,6 +57,7 @@ namespace target_screen {
     btn_array[14] = &btn_Zero;
     btn_array[15] = &btn_Back;
     btn_array[16] = &btn_Run;
+    btn_array[17] = &btn_Save;
 
     btn_Target.addToggle(func_Distance, 0);
     btn_Cancel.addInputKey(func_Input, 0);
@@ -71,6 +74,7 @@ namespace target_screen {
     btn_Nine.addInputKey(func_Input, 0);
     btn_Back.addMomentary(func_Back, 0);
     btn_Run.addMomentary(func_Run, 0);
+    btn_Save.addMomentary(func_saveStepDist, 0);
 
     btn_Target.addBorder(3, WHITE);
     btn_Distance.addBorder(3, WHITE);
@@ -205,6 +209,18 @@ namespace target_screen {
       btn_Run.drawButton(CUSTOM_GREEN);
       btn_Run.setToggleActive(false); // reset button
       btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(driver.XACTUAL()));
+    }
+  }
+
+
+  void func_saveStepDist(bool active) {
+    if (active && !canEditTarget) {
+      long nrSteps = atoi(targetValues);
+      setStepsPerMovement(nrSteps);
+      calculateStepSize(); // update step size
+      btn_Save.drawButton(CUSTOM_GREEN);
+      delay(250);
+      btn_Save.drawButton(WHITE);
     }
   }
 

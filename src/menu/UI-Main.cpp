@@ -1,20 +1,22 @@
 #include "GlobalVariables.h"
-#include "UI-Main.h"
-#include "UI-Global.h"
-#include "UI-Home.h"
-#include "UI-Target.h"
-#include "UI-Flash.h"
-#include "UI-Manual.h"
-#include "UI-Auto.h"
-#include "UI-AutoConfig.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Global.h"
+#include "menu/UI-Home.h"
+#include "menu/UI-Target.h"
+#include "menu/UI-Flash.h"
+#include "menu/UI-Config.h"
+#include "menu/UI-Manual.h"
+#include "menu/UI-Auto.h"
+#include "menu/UI-AutoConfig.h"
 
 using namespace global;
 using namespace manual_screen;
 using namespace home_screen;
 using namespace target_screen;
 using namespace flash_screen;
-using namespace auto_screen;
 using namespace config_screen;
+using namespace auto_screen;
+using namespace autoconfig_screen;
 
 
 void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) {
@@ -26,6 +28,7 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
   initHomeButtons();
   initTargetButtons();
   initFlashButtons();
+  initConfigButtons();
   initManualButtons();
   initAutoButtons();
   initAutoConfigButtons();
@@ -44,6 +47,9 @@ void populateScreen(String screen) {
   }
   else if (screen == "Flash") {
     populateFlashScreen();
+  }
+  else if (screen == "Config") {
+    populateConfigScreen();
   }
   else if (screen == "Manual") {
     populateManualScreen();
@@ -87,6 +93,9 @@ void readTouchScreen(String screen) {
       }
       else if (screen == "Flash") {
         checkFlashButtons(touch_x, touch_y);
+      }
+      else if (screen == "Config") {
+        checkConfigButtons(touch_x, touch_y);
       }
       else if (screen == "Manual") {
         checkManualButtons(touch_x, touch_y);

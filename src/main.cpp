@@ -35,13 +35,13 @@
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
 #include "StepperControl.h"										// functions for controlling the stepper motor
 #include "VariableDeclarations.h"							// external variable declarations
-#include "UI-Main.h"
-#include "UI-Home.h"
-#include "UI-Manual.h"
-#include "UI-Target.h"
-#include "UI-Flash.h"
-#include "UI-Auto.h"
-#include "UI-AutoConfig.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Home.h"
+#include "menu/UI-Manual.h"
+#include "menu/UI-Target.h"
+#include "menu/UI-Flash.h"
+#include "menu/UI-Auto.h"
+#include "menu/UI-AutoConfig.h"
 #include "Wire.h"
 
 

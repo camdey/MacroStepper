@@ -3,10 +3,10 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "ShutterControl.h"
-#include "UI-Main.h"
-#include "UI-Auto.h"
-#include "UI-AutoConfig.h"
-#include "UI-Global.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Auto.h"
+#include "menu/UI-AutoConfig.h"
+#include "menu/UI-Global.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -52,7 +52,7 @@ void autoStack() {
 		}
     // only move if autoStack hasn't been paused by flash failure
     if (!autoStackPaused && (!isShutterEnabled() || hasShutterTriggered())) {
-      unsigned long delay = getShutterDelay()*1000 + recycleTime;
+      unsigned long delay = getShutterDelay()*1000;
   		executeMovement(1, delay);
     }
 
@@ -113,7 +113,7 @@ void dryRun() {
   driver.XTARGET(getStartPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::printPosition(); // update position
+      autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
@@ -124,7 +124,7 @@ void dryRun() {
   driver.XTARGET(getEndPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::printPosition(); // update position
+      autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
@@ -134,7 +134,7 @@ void dryRun() {
   driver.XTARGET(getStartPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::printPosition(); // update position
+      autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
@@ -171,8 +171,11 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
     // set new target position
     driver.XTARGET(targetPosition);
+    // reduce speed
+    setTargetVelocity(2000);
     // wait for stepper to reach target position
     while(driver.XACTUAL() != driver.XTARGET()) {}
+    setTargetVelocity(stealthChopMaxVelocity);
     setExecutedMovement(true);  
     setLastStepTime(millis());
   }

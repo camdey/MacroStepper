@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-namespace config_screen {
+namespace autoconfig_screen {
   void initAutoConfigButtons();
   void populateAutoConfigScreen();
   void checkAutoConfigButtons(int touch_x, int touch_y);

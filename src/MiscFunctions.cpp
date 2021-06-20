@@ -1,8 +1,8 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
-#include "UI-Main.h"
-#include "UI-Manual.h"
-#include "UI-Auto.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Manual.h"
+#include "menu/UI-Auto.h"
 
 
 void rotateScreen() {

@@ -1,8 +1,8 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "UI-Main.h"
-#include "UI-Home.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Home.h"
 
 namespace home_screen {
   #define num_btns 7
@@ -15,7 +15,8 @@ namespace home_screen {
   gfxButton btn_Home      =   btn.initBitmapButton(home,        20,   230,  80,   80,   WHITE,          true  );
   gfxButton btn_Target    =   btn.initBitmapButton(target,      140,  230,  80,   80,   WHITE,          true  );
   gfxButton btn_Flash     =   btn.initBitmapButton(flashBulb,   260,  230,  80,   80,   WHITE,          true  );
-  gfxButton btn_Rotate    =   btn.initBitmapButton(rotate,      380,  230,  80,   80,   WHITE,          true  );
+  // gfxButton btn_Rotate    =   btn.initBitmapButton(rotate,      380,  230,  80,   80,   WHITE,          true  );
+  gfxButton btn_Config    =   btn.initBitmapButton(cogWheel,    380,  230,  80, 80,     WHITE,          true  );
 
 
   void initHomeButtons() {
@@ -25,14 +26,16 @@ namespace home_screen {
     btn_array[3] = &btn_Home;
     btn_array[4] = &btn_Target;
     btn_array[5] = &btn_Flash;
-    btn_array[6] = &btn_Rotate;
+    // btn_array[6] = &btn_Rotate;
+    btn_array[6] = &btn_Config;
 
     btn_Manual.addMomentary(func_Manual, 0);
     btn_Auto.addMomentary(func_Auto, 0);
     btn_Home.addMomentary(func_Home, 0);
     btn_Target.addMomentary(func_Target, 0);
     btn_Flash.addMomentary( func_Flash, 0);
-    btn_Rotate.addMomentary(func_Rotate, 0);
+    // btn_Rotate.addMomentary(func_Rotate, 0);
+    btn_Config.addMomentary(func_Config, 0);
 
     btn_Manual.addBorder(4, WHITE);
     btn_Auto.addBorder(4, WHITE);
@@ -94,6 +97,13 @@ namespace home_screen {
   void func_Flash(bool btnActive) {
     if (btnActive) {
       populateScreen("Flash");
+    }
+  }
+
+
+  void func_Config(bool btnActive) {
+    if (btnActive) {
+      populateScreen("Config");
     }
   }
 

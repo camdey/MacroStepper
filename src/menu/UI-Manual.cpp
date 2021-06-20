@@ -2,9 +2,9 @@
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
 #include "StepperControl.h"
-#include "UI-Main.h"
-#include "UI-Manual.h"
-#include "UI-Global.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Manual.h"
+#include "menu/UI-Global.h"
 
 
 namespace manual_screen {
