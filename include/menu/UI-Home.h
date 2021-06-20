@@ -11,7 +11,9 @@ namespace home_screen {
   void func_Auto(bool btnActive);
   void func_Manual(bool btnActive);
   void func_Home(bool btnActive);
+  void func_Target(bool btnActive);
   void func_Flash(bool btnActive);
+  void func_Config(bool btnActive);
   void func_Rotate(bool btnActive);
 }
 #endif

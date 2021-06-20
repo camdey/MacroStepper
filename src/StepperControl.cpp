@@ -3,9 +3,10 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "ShutterControl.h"
-#include "UI-Main.h"
-#include "UI-Auto.h"
-#include "UI-AutoConfig.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Auto.h"
+#include "menu/UI-AutoConfig.h"
+#include "menu/UI-Global.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -29,37 +30,35 @@ void autoStack() {
     setExecutedMovement(false);
     setShutterTriggered(false);
     setLastStepTime(millis());
+    global::func_Reset(false);              // change reset button to red
+    auto_screen::stackStatus(stackBegin);
   }
 
-  bool shutterFailed = false;               // store result of shutter trigger attempt
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
-	    triggerShutter();                     // take photo
-      if (!hasShutterTriggered()) {
-        long retryStart = millis();
-        shutterFailed = true;               // used to set one-off delay later
-        while (!hasShutterTriggered()) {    // retry triggering shutter
-          triggerShutter();
-          if (hasShutterTriggered()) {
-            break;                          // if retry successful, break
-          }
-          else if (millis() - retryStart >= 10000) {
-            auto_screen::pauseStack();      // pause autostack so user can troubleshoot flash issue
-            populateScreen("Flash");        // go to flashScreen if can't trigger after 10 seconds
-            break;
-          }
-        }
+      // if flashProcedure idle or is successful, begin new procedure or trigger flash if !isFlashSensorEnabled
+      if (getStackProcedureStage() == stackBegin || getStackProcedureStage() == newStep) {
+        triggerShutter();                   // take photo and trigger flash immediately or begin flash procedure
+      }
+      else {
+        runFlashProcedure(false);           // keep trying to fire flash
+      }
+      if (getStackProcedureStage() == flashUnresponsive) {
+        auto_screen::stackStatus(newStep);  // reset flash procedure
+        auto_screen::pauseStack();          // pause autostack so user can troubleshoot flash issue
+        populateScreen("Flash");            // go to flashScreen if can't trigger after 10 seconds
       }
 		}
     // only move if autoStack hasn't been paused by flash failure
-    // and there's been >= 500ms since the flash was triggered successfully (gives time for vibration to settle)
-    if (!autoStackPaused && millis() - getLastFlashTime() >= 500) {
-  		executeMovement(1, getShutterDelay()*1000);
+    if (!autoStackPaused && (!isShutterEnabled() || hasShutterTriggered())) {
+      unsigned long delay = getShutterDelay()*1000;
+  		executeMovement(1, delay);
     }
 
 		if (hasExecutedMovement()) {
 			incrementNrMovementsCompleted();
+      auto_screen::stackStatus(newStep);
 	    if (getCurrentScreen() == "Auto") {   // make sure correct screen is displaying
 	      auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
@@ -67,12 +66,9 @@ void autoStack() {
 			setShutterTriggered(false);           // reset shutter triggered flag
 			setExecutedMovement(false);           // reset executed movement flag
 		}
-
-    if (shutterFailed) {
-      delay(10000);                         // 10 second delay to prevent trying to take another photo immediately after
-    }
   }
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
+    auto_screen::stackStatus(stackCompleted);
     terminateAutoStack();                   // stop AutoStack sequence if end reached
   }
 }
@@ -117,7 +113,7 @@ void dryRun() {
   driver.XTARGET(getStartPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::printPosition(); // update position
+      autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
@@ -128,7 +124,7 @@ void dryRun() {
   driver.XTARGET(getEndPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::printPosition(); // update position
+      autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
@@ -138,7 +134,7 @@ void dryRun() {
   driver.XTARGET(getStartPosition());
   while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
-      config_screen::printPosition(); // update position
+      autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
     }
   }
@@ -164,6 +160,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
   // step after elapsed amount of time
   if ((millis() - getLastStepTime() > stepperDelay)) {
+    auto_screen::stackStatus(stepTaken);
     // enable stepper if currently disabled
 		if (!isStepperEnabled()) {
 	    setStepperEnabled(true);
@@ -174,14 +171,36 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
     // set new target position
     driver.XTARGET(targetPosition);
+    // reduce speed
+    setTargetVelocity(2000);
     // wait for stepper to reach target position
     while(driver.XACTUAL() != driver.XTARGET()) {}
+    setTargetVelocity(stealthChopMaxVelocity);
     setExecutedMovement(true);  
     setLastStepTime(millis());
   }
   else {
 		setExecutedMovement(false); // no step taken
+    auto_screen::stackStatus(stepDelay);
 	}
+}
+
+
+// execute a predetermined number of steps
+void executeSteps(long nrSteps) {
+  // change to StealthChop is StallGuard is configured
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
+  if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+
+  long targetPosition = driver.XACTUAL() + nrSteps;
+  // set new target position
+  driver.XTARGET(targetPosition);
+  // wait for stepper to reach target position
+  while(driver.XACTUAL() != driver.XTARGET()) {}
 }
 
 
@@ -287,17 +306,15 @@ void overshootPosition(int startPosition, int numberOfSteps) {
 // clean up variables etc after completing AutoStack sequence
 void terminateAutoStack() {
   if (getCurrentScreen() != "Auto") {
-    populateScreen("Auto");           // go back to Auto screen if not already on it
+    populateScreen("Auto");                   // go back to Auto screen if not already on it
   }
-  auto_screen::estimateDuration();    // update estimate
-  autoStackInitiated = false;
-  isNewAutoStack = true;
+  auto_screen::resetStack();                  // update button and reset button bitmap
+  auto_screen::estimateDuration();            // update estimate
+  global::btn_Reset.updateColour(BLACK);      // change reset button back to black
   setShutterTriggered(false);
-  auto_screen::pauseStack();          // reset PlayPause button to "paused" mode"
-  autoStackPaused = false;            // autoStack is completed but not paused
-  setNrMovementsCompleted(0);         // reset completed movements count
+  setNrMovementsCompleted(0);                 // reset completed movements count
   setExecutedMovement(false);
-  produceTone(4, 300, 200);           // sound 4 tones for 300ms separated by a 200ms delay
+  produceTone(4, 300, 200);                   // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
   setTargetVelocity(stealthChopMaxVelocity);
 }

@@ -4,7 +4,8 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void checkFlashStatus();
+bool isFlashReady();
 void triggerShutter();
+void runFlashProcedure(bool restart);
 
 #endif

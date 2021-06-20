@@ -8,44 +8,49 @@
 #include <MCUFRIEND_kbv.h>
 #include <gfxButton.h>
 #include "TimerFreeTone.h"
-#include <Fonts/Arimo_Regular_10.h>
-#include <Fonts/Arimo_Regular_16.h>
-#include <Fonts/Arimo_Regular_18.h>
-#include <Fonts/Arimo_Regular_20.h>
-#include <Fonts/Arimo_Regular_22.h>
-#include <Fonts/Arimo_Regular_24.h>
-#include <Fonts/Arimo_Regular_30.h>
-#include <Fonts/Arimo_Regular_36.h>
-#include <Fonts/Arimo_Regular_40.h>
-#include <Fonts/Arimo_Bold_20.h>
-#include <Fonts/Arimo_Bold_24.h>
-#include <Fonts/Arimo_Bold_30.h>
-#include <Fonts/Arimo_Bold_36.h>
-#include <Fonts/Arimo_Bold_40.h>
-#include <Fonts/Syncopate_Bold_36.h>
-#include <Fonts/Permanent_Marker_Regular_36.h>
-#include <Fonts/Lato_Black_34.h>
-#include <Fonts/Lato_Black_40.h>
-#include <Icons/ArrowUp.h>
-#include <Icons/ArrowDown.h>
-#include <Icons/BackArrow.h>
-#include <Icons/Cancel.h>
-#include <Icons/CogWheel.h>
-#include <Icons/DelayClock.h>
-#include <Icons/FlashBulb.h>
-#include <Icons/FlashOn.h>
-#include <Icons/FlashOff.h>
-#include <Icons/MainLogo.h>
-#include <Icons/Play.h>
-#include <Icons/Pause.h>
-#include <Icons/Rotate.h>
-#include <Icons/Target.h>
-#include <Icons/Timer.h>
+#include <fonts/Arimo_Regular_10.h>
+#include <fonts/Arimo_Regular_16.h>
+#include <fonts/Arimo_Regular_18.h>
+#include <fonts/Arimo_Regular_20.h>
+#include <fonts/Arimo_Regular_22.h>
+#include <fonts/Arimo_Regular_24.h>
+#include <fonts/Arimo_Regular_30.h>
+#include <fonts/Arimo_Regular_36.h>
+#include <fonts/Arimo_Regular_40.h>
+#include <fonts/Arimo_Bold_20.h>
+#include <fonts/Arimo_Bold_24.h>
+#include <fonts/Arimo_Bold_30.h>
+#include <fonts/Arimo_Bold_36.h>
+#include <fonts/Arimo_Bold_40.h>
+#include <fonts/Syncopate_Bold_36.h>
+#include <fonts/Permanent_Marker_Regular_36.h>
+#include <fonts/Lato_Black_34.h>
+#include <fonts/Lato_Black_40.h>
+#include <icons/ArrowUp.h>
+#include <icons/ArrowDown.h>
+#include <icons/BackArrow.h>
+#include <icons/Cancel.h>
+#include <icons/CogWheel.h>
+#include <icons/DelayClock.h>
+#include <icons/FlashBulb.h>
+#include <icons/FlashOn.h>
+#include <icons/FlashOff.h>
+#include <icons/Home.h>
+#include <icons/MainLogo.h>
+#include <icons/Play.h>
+#include <icons/Pause.h>
+#include <icons/Rocket.h>
+#include <icons/Rotate.h>
+#include <icons/Save.h>
+#include <icons/Target.h>
+#include <icons/Timer.h>
+#include <icons/ToggleOn.h>
+#include <icons/ToggleOff.h>
 
-extern TouchScreen      ts;
-extern TMC5160Stepper   driver;
-extern MCUFRIEND_kbv 	tft;
-extern gfxButton        btn;
+extern TouchScreen          ts;
+extern TMC5160Stepper       driver;
+extern MCUFRIEND_kbv 	    tft;
+extern gfxButton            btn;
 
 // Definitions for some common 16-bit color values:
 #define	BLACK   						0x0000
@@ -79,6 +84,7 @@ extern gfxButton        btn;
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
 #define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement 
 #define stealthChopMaxVelocity      200000          // max target velocity (VMAX) during StealthChop movements 
+#define maxStepsPerMovement         999             // maximum number of steps allowed per movement
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT

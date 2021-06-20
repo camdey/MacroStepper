@@ -1,25 +1,40 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
-#include "UI-Main.h"
-#include "UI-Auto.h"
-#include "UI-Global.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Auto.h"
+#include "menu/UI-Global.h"
 
 namespace auto_screen {
-  #define num_btns 9
+  #define num_btns 10
   gfxButton *btn_array[num_btns];
 
+  char* stackProcedureValues[] {
+    "Started",
+    "Flash On?",
+    "Pull Shutter",
+    "Flash Off?",
+    "Release Shutter",
+    "Flash Fired",
+    "Flash Error",
+    "Step Taken",
+    "Step Delay",
+    "New Step",
+    "Completed"
+  };
 
-  gfxButton btn_StepSize     =   btn.initButton("Step Size",  "fillRoundRect",  0,  20,   160,  80, 15, DARKGRAY, true  );
-  gfxButton btn_EstTime      =   btn.initButton("Est. Time",  "fillRoundRect",  0,  120,  160,  80, 15, DARKGRAY, false );
-  gfxButton btn_Progress     =   btn.initButton("Progress",   "fillRoundRect",  0,  220,  160,  80, 15, DARKGRAY, false );
+
+  gfxButton btn_StepSize      =   btn.initButton("Step Size",   "fillRoundRect",  0,    20,   160,  80,   15, DARKGRAY,   true  );
+  gfxButton btn_EstTime       =   btn.initButton("Est. Time",   "fillRoundRect",  0,    120,  160,  80,   15, DARKGRAY,   false );
+  gfxButton btn_Progress      =   btn.initButton("Progress",    "fillRoundRect",  0,    220,  160,  80,   15, DARKGRAY,   false );
+  gfxButton btn_StackStatus   =   btn.initTransparentButton("Started",       350,    200,  120,  120,                  false );
   // gfxButton btn_Flash        =   btn.initBitmapButton(flashOff,   220,  20,   80, 80, CUSTOM_RED, true  ); // added to global buttons
-  gfxButton btn_Config       =   btn.initBitmapButton(cogWheel,   220,  120,  80, 80, WHITE,      true  );
-  gfxButton btn_Back         =   btn.initBitmapButton(backArrow,  220,  220,  80, 80, WHITE,      true  );
-  // don't add these buttons to an array as they depend on logic as to which symbol appears and in which colour
-  gfxButton btn_PlayPause    =   btn.initBitmapButton(play,       350,  100,  120,  120,  CUSTOM_GREEN, true);
-  gfxButton btn_ArrowUp      =   btn.initBitmapButton(arrowUp,    350,  20,   120,  120,  CUSTOM_GREEN, true);
-  gfxButton btn_ArrowDown    =   btn.initBitmapButton(arrowDown,  350,  180,  120,  120,  CUSTOM_RED,   true);
+  gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,   220,  120,  80, 80, WHITE,      true  );
+  gfxButton btn_Back          =   btn.initBitmapButton(backArrow,  220,  220,  80, 80, WHITE,      true  );
+  gfxButton btn_PlayPause     =   btn.initBitmapButton(play,       350,  100,  120,  120,  CUSTOM_GREEN, true);
+  // gfxButton btn_PlayPause     =   btn.initBitmapButton(play,       350,  20,   120,  120,  CUSTOM_GREEN, true);
+  gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,    350,  20,   120,  120,  CUSTOM_GREEN, true);
+  gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,  350,  180,  120,  120,  CUSTOM_RED,   true);
 
 
   void initAutoButtons() {
@@ -32,6 +47,7 @@ namespace auto_screen {
     btn_array[6] = &btn_PlayPause;
     btn_array[7] = &btn_ArrowUp;
     btn_array[8] = &btn_ArrowDown;
+    btn_array[9] = &btn_StackStatus;
 
     btn_StepSize.addToggle(func_StepDistance,   0 );
     btn_Config.addMomentary(func_Config,        0 );
@@ -43,6 +59,7 @@ namespace auto_screen {
     // arrows are disabled by default, only enabled when editing step size
     btn_ArrowUp.hideButton(true);
     btn_ArrowDown.hideButton(true);
+    btn_StackStatus.hideButton(true);
 
     btn_StepSize.addBorder(3, WHITE);
     btn_EstTime.addBorder(3,  WHITE);
@@ -67,6 +84,9 @@ namespace auto_screen {
     estimateDuration();
     btn_Progress.writeTextTopCentre(Arimo_Regular_30, WHITE);
     printAutoStackProgress();
+    if (!btn_StackStatus.isHidden()) {
+      // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
+    }
   }
 
 
@@ -134,10 +154,12 @@ namespace auto_screen {
       if (btnActive && !areArrowsEnabled()) {
         autoStackInitiated = true;   // start autoStack sequence
         autoStackPaused = false;
+        btn_StackStatus.hideButton(false); // show status
         btn_PlayPause.drawButton(BLACK); // replace existing button
         btn_PlayPause.updateBitmap(pause); // update bitmap image
         btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
         btn_PlayPause.drawButton(); // draw
+        // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
       }
       else if (!btnActive && !areArrowsEnabled()) {
         autoStackPaused = true;  // autoStack paused
@@ -145,11 +167,32 @@ namespace auto_screen {
         btn_PlayPause.updateBitmap(play); // update bitmap image
         btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
         btn_PlayPause.drawButton(); // draw
+        // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
       }
     }
     else {
       btn_PlayPause.setToggleActive(!btnActive); // reset button state
     }
+  }
+
+
+  void stackStatus(stackProcedureEnum stage) {
+    // unhide if hidden
+    if (btn_StackStatus.isHidden()) {
+      btn_StackStatus.hideButton(false);
+    }
+
+    String stageString = stackProcedureValues[stage];
+    int textColour = WHITE;
+
+     // only print if on correct screen and value has changed
+    if (getCurrentScreen() == "Auto" && stage != getStackProcedureStage()) {
+      // btn_StackStatus.writeTextCentre(Arimo_Bold_20, textColour, stageString);
+      // char* newLabel = strdup(stageString.c_str());
+      // btn_StackStatus.updateLabel(newLabel);
+      // Serial.print("status char: "); Serial.println(newLabel);
+    }
+    setStackProcedureStage(stage); // update to new value
   }
 
 
@@ -163,6 +206,20 @@ namespace auto_screen {
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
     btn_PlayPause.setToggleActive(false); // set button state to "pause" mode
+  }
+
+
+  /***********************************************************************
+  Used to reset autostack after completed stack.
+  ***********************************************************************/
+  void resetStack() {
+    autoStackPaused = false;
+    autoStackInitiated = false;
+    isNewAutoStack = true;
+    btn_PlayPause.drawButton(BLACK); // replace existing button
+    btn_PlayPause.updateBitmap(play); // update to show play button
+    btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
+    btn_PlayPause.drawButton(); // draw button
   }
 
 
@@ -190,8 +247,8 @@ namespace auto_screen {
   them as "mm:ss" on the screen.
   ***********************************************************************/
   void estimateDuration() {
-    float duration = getNrMovementsRequired() * (getShutterDelay() + (recycleTime/1000));
-    float elapsed = getNrMovementsCompleted() * (getShutterDelay() + (recycleTime/1000));
+    float duration = getNrMovementsRequired() * (getShutterDelay());
+    float elapsed = getNrMovementsCompleted() * (getShutterDelay());
     float remaining = duration - elapsed;
     int minutes = floor(remaining / 60);
     int seconds = int(remaining) % 60;

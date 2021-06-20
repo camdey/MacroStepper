@@ -1,5 +1,6 @@
 #include "GlobalVariables.h"
 #include "ShutterControl.h"
+#include "menu/UI-Auto.h"
 
 
 /******************************************************************
@@ -9,7 +10,7 @@ ON and OFF values have been changed via the flashScreen.
 If the godoxValue reading is >= than the Threshold, flashReady
 returns TRUE else FALSE.
 ******************************************************************/
-void checkFlashStatus() {
+bool isFlashReady() {
   long adjustedVal;
   int weight = 40;
 
@@ -20,13 +21,15 @@ void checkFlashStatus() {
   setGodoxValue(round(adjustedVal*1.00 / 10000));
   // update threshold, e.g. ((310-50)*0.75)+50 = 245
   flashThreshold = int(((flashOnValue - flashOffValue) * 0.75) + flashOffValue);
-
+  // Serial.print("godoxVal: "); Serial.println(getGodoxValue());
   if (getGodoxValue() >= flashThreshold) {
     setFlashAvailable(true);
   }
   else {
     setFlashAvailable(false);
   }
+  
+  return (getGodoxValue() >= flashThreshold);
 }
 
 
@@ -36,39 +39,116 @@ It first checks if the flash has recycled (red LED is on) and then
 sets the shutter pin to HIGH. A loop will start where the flash is
 continually checked to see if it has triggered (red LED goes off)
 ******************************************************************/
+// void triggerShutter() {
+// 	setShutterTriggered(false);
+
+//   // if flash bulb enabled
+//   if (isFlashSensorEnabled()) {
+//     unsigned long startTime = millis();
+
+//     // wait for flash to be ready first
+//     while (!isFlashAvailableOld()) {
+//       if (millis() - getLastMillis() >= 10) {
+//         isFlashReady();
+//         // break if flash not available after 5s
+//         if (millis() - startTime >= 5000) {
+//           break;
+//         }
+//         setLastMillis(millis());
+//       }
+//     }
+//     // trigger flash
+//     digitalWrite(SONY_PIN, HIGH);
+//     // wait for flash to be fired, isFlashAvailableOld() will be false as godox LED will briefly turn off
+//     while (millis() - startTime <= 1500 && isFlashAvailableOld()) {
+//       if (millis() - getLastMillis() >= 10) {
+//         isFlashReady();
+//         setLastMillis(millis());
+//       }
+//     }
+//     if (!isFlashAvailableOld()) {
+//       setShutterTriggered(true);
+//       setFlashTriggerTime(millis());
+//     }
+
+//     recycleTime = (millis() - startTime);
+//     // reset shutter signal
+//     digitalWrite(SONY_PIN, LOW);
+//   }
+//   else {
+//     // trigger flash
+//     digitalWrite(SONY_PIN, HIGH);
+//     delay(500);
+//     digitalWrite(SONY_PIN, LOW);
+//     setShutterTriggered(true);
+//   }
+// }
+
 void triggerShutter() {
-	setShutterTriggered(false);
-  unsigned long startTime = millis();
-
-  // wait for flash to be ready first
-  while (!isFlashAvailable()) {
-    if (millis() - getLastMillis() >= 10) {
-      checkFlashStatus();
-      // break if flash not available after 5s
-      if (millis() - startTime >= 5000) {
-        break;
-      }
-      setLastMillis(millis());
+  if (isFlashSensorEnabled()) {
+    runFlashProcedure(true);
+  }
+  else {
+    // if not yet triggered, trigger
+    if (digitalRead(SONY_PIN) == LOW) {
+      digitalWrite(SONY_PIN, HIGH);
+      setFlashTriggerTime(millis());
+      Serial.println("pullShutter");
+      auto_screen::stackStatus(pullShutter);
+    }
+    // if triggered, don't set LOW until 800ms has passed
+    else if (millis() - getFlashTriggerTime() >= 800) {
+      digitalWrite(SONY_PIN, LOW);
+      // setShutterTriggered(true);
+      Serial.println("releaseShutter");
+      auto_screen::stackStatus(releaseShutter);
     }
   }
-
-  // trigger flash
-  digitalWrite(SONY_PIN, HIGH);
-
-  // wait for flash to be fired, isFlashAvailable() will be false as godox LED will briefly turn off
-  while (millis() - startTime <= 3000 && isFlashAvailable()) {
-    if (millis() - getLastMillis() >= 10) {
-      checkFlashStatus();
-      setLastMillis(millis());
-    }
-  }
-  if (!isFlashAvailable()) {
-    setShutterTriggered(true);
-    setLastFlashTime(millis());
-  }
-
-  recycleTime = (millis() - startTime);
-
-  // reset shutter signal
-  digitalWrite(SONY_PIN, LOW);
 }
+
+
+void runFlashProcedure(bool restart) {
+  if (restart) {
+    auto_screen::stackStatus(isFlashAvailable);
+    setFlashTriggerTime(millis());
+    setShutterTriggered(false);
+    Serial.println("isFlashAvailable");
+  }
+  // begin flash sequence
+  if (getStackProcedureStage() == isFlashAvailable) {
+    if (isFlashReady()) {
+      auto_screen::stackStatus(pullShutter);
+      Serial.println("pullShutter");
+    }
+  }
+  else if (getStackProcedureStage() == pullShutter) {
+    digitalWrite(SONY_PIN, HIGH);
+    if (isFlashSensorEnabled()) {
+      auto_screen::stackStatus(isFlashUnavailable);
+      Serial.println("isFlashUnavailable");
+    }
+    else {
+      triggerShutter();
+    }
+  }
+  else if (getStackProcedureStage() == isFlashUnavailable) {
+    if (!isFlashReady()) {
+      auto_screen::stackStatus(releaseShutter);
+      Serial.println("releaseShutter");
+    }
+  }
+  else if (getStackProcedureStage() == releaseShutter) {
+    digitalWrite(SONY_PIN, LOW);
+    auto_screen::stackStatus(flashSuccessful);
+    Serial.println("flashSuccessful");
+    recycleTime = (millis() - getFlashTriggerTime());
+    setShutterTriggered(true);
+  }
+  // fail over
+  if (millis() - getFlashTriggerTime() >= 6000 && (getStackProcedureStage() == isFlashAvailable || getStackProcedureStage() == isFlashUnavailable)) {
+    auto_screen::stackStatus(flashUnresponsive);
+    digitalWrite(SONY_PIN, LOW);
+    Serial.println("flashUnresponsive");
+  }
+}
+

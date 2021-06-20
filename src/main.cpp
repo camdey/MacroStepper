@@ -35,12 +35,13 @@
 #include "ShutterControl.h"										// functions relating to the camera shutter and flash
 #include "StepperControl.h"										// functions for controlling the stepper motor
 #include "VariableDeclarations.h"							// external variable declarations
-#include "UI-Main.h"
-#include "UI-Home.h"
-#include "UI-Manual.h"
-#include "UI-Flash.h"
-#include "UI-Auto.h"
-#include "UI-AutoConfig.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Home.h"
+#include "menu/UI-Manual.h"
+#include "menu/UI-Target.h"
+#include "menu/UI-Flash.h"
+#include "menu/UI-Auto.h"
+#include "menu/UI-AutoConfig.h"
 #include "Wire.h"
 
 
@@ -53,7 +54,7 @@ gfxButton       btn;
 // --- currentTimes and elapsed times --- //
 unsigned long prevButtonCheck 		= 0;    		
 unsigned long prevJoystickCheck 	= 0;    			
-unsigned long recycleTime 				= 1000;    		// duration to take photo
+unsigned long recycleTime 				= 0;    		// duration to take photo
 // --- Input and Output values --- //
 int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
 int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
@@ -66,7 +67,7 @@ int flashOffValue                 = 30;         // initial value for flash consi
 // --- Enable/Disable functionality --- //
 bool runHomingSequence 						= true;       // runs rehoming sequence
 bool isNewAutoStack 						  = true;       // move to start for autoStack procedure
-bool autoStackInitiated 						= false;      // enables function for stack procedure
+bool autoStackInitiated 					= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
 bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
@@ -117,6 +118,10 @@ void loop() {
   // run AutoStack sequence if enabled
   if (autoStackInitiated && !autoStackPaused) {
     autoStack();
+    // update duration if on Auto screen
+    if (getCurrentScreen() == "Auto") {
+		  auto_screen::estimateDuration();
+    }
   }
   // take touch reading
   if (millis() - prevButtonCheck >= 50) {
@@ -141,12 +146,6 @@ void loop() {
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
 			flash_screen::updateGodoxValue();
 		}
-  //   // set END as maxRailPosition if Z Stick depressed
-  //   if (getCurrentScreen() == "AutoConfig" && canEditEndPosition() && digitalRead(ZSTICK_PIN) == LOW) {
-  //     autoStackMax = true;
-  //     config_screen::updateEndPosition();
-  //     autoStackMax = false;
-  //   }
     prevJoystickCheck = millis();
   }
 

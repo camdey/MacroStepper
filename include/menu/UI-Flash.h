@@ -12,6 +12,7 @@ namespace flash_screen {
   void func_FlashOn(bool btnActive);
   void func_FlashTest(bool btnActive);
   void func_Back(bool btnActive);
+  void func_FlashSensor(bool btnActive);
   void updateGodoxValue();
 }
 #endif

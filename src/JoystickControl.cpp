@@ -3,9 +3,9 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
-#include "UI-Main.h"
-#include "UI-Manual.h"
-#include "UI-AutoConfig.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-Manual.h"
+#include "menu/UI-AutoConfig.h"
 
 
 // calculate new velocity (VMAX) value while using joystick motion
@@ -141,13 +141,13 @@ void printNewPositions() {
     manual_screen::printPosition();
   }
   else if (getCurrentScreen() == "AutoConfig") {    // else if Auto Config screen, print new position
-    config_screen::printPosition();
+    autoconfig_screen::printPosition();
 
     if (canEditStartPosition()) {
-    config_screen::updateStartPosition();           // if editing Start position, set start but not end position
+    autoconfig_screen::updateStartPosition();           // if editing Start position, set start but not end position
     }
     else if (canEditEndPosition()) {
-      config_screen::updateEndPosition();           // if editing End position, set end but not start position
+      autoconfig_screen::updateEndPosition();           // if editing End position, set end but not start position
     }
   }
 }

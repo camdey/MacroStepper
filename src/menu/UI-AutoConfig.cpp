@@ -1,11 +1,12 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "UI-Main.h"
-#include "UI-AutoConfig.h"
+#include "menu/UI-Main.h"
+#include "menu/UI-AutoConfig.h"
+#include "menu/UI-Global.h"
 
-namespace config_screen {
-  #define num_btns 8
+namespace autoconfig_screen {
+  #define num_btns 9
   gfxButton *btn_array[num_btns];
 
 
@@ -14,7 +15,7 @@ namespace config_screen {
   gfxButton btn_Run           =   btn.initButton("RUN",   "fillRoundRect",  0,  220,  160,  80, 15, CUSTOM_BLUE,  true  );
   gfxButton btn_Delay         =   btn.initBitmapButton(timer,     220,  20,   80,   80,   WHITE,        true  );
   gfxButton btn_DelayVal      =   btn.initTransparentButton(      295,  20,   40,   30,                 false );
-  gfxButton btn_Reset         =   btn.initBitmapButton(cancel,    220,  120,  80,   80,   BLACK,        true  ); // don't add btn_Reset to array as its colour depends on the state of autoStack
+  // gfxButton btn_Reset         =   btn.initBitmapButton(cancel,    220,  120,  80,   80,   BLACK,        true  ); added to global buttons
   gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 220,  220,  80,   80,   WHITE,        true  );
   gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,  20,   120,  120,  CUSTOM_GREEN, true  );
   gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,  180,  120,  120,  CUSTOM_RED,   true  );
@@ -27,14 +28,14 @@ namespace config_screen {
     btn_array[3] = &btn_Delay;
     btn_array[4] = &btn_DelayVal;
     btn_array[5] = &btn_Back;
-    btn_array[6] = &btn_ArrowUp;
-    btn_array[7] = &btn_ArrowDown;
+    btn_array[6] = &global::btn_Reset;
+    btn_array[7] = &btn_ArrowUp;
+    btn_array[8] = &btn_ArrowDown;
 
     btn_Start.addToggle(func_Start,             0 );
     btn_End.addToggle(func_End,                 0 );
     btn_Run.addToggle(func_Run,                 0 );
     btn_Delay.addToggle(func_Delay,             0 );
-    btn_Reset.addMomentary(func_Reset,          0 );
     btn_Back.addMomentary(func_Back,            0 );
     btn_ArrowUp.addMomentary(func_ArrowUp,      0 );
     btn_ArrowDown.addMomentary(func_ArrowDown,  0 );
@@ -51,13 +52,6 @@ namespace config_screen {
     // draw buttons
     for (int i=0; i < num_btns; i++) {
       btn_array[i]->drawButton();
-    }
-
-    if (!autoStackInitiated) {
-      btn_Reset.drawButton(BLACK);
-    }
-    else if (autoStackInitiated) {
-      btn_Reset.drawButton(CUSTOM_RED);
     }
 
     int currentPosition = driver.XACTUAL();
@@ -150,21 +144,6 @@ namespace config_screen {
 
       btn_Delay.drawButton(WHITE);
       btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, String(getShutterDelay()));
-    }
-  }
-
-
-  // reset AutoStack procedure to default values
-  void func_Reset(bool btnActive) {
-    if (btnActive) {
-      autoStackInitiated = false;
-      isNewAutoStack = true;
-      autoStackPaused = false;
-      setNrMovementsCompleted(0);
-      setNrMovementsRequired(0);
-      setStartPosition(driver.XACTUAL());
-      setEndPosition(driver.XACTUAL());
-      btn_Reset.drawButton(BLACK);
     }
   }
 

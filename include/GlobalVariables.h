@@ -25,7 +25,7 @@ bool canEditFlashOffValue();
 void setExecutedMovement(bool executed);
 bool hasExecutedMovement();
 void setFlashAvailable(bool available);
-bool isFlashAvailable();
+bool isFlashAvailableOld();
 void setGodoxValue(int value);
 int getGodoxValue();
 void setGodoxFilterValue(long value);
@@ -43,8 +43,8 @@ long getEndPosition();
 bool hasReachedTargetPosition();
 void setLastMillis(long millis);
 long getLastMillis();
-void setLastFlashTime(long millis);
-long getLastFlashTime();
+void setFlashTriggerTime(long millis);
+long getFlashTriggerTime();
 void setLastStepTime(long millis);
 long getLastStepTime();
 void setNrMovementsCompleted(int nrMovements);
@@ -74,5 +74,25 @@ void setTargetVelocity(long velocity);
 long getTargetVelocity();
 void setTestingFlash(bool state);
 bool isTestingFlash();
+void setFlashSensorEnabled(bool enabled);
+bool isFlashSensorEnabled();
+
+enum stackProcedureEnum {
+    stackBegin,
+    isFlashAvailable,
+    pullShutter,
+    isFlashUnavailable,
+    releaseShutter,
+    flashSuccessful,
+    flashUnresponsive,
+    stepTaken,
+    stepDelay,
+    newStep,
+    stackCompleted
+};
+// extern stackProcedureEnum   stackProcedureStage;
+void setStackProcedureStage(stackProcedureEnum stage);
+stackProcedureEnum getStackProcedureStage();
+
 
 #endif
