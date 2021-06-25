@@ -76,6 +76,8 @@ void setTestingFlash(bool state);
 bool isTestingFlash();
 void setFlashSensorEnabled(bool enabled);
 bool isFlashSensorEnabled();
+void setRevsPerMinute(int rpm);
+int getRevsPerMinute();
 
 enum stackProcedureEnum {
     stackBegin,

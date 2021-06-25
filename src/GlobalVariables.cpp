@@ -34,6 +34,7 @@ int stepsPerMovement            = 16;           // number of microsteps to trave
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
 bool flashSensorEnabled         = false;        // is flash bulb enabled, or only take photos without flash?
+int revsPerMinute               = 50;           // revs per minute for video 360, stored as 10x higher to avoid floating point math
 stackProcedureEnum stackProcedureStage = stackBegin;
 
 
@@ -489,4 +490,14 @@ void setFlashSensorEnabled(bool enabled) {
 
 bool isFlashSensorEnabled() {
   return flashSensorEnabled;
+}
+
+
+void setRevsPerMinute(int rpm) {
+  revsPerMinute = rpm;
+}
+
+
+int getRevsPerMinute() {
+  return revsPerMinute;
 }

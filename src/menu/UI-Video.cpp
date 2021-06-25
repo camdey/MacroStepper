@@ -1,4 +1,5 @@
 #include "GlobalVariables.h"
+#include "StepperControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Video.h"
 #include "menu/UI-Global.h"
@@ -7,19 +8,20 @@ namespace video_screen {
   #define num_btns 6
   gfxButton *btn_array[num_btns];
 
-  gfxButton btn_Speed         =   btn.initButton("Speed",   "fillRoundRect",  0,    20,   160,  80,   15, DARKGRAY,   true  );
-  gfxButton btn_Back          =   btn.initBitmapButton(backArrow,  220,  220,  80, 80, WHITE,      true  );
-  gfxButton btn_PlayPause     =   btn.initBitmapButton(play,       30,  100,  120,  120,  CUSTOM_GREEN, true);
-  gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,    350,  20,   120,  120,  CUSTOM_GREEN, true);
-  gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,  350,  180,  120,  120,  CUSTOM_RED,   true);
-  gfxButton btn_Direction     =   btn.initBitmapButton(dir,  350,  180,  120,  120,  CUSTOM_RED,   true);
+  gfxButton btn_PlayPause     =   btn.initBitmapButton(play,        30,   100,  120,  120,  CUSTOM_GREEN, true  );
+  gfxButton btn_Speed         =   btn.initButton("Speed", "fillRoundRect",  160,  20, 160,  80, 15, DARKGRAY, true  );
+  gfxButton btn_Back          =   btn.initBitmapButton(backArrow,   200,  220,  80,   80,   WHITE,        true  );
+  gfxButton btn_Direction     =   btn.initBitmapButton(dir_cw,      200,  120,  80,   80,   CUSTOM_GREEN, true  );
+  gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,     350,  20,   120,  120,  CUSTOM_GREEN, true  );
+  gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,   350,  180,  120,  120,  CUSTOM_RED,   true  );
+ 
 
-  float prevStepperRpm = 0.00;
-  #define MAX_VIDEO_SPEED
-  #define MAX_VIDEO_RPM
+  #define STEPS_PER_VMAX 727 // number of steps per second for every 1000 VMAX
+  #define ORBIS_MOTOR_STEPS 200 // number of steps per revolution for the stepper motor used for Orbis
+  int nrSteps = 10000;
 
 
-  void initAutoButtons() {
+  void initVideoButtons() {
     btn_array[0] = &btn_Speed;
     btn_array[1] = &btn_Back;
     btn_array[2] = &btn_PlayPause;
@@ -28,7 +30,7 @@ namespace video_screen {
     btn_array[5] = &btn_Direction;
 
     btn_Speed.addToggle(func_Speed,             0 );
-    btn_Direction.addToggle(func_Direction,  0 );
+    btn_Direction.addToggle(func_Direction,     0 );
     btn_Back.addMomentary(func_Back,            0 );
     btn_PlayPause.addToggle(func_PlayPause,     0 );
     btn_ArrowUp.addMomentary(func_ArrowUp,      0 );
@@ -36,7 +38,7 @@ namespace video_screen {
   }
 
 
-  void populateAutoScreen() {
+  void populateVideoScreen() {
     setCurrentScreen("Video");
 
     // draw buttons
@@ -47,11 +49,12 @@ namespace video_screen {
     }
 
     // draw text
-    func_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
+    btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
+    btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getRevsPerMinute()/10));
   }
 
 
-  void checkAutoButtons(int touch_x, int touch_y) {
+  void checkVideoButtons(int touch_x, int touch_y) {
     for (int i=0; i < num_btns; i++) {
       if (btn_array[i]->isTactile()) {
         btn_array[i]->contains(touch_x, touch_y);
@@ -64,28 +67,41 @@ namespace video_screen {
     if (btnActive ) {
       setArrowsEnabled(true);
       setEditMovementDistance(true);
-      btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(get360Speed()));
+      btn_Speed.writeTextTopCentre(Arimo_Regular_30, YELLOW);
+      btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10));
     }
     else if (!btnActive) {
       setArrowsEnabled(false);
       setEditMovementDistance(false);
-      btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(get360Speed()));
+      btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
+      btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getRevsPerMinute()/10));
     }
+    // make sure VMAX is updated
+    rpmToVmax();
   }
 
 
   void func_Direction(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
-      
+      btn_Direction.drawButton(BLACK); // replace existing button
+      btn_Direction.updateBitmap(dir_ccw); // update bitmap image
+      btn_Direction.updateColour(CUSTOM_RED); // change colour
+      btn_Direction.drawButton(); // draw
+      nrSteps = nrSteps*-1; // change direction
+    }
+    else if (!btnActive && !areArrowsEnabled()) {
+      btn_Direction.drawButton(BLACK); // replace existing button
+      btn_Direction.updateBitmap(dir_cw); // update bitmap image
+      btn_Direction.updateColour(CUSTOM_GREEN); // change colour
+      btn_Direction.drawButton(); // draw
+      nrSteps = nrSteps*-1; // change direction
     }
   }
 
 
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
-      populateScreen("Stack");
+      populateScreen("Orbis");
     }
   }
 
@@ -96,39 +112,43 @@ namespace video_screen {
       btn_PlayPause.updateBitmap(pause); // update bitmap image
       btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
       btn_PlayPause.drawButton(); // draw
+      video360(nrSteps);
     }
     else if (!btnActive && !areArrowsEnabled()) {
       btn_PlayPause.drawButton(BLACK); // replace existing button
       btn_PlayPause.updateBitmap(play); // update bitmap image
       btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
       btn_PlayPause.drawButton(); // draw
-      }
+      video360(0);
+    }
   }
 
 
   void func_ArrowUp(bool btnActive) {
     if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
-      incrementVideoSpeed();
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(get360Speed()));
+      setRevsPerMinute(getRevsPerMinute()+1);
+      btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10));
     }
   }
 
 
   void func_ArrowDown(bool btnActive) {
     if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
-      decrementVideoSpeed();
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(get360Speed()));
+      setRevsPerMinute(getRevsPerMinute()-1);
+      btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10));
     }
   }
 
 
-  void calcStepperSpeed() {
-      int speed = map(getAvgReading(), 0, 1023, 0, MAX_VIDEO_SPEED); 
-      stepper.setSpeed(speed*getStepperDirection());
-      float stepperRpm = round(map(speed, 0, MAX_VIDEO_SPEED, 0, MAX_VIDEO_RPM*100)/10.00)/10.00; // convert to 0-500, divide by 10 and round, divide by 10
-      if (stepperRpm != prevStepperRpm) {
-          prevStepperRpm = stepperRpm;
-          printSpeed(stepperRpm);
-      }
+  // convert desired RPM to VMAX for setting max speed
+  // store STEPS_PER_VMAX and RPM as integers and then divide by necessary denominator to convert back
+  void rpmToVmax() {
+      int stepsPerRev = ORBIS_MOTOR_STEPS * nrMicrosteps; // 200 * 16 = 3200
+      int rpm = getRevsPerMinute();                       // e.g. 5.0rpm = 50
+      int totalSteps = rpm * stepsPerRev / 10;            // 50 * 3200 / 10 = 16000
+      int stepsPerSecond = totalSteps / 60;               // 16000 / 60 = 266 SPS
+      int vMax = stepsPerSecond / STEPS_PER_VMAX * 1000;  // 266 / 727 * 1000 = 365.8
+      setTargetVelocity(vMax);
   }
+
 }

@@ -32,6 +32,8 @@
 #include <icons/Cancel.h>
 #include <icons/CogWheel.h>
 #include <icons/DelayClock.h>
+#include <icons/DirectionCW.h>
+#include <icons/DirectionCCW.h>
 #include <icons/FlashBulb.h>
 #include <icons/FlashOn.h>
 #include <icons/FlashOff.h>
@@ -40,7 +42,7 @@
 #include <icons/Play.h>
 #include <icons/Pause.h>
 #include <icons/Rocket.h>
-#include <icons/Direction.h>
+#include <icons/RotateScreen.h>
 #include <icons/Save.h>
 #include <icons/Target.h>
 #include <icons/Timer.h>

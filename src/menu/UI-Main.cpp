@@ -4,6 +4,7 @@
 #include "menu/UI-Home.h"
 #include "menu/UI-Stack.h"
 #include "menu/UI-Orbis.h"
+#include "menu/UI-Video.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"
 #include "menu/UI-Config.h"
@@ -16,6 +17,7 @@ using namespace manual_screen;
 using namespace home_screen;
 using namespace stack_screen;
 using namespace orbis_screen;
+using namespace video_screen;
 using namespace target_screen;
 using namespace flash_screen;
 using namespace config_screen;
@@ -32,6 +34,7 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
   initHomeButtons();
   initStackButtons();
   initOrbisButtons();
+  initVideoButtons();
   initTargetButtons();
   initFlashButtons();
   initConfigButtons();
@@ -53,6 +56,9 @@ void populateScreen(String screen) {
   }
   if (screen == "Orbis") {
     populateOrbisScreen();
+  }
+  if (screen == "Video") {
+    populateVideoScreen();
   }
   if (screen == "Target") {
     populateTargetScreen();
@@ -105,6 +111,9 @@ void readTouchScreen(String screen) {
       }
       else if (screen == "Orbis") {
         checkOrbisButtons(touch_x, touch_y);
+      }
+      else if (screen == "Video") {
+        checkVideoButtons(touch_x, touch_y);
       }
       else if (screen == "Target") {
         checkTargetButtons(touch_x, touch_y);
