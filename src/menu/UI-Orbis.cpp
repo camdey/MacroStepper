@@ -16,7 +16,7 @@ namespace orbis_screen {
     btn_array[1] = &btn_Photo;
     btn_array[2] = &btn_Back;
 
-    btn_Video.addToggle(func_Video,     0 );
+    btn_Video.addMomentary(func_Video,     0 );
     btn_Photo.addMomentary(func_Photo,  0 );
     btn_Back.addMomentary(func_Back,    0 );
 
@@ -51,14 +51,14 @@ namespace orbis_screen {
 
   void func_Video(bool btnActive) {
     if (btnActive) {
-      populateScreen("Video");
+      populateScreen("Video360");
     }
   }
 
 
   void func_Photo(bool btnActive) {
     if (btnActive) {
-      populateScreen("Photo");
+      populateScreen("Photo360");
     }
   }
 

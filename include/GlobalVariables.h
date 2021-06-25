@@ -82,6 +82,10 @@ void setVideo360Active(bool active);
 bool isVideo360Active();
 void setVideo360Target(long target);
 long getVideo360Target();
+void setJoystickMaxVelocity(long velocity);
+long getJoystickMaxVelocity();
+void setNr360Photos(int nrPhotos);
+int getNr360Photos();
 
 enum stackProcedureEnum {
     stackBegin,

@@ -84,7 +84,7 @@ extern gfxButton            btn;
 #define minRailPosition             0
 #define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
-#define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement 
+// #define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement (use global functions for this)
 #define stealthChopMaxVelocity      200000          // max target velocity (VMAX) during StealthChop movements 
 #define maxStepsPerMovement         999             // maximum number of steps allowed per movement
 

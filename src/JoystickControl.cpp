@@ -22,7 +22,8 @@ long calcVelocity(int xPos) {
   }
   xAdj = round(log(xAdj)*100); // multiply by 100 as value will be truncated to integer
   // 624 = log(512)*100 rounded
-  velocity = map(xAdj, 0, 624, joystickMaxVelocity, 0);
+  // Serial.print("joystick vel: "); Serial.println(getJoystickMaxVelocity());
+  velocity = map(xAdj, 0, 624, getJoystickMaxVelocity(), 0);
 
   return velocity;
 }
@@ -56,7 +57,7 @@ void calibrateJoyStick() {
   xStickUpper = xStickResting + 10;
   xStickLower = xStickResting - 10;
   xStickDiff = 512 - xStickResting;
-  Serial.print("xStick Calib. Diff: "); Serial.println(xStickDiff);
+  // Serial.print("xStick Calib. Diff: "); Serial.println(xStickDiff);
 }
 
 

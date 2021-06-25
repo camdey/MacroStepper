@@ -37,6 +37,8 @@ bool flashSensorEnabled         = false;        // is flash bulb enabled, or onl
 int revsPerMinute               = 50;           // revs per minute for video 360, stored as 10x higher to avoid floating point math
 bool video360Active             = false;        // is video 360 running?
 long video360Target             = 10000;        // set target number of steps for video 360
+long joystickMaxVelocity        = 100000;       // VMAX when using joystick
+int nr360Photos                 = 72;           // nr photos taken in a 360 photo
 stackProcedureEnum stackProcedureStage = stackBegin;
 
 
@@ -522,4 +524,24 @@ void setVideo360Target(long target) {
 
 long getVideo360Target() {
   return video360Target;
+}
+
+
+void setJoystickMaxVelocity(long velocity) {
+  joystickMaxVelocity = velocity;
+}
+
+
+long getJoystickMaxVelocity() {
+  return joystickMaxVelocity;
+}
+
+
+void setNr360Photos(int nrPhotos) {
+  nr360Photos = nrPhotos;
+}
+
+
+int getNr360Photos() {
+  return nr360Photos;
 }

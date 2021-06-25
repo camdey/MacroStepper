@@ -4,7 +4,8 @@
 #include "menu/UI-Home.h"
 #include "menu/UI-Stack.h"
 #include "menu/UI-Orbis.h"
-#include "menu/UI-Video.h"
+#include "menu/UI-Video360.h"
+#include "menu/UI-Photo360.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"
 #include "menu/UI-Config.h"
@@ -18,6 +19,7 @@ using namespace home_screen;
 using namespace stack_screen;
 using namespace orbis_screen;
 using namespace video_screen;
+using namespace photo_screen;
 using namespace target_screen;
 using namespace flash_screen;
 using namespace config_screen;
@@ -34,7 +36,8 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
   initHomeButtons();
   initStackButtons();
   initOrbisButtons();
-  initVideoButtons();
+  initVideo360Buttons();
+  initPhoto360Buttons();
   initTargetButtons();
   initFlashButtons();
   initConfigButtons();
@@ -57,8 +60,11 @@ void populateScreen(String screen) {
   if (screen == "Orbis") {
     populateOrbisScreen();
   }
-  if (screen == "Video") {
-    populateVideoScreen();
+  if (screen == "Video360") {
+    populateVideo360Screen();
+  }
+  if (screen == "Photo360") {
+    populatePhoto360Screen();
   }
   if (screen == "Target") {
     populateTargetScreen();
@@ -112,8 +118,11 @@ void readTouchScreen(String screen) {
       else if (screen == "Orbis") {
         checkOrbisButtons(touch_x, touch_y);
       }
-      else if (screen == "Video") {
-        checkVideoButtons(touch_x, touch_y);
+      else if (screen == "Video360") {
+        checkVideo360Buttons(touch_x, touch_y);
+      }
+      else if (screen == "Photo360") {
+        checkPhoto360Buttons(touch_x, touch_y);
       }
       else if (screen == "Target") {
         checkTargetButtons(touch_x, touch_y);

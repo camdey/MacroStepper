@@ -2,7 +2,7 @@
 #include "StepperControl.h"
 #include "DriverConfig.h"
 #include "menu/UI-Main.h"
-#include "menu/UI-Video.h"
+#include "menu/UI-Video360.h"
 #include "menu/UI-Global.h"
 
 namespace video_screen {
@@ -22,7 +22,7 @@ namespace video_screen {
   int nrSteps = 10000;
 
 
-  void initVideoButtons() {
+  void initVideo360Buttons() {
     btn_array[0] = &btn_Speed;
     btn_array[1] = &btn_Back;
     btn_array[2] = &btn_PlayPause;
@@ -39,8 +39,9 @@ namespace video_screen {
   }
 
 
-  void populateVideoScreen() {
-    setCurrentScreen("Video");
+  void populateVideo360Screen() {
+    setCurrentScreen("Video360");
+    setJoystickMaxVelocity(5000); // lower joystick speed
 
     // draw buttons
     for (int i=0; i < num_btns; i++) {
@@ -55,7 +56,7 @@ namespace video_screen {
   }
 
 
-  void checkVideoButtons(int touch_x, int touch_y) {
+  void checkVideo360Buttons(int touch_x, int touch_y) {
     for (int i=0; i < num_btns; i++) {
       if (btn_array[i]->isTactile()) {
         btn_array[i]->contains(touch_x, touch_y);
@@ -109,6 +110,7 @@ namespace video_screen {
         setVideo360Active(false);
       }
       configStealthChop(); // reset VMAX
+      setJoystickMaxVelocity(100000); // reset back to original value
       populateScreen("Orbis");
     }
   }
