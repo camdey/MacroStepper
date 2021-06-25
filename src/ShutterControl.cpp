@@ -39,51 +39,6 @@ It first checks if the flash has recycled (red LED is on) and then
 sets the shutter pin to HIGH. A loop will start where the flash is
 continually checked to see if it has triggered (red LED goes off)
 ******************************************************************/
-// void triggerShutter() {
-// 	setShutterTriggered(false);
-
-//   // if flash bulb enabled
-//   if (isFlashSensorEnabled()) {
-//     unsigned long startTime = millis();
-
-//     // wait for flash to be ready first
-//     while (!isFlashAvailableOld()) {
-//       if (millis() - getLastMillis() >= 10) {
-//         isFlashReady();
-//         // break if flash not available after 5s
-//         if (millis() - startTime >= 5000) {
-//           break;
-//         }
-//         setLastMillis(millis());
-//       }
-//     }
-//     // trigger flash
-//     digitalWrite(SONY_PIN, HIGH);
-//     // wait for flash to be fired, isFlashAvailableOld() will be false as godox LED will briefly turn off
-//     while (millis() - startTime <= 1500 && isFlashAvailableOld()) {
-//       if (millis() - getLastMillis() >= 10) {
-//         isFlashReady();
-//         setLastMillis(millis());
-//       }
-//     }
-//     if (!isFlashAvailableOld()) {
-//       setShutterTriggered(true);
-//       setFlashTriggerTime(millis());
-//     }
-
-//     recycleTime = (millis() - startTime);
-//     // reset shutter signal
-//     digitalWrite(SONY_PIN, LOW);
-//   }
-//   else {
-//     // trigger flash
-//     digitalWrite(SONY_PIN, HIGH);
-//     delay(500);
-//     digitalWrite(SONY_PIN, LOW);
-//     setShutterTriggered(true);
-//   }
-// }
-
 void triggerShutter() {
   if (isFlashSensorEnabled()) {
     runFlashProcedure(true);

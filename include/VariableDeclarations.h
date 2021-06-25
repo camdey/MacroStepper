@@ -32,6 +32,8 @@
 #include <icons/Cancel.h>
 #include <icons/CogWheel.h>
 #include <icons/DelayClock.h>
+#include <icons/DirectionCW.h>
+#include <icons/DirectionCCW.h>
 #include <icons/FlashBulb.h>
 #include <icons/FlashOn.h>
 #include <icons/FlashOff.h>
@@ -40,7 +42,7 @@
 #include <icons/Play.h>
 #include <icons/Pause.h>
 #include <icons/Rocket.h>
-#include <icons/Rotate.h>
+#include <icons/RotateScreen.h>
 #include <icons/Save.h>
 #include <icons/Target.h>
 #include <icons/Timer.h>
@@ -82,7 +84,7 @@ extern gfxButton            btn;
 #define minRailPosition             0
 #define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 #define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
-#define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement 
+// #define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement (use global functions for this)
 #define stealthChopMaxVelocity      200000          // max target velocity (VMAX) during StealthChop movements 
 #define maxStepsPerMovement         999             // maximum number of steps allowed per movement
 

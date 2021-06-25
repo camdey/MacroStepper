@@ -303,6 +303,7 @@ void overshootPosition(int startPosition, int numberOfSteps) {
   while (driver.XACTUAL() != driver.XTARGET()) {}
 }
 
+
 // clean up variables etc after completing AutoStack sequence
 void terminateAutoStack() {
   if (getCurrentScreen() != "Auto") {
@@ -317,4 +318,19 @@ void terminateAutoStack() {
   produceTone(4, 300, 200);                   // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
   setTargetVelocity(stealthChopMaxVelocity);
+}
+
+
+void video360(long nrSteps) {
+  // change to StealthChop if StallGuard is configured
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
+  if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+  // update target velocity as callign configStealthChop resets this on the driver register but not the function
+  setTargetVelocity(getTargetVelocity());
+  // set position
+  driver.XTARGET(driver.XACTUAL()+nrSteps);
 }

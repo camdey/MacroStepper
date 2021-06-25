@@ -37,6 +37,10 @@
 #include "VariableDeclarations.h"							// external variable declarations
 #include "menu/UI-Main.h"
 #include "menu/UI-Home.h"
+#include "menu/UI-Stack.h"
+#include "menu/UI-Orbis.h"
+#include "menu/UI-Video360.h"
+#include "menu/UI-Photo360.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"
@@ -127,6 +131,11 @@ void loop() {
   if (millis() - prevButtonCheck >= 50) {
     readTouchScreen(getCurrentScreen());
     prevButtonCheck = millis();
+
+    // if video360 active, keep updating target so stepper keeps moving
+    if (isVideo360Active()) {
+      video360(getVideo360Target());
+    }
   }
   // take joystick and limit switch reading, put stepper to sleep
   if (millis() - prevJoystickCheck >= 100) {
@@ -134,8 +143,8 @@ void loop() {
     int xStickPos = readJoystick();
     isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
   
-    // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && isJoystickBtnActive) {
+    // move if past threshold and not in autoStack or video360 mode
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && !isVideo360Active() && isJoystickBtnActive) {
       joystickMotion(xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
