@@ -103,11 +103,11 @@ void joystickMotion(int xPos) {
   
     if (millis() - getLastMillis() >= 100) {
       velocity = calcVelocity(xPos);
-      Serial.print(" xPos: "); Serial.print(xPos);
-      Serial.print(" | currentPos: "); Serial.print(driver.XACTUAL());
-      Serial.print(" | targetPos: "); Serial.print(driver.XTARGET());
-      Serial.print(" | VACTUAL: "); Serial.print(driver.VACTUAL());
-      Serial.print(" | velocity: "); Serial.println(velocity);
+      // Serial.print(" xPos: "); Serial.print(xPos);
+      // Serial.print(" | currentPos: "); Serial.print(driver.XACTUAL());
+      // Serial.print(" | targetPos: "); Serial.print(driver.XTARGET());
+      // Serial.print(" | VACTUAL: "); Serial.print(driver.VACTUAL());
+      // Serial.print(" | velocity: "); Serial.println(velocity);
 
       isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
 

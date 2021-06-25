@@ -35,6 +35,8 @@ long targetVelocity             = 200000;       // target velocity = VMAX for TM
 bool testingFlash               = false;        // flag for testing flash threshold
 bool flashSensorEnabled         = false;        // is flash bulb enabled, or only take photos without flash?
 int revsPerMinute               = 50;           // revs per minute for video 360, stored as 10x higher to avoid floating point math
+bool video360Active             = false;        // is video 360 running?
+long video360Target             = 10000;        // set target number of steps for video 360
 stackProcedureEnum stackProcedureStage = stackBegin;
 
 
@@ -500,4 +502,24 @@ void setRevsPerMinute(int rpm) {
 
 int getRevsPerMinute() {
   return revsPerMinute;
+}
+
+
+void setVideo360Active(bool active) {
+  video360Active = active;
+}
+
+
+bool isVideo360Active() {
+  return video360Active;
+}
+
+
+void setVideo360Target(long target) {
+  video360Target = target;
+}
+
+
+long getVideo360Target() {
+  return video360Target;
 }

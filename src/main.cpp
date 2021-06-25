@@ -130,6 +130,11 @@ void loop() {
   if (millis() - prevButtonCheck >= 50) {
     readTouchScreen(getCurrentScreen());
     prevButtonCheck = millis();
+
+    // if video360 active, keep updating target so stepper keeps moving
+    if (isVideo360Active()) {
+      video360(getVideo360Target());
+    }
   }
   // take joystick and limit switch reading, put stepper to sleep
   if (millis() - prevJoystickCheck >= 100) {
