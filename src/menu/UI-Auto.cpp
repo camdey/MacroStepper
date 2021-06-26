@@ -176,23 +176,23 @@ namespace auto_screen {
   }
 
 
-  void stackStatus(stackProcedureEnum stage) {
+  void stackStatus(stack stage) {
     // unhide if hidden
     if (btn_StackStatus.isHidden()) {
       btn_StackStatus.hideButton(false);
     }
 
-    String stageString = stackProcedureValues[stage];
-    int textColour = WHITE;
+    // String stageString = stackProcedureValues[stage];
+    // int textColour = WHITE;
 
      // only print if on correct screen and value has changed
-    if (getCurrentScreen() == "Auto" && stage != getStackProcedureStage()) {
+    if (getCurrentScreen() == "Auto" && stage != getStackStage()) {
       // btn_StackStatus.writeTextCentre(Arimo_Bold_20, textColour, stageString);
       // char* newLabel = strdup(stageString.c_str());
       // btn_StackStatus.updateLabel(newLabel);
       // Serial.print("status char: "); Serial.println(newLabel);
     }
-    setStackProcedureStage(stage); // update to new value
+    setStackStage(stage); // update to new value
   }
 
 
@@ -220,6 +220,7 @@ namespace auto_screen {
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
+    btn_PlayPause.setToggleActive(false); // reset button state
   }
 
 

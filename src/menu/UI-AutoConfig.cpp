@@ -223,7 +223,7 @@ namespace autoconfig_screen {
   void updateEndPosition() {
     // set new end value
     if (autoStackMax) {
-      setEndPosition(maxRailPosition);
+      setEndPosition(MAX_RAIL_POSITION);
     }
     else if (!autoStackMax) {
       setEndPosition(driver.XACTUAL());

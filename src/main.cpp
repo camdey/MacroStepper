@@ -74,7 +74,10 @@ bool isNewAutoStack 						  = true;       // move to start for autoStack procedu
 bool autoStackInitiated 					= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
 bool stallGuardConfigured 				= true;				// stallGuard config has run
-bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
+bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure
+bool isNewPhoto360                = true;       // move to start for photo360 procedure
+bool photo360Initiated            = false;      // enables function for photo360 procedure
+bool photo360Paused               = false;      // pause photo360 procedure
 
 
 // ***** --- MAIN PROGRAM --- ***** //
@@ -90,7 +93,7 @@ void setup(void) {
 
 	driver.begin();
 	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
-	driver.microsteps(nrMicrosteps);
+	driver.microsteps(NR_MICROSTEPS);
   driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
 
   setStepperEnabled(true);
@@ -136,6 +139,9 @@ void loop() {
     if (isVideo360Active()) {
       video360(getVideo360Target());
     }
+    if (photo360Initiated) {
+      photo360();
+    }
   }
   // take joystick and limit switch reading, put stepper to sleep
   if (millis() - prevJoystickCheck >= 100) {
@@ -148,7 +154,7 @@ void loop() {
       joystickMotion(xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && (!autoStackInitiated || autoStackPaused) && isStepperEnabled()) {
+    if (hasReachedTargetPosition() && (!autoStackInitiated || autoStackPaused) && isStepperEnabled() && (!photo360Initiated || photo360Paused)) {
       setStepperEnabled(false); // disable stepper
     }
 		// update godoxValue if on Flash screen

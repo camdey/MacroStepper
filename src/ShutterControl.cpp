@@ -49,14 +49,20 @@ void triggerShutter() {
       digitalWrite(SONY_PIN, HIGH);
       setFlashTriggerTime(millis());
       Serial.println("pullShutter");
-      auto_screen::stackStatus(pullShutter);
+
+      if (autoStackInitiated) {
+        auto_screen::stackStatus(stack::pullShutter);
+      }
     }
     // if triggered, don't set LOW until 800ms has passed
     else if (millis() - getFlashTriggerTime() >= 800) {
       digitalWrite(SONY_PIN, LOW);
       // setShutterTriggered(true);
       Serial.println("releaseShutter");
-      auto_screen::stackStatus(releaseShutter);
+
+      if (autoStackInitiated) {
+        auto_screen::stackStatus(stack::releaseShutter);
+      }
     }
   }
 }
@@ -64,44 +70,44 @@ void triggerShutter() {
 
 void runFlashProcedure(bool restart) {
   if (restart) {
-    auto_screen::stackStatus(isFlashAvailable);
+    auto_screen::stackStatus(stack::isFlashAvailable);
     setFlashTriggerTime(millis());
     setShutterTriggered(false);
     Serial.println("isFlashAvailable");
   }
   // begin flash sequence
-  if (getStackProcedureStage() == isFlashAvailable) {
+  if (getStackStage() == stack::isFlashAvailable) {
     if (isFlashReady()) {
-      auto_screen::stackStatus(pullShutter);
+      auto_screen::stackStatus(stack::pullShutter);
       Serial.println("pullShutter");
     }
   }
-  else if (getStackProcedureStage() == pullShutter) {
+  else if (getStackStage() == stack::pullShutter) {
     digitalWrite(SONY_PIN, HIGH);
     if (isFlashSensorEnabled()) {
-      auto_screen::stackStatus(isFlashUnavailable);
+      auto_screen::stackStatus(stack::isFlashUnavailable);
       Serial.println("isFlashUnavailable");
     }
     else {
       triggerShutter();
     }
   }
-  else if (getStackProcedureStage() == isFlashUnavailable) {
+  else if (getStackStage() == stack::isFlashUnavailable) {
     if (!isFlashReady()) {
-      auto_screen::stackStatus(releaseShutter);
+      auto_screen::stackStatus(stack::releaseShutter);
       Serial.println("releaseShutter");
     }
   }
-  else if (getStackProcedureStage() == releaseShutter) {
+  else if (getStackStage() == stack::releaseShutter) {
     digitalWrite(SONY_PIN, LOW);
-    auto_screen::stackStatus(flashSuccessful);
+    auto_screen::stackStatus(stack::flashSuccessful);
     Serial.println("flashSuccessful");
     recycleTime = (millis() - getFlashTriggerTime());
     setShutterTriggered(true);
   }
   // fail over
-  if (millis() - getFlashTriggerTime() >= 6000 && (getStackProcedureStage() == isFlashAvailable || getStackProcedureStage() == isFlashUnavailable)) {
-    auto_screen::stackStatus(flashUnresponsive);
+  if (millis() - getFlashTriggerTime() >= 6000 && (getStackStage() == stack::isFlashAvailable || getStackStage() == stack::isFlashUnavailable)) {
+    auto_screen::stackStatus(stack::flashUnresponsive);
     digitalWrite(SONY_PIN, LOW);
     Serial.println("flashUnresponsive");
   }

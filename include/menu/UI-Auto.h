@@ -21,7 +21,7 @@ namespace auto_screen {
   void estimateDuration();
   void printAutoStackProgress();
   void hideArrows(bool hide);
-  void stackStatus(stackProcedureEnum stage);
+  void stackStatus(stack stage);
 }
 
 #endif

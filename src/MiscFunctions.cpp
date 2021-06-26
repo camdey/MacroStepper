@@ -42,11 +42,11 @@ void calculateStepSize() {
   // constrain multiplier range
   if (getStepsPerMovement() < 1) {
     setStepsPerMovement(1);
-  } else if (getStepsPerMovement() > maxStepsPerMovement) {
-    setStepsPerMovement(maxStepsPerMovement);
+  } else if (getStepsPerMovement() > MAX_STEPS_PER_MOVEMENT) {
+    setStepsPerMovement(MAX_STEPS_PER_MOVEMENT);
   }
 
-  distancePerMovement = microstepLength * getStepsPerMovement();
+  distancePerMovement = MICROSTEP_DIST * getStepsPerMovement();
 
   if (distancePerMovement != getStepSize()) {
     // print new delay value

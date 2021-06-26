@@ -84,11 +84,20 @@ void setVideo360Target(long target);
 long getVideo360Target();
 void setJoystickMaxVelocity(long velocity);
 long getJoystickMaxVelocity();
-void setNr360Photos(int nrPhotos);
+void incrementNr360Photos();
+void decrementNr360Photos();
 int getNr360Photos();
+void setPhoto360Delay(long delay);
+long getPhoto360Delay();
+void setNrCompleted360Photos(int nrPhotos);
+int getNrCompleted360Photos();
+void setLastPhoto360Step();
+long getLastPhoto360Step();
+void setWaitingForShutter(bool state);
+bool isWaitingForShutter();
 
-enum stackProcedureEnum {
-    stackBegin,
+enum class stack {
+    start,
     isFlashAvailable,
     pullShutter,
     isFlashUnavailable,
@@ -100,9 +109,17 @@ enum stackProcedureEnum {
     newStep,
     stackCompleted
 };
-// extern stackProcedureEnum   stackProcedureStage;
-void setStackProcedureStage(stackProcedureEnum stage);
-stackProcedureEnum getStackProcedureStage();
+void setStackStage(stack stage);
+stack getStackStage();
+
+enum class orbis {
+    start,
+    pullShutter,
+    releaseShutter,
+    moveStepper
+};
+void setPhoto360Stage(orbis stage);
+orbis getPhoto360Stage();
 
 
 #endif

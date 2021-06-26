@@ -15,5 +15,6 @@ void goToStart();
 void overshootPosition(int startPosition, int numberOfSteps);
 void terminateAutoStack();
 void video360(long nrSteps);
+void photo360();
 
 #endif

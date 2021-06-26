@@ -1,6 +1,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
+#include "StepperControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Photo360.h"
 #include "menu/UI-Global.h"
@@ -8,10 +9,12 @@
 namespace photo_screen {
   #define num_btns 9
   gfxButton *btn_array[num_btns];
+  bool canEditPhotoNr     = false; // flag for editing photoNr with arrows
+  bool canEditPhotoDelay  = false; // flag for editing photoDelay with arrows
 
 
   gfxButton btn_PhotoNr       =   btn.initButton("Nr Photos",   "fillRoundRect",  0,    20,   160,  80,   15, DARKGRAY,   true  );
-  gfxButton btn_Delay         =   btn.initButton("Delay",       "fillRoundRect",  0,    120,  160,  80,   15, DARKGRAY,   false );
+  gfxButton btn_Delay         =   btn.initButton("Delay",       "fillRoundRect",  0,    120,  160,  80,   15, DARKGRAY,   true  );
   gfxButton btn_Progress      =   btn.initButton("Progress",    "fillRoundRect",  0,    220,  160,  80,   15, DARKGRAY,   false );
   gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,   220,  120,  80,    80, WHITE,        true  );
   gfxButton btn_Back          =   btn.initBitmapButton(backArrow,  220,  220,  80,    80, WHITE,        true  );
@@ -63,6 +66,7 @@ namespace photo_screen {
     btn_PhotoNr.writeTextTopCentre(Arimo_Regular_30, WHITE);
     btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getNr360Photos()));
     btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
+    btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getPhoto360Delay()));
     btn_Progress.writeTextTopCentre(Arimo_Regular_30, WHITE);
     printPhoto360Progress();
   }
@@ -77,10 +81,12 @@ namespace photo_screen {
   }
 
 
+  // set number of photos required for photo360 procedure
   void func_PhotoNr(bool btnActive) {
-    if (btnActive && (!autoStackInitiated || autoStackPaused)) {
+    // don't allow changing mid-procedure
+    if (btnActive && !photo360Initiated && !canEditPhotoDelay) {
       setArrowsEnabled(true);
-      // setEditPhotoNr(true);
+      canEditPhotoNr = true;
       hideArrows(false); // show arrows, hide play/pause
 
       btn_PhotoNr.writeTextTopCentre(Arimo_Regular_30, YELLOW);
@@ -91,9 +97,9 @@ namespace photo_screen {
       btn_ArrowUp.drawButton(CUSTOM_GREEN);
       btn_ArrowDown.drawButton(CUSTOM_RED);
     }
-    else if (!btnActive && (!autoStackInitiated || autoStackPaused)) {
+    else if (!btnActive && !photo360Initiated && !canEditPhotoDelay) {
       setArrowsEnabled(false);
-      // setEditPhotoNr(false);
+      canEditPhotoNr = false;
       hideArrows(true); // hide arrows, show play/pause
 
       // TODO would be nice to not re-write the top line on every arrow press
@@ -111,32 +117,33 @@ namespace photo_screen {
   }
 
 
-    void func_Delay(bool btnActive) {
-    if (btnActive && (!autoStackInitiated || autoStackPaused)) {
+  // set delay between photos for photo360 procedure
+  void func_Delay(bool btnActive) {
+    // don't allow changing unless paused or not started
+    if (btnActive && (!photo360Initiated || photo360Paused) && !canEditPhotoNr) {
       setArrowsEnabled(true);
-      // setEditPhotoNr(true);
+      canEditPhotoDelay = true;
       hideArrows(false); // show arrows, hide play/pause
 
-      // btn_Delay.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-      // btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
+      btn_Delay.writeTextTopCentre(Arimo_Regular_30, YELLOW);
+      btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getPhoto360Delay()));
 
-      // // clear play/pause button
-      // btn_PlayPause.drawButton(BLACK);
-      // btn_ArrowUp.drawButton(CUSTOM_GREEN);
-      // btn_ArrowDown.drawButton(CUSTOM_RED);
+      // clear play/pause button
+      btn_PlayPause.drawButton(BLACK);
+      btn_ArrowUp.drawButton(CUSTOM_GREEN);
+      btn_ArrowDown.drawButton(CUSTOM_RED);
     }
-    else if (!btnActive && (!autoStackInitiated || autoStackPaused)) {
+    else if (!btnActive && (!photo360Initiated || photo360Paused) && !canEditPhotoNr) {
       setArrowsEnabled(false);
-      // setEditPhotoNr(false);
+      canEditPhotoDelay = false;
       hideArrows(true); // hide arrows, show play/pause
 
-      // TODO would be nice to not re-write the top line on every arrow press
-      // btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
-      // btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getNr360Photos()));
+      btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
+      btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getPhoto360Delay()));
 
-      // btn_ArrowUp.drawButton(BLACK);
-      // btn_ArrowDown.drawButton(BLACK);
-      // btn_PlayPause.drawButton();
+      btn_ArrowUp.drawButton(BLACK);
+      btn_ArrowDown.drawButton(BLACK);
+      btn_PlayPause.drawButton();
     }
     else {
       // set back to off if conditions above not met
@@ -160,36 +167,36 @@ namespace photo_screen {
 
 
   void func_PlayPause(bool btnActive) {
-    // if (getNrMovementsRequired() > 0) {
-    //   if (btnActive && !areArrowsEnabled()) {
-    //     autoStackInitiated = true;   // start autoStack sequence
-    //     autoStackPaused = false;
-    //     btn_PlayPause.drawButton(BLACK); // replace existing button
-    //     btn_PlayPause.updateBitmap(pause); // update bitmap image
-    //     btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
-    //     btn_PlayPause.drawButton(); // draw
-    //     // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
-    //   }
-    //   else if (!btnActive && !areArrowsEnabled()) {
-    //     autoStackPaused = true;  // autoStack paused
-    //     btn_PlayPause.drawButton(BLACK); // replace existing button
-    //     btn_PlayPause.updateBitmap(play); // update bitmap image
-    //     btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
-    //     btn_PlayPause.drawButton(); // draw
-    //     // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
-    //   }
-    // }
-    // else {
-    //   btn_PlayPause.setToggleActive(!btnActive); // reset button state
-    // }
+    if (btnActive && !areArrowsEnabled()) {
+      if (isNewPhoto360) {
+        setNrCompleted360Photos(0);
+      }
+      photo360Initiated = true;   // start photo360 sequence
+      photo360Paused = false;
+      photo360();
+      btn_PlayPause.drawButton(BLACK); // replace existing button
+      btn_PlayPause.updateBitmap(pause); // update bitmap image
+      btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
+      btn_PlayPause.drawButton(); // draw
+    }
+    else if (!btnActive && !areArrowsEnabled()) {
+      photo360Paused = true;  // photo360 paused
+      btn_PlayPause.drawButton(BLACK); // replace existing button
+      btn_PlayPause.updateBitmap(play); // update bitmap image
+      btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
+      btn_PlayPause.drawButton(); // draw
+    }
+    else {
+      btn_PlayPause.setToggleActive(!btnActive); // reset button state
+    }
   }
 
 
   /***********************************************************************
-  Used to pause autostack when needing to be called from another file.
+  Used to pause photo360 when needing to be called from another file.
   ***********************************************************************/
   void pausePhoto360() {
-    // autoStackPaused = true; // pause autostack
+    // photo360Paused = true; // pause photo360
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update bitmap image
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
@@ -199,49 +206,63 @@ namespace photo_screen {
 
 
   /***********************************************************************
-  Used to reset autostack after completed stack.
+  Used to reset photo360 after completed 360.
   ***********************************************************************/
   void resetPhoto360() {
-    // autoStackPaused = false;
-    // autoStackInitiated = false;
-    // isNewAutoStack = true;
+    photo360Paused = false;
+    photo360Initiated = false;
+    isNewPhoto360 = true;
+    setPhoto360Stage(orbis::start);
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
+    btn_PlayPause.setToggleActive(false); // reset button state
   }
 
 
   void func_ArrowUp(bool btnActive) {
-    // if (btnActive && canEditPhotoNr() && areArrowsEnabled()) {
-    //   // incrementStepsPerMovement();
-    //   // calculateStepSize();
-    //   btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
-    // }
+    if (btnActive && areArrowsEnabled()) {
+      if (canEditPhotoNr) {
+        incrementNr360Photos();
+        printPhoto360Progress();
+        btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
+      }
+      else if (canEditPhotoDelay) {
+        setPhoto360Delay(getPhoto360Delay()+100);
+        btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getPhoto360Delay()));
+      }
+    }
   }
 
 
   void func_ArrowDown(bool btnActive) {
-    // if (btnActive && canEditPhotoNr() && areArrowsEnabled()) {
-    //   // decrementStepsPerMovement();
-    //   // calculateStepSize();
-    //   btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
-    // }
+    if (btnActive && areArrowsEnabled()) {
+      if (canEditPhotoNr) {
+        decrementNr360Photos();
+        printPhoto360Progress();
+        btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
+      }
+      else if (canEditPhotoDelay) {
+        setPhoto360Delay(getPhoto360Delay()-100);
+        btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getPhoto360Delay()));
+      }
+    }
   }
 
 
   /***********************************************************************
-  Updates the autoStack screen with current progress of stack sequence.
+  Updates the photo360 screen with current progress of 360 sequence.
   Uses sprintf_P function to concatenate two values and format them as
   "completed / remaining" on the screen.
   ***********************************************************************/
   void printPhoto360Progress() {
-    // char photo360Progress[10]  = "0/0";
+    char photo360Progress[10]  = "0/0";
 
-    // // format progress in "Completed / Total" string
-    // sprintf_P(photo360Progress, PSTR("%02d/%02d"), getNrMovementsCompleted(), getNrMovementsRequired());
-    // // print to screen
-    // btn_Progress.writeTextBottomCentre(Arimo_Bold_30, WHITE, photo360Progress);
+    // format progress in "Completed / Total" string
+    sprintf_P(photo360Progress, PSTR("%02d/%02d"), getNrCompleted360Photos(), getNr360Photos());
+    // print to screen
+    btn_Progress.writeTextBottomCentre(Arimo_Bold_30, WHITE, photo360Progress);
   }
 
 

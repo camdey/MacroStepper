@@ -75,18 +75,19 @@ extern gfxButton            btn;
 #define CUSTOM_YELLOW                   0xFF46
 
 // microsteps and positions
-#define nrMicrosteps			    16              // number of microsteps per full step
-#define microstepLength             0.3125          // distance travelled per microstep in um = 2 / 400 / 16
-#define railLength                  200             // total length of actuator rails
-#define stageLength                 62              // total length of rail stage minus rubber pads on stage ends
-#define endStoppers                 18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
-#define railTravel                  120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
-#define minRailPosition             0
-#define maxRailPosition             384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
-#define safeZone                    6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
-// #define joystickMaxVelocity         100000          // max target velocity (VMAX) during joystick movement (use global functions for this)
-#define stealthChopMaxVelocity      200000          // max target velocity (VMAX) during StealthChop movements 
-#define maxStepsPerMovement         999             // maximum number of steps allowed per movement
+#define AUTOSTACK_MOTOR_STEPS       400             // number of steps per revolution for the autostack stepper
+#define ORBIS_MOTOR_STEPS           200             // number of steps per revolution for the orbis stepper
+#define NR_MICROSTEPS               16              // number of microsteps per full step
+#define MICROSTEP_DIST              0.3125          // distance travelled per microstep in um = 2 / 400 / 16
+#define RAIL_LENGTH                 200             // total length of actuator rails
+#define STAGE_LENGTH                62              // total length of rail stage minus rubber pads on stage ends
+#define END_STOPPER_THICKNESS       18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
+#define RAIL_TRAVEL_LENGTH          120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
+#define MIN_RAIL_POSITION           0
+#define MAX_RAIL_POSITION           384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
+#define SAFE_ZONE_BUFFER            6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
+#define STEALTH_CHOP_VMAX           200000          // max target velocity (VMAX) during StealthChop movements 
+#define MAX_STEPS_PER_MOVEMENT      999             // maximum number of steps allowed per movement
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT
@@ -164,5 +165,8 @@ extern bool autoStackInitiated;
 extern bool autoStackPaused;
 extern bool stallGuardConfigured;
 extern bool autoStackMax;
+extern bool isNewPhoto360;
+extern bool photo360Initiated;
+extern bool photo360Paused;
 
 #endif

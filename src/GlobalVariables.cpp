@@ -38,17 +38,36 @@ int revsPerMinute               = 50;           // revs per minute for video 360
 bool video360Active             = false;        // is video 360 running?
 long video360Target             = 10000;        // set target number of steps for video 360
 long joystickMaxVelocity        = 100000;       // VMAX when using joystick
+int nr360PhotosArrayIndex       = 11;            // index for number of photoCountArray
 int nr360Photos                 = 72;           // nr photos taken in a 360 photo
-stackProcedureEnum stackProcedureStage = stackBegin;
+long photo360Delay              = 1000;         // delay in milliseconds between each photo in a photo360 procedure
+int nrCompleted360Photos        = 0;            // nr of photos taken in a 360 procedure
+long lastPhoto360Step           = 0;            // millis of last photo taken for photo360
+bool waitingForShutter          = false;        // are we currently waiting for the shutter to be successfully triggered?
+
+stack stackStage = stack::start;
+orbis photo360Stage = orbis::start;
+#define photoCountArraySize 20 // need to ensure we don't go out of bounds
+int photoCountArray[] = {6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108,114,120}; // possible values for nr360Photos
 
 
-void setStackProcedureStage(stackProcedureEnum stage) {
-  stackProcedureStage = stage;
+void setStackStage(stack stage) {
+  stackStage = stage;
 }
 
 
-stackProcedureEnum getStackProcedureStage() {
-  return stackProcedureStage;
+stack getStackStage() {
+  return stackStage;
+}
+
+
+void setPhoto360Stage(orbis stage) {
+  photo360Stage = stage;
+}
+
+
+orbis getPhoto360Stage() {
+  return photo360Stage;
 }
 
  
@@ -537,11 +556,66 @@ long getJoystickMaxVelocity() {
 }
 
 
-void setNr360Photos(int nrPhotos) {
-  nr360Photos = nrPhotos;
+void incrementNr360Photos() {
+  // minus one as array index starts at 0
+  if (nr360PhotosArrayIndex < photoCountArraySize-1) {
+    nr360PhotosArrayIndex++;
+  }
+}
+
+
+void decrementNr360Photos() {
+  if (nr360PhotosArrayIndex > 0) {
+    nr360PhotosArrayIndex--;
+  }
 }
 
 
 int getNr360Photos() {
+  nr360Photos = photoCountArray[nr360PhotosArrayIndex];
   return nr360Photos;
+}
+
+
+void setPhoto360Delay(long delay) {
+  photo360Delay = delay;
+  // 800ms is min time needed for pulling shutter
+  if (photo360Delay < 800) {
+    photo360Delay = 800;
+  }
+}
+
+
+long getPhoto360Delay() {
+  return photo360Delay;
+}
+
+
+void setNrCompleted360Photos(int nrPhotos) {
+  nrCompleted360Photos = nrPhotos;
+}
+
+
+int getNrCompleted360Photos() {
+  return nrCompleted360Photos;
+}
+
+
+void setLastPhoto360Step() {
+  lastPhoto360Step = millis();
+}
+
+
+long getLastPhoto360Step() {
+  return lastPhoto360Step;
+}
+
+
+void setWaitingForShutter(bool state) {
+  waitingForShutter = state;
+}
+
+
+bool isWaitingForShutter() {
+  return waitingForShutter;
 }
