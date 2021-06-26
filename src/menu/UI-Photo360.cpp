@@ -170,14 +170,15 @@ namespace photo_screen {
     if (btnActive && !areArrowsEnabled()) {
       if (isNewPhoto360) {
         setNrCompleted360Photos(0);
+        setCurrentStage(start);
       }
       photo360Initiated = true;   // start photo360 sequence
       photo360Paused = false;
-      photo360();
       btn_PlayPause.drawButton(BLACK); // replace existing button
       btn_PlayPause.updateBitmap(pause); // update bitmap image
       btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
       btn_PlayPause.drawButton(); // draw
+      photo360();
     }
     else if (!btnActive && !areArrowsEnabled()) {
       photo360Paused = true;  // photo360 paused
@@ -201,7 +202,7 @@ namespace photo_screen {
     btn_PlayPause.updateBitmap(play); // update bitmap image
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
-    btn_PlayPause.setToggleActive(false); // set button state to "pause" mode
+    // btn_PlayPause.setToggleActive(false); // set button state to "pause" mode
   }
 
 
@@ -212,12 +213,12 @@ namespace photo_screen {
     photo360Paused = false;
     photo360Initiated = false;
     isNewPhoto360 = true;
-    setPhoto360Stage(orbis::start);
+    setCurrentStage(idle);
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
-    btn_PlayPause.setToggleActive(false); // reset button state
+    btn_PlayPause.setButtonActive(false);
   }
 
 

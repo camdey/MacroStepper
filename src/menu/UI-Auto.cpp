@@ -176,7 +176,7 @@ namespace auto_screen {
   }
 
 
-  void stackStatus(stack stage) {
+  void stackStatus(stages stage) {
     // unhide if hidden
     if (btn_StackStatus.isHidden()) {
       btn_StackStatus.hideButton(false);
@@ -186,13 +186,13 @@ namespace auto_screen {
     // int textColour = WHITE;
 
      // only print if on correct screen and value has changed
-    if (getCurrentScreen() == "Auto" && stage != getStackStage()) {
+    if (getCurrentScreen() == "Auto" && stage != getCurrentStage()) {
       // btn_StackStatus.writeTextCentre(Arimo_Bold_20, textColour, stageString);
       // char* newLabel = strdup(stageString.c_str());
       // btn_StackStatus.updateLabel(newLabel);
       // Serial.print("status char: "); Serial.println(newLabel);
     }
-    setStackStage(stage); // update to new value
+    setCurrentStage(stage); // update to new value
   }
 
 
@@ -205,7 +205,7 @@ namespace auto_screen {
     btn_PlayPause.updateBitmap(play); // update bitmap image
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
-    btn_PlayPause.setToggleActive(false); // set button state to "pause" mode
+    btn_PlayPause.setButtonActive(false); // set button state to "pause" mode
   }
 
 
@@ -216,11 +216,12 @@ namespace auto_screen {
     autoStackPaused = false;
     autoStackInitiated = false;
     isNewAutoStack = true;
+    setCurrentStage(idle);
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
-    btn_PlayPause.setToggleActive(false); // reset button state
+    btn_PlayPause.setButtonActive(false);
   }
 
 

@@ -19,14 +19,14 @@ namespace global {
       btn_Flash.updateBitmap(flashOn);
       btn_Flash.updateColour(CUSTOM_GREEN);
       btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
-      auto_screen::stackStatus(stack::newStep);
+      auto_screen::stackStatus(newStep);
     }
     else if (!btnActive) {
       setShutterEnabled(false);
       btn_Flash.updateBitmap(flashOff);
       btn_Flash.updateColour(CUSTOM_RED);
       btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
-      auto_screen::stackStatus(stack::newStep);
+      auto_screen::stackStatus(newStep);
     }
   }
 

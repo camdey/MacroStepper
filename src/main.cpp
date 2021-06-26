@@ -154,7 +154,7 @@ void loop() {
       joystickMotion(xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && (!autoStackInitiated || autoStackPaused) && isStepperEnabled() && (!photo360Initiated || photo360Paused)) {
+    if (hasReachedTargetPosition() && isStepperEnabled() && getCurrentStage() == idle) {
       setStepperEnabled(false); // disable stepper
     }
 		// update godoxValue if on Flash screen

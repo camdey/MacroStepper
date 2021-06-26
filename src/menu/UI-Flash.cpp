@@ -98,13 +98,13 @@ namespace flash_screen {
       btn_FlashSensor.updateColour(CUSTOM_GREEN);
       btn_FlashSensor.drawButton();
       setFlashSensorEnabled(true);
-      auto_screen::stackStatus(stack::newStep); // always reset in case switched mid-procedure
+      auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
     }
     else if (!btnActive) {
       btn_FlashSensor.updateColour(CUSTOM_RED);
       btn_FlashSensor.drawButton();
       setFlashSensorEnabled(false);
-      auto_screen::stackStatus(stack::newStep); // always reset in case switched mid-procedure
+      auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
     }
   }
 
@@ -126,12 +126,12 @@ namespace flash_screen {
       setLastMillis(millis());
       while (millis() - getLastMillis() <= 6500) {
         runFlashProcedure(false);
-        if (getStackStage() == stack::flashSuccessful) {
+        if (getCurrentStage() == flashSuccessful) {
           break;
         }
       }
       // reset stackProcedureStage
-      auto_screen::stackStatus(stack::newStep);
+      auto_screen::stackStatus(newStep);
 
       // check result
       if (!hasShutterTriggered()) {

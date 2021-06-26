@@ -96,7 +96,8 @@ long getLastPhoto360Step();
 void setWaitingForShutter(bool state);
 bool isWaitingForShutter();
 
-enum class stack {
+enum stages {
+    idle,
     start,
     isFlashAvailable,
     pullShutter,
@@ -109,17 +110,7 @@ enum class stack {
     newStep,
     stackCompleted
 };
-void setStackStage(stack stage);
-stack getStackStage();
-
-enum class orbis {
-    start,
-    pullShutter,
-    releaseShutter,
-    moveStepper
-};
-void setPhoto360Stage(orbis stage);
-orbis getPhoto360Stage();
-
+void setCurrentStage(stages stage);
+stages getCurrentStage();
 
 #endif

@@ -32,21 +32,21 @@ void autoStack() {
     setShutterTriggered(false);
     setLastStepTime(millis());
     global::func_Reset(false);              // change reset button to red
-    auto_screen::stackStatus(stack::start);
+    auto_screen::stackStatus(start);
   }
 
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
       // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
-      if (getStackStage() == stack::start || getStackStage() == stack::newStep) {
+      if (getCurrentStage() == start || getCurrentStage() == newStep) {
         triggerShutter();                   // take photo and trigger flash immediately or start flash procedure
       }
       else {
         runFlashProcedure(false);           // keep trying to fire flash
       }
-      if (getStackStage() == stack::flashUnresponsive) {
-        auto_screen::stackStatus(stack::newStep);  // reset flash procedure
+      if (getCurrentStage() == flashUnresponsive) {
+        auto_screen::stackStatus(newStep);  // reset flash procedure
         auto_screen::pauseStack();          // pause autostack so user can troubleshoot flash issue
         populateScreen("Flash");            // go to flashScreen if can't trigger after 10 seconds
       }
@@ -59,7 +59,7 @@ void autoStack() {
 
 		if (hasExecutedMovement()) {
 			incrementNrMovementsCompleted();
-      auto_screen::stackStatus(stack::newStep);
+      auto_screen::stackStatus(newStep);
 	    if (getCurrentScreen() == "Auto") {   // make sure correct screen is displaying
 	      auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
@@ -69,7 +69,7 @@ void autoStack() {
 		}
   }
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
-    auto_screen::stackStatus(stack::stackCompleted);
+    auto_screen::stackStatus(stackCompleted);
     terminateAutoStack();                   // stop AutoStack sequence if end reached
   }
 }
@@ -161,7 +161,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
   // step after elapsed amount of time
   if ((millis() - getLastStepTime() > stepperDelay)) {
-    auto_screen::stackStatus(stack::stepTaken);
+    auto_screen::stackStatus(stepTaken);
     // enable stepper if currently disabled
 		if (!isStepperEnabled()) {
 	    setStepperEnabled(true);
@@ -182,7 +182,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
   }
   else {
 		setExecutedMovement(false); // no step taken
-    auto_screen::stackStatus(stack::stepDelay);
+    auto_screen::stackStatus(stepDelay);
 	}
 }
 
@@ -339,7 +339,7 @@ void video360(long nrSteps) {
 
 void photo360() {
     // 0 - if start of new photo360, set speed, take first photo, and enable stepper
-    if (getPhoto360Stage() == orbis::start && isNewPhoto360 && photo360Initiated) {
+    if (getCurrentStage() == start && isNewPhoto360 && photo360Initiated) {
         Serial.print("STARTED: "); Serial.println(millis());
         setTargetVelocity(360); // approx. 5rpm
         // reset target to be safe
@@ -352,13 +352,13 @@ void photo360() {
           setStepperEnabled(true);
         }
         isNewPhoto360 = false;
-        setPhoto360Stage(orbis::pullShutter);
+        setCurrentStage(pullShutter);
     }
 
     if (photo360Initiated && !photo360Paused) {
       // if not waiting for shutter and we are at the target, trigger flash
       // STEP 1: trigger photo
-      if (getPhoto360Stage() == orbis::pullShutter && driver.XACTUAL() == driver.XTARGET()) {
+      if (getCurrentStage() == pullShutter && hasReachedTargetPosition()) {
         // wait for delay, this should be skipped on the first photo
         if (millis() - getLastPhoto360Step() >= getPhoto360Delay()) {
           // take photo
@@ -368,12 +368,12 @@ void photo360() {
           setFlashTriggerTime(millis());
           // set this at the start of the "loop" (pull, release, move)
           setLastPhoto360Step();
-          setPhoto360Stage(orbis::releaseShutter);
+          setCurrentStage(releaseShutter);
         }
       }
 
       // if shutter has triggered yet, keep retrying until 800ms has passed
-      if (getPhoto360Stage() == orbis::releaseShutter) {
+      if (getCurrentStage() == releaseShutter) {
         if (millis() - getFlashTriggerTime() >= 800) {
           Serial.print("RELEASE SHUTTER: "); Serial.println(millis());
           digitalWrite(SONY_PIN, LOW);
@@ -383,12 +383,12 @@ void photo360() {
           if (getCurrentScreen() == "Photo360") {
             photo_screen::printPhoto360Progress();
           }
-          setPhoto360Stage(orbis::moveStepper);
+          setCurrentStage(newStep);
         }
       }
 
       // STEP 2: move to new target if time since last step has passed the delay period
-      if (getPhoto360Stage() == orbis::moveStepper) {
+      if (getCurrentStage() == newStep) {
         // wait for delay
         if (millis() - getLastPhoto360Step() >= getPhoto360Delay()/2) {
           Serial.print("STEP TO TARGET: "); Serial.println(millis());
@@ -400,7 +400,7 @@ void photo360() {
           // wait for stepper to reach position
           while (driver.XACTUAL() != driver.XTARGET()) {}
           Serial.print("AT TARGET: "); Serial.println(millis());
-          setPhoto360Stage(orbis::pullShutter);
+          setCurrentStage(pullShutter);
         }
       }
 

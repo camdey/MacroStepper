@@ -45,29 +45,18 @@ int nrCompleted360Photos        = 0;            // nr of photos taken in a 360 p
 long lastPhoto360Step           = 0;            // millis of last photo taken for photo360
 bool waitingForShutter          = false;        // are we currently waiting for the shutter to be successfully triggered?
 
-stack stackStage = stack::start;
-orbis photo360Stage = orbis::start;
+stages currentStage = idle;
 #define photoCountArraySize 20 // need to ensure we don't go out of bounds
 int photoCountArray[] = {6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108,114,120}; // possible values for nr360Photos
 
 
-void setStackStage(stack stage) {
-  stackStage = stage;
+void setCurrentStage(stages stage) {
+  currentStage = stage;
 }
 
 
-stack getStackStage() {
-  return stackStage;
-}
-
-
-void setPhoto360Stage(orbis stage) {
-  photo360Stage = stage;
-}
-
-
-orbis getPhoto360Stage() {
-  return photo360Stage;
+stages getCurrentStage() {
+  return currentStage;
 }
 
  
