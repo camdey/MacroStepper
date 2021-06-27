@@ -93,8 +93,8 @@ void setNrCompleted360Photos(int nrPhotos);
 int getNrCompleted360Photos();
 void setLastPhoto360Step();
 long getLastPhoto360Step();
-void setWaitingForShutter(bool state);
-bool isWaitingForShutter();
+void setStepperDirCW (bool clockwise);
+bool isStepperDirCW();
 
 enum stages {
     idle,

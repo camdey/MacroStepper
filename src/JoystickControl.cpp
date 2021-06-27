@@ -76,15 +76,7 @@ control resumes.
 void joystickMotion(int xPos) {
   long velocity = calcVelocity(xPos);
 
-  // enable stepper if disabled
-  if (!isStepperEnabled()) {
-    setStepperEnabled(true);
-  }
-  // configure stepper for stealth chop
-  if (stallGuardConfigured) {
-    configStealthChop();
-  }
-
+  readyStealthChop();
   // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   

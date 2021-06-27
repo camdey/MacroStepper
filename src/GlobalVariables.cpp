@@ -43,7 +43,7 @@ int nr360Photos                 = 72;           // nr photos taken in a 360 phot
 long photo360Delay              = 1000;         // delay in milliseconds between each photo in a photo360 procedure
 int nrCompleted360Photos        = 0;            // nr of photos taken in a 360 procedure
 long lastPhoto360Step           = 0;            // millis of last photo taken for photo360
-bool waitingForShutter          = false;        // are we currently waiting for the shutter to be successfully triggered?
+bool stepperDirCW               = true;         // direction of the stepper motor, is it clockwise?
 
 stages currentStage = idle;
 #define photoCountArraySize 20 // need to ensure we don't go out of bounds
@@ -600,11 +600,11 @@ long getLastPhoto360Step() {
 }
 
 
-void setWaitingForShutter(bool state) {
-  waitingForShutter = state;
+void setStepperDirCW (bool clockwise) {
+  stepperDirCW = clockwise;
 }
 
 
-bool isWaitingForShutter() {
-  return waitingForShutter;
+bool isStepperDirCW() {
+  return stepperDirCW;
 }

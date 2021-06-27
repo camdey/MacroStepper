@@ -41,6 +41,7 @@
 #include "menu/UI-Orbis.h"
 #include "menu/UI-Video360.h"
 #include "menu/UI-Photo360.h"
+#include "menu/UI-Photo360Config.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"

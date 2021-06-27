@@ -1,6 +1,4 @@
 #include "GlobalVariables.h"
-#include "MiscFunctions.h"
-#include "ShutterControl.h"
 #include "StepperControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Photo360.h"
@@ -154,7 +152,7 @@ namespace photo_screen {
 
   void func_Config(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
-      populateScreen("PhotoConfig");
+      populateScreen("Photo360Config");
     }
   }
 
@@ -214,6 +212,7 @@ namespace photo_screen {
     photo360Initiated = false;
     isNewPhoto360 = true;
     setCurrentStage(idle);
+    setTargetVelocity(STEALTH_CHOP_VMAX);
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
@@ -226,6 +225,7 @@ namespace photo_screen {
     if (btnActive && areArrowsEnabled()) {
       if (canEditPhotoNr) {
         incrementNr360Photos();
+        setNrCompleted360Photos(0); // reset in case adjusting after previous run
         printPhoto360Progress();
         btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
       }
@@ -241,6 +241,7 @@ namespace photo_screen {
     if (btnActive && areArrowsEnabled()) {
       if (canEditPhotoNr) {
         decrementNr360Photos();
+        setNrCompleted360Photos(0); // reset in case adjusting after previous run
         printPhoto360Progress();
         btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getNr360Photos()));
       }
