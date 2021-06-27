@@ -13,10 +13,9 @@ namespace autoconfig_screen {
   gfxButton btn_Start         =   btn.initButton("START", "fillRoundRect",  0,  20,   160,  80, 15, CUSTOM_GREEN, true  );
   gfxButton btn_End           =   btn.initButton("END",   "fillRoundRect",  0,  120,  160,  80, 15, CUSTOM_RED,   true  );
   gfxButton btn_Run           =   btn.initButton("RUN",   "fillRoundRect",  0,  220,  160,  80, 15, CUSTOM_BLUE,  true  );
-  gfxButton btn_Delay         =   btn.initBitmapButton(timer,     220,  20,   80,   80,   WHITE,        true  );
+  gfxButton btn_Delay         =   btn.initBitmapButton(timer,     200,  20,   80,   80,   WHITE,        true  );
   gfxButton btn_DelayVal      =   btn.initTransparentButton(      295,  20,   40,   30,                 false );
-  // gfxButton btn_Reset         =   btn.initBitmapButton(cancel,    220,  120,  80,   80,   BLACK,        true  ); added to global buttons
-  gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 220,  220,  80,   80,   WHITE,        true  );
+  gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,  220,  80,   80,   WHITE,        true  );
   gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,  20,   120,  120,  CUSTOM_GREEN, true  );
   gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,  180,  120,  120,  CUSTOM_RED,   true  );
 

@@ -52,6 +52,7 @@ namespace photo_screen {
 
   void populatePhoto360Screen() {
     setCurrentScreen("Photo360");
+    setJoystickMaxVelocity(5000); // lower joystick speed
 
     // draw buttons
     for (int i=0; i < num_btns; i++) {
@@ -160,6 +161,7 @@ namespace photo_screen {
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
       populateScreen("Orbis");
+      setJoystickMaxVelocity(100000); // reset back to original value
     }
   }
 
@@ -208,6 +210,7 @@ namespace photo_screen {
   Used to reset photo360 after completed 360.
   ***********************************************************************/
   void resetPhoto360() {
+    global::func_Reset(true);
     photo360Paused = false;
     photo360Initiated = false;
     isNewPhoto360 = true;

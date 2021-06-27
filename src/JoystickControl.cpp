@@ -122,7 +122,7 @@ void joystickMotion(int xPos) {
   while (driver.VACTUAL() != 0) {}                    // wait for stepper to decelerate
   printNewPositions();                                // print final positions now that stepper has stopped
   driver.XTARGET(driver.XACTUAL());                   // reset target to actual
-  setTargetVelocity(STEALTH_CHOP_VMAX);          // reset VMAX to stealthChop default
+  setTargetVelocity(STEALTH_CHOP_VMAX);               // reset VMAX to stealthChop default
 }
 
 

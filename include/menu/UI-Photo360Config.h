@@ -10,7 +10,9 @@ namespace photoconfig_screen {
   void initPhoto360ConfigButtons();
   void populatePhoto360ConfigScreen();
   void checkPhoto360ConfigButtons(int touch_x, int touch_y);
-  void func_PhotoNr(bool btnActive);
+  void func_90(bool btnActive);
+  void func_180(bool btnActive);
+  void func_360(bool btnActive);
   void func_Back(bool btnActive);
   void func_Direction(bool btnActive);
   void func_ArrowUp(bool btnActive);

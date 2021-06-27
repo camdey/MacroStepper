@@ -305,16 +305,17 @@ void video360(long nrSteps) {
 
 
 void photo360() {
+    setTargetVelocity(360); // approx. 5rpm
     // 0 - if start of new photo360, set speed, take first photo, and enable stepper
     if (getCurrentStage() == start && isNewPhoto360 && photo360Initiated) {
         // Serial.print("STARTED: "); Serial.println(millis());
-        setTargetVelocity(360); // approx. 5rpm
         // reset target to be safe
         driver.XTARGET(driver.XACTUAL());
         // change to StealthChop if StallGuard is configured
         readyStealthChop();
         isNewPhoto360 = false;
         setCurrentStage(pullShutter);
+        global::func_Reset(false); // change reset button to red
     }
 
     if (photo360Initiated && !photo360Paused) {
