@@ -2,10 +2,11 @@
 #include "menu/UI-Global.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
+#include "menu/UI-Photo360.h"
 
 namespace global {
-  gfxButton btn_Flash = btn.initBitmapButton(flashOff,  220,  20,   80, 80, CUSTOM_RED, true  );
-  gfxButton btn_Reset = btn.initBitmapButton(cancel,    220,  120,  80, 80, BLACK,      true  );
+  gfxButton btn_Flash = btn.initBitmapButton(flashOff,  200,  20,   80, 80, CUSTOM_RED, true  );
+  gfxButton btn_Reset = btn.initBitmapButton(cancel,    200,  120,  80, 80, BLACK,      true  );
 
 
   void initGlobalButtons() {
@@ -43,9 +44,21 @@ namespace global {
       // setEndPosition(driver.XACTUAL());
       btn_Reset.updateColour(BLACK);
       btn_Reset.drawButton(BLACK);
+      setCurrentStage(idle);
+    }
+    // if button pressed and photo360 active...
+    else if (btnActive && photo360Initiated) {
+      photo360Paused = false;
+      photo360Initiated = false;
+      isNewPhoto360 = true;
+      setNrCompleted360Photos(0);
+      btn_Reset.updateColour(BLACK);
+      btn_Reset.drawButton(BLACK);
+      // setTargetVelocity(STEALTH_CHOP_VMAX);
+      setCurrentStage(idle);
     }
     // if function called from elsewhere...
-    else if (autoStackInitiated) {
+    else if (!btnActive && autoStackInitiated || photo360Initiated) {
       btn_Reset.updateColour(CUSTOM_RED);
     }
   }

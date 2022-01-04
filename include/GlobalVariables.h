@@ -76,9 +76,29 @@ void setTestingFlash(bool state);
 bool isTestingFlash();
 void setFlashSensorEnabled(bool enabled);
 bool isFlashSensorEnabled();
+void setRevsPerMinute(int rpm);
+int getRevsPerMinute();
+void setVideo360Active(bool active);
+bool isVideo360Active();
+void setVideo360Target(long target);
+long getVideo360Target();
+void setJoystickMaxVelocity(long velocity);
+long getJoystickMaxVelocity();
+void incrementNr360Photos();
+void decrementNr360Photos();
+int getNr360Photos();
+void setPhoto360Delay(long delay);
+long getPhoto360Delay();
+void setNrCompleted360Photos(int nrPhotos);
+int getNrCompleted360Photos();
+void setLastPhoto360Step();
+long getLastPhoto360Step();
+void setStepperDirCW (bool clockwise);
+bool isStepperDirCW();
 
-enum stackProcedureEnum {
-    stackBegin,
+enum stages {
+    idle,
+    start,
     isFlashAvailable,
     pullShutter,
     isFlashUnavailable,
@@ -90,9 +110,7 @@ enum stackProcedureEnum {
     newStep,
     stackCompleted
 };
-// extern stackProcedureEnum   stackProcedureStage;
-void setStackProcedureStage(stackProcedureEnum stage);
-stackProcedureEnum getStackProcedureStage();
-
+void setCurrentStage(stages stage);
+stages getCurrentStage();
 
 #endif

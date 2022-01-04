@@ -2,6 +2,11 @@
 #include "menu/UI-Main.h"
 #include "menu/UI-Global.h"
 #include "menu/UI-Home.h"
+#include "menu/UI-Stack.h"
+#include "menu/UI-Orbis.h"
+#include "menu/UI-Video360.h"
+#include "menu/UI-Photo360.h"
+#include "menu/UI-Photo360Config.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"
 #include "menu/UI-Config.h"
@@ -12,6 +17,11 @@
 using namespace global;
 using namespace manual_screen;
 using namespace home_screen;
+using namespace stack_screen;
+using namespace orbis_screen;
+using namespace video_screen;
+using namespace photo_screen;
+using namespace photoconfig_screen;
 using namespace target_screen;
 using namespace flash_screen;
 using namespace config_screen;
@@ -26,6 +36,11 @@ void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce) 
 
   initGlobalButtons();
   initHomeButtons();
+  initStackButtons();
+  initOrbisButtons();
+  initVideo360Buttons();
+  initPhoto360Buttons();
+  initPhoto360ConfigButtons();
   initTargetButtons();
   initFlashButtons();
   initConfigButtons();
@@ -41,6 +56,21 @@ void populateScreen(String screen) {
   tft.fillScreen(BLACK);
   if (screen == "Home") {
     populateHomeScreen();
+  }
+  if (screen == "Stack") {
+    populateStackScreen();
+  }
+  if (screen == "Orbis") {
+    populateOrbisScreen();
+  }
+  if (screen == "Video360") {
+    populateVideo360Screen();
+  }
+  if (screen == "Photo360") {
+    populatePhoto360Screen();
+  }
+  if (screen == "Photo360Config") {
+    populatePhoto360ConfigScreen();
   }
   if (screen == "Target") {
     populateTargetScreen();
@@ -87,6 +117,21 @@ void readTouchScreen(String screen) {
     if ((touch_x > 0 && touch_x <= tft.width()) && (touch_y > 0 && touch_y <= tft.height())) {
       if (screen == "Home") {
         checkHomeButtons(touch_x, touch_y);
+      }
+      else if (screen == "Stack") {
+        checkStackButtons(touch_x, touch_y);
+      }
+      else if (screen == "Orbis") {
+        checkOrbisButtons(touch_x, touch_y);
+      }
+      else if (screen == "Video360") {
+        checkVideo360Buttons(touch_x, touch_y);
+      }
+      else if (screen == "Photo360") {
+        checkPhoto360Buttons(touch_x, touch_y);
+      }
+      else if (screen == "Photo360Config") {
+        checkPhoto360ConfigButtons(touch_x, touch_y);
       }
       else if (screen == "Target") {
         checkTargetButtons(touch_x, touch_y);

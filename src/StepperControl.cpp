@@ -7,6 +7,7 @@
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
+#include "menu/UI-Photo360.h"
 
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
@@ -19,9 +20,7 @@ another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void autoStack() {
-  if (!isStepperEnabled()) {
-    setStepperEnabled(true);                // wake stepper from sleep
-  }
+  readyStealthChop();
   
   if (isNewAutoStack) {                     // move to start position if beginning AutoStack
     setTargetVelocity(10000);               // reduce max velocity to minimize vibration
@@ -31,20 +30,20 @@ void autoStack() {
     setShutterTriggered(false);
     setLastStepTime(millis());
     global::func_Reset(false);              // change reset button to red
-    auto_screen::stackStatus(stackBegin);
+    auto_screen::stackStatus(start);
   }
 
   if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
-      // if flashProcedure idle or is successful, begin new procedure or trigger flash if !isFlashSensorEnabled
-      if (getStackProcedureStage() == stackBegin || getStackProcedureStage() == newStep) {
-        triggerShutter();                   // take photo and trigger flash immediately or begin flash procedure
+      // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
+      if (getCurrentStage() == start || getCurrentStage() == newStep) {
+        triggerShutter();                   // take photo and trigger flash immediately or start flash procedure
       }
       else {
         runFlashProcedure(false);           // keep trying to fire flash
       }
-      if (getStackProcedureStage() == flashUnresponsive) {
+      if (getCurrentStage() == flashUnresponsive) {
         auto_screen::stackStatus(newStep);  // reset flash procedure
         auto_screen::pauseStack();          // pause autostack so user can troubleshoot flash issue
         populateScreen("Flash");            // go to flashScreen if can't trigger after 10 seconds
@@ -98,14 +97,7 @@ bool detectEndStop() {
 
 // run through the specified AutoStack procedure using the current start and end values
 void dryRun() {
-  // enable stepper if disabled
-	if (!isStepperEnabled()) {
-    setStepperEnabled(true);
-  }
-    // change to StealthChop is StallGuard is configured
-  if (stallGuardConfigured) {
-    configStealthChop();
-  }
+  readyStealthChop();
 
   // reduce stepper velocity
   setTargetVelocity(5000);
@@ -140,7 +132,7 @@ void dryRun() {
   }
   // overshoot by 3200 steps/1mm and return to start
   overshootPosition(getStartPosition(), 3200);
-  setTargetVelocity(stealthChopMaxVelocity);
+  setTargetVelocity(STEALTH_CHOP_VMAX);
 }
 
 
@@ -153,19 +145,11 @@ until it receives a response of true. Prevents stall if rail has
 been homed and will exit autoStack if running.
 ******************************************************************/
 void executeMovement(int stepDirection, unsigned long stepperDelay) {
-  // change to StealthChop is StallGuard is configured
-  if (stallGuardConfigured) {
-    configStealthChop();
-  }
+  readyStealthChop();
 
   // step after elapsed amount of time
   if ((millis() - getLastStepTime() > stepperDelay)) {
     auto_screen::stackStatus(stepTaken);
-    // enable stepper if currently disabled
-		if (!isStepperEnabled()) {
-	    setStepperEnabled(true);
-	  }
-
     int stepVelocity = stepDirection * getStepsPerMovement();
     long targetPosition = driver.XACTUAL() + stepVelocity;
 
@@ -175,7 +159,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
     setTargetVelocity(2000);
     // wait for stepper to reach target position
     while(driver.XACTUAL() != driver.XTARGET()) {}
-    setTargetVelocity(stealthChopMaxVelocity);
+    setTargetVelocity(STEALTH_CHOP_VMAX);
     setExecutedMovement(true);  
     setLastStepTime(millis());
   }
@@ -188,14 +172,7 @@ void executeMovement(int stepDirection, unsigned long stepperDelay) {
 
 // execute a predetermined number of steps
 void executeSteps(long nrSteps) {
-  // change to StealthChop is StallGuard is configured
-  if (stallGuardConfigured) {
-    configStealthChop();
-  }
-  if (!isStepperEnabled()) {
-    setStepperEnabled(true);
-  }
-
+  readyStealthChop();
   long targetPosition = driver.XACTUAL() + nrSteps;
   // set new target position
   driver.XTARGET(targetPosition);
@@ -210,17 +187,13 @@ void executeSteps(long nrSteps) {
 // moves stepper to middle of the rail (192,000)
 void homeRail() {
   bool hitRearStop, hitForwardStop = false;
-  if (!isStepperEnabled()) {
-    setStepperEnabled(true);
-  }
-	// set configuration for stallGuard
-	configStallGuard();
+  readyStallGuard();
   // reset positions
   setForwardEndStop(1);
   setBackwardEndStop(1);
 
   // move to rear end stop + 100,000 just to ensure it over-runs without decelerating
-	driver.XTARGET(-maxRailPosition - 100000);
+	driver.XTARGET(-MAX_RAIL_POSITION - 100000);
   hitRearStop = detectEndStop(); // wait until end stop detected
   // if endstop detected... 
   if (hitRearStop) {
@@ -234,7 +207,7 @@ void homeRail() {
     setBackwardEndStop(driver.XACTUAL()); // set backward position
   }
   // move to forward end stop
-  driver.XTARGET(maxRailPosition + 100000);
+  driver.XTARGET(MAX_RAIL_POSITION + 100000);
   hitForwardStop = detectEndStop(); // wait until end stop detected
   // if endstop detected...
   if (hitForwardStop) {
@@ -244,12 +217,12 @@ void homeRail() {
 
     // Serial.print("Actual: "); Serial.println(driver.XACTUAL());
 
-    driver.XACTUAL(maxRailPosition); // set front end stop position as 0
+    driver.XACTUAL(MAX_RAIL_POSITION); // set front end stop position as 0
     setForwardEndStop(driver.XACTUAL()); // set forward position
   }
 
 	// if back and forward position set, move to middle position
-	if (getBackwardEndStop() == minRailPosition && getForwardEndStop() == maxRailPosition) {
+	if (getBackwardEndStop() == MIN_RAIL_POSITION && getForwardEndStop() == MAX_RAIL_POSITION) {
     driver.XTARGET(192000);
     // wait to reach position before changing driver config after homing completed
     while (driver.XACTUAL() != driver.XTARGET()) {
@@ -303,6 +276,7 @@ void overshootPosition(int startPosition, int numberOfSteps) {
   while (driver.XACTUAL() != driver.XTARGET()) {}
 }
 
+
 // clean up variables etc after completing AutoStack sequence
 void terminateAutoStack() {
   if (getCurrentScreen() != "Auto") {
@@ -316,5 +290,120 @@ void terminateAutoStack() {
   setExecutedMovement(false);
   produceTone(4, 300, 200);                   // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
-  setTargetVelocity(stealthChopMaxVelocity);
+  setTargetVelocity(STEALTH_CHOP_VMAX);
+}
+
+
+void video360(long nrSteps) {
+  // change to StealthChop if StallGuard is configured
+  readyStealthChop();
+  // update target velocity as calling configStealthChop resets this on the driver register but not the function
+  setTargetVelocity(getTargetVelocity());
+  // set position
+  driver.XTARGET(driver.XACTUAL()+nrSteps);
+}
+
+
+void photo360() {
+    setTargetVelocity(360); // approx. 5rpm
+    // 0 - if start of new photo360, set speed, take first photo, and enable stepper
+    if (getCurrentStage() == start && isNewPhoto360 && photo360Initiated) {
+        // Serial.print("STARTED: "); Serial.println(millis());
+        // reset target to be safe
+        driver.XTARGET(driver.XACTUAL());
+        // change to StealthChop if StallGuard is configured
+        readyStealthChop();
+        setCurrentStage(pullShutter);
+        global::func_Reset(false); // change reset button to red
+    }
+
+    if (photo360Initiated && !photo360Paused) {
+      // if not waiting for shutter and we are at the target, trigger flash
+      // STEP 1: trigger photo
+      if (getCurrentStage() == pullShutter && hasReachedTargetPosition()) {
+        // wait for delay, this should be skipped on the first photo
+        if (millis() - getLastPhoto360Step() >= getPhoto360Delay()) {
+          // take photo
+          // Serial.print("PULL SHUTTER: "); Serial.println(millis());
+          digitalWrite(SONY_PIN, HIGH);
+          setFlashTriggerTime(millis());
+          // set this at the start of the "loop" (pull, release, move)
+          setLastPhoto360Step();
+          setCurrentStage(releaseShutter);
+        }
+      }
+
+      // if shutter hasn't triggered yet, keep retrying until 800ms has passed
+      if (getCurrentStage() == releaseShutter) {
+        if (millis() - getFlashTriggerTime() >= 800) {
+          // Serial.print("RELEASE SHUTTER: "); Serial.println(millis());
+          digitalWrite(SONY_PIN, LOW);
+          // increment nr completed 360 photos
+          setNrCompleted360Photos(getNrCompleted360Photos()+1);
+          if (getCurrentScreen() == "Photo360") {
+            photo_screen::printPhoto360Progress();
+          }
+          setCurrentStage(newStep);
+        }
+      }
+
+      // STEP 2: move to new target if time since last step has passed the delay period
+      if (getCurrentStage() == newStep) {
+        // wait for delay
+        if (millis() - getLastPhoto360Step() >= getPhoto360Delay()/2) {
+          // Serial.print("STEP TO TARGET: "); Serial.println(millis());
+          // calculate number of microsteps to move for each photo, will truncate down to an int
+          int nr360Steps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
+          int remainder = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) % getNr360Photos();
+          // if there is a remainder, add a 1 step to the same number of photos as the size of the remainder
+          // e.g. if remainder is 80 steps, add 1 step to the last 80 photos in the photo360 procedure
+          if (getNrCompleted360Photos() > getNr360Photos()-remainder) {
+            nr360Steps++;
+          }
+          // if not clockwise, reverse direction of travel
+          if (!isStepperDirCW()) {
+            nr360Steps = nr360Steps*-1;
+          }
+          driver.XTARGET(driver.XACTUAL() + nr360Steps);
+          setCurrentStage(stepTaken);
+        }
+      }
+
+      // STEP 3: if arrived at target, take photo and loop back through steps
+      if (getCurrentStage() == stepTaken && hasReachedTargetPosition()) {
+        // Serial.print("AT TARGET: "); Serial.println(millis());
+        setCurrentStage(pullShutter);
+      }
+
+      // photo360 completed, previous `pullShutter` state will be overwritten by the reset to idle
+      if (getNrCompleted360Photos() == getNr360Photos()) {
+        // reset flags
+        photo_screen::resetPhoto360();
+        // Serial.print("COMPLETED: "); Serial.println(millis());
+      }
+    }
+}
+
+
+void readyStallGuard() {
+  // enable stepper if disabled
+	if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+  // change to StallGuard is StealthChop is configured
+  if (!stallGuardConfigured) {
+    configStallGuard();
+  }
+}
+
+
+void readyStealthChop() {
+  // enable stepper if disabled
+	if (!isStepperEnabled()) {
+    setStepperEnabled(true);
+  }
+  // change to StealthChop is StallGuard is configured
+  if (stallGuardConfigured) {
+    configStealthChop();
+  }
 }

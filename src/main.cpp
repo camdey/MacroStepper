@@ -37,6 +37,11 @@
 #include "VariableDeclarations.h"							// external variable declarations
 #include "menu/UI-Main.h"
 #include "menu/UI-Home.h"
+#include "menu/UI-Stack.h"
+#include "menu/UI-Orbis.h"
+#include "menu/UI-Video360.h"
+#include "menu/UI-Photo360.h"
+#include "menu/UI-Photo360Config.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-Target.h"
 #include "menu/UI-Flash.h"
@@ -70,7 +75,10 @@ bool isNewAutoStack 						  = true;       // move to start for autoStack procedu
 bool autoStackInitiated 					= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
 bool stallGuardConfigured 				= true;				// stallGuard config has run
-bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure 
+bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure
+bool isNewPhoto360                = true;       // move to start for photo360 procedure
+bool photo360Initiated            = false;      // enables function for photo360 procedure
+bool photo360Paused               = false;      // pause photo360 procedure
 
 
 // ***** --- MAIN PROGRAM --- ***** //
@@ -86,7 +94,7 @@ void setup(void) {
 
 	driver.begin();
 	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
-	driver.microsteps(nrMicrosteps);
+	driver.microsteps(NR_MICROSTEPS);
   driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
 
   setStepperEnabled(true);
@@ -127,6 +135,14 @@ void loop() {
   if (millis() - prevButtonCheck >= 50) {
     readTouchScreen(getCurrentScreen());
     prevButtonCheck = millis();
+
+    // if video360 active, keep updating target so stepper keeps moving
+    if (isVideo360Active()) {
+      video360(getVideo360Target());
+    }
+    if (photo360Initiated) {
+      photo360();
+    }
   }
   // take joystick and limit switch reading, put stepper to sleep
   if (millis() - prevJoystickCheck >= 100) {
@@ -134,12 +150,12 @@ void loop() {
     int xStickPos = readJoystick();
     isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
   
-    // move if past threshold and not in autoStack mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && isJoystickBtnActive) {
+    // move if past threshold and not in autoStack or video360 mode
+    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && !isVideo360Active() && isJoystickBtnActive) {
       joystickMotion(xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && (!autoStackInitiated || autoStackPaused) && isStepperEnabled()) {
+    if (hasReachedTargetPosition() && isStepperEnabled() && getCurrentStage() == idle) {
       setStepperEnabled(false); // disable stepper
     }
 		// update godoxValue if on Flash screen

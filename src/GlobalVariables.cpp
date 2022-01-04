@@ -34,16 +34,29 @@ int stepsPerMovement            = 16;           // number of microsteps to trave
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
 bool flashSensorEnabled         = false;        // is flash bulb enabled, or only take photos without flash?
-stackProcedureEnum stackProcedureStage = stackBegin;
+int revsPerMinute               = 50;           // revs per minute for video 360, stored as 10x higher to avoid floating point math
+bool video360Active             = false;        // is video 360 running?
+long video360Target             = 10000;        // set target number of steps for video 360
+long joystickMaxVelocity        = 100000;       // VMAX when using joystick
+int nr360PhotosArrayIndex       = 11;            // index for number of photoCountArray
+int nr360Photos                 = 72;           // nr photos taken in a 360 photo
+long photo360Delay              = 1000;         // delay in milliseconds between each photo in a photo360 procedure
+int nrCompleted360Photos        = 0;            // nr of photos taken in a 360 procedure
+long lastPhoto360Step           = 0;            // millis of last photo taken for photo360
+bool stepperDirCW               = true;         // direction of the stepper motor, is it clockwise?
+
+stages currentStage = idle;
+#define photoCountArraySize 20 // need to ensure we don't go out of bounds
+int photoCountArray[] = {6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108,114,120}; // possible values for nr360Photos
 
 
-void setStackProcedureStage(stackProcedureEnum stage) {
-  stackProcedureStage = stage;
+void setCurrentStage(stages stage) {
+  currentStage = stage;
 }
 
 
-stackProcedureEnum getStackProcedureStage() {
-  return stackProcedureStage;
+stages getCurrentStage() {
+  return currentStage;
 }
 
  
@@ -489,4 +502,109 @@ void setFlashSensorEnabled(bool enabled) {
 
 bool isFlashSensorEnabled() {
   return flashSensorEnabled;
+}
+
+
+void setRevsPerMinute(int rpm) {
+  revsPerMinute = rpm;
+}
+
+
+int getRevsPerMinute() {
+  return revsPerMinute;
+}
+
+
+void setVideo360Active(bool active) {
+  video360Active = active;
+}
+
+
+bool isVideo360Active() {
+  return video360Active;
+}
+
+
+void setVideo360Target(long target) {
+  video360Target = target;
+}
+
+
+long getVideo360Target() {
+  return video360Target;
+}
+
+
+void setJoystickMaxVelocity(long velocity) {
+  joystickMaxVelocity = velocity;
+}
+
+
+long getJoystickMaxVelocity() {
+  return joystickMaxVelocity;
+}
+
+
+void incrementNr360Photos() {
+  // minus one as array index starts at 0
+  if (nr360PhotosArrayIndex < photoCountArraySize-1) {
+    nr360PhotosArrayIndex++;
+  }
+}
+
+
+void decrementNr360Photos() {
+  if (nr360PhotosArrayIndex > 0) {
+    nr360PhotosArrayIndex--;
+  }
+}
+
+
+int getNr360Photos() {
+  nr360Photos = photoCountArray[nr360PhotosArrayIndex];
+  return nr360Photos;
+}
+
+
+void setPhoto360Delay(long delay) {
+  photo360Delay = delay;
+  // 800ms is min time needed for pulling shutter
+  if (photo360Delay < 800) {
+    photo360Delay = 800;
+  }
+}
+
+
+long getPhoto360Delay() {
+  return photo360Delay;
+}
+
+
+void setNrCompleted360Photos(int nrPhotos) {
+  nrCompleted360Photos = nrPhotos;
+}
+
+
+int getNrCompleted360Photos() {
+  return nrCompleted360Photos;
+}
+
+
+void setLastPhoto360Step() {
+  lastPhoto360Step = millis();
+}
+
+
+long getLastPhoto360Step() {
+  return lastPhoto360Step;
+}
+
+
+void setStepperDirCW (bool clockwise) {
+  stepperDirCW = clockwise;
+}
+
+
+bool isStepperDirCW() {
+  return stepperDirCW;
 }

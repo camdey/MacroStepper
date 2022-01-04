@@ -169,7 +169,7 @@ namespace target_screen {
       }
 
       // calculate distance in mm
-      targetMillimetres = atoi(targetValues)*(microstepLength/1000.0000);
+      targetMillimetres = atoi(targetValues)*(MICROSTEP_DIST/1000.0000);
       btn_Target.writeTextBottomCentre(Arimo_Bold_30, YELLOW, targetValues);
       btn_Distance.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(targetMillimetres, 4));
     }
@@ -194,7 +194,7 @@ namespace target_screen {
 
   void func_Back(bool active) {
     if (active && !canEditTarget) {
-      populateScreen("Home");
+      populateScreen("Stack");
     }
   }
 
@@ -205,7 +205,7 @@ namespace target_screen {
       btn_Run.drawButton(CUSTOM_RED);
       driver.VMAX(20000);
       executeSteps(nrSteps);
-      driver.VMAX(stealthChopMaxVelocity);
+      driver.VMAX(STEALTH_CHOP_VMAX);
       btn_Run.drawButton(CUSTOM_GREEN);
       btn_Run.setToggleActive(false); // reset button
       btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(driver.XACTUAL()));

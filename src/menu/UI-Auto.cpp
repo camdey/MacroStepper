@@ -28,11 +28,9 @@ namespace auto_screen {
   gfxButton btn_EstTime       =   btn.initButton("Est. Time",   "fillRoundRect",  0,    120,  160,  80,   15, DARKGRAY,   false );
   gfxButton btn_Progress      =   btn.initButton("Progress",    "fillRoundRect",  0,    220,  160,  80,   15, DARKGRAY,   false );
   gfxButton btn_StackStatus   =   btn.initTransparentButton("Started",       350,    200,  120,  120,                  false );
-  // gfxButton btn_Flash        =   btn.initBitmapButton(flashOff,   220,  20,   80, 80, CUSTOM_RED, true  ); // added to global buttons
-  gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,   220,  120,  80, 80, WHITE,      true  );
-  gfxButton btn_Back          =   btn.initBitmapButton(backArrow,  220,  220,  80, 80, WHITE,      true  );
+  gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,   200,  120,  80, 80, WHITE,      true  );
+  gfxButton btn_Back          =   btn.initBitmapButton(backArrow,  200,  220,  80, 80, WHITE,      true  );
   gfxButton btn_PlayPause     =   btn.initBitmapButton(play,       350,  100,  120,  120,  CUSTOM_GREEN, true);
-  // gfxButton btn_PlayPause     =   btn.initBitmapButton(play,       350,  20,   120,  120,  CUSTOM_GREEN, true);
   gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,    350,  20,   120,  120,  CUSTOM_GREEN, true);
   gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,  350,  180,  120,  120,  CUSTOM_RED,   true);
 
@@ -144,7 +142,7 @@ namespace auto_screen {
 
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
-      populateScreen("Home");
+      populateScreen("Stack");
     }
   }
 
@@ -176,23 +174,23 @@ namespace auto_screen {
   }
 
 
-  void stackStatus(stackProcedureEnum stage) {
+  void stackStatus(stages stage) {
     // unhide if hidden
     if (btn_StackStatus.isHidden()) {
       btn_StackStatus.hideButton(false);
     }
 
-    String stageString = stackProcedureValues[stage];
-    int textColour = WHITE;
+    // String stageString = stackProcedureValues[stage];
+    // int textColour = WHITE;
 
      // only print if on correct screen and value has changed
-    if (getCurrentScreen() == "Auto" && stage != getStackProcedureStage()) {
+    if (getCurrentScreen() == "Auto" && stage != getCurrentStage()) {
       // btn_StackStatus.writeTextCentre(Arimo_Bold_20, textColour, stageString);
       // char* newLabel = strdup(stageString.c_str());
       // btn_StackStatus.updateLabel(newLabel);
       // Serial.print("status char: "); Serial.println(newLabel);
     }
-    setStackProcedureStage(stage); // update to new value
+    setCurrentStage(stage); // update to new value
   }
 
 
@@ -205,7 +203,7 @@ namespace auto_screen {
     btn_PlayPause.updateBitmap(play); // update bitmap image
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
-    btn_PlayPause.setToggleActive(false); // set button state to "pause" mode
+    btn_PlayPause.setButtonActive(false); // set button state to "pause" mode
   }
 
 
@@ -216,10 +214,12 @@ namespace auto_screen {
     autoStackPaused = false;
     autoStackInitiated = false;
     isNewAutoStack = true;
+    setCurrentStage(idle);
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
     btn_PlayPause.drawButton(); // draw button
+    btn_PlayPause.setButtonActive(false);
   }
 
 

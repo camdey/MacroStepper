@@ -39,51 +39,6 @@ It first checks if the flash has recycled (red LED is on) and then
 sets the shutter pin to HIGH. A loop will start where the flash is
 continually checked to see if it has triggered (red LED goes off)
 ******************************************************************/
-// void triggerShutter() {
-// 	setShutterTriggered(false);
-
-//   // if flash bulb enabled
-//   if (isFlashSensorEnabled()) {
-//     unsigned long startTime = millis();
-
-//     // wait for flash to be ready first
-//     while (!isFlashAvailableOld()) {
-//       if (millis() - getLastMillis() >= 10) {
-//         isFlashReady();
-//         // break if flash not available after 5s
-//         if (millis() - startTime >= 5000) {
-//           break;
-//         }
-//         setLastMillis(millis());
-//       }
-//     }
-//     // trigger flash
-//     digitalWrite(SONY_PIN, HIGH);
-//     // wait for flash to be fired, isFlashAvailableOld() will be false as godox LED will briefly turn off
-//     while (millis() - startTime <= 1500 && isFlashAvailableOld()) {
-//       if (millis() - getLastMillis() >= 10) {
-//         isFlashReady();
-//         setLastMillis(millis());
-//       }
-//     }
-//     if (!isFlashAvailableOld()) {
-//       setShutterTriggered(true);
-//       setFlashTriggerTime(millis());
-//     }
-
-//     recycleTime = (millis() - startTime);
-//     // reset shutter signal
-//     digitalWrite(SONY_PIN, LOW);
-//   }
-//   else {
-//     // trigger flash
-//     digitalWrite(SONY_PIN, HIGH);
-//     delay(500);
-//     digitalWrite(SONY_PIN, LOW);
-//     setShutterTriggered(true);
-//   }
-// }
-
 void triggerShutter() {
   if (isFlashSensorEnabled()) {
     runFlashProcedure(true);
@@ -94,14 +49,20 @@ void triggerShutter() {
       digitalWrite(SONY_PIN, HIGH);
       setFlashTriggerTime(millis());
       Serial.println("pullShutter");
-      auto_screen::stackStatus(pullShutter);
+
+      if (autoStackInitiated) {
+        auto_screen::stackStatus(pullShutter);
+      }
     }
     // if triggered, don't set LOW until 800ms has passed
     else if (millis() - getFlashTriggerTime() >= 800) {
       digitalWrite(SONY_PIN, LOW);
       // setShutterTriggered(true);
       Serial.println("releaseShutter");
-      auto_screen::stackStatus(releaseShutter);
+
+      if (autoStackInitiated) {
+        auto_screen::stackStatus(releaseShutter);
+      }
     }
   }
 }
@@ -115,13 +76,13 @@ void runFlashProcedure(bool restart) {
     Serial.println("isFlashAvailable");
   }
   // begin flash sequence
-  if (getStackProcedureStage() == isFlashAvailable) {
+  if (getCurrentStage() == isFlashAvailable) {
     if (isFlashReady()) {
       auto_screen::stackStatus(pullShutter);
       Serial.println("pullShutter");
     }
   }
-  else if (getStackProcedureStage() == pullShutter) {
+  else if (getCurrentStage() == pullShutter) {
     digitalWrite(SONY_PIN, HIGH);
     if (isFlashSensorEnabled()) {
       auto_screen::stackStatus(isFlashUnavailable);
@@ -131,13 +92,13 @@ void runFlashProcedure(bool restart) {
       triggerShutter();
     }
   }
-  else if (getStackProcedureStage() == isFlashUnavailable) {
+  else if (getCurrentStage() == isFlashUnavailable) {
     if (!isFlashReady()) {
       auto_screen::stackStatus(releaseShutter);
       Serial.println("releaseShutter");
     }
   }
-  else if (getStackProcedureStage() == releaseShutter) {
+  else if (getCurrentStage() == releaseShutter) {
     digitalWrite(SONY_PIN, LOW);
     auto_screen::stackStatus(flashSuccessful);
     Serial.println("flashSuccessful");
@@ -145,7 +106,7 @@ void runFlashProcedure(bool restart) {
     setShutterTriggered(true);
   }
   // fail over
-  if (millis() - getFlashTriggerTime() >= 6000 && (getStackProcedureStage() == isFlashAvailable || getStackProcedureStage() == isFlashUnavailable)) {
+  if (millis() - getFlashTriggerTime() >= 6000 && (getCurrentStage() == isFlashAvailable || getCurrentStage() == isFlashUnavailable)) {
     auto_screen::stackStatus(flashUnresponsive);
     digitalWrite(SONY_PIN, LOW);
     Serial.println("flashUnresponsive");
