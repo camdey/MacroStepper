@@ -109,7 +109,6 @@ namespace video_screen {
         setVideo360Active(false);
       }
       configStealthChop(); // reset VMAX
-      setJoystickMaxVelocity(100000); // reset back to original value
       populateScreen("Orbis");
     }
   }

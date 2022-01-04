@@ -27,7 +27,7 @@ namespace orbis_screen {
 
   void populateOrbisScreen() {
     setCurrentScreen("Orbis");
-
+    setJoystickMaxVelocity(5000); // lower joystick speed
     // draw buttons
     for (int i=0; i < num_btns; i++) {
       if (!btn_array[i]->isHidden()) { // if button is not hidden, draw it
@@ -66,6 +66,7 @@ namespace orbis_screen {
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
       populateScreen("Home");
+      setJoystickMaxVelocity(100000); // reset back to original value
     }
   }
 }

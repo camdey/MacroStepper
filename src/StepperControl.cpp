@@ -313,7 +313,6 @@ void photo360() {
         driver.XTARGET(driver.XACTUAL());
         // change to StealthChop if StallGuard is configured
         readyStealthChop();
-        isNewPhoto360 = false;
         setCurrentStage(pullShutter);
         global::func_Reset(false); // change reset button to red
     }
@@ -372,10 +371,11 @@ void photo360() {
 
       // STEP 3: if arrived at target, take photo and loop back through steps
       if (getCurrentStage() == stepTaken && hasReachedTargetPosition()) {
+        // Serial.print("AT TARGET: "); Serial.println(millis());
         setCurrentStage(pullShutter);
       }
 
-      // photo360 completed
+      // photo360 completed, previous `pullShutter` state will be overwritten by the reset to idle
       if (getNrCompleted360Photos() == getNr360Photos()) {
         // reset flags
         photo_screen::resetPhoto360();
