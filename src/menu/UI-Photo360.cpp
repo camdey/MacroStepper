@@ -161,7 +161,6 @@ namespace photo_screen {
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
       populateScreen("Orbis");
-      setJoystickMaxVelocity(100000); // reset back to original value
     }
   }
 
@@ -210,12 +209,12 @@ namespace photo_screen {
   Used to reset photo360 after completed 360.
   ***********************************************************************/
   void resetPhoto360() {
-    global::func_Reset(true);
     photo360Paused = false;
     photo360Initiated = false;
     isNewPhoto360 = true;
+    setNrCompleted360Photos(0);
     setCurrentStage(idle);
-    setTargetVelocity(STEALTH_CHOP_VMAX);
+    // setTargetVelocity(STEALTH_CHOP_VMAX);
     btn_PlayPause.drawButton(BLACK); // replace existing button
     btn_PlayPause.updateBitmap(play); // update to show play button
     btn_PlayPause.updateColour(CUSTOM_GREEN); // update color

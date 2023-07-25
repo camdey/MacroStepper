@@ -194,7 +194,7 @@ namespace target_screen {
 
   void func_Back(bool active) {
     if (active && !canEditTarget) {
-      populateScreen("Home");
+      populateScreen("Stack");
     }
   }
 

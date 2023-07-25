@@ -114,7 +114,6 @@ namespace photoconfig_screen {
   void func_Back(bool btnActive) {
     if (btnActive) {
       populateScreen("Photo360");
-      setJoystickMaxVelocity(100000); // reset back to original value
     }
   }
 

@@ -87,7 +87,7 @@ extern gfxButton            btn;
 #define MAX_RAIL_POSITION           384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
 #define SAFE_ZONE_BUFFER            6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
 #define STEALTH_CHOP_VMAX           200000          // max target velocity (VMAX) during StealthChop movements 
-#define MAX_STEPS_PER_MOVEMENT      999             // maximum number of steps allowed per movement
+#define MAX_STEPS_PER_MOVEMENT      16000           // maximum number of steps allowed per movement. 16000 = 5mm
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT

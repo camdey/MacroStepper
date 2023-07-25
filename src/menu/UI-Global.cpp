@@ -54,7 +54,7 @@ namespace global {
       setNrCompleted360Photos(0);
       btn_Reset.updateColour(BLACK);
       btn_Reset.drawButton(BLACK);
-      setTargetVelocity(STEALTH_CHOP_VMAX);
+      // setTargetVelocity(STEALTH_CHOP_VMAX);
       setCurrentStage(idle);
     }
     // if function called from elsewhere...
