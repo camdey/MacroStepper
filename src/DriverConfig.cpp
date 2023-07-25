@@ -27,12 +27,12 @@ void configStealthChop() {
   driver.irun(16);
   driver.iholddelay(8);
   driver.RAMPMODE(0);                     // Positioning mode (using all A, D and V parameters)
-  driver.A1(5000);                        // First acceleration between VSTART and V1
+  driver.a1(5000);                        // First acceleration between VSTART and V1
   driver.AMAX(3500);                      // Second acceleration between V1 and VMAX
   driver.VMAX(STEALTH_CHOP_VMAX);    // Motion ramp target velocity (VMAX >= VSTART). Can be changed during a motion.
-  driver.V1(30000);                       // First acceleration / deceleration phase treshold velocity
+  driver.v1(30000);                       // First acceleration / deceleration phase treshold velocity
   driver.DMAX(3500);                      // Deceleration between VMAX and V1
-  driver.D1(5000);                        // Deceleration between V1 and VSTOP
+  driver.d1(5000);                        // Deceleration between V1 and VSTOP
   driver.VSTART(0);                       // Motor start velocity (VSTOP >= VSTART)
   driver.VSTOP(10);                       // Motor stop velocity
 
@@ -69,12 +69,12 @@ void configStallGuard() {
   driver.irun(16);
   driver.iholddelay(8);
   driver.RAMPMODE(0);                     // Positioning mode (using all A, D and V parameters)
-  driver.A1(1000);                        // First acceleration between VSTART and V1
+  driver.a1(1000);                        // First acceleration between VSTART and V1
   driver.AMAX(800);                       // Second acceleration between V1 and VMAX
   driver.VMAX(50000);                     // Motion ramp target velocity (VMAX >= VSTART). Can be changed during a motion.
-  driver.V1(30000);                       // First acceleration / deceleration phase treshold velocity
+  driver.v1(30000);                       // First acceleration / deceleration phase treshold velocity
   driver.DMAX(1200);                      // Deceleration between VMAX and V1
-  driver.D1(1000);                        // Deceleration between V1 and VSTOP
+  driver.d1(1000);                        // Deceleration between V1 and VSTOP
   driver.VSTART(2);                       // Motor start velocity (VSTOP >= VSTART)
   driver.VSTOP(12);                       // Motor stop velocity
 
