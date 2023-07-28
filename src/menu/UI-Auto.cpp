@@ -247,8 +247,8 @@ namespace auto_screen {
   them as "mm:ss" on the screen.
   ***********************************************************************/
   void estimateDuration() {
-    float duration = getNrMovementsRequired() * (getShutterDelay());
-    float elapsed = getNrMovementsCompleted() * (getShutterDelay());
+    float duration = getNrMovementsRequired() * (getShutterDelay()*0.001);
+    float elapsed = getNrMovementsCompleted() * (getShutterDelay()*0.001);
     float remaining = duration - elapsed;
     int minutes = floor(remaining / 60);
     int seconds = int(remaining) % 60;

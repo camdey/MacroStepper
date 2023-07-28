@@ -14,7 +14,7 @@ namespace autoconfig_screen {
   gfxButton btn_End           =   btn.initButton("END",   "fillRoundRect",  0,  120,  160,  80, 15, CUSTOM_RED,   true  );
   gfxButton btn_Run           =   btn.initButton("RUN",   "fillRoundRect",  0,  220,  160,  80, 15, CUSTOM_BLUE,  true  );
   gfxButton btn_Delay         =   btn.initBitmapButton(timer,     200,  20,   80,   80,   WHITE,        true  );
-  gfxButton btn_DelayVal      =   btn.initTransparentButton(      275,  20,   40,   30,                 false );
+  gfxButton btn_DelayVal      =   btn.initTransparentButton(      280,  20,   60,   30,                 false );
   gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,  220,  80,   80,   WHITE,        true  );
   gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,  20,   120,  120,  CUSTOM_GREEN, true  );
   gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,  180,  120,  120,  CUSTOM_RED,   true  );
@@ -62,7 +62,7 @@ namespace autoconfig_screen {
     btn_End.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(getEndPosition()));
     btn_Run.writeTextTopCentre(Arimo_Regular_30,    WHITE);
     btn_Run.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(currentPosition));
-    btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  String(getShutterDelay()));
+    btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  getShutterDelaySeconds());
   }
 
 
@@ -135,14 +135,14 @@ namespace autoconfig_screen {
       setEditShutterDelay(true);
 
       btn_Delay.drawButton(YELLOW);
-      btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, String(getShutterDelay()));
+      btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, getShutterDelaySeconds());
     }
     else if (!btnActive && canEditShutterDelay()) {
       setArrowsEnabled(false);
       setEditShutterDelay(false);
 
       btn_Delay.drawButton(WHITE);
-      btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, String(getShutterDelay()));
+      btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, getShutterDelaySeconds());
     }
   }
 
@@ -234,7 +234,7 @@ namespace autoconfig_screen {
 
   // print the new shutterDelay value to screen
   void printShutterDelay() {
-    btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, String(getShutterDelay()));
+    btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, getShutterDelaySeconds());
   }
 
 

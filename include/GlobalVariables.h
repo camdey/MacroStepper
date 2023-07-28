@@ -62,6 +62,7 @@ void setShutterDelay(int delay);
 void incrementShutterDelay();
 void decrementShutterDelay();
 int getShutterDelay();
+String getShutterDelaySeconds();
 void setStepperEnabled(bool enable);
 bool isStepperEnabled();
 void setStepsPerMovement(int nrSteps);

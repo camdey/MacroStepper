@@ -26,7 +26,7 @@ int nrMovementsRequired         = 0;            // number of movements (multiple
 bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
 long recursiveValue             = 51200;        // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 bool screenRotated              = false;        // check whether screen has been rotated or not
-int shutterDelay                = 1;            // delay in seconds between a movement and taking a photo via the shutter pin
+int shutterDelay                = 500;          // delay in milliseconds between a movement and taking a photo via the shutter pin
 bool shutterTriggered           = true;         // shutter successfully triggered or not
 bool stepperEnabled             = true;         // current state of stepper motor
 float stepSize                  = 5.0000;       // distance travelled per movement in micrometres, default to 5um
@@ -388,27 +388,35 @@ bool isScreenRotated() {
 
 // Set delay between a movement and taking a photo via shutter pin
 void setShutterDelay(int delay) {
-  shutterDelay = valueCheck(delay, 1, 59);
+  shutterDelay = valueCheck(delay, 500, 5900);
 }
 
 
 // Increment delay between a movement and taking a photo via shutter pin
 void incrementShutterDelay() {
-  shutterDelay++;
-  shutterDelay = valueCheck(shutterDelay, 1, 59);
+  shutterDelay+=100;
+  shutterDelay = valueCheck(shutterDelay, 500, 5900);
 }
 
 
 // Decrement delay between a movement and taking a photo via shutter pin
 void decrementShutterDelay() {
-  shutterDelay--;
-  shutterDelay = valueCheck(shutterDelay, 1, 59);
+  shutterDelay-=100;
+  shutterDelay = valueCheck(shutterDelay, 500, 5900);
 }
 
 
 // Get delay between a movement and taking a photo via shutter pin
 int getShutterDelay() {
   return shutterDelay;
+}
+
+// Get delay in seconds in a displayable String format between a movement and taking a photo via shutter pin
+String getShutterDelaySeconds() {
+  int delay = getShutterDelay();
+  int thousandths = delay*0.001;
+  int hundreths = (delay-(thousandths*1000))*0.01;
+  return String(thousandths) + '.' + String(hundreths);
 }
 
 
@@ -568,9 +576,9 @@ int getNr360Photos() {
 
 void setPhoto360Delay(long delay) {
   photo360Delay = delay;
-  // 800ms is min time needed for pulling shutter
-  if (photo360Delay < 800) {
-    photo360Delay = 800;
+  // 500ms is min time needed for pulling shutter
+  if (photo360Delay < 500) {
+    photo360Delay = 500;
   }
 }
 

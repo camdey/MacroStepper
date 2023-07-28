@@ -51,7 +51,7 @@ void autoStack() {
 		}
     // only move if autoStack hasn't been paused by flash failure
     if (!autoStackPaused && (!isShutterEnabled() || hasShutterTriggered())) {
-      unsigned long delay = getShutterDelay()*1000;
+      unsigned long delay = getShutterDelay();
   		executeMovement(1, delay);
     }
 
