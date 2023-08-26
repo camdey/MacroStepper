@@ -128,11 +128,11 @@ extern gfxButton            btn;
 // driver1 pins
 #define DIAG0_1_PIN 				    38
 #define DIAG1_1_PIN 				    40
-// #define DIR_1_PIN 					30              // use SPI stepping with TMC5160
-// #define STEP_1_PIN                   32              // use SPI stepping with TMC5160
+// #define DIR_1_PIN 					30          // use SPI stepping with TMC5160
+// #define STEP_1_PIN                   32          // use SPI stepping with TMC5160
 #define CS_1_PIN 						34
 #define EN_1_PIN 						36
-#define R_1_SENSE                       0.075f          // Watterott TMC5160 uses 0.075
+#define R_1_SENSE                       0.075f      // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
@@ -141,11 +141,11 @@ extern gfxButton            btn;
 // driver2 pins
 #define DIAG0_2_PIN 				    24
 #define DIAG1_2_PIN 				    26
-// #define DIR_2_PIN 					28              // use SPI stepping with TMC5160
-// #define STEP_2_PIN 				    30              // use SPI stepping with TMC5160
+// #define DIR_2_PIN 					28          // use SPI stepping with TMC5160
+// #define STEP_2_PIN 				    30          // use SPI stepping with TMC5160
 #define CS_2_PIN 						28
 #define EN_2_PIN 						42
-#define R_2_SENSE                       0.075f          // Watterott TMC5160 uses 0.075
+#define R_2_SENSE                       0.075f      // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
