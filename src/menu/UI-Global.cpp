@@ -40,8 +40,8 @@ namespace global {
       autoStackPaused = false;
       setNrMovementsCompleted(0);
       // setNrMovementsRequired(0);
-      // setStartPosition(driver.XACTUAL());
-      // setEndPosition(driver.XACTUAL());
+      // setStartPosition(driver1.XACTUAL());
+      // setEndPosition(driver1.XACTUAL());
       btn_Reset.updateColour(BLACK);
       btn_Reset.drawButton(BLACK);
       setCurrentStage(idle);

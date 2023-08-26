@@ -1,6 +1,8 @@
+#include <Arduino.h>
+#include "VariableDeclarations.h"
 #include "DriverConfig.h"
 
-void configStealthChop() {
+void configStealthChop(TMC5160Stepper &driver) {
   driver.GCONF();
   driver.en_pwm_mode(true);
   driver.en_softstop(true);
@@ -29,7 +31,7 @@ void configStealthChop() {
   driver.RAMPMODE(0);                     // Positioning mode (using all A, D and V parameters)
   driver.a1(5000);                        // First acceleration between VSTART and V1
   driver.AMAX(3500);                      // Second acceleration between V1 and VMAX
-  driver.VMAX(STEALTH_CHOP_VMAX);    // Motion ramp target velocity (VMAX >= VSTART). Can be changed during a motion.
+  driver.VMAX(STEALTH_CHOP_VMAX);         // Motion ramp target velocity (VMAX >= VSTART). Can be changed during a motion.
   driver.v1(30000);                       // First acceleration / deceleration phase treshold velocity
   driver.DMAX(3500);                      // Deceleration between VMAX and V1
   driver.d1(5000);                        // Deceleration between V1 and VSTOP
@@ -42,7 +44,7 @@ void configStealthChop() {
   stallGuardConfigured = false;
 }
 
-void configStallGuard() {
+void configStallGuard(TMC5160Stepper &driver) {
   driver.GCONF();
   driver.en_pwm_mode(true);
   driver.en_softstop(false);
@@ -79,11 +81,11 @@ void configStallGuard() {
   driver.VSTOP(12);                       // Motor stop velocity
 
   // STALLGUARD2 PARAMETERS
-  driver.sg_stop(true);                 // stop by stallguard, disable to release motor after stall event
-  driver.sgt(0);                        // stallguard sensitivity
-  driver.semin(2);                      // If the StallGuard2 result falls below SEMIN*32, the motor current is increased
-  driver.semax(1);                      // If the StallGuard2 result is equal to or above (SEMIN+SEMAX+1)*32, the motor current becomes decreased to save energy.
-  driver.sedn(0b00);                    // For each 8 StallGuard2 values decrease current down step speed by one
+  driver.sg_stop(true);                   // stop by stallguard, disable to release motor after stall event
+  driver.sgt(0);                          // stallguard sensitivity
+  driver.semin(2);                        // If the StallGuard2 result falls below SEMIN*32, the motor current is increased
+  driver.semax(1);                        // If the StallGuard2 result is equal to or above (SEMIN+SEMAX+1)*32, the motor current becomes decreased to save energy.
+  driver.sedn(0b00);                      // For each 8 StallGuard2 values decrease current down step speed by one
 
   stallGuardConfigured = true;
 }

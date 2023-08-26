@@ -18,7 +18,7 @@ long BackwardEndStopPosition    = 1;            // position of the backward end 
 long startPosition              = 0;            // starting position of an AutoStack sequence
 long endPosition                = 0;            // end position of an AutoStack sequence
 long lastMillis                 = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
-long flashTriggerTime              = 0;            // last millis time flash was triggered successfully
+long flashTriggerTime           = 0;            // last millis time flash was triggered successfully
 long lastStepTime               = 0;            // last millis time a step was executed
 bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
 int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
@@ -279,7 +279,7 @@ long getEndPosition() {
 
 // check if the stepper's current position is the same as the target position
 bool hasReachedTargetPosition() {
-    bool hasReachedTarget = (driver.XACTUAL() == driver.XTARGET());
+    bool hasReachedTarget = (driver1.XACTUAL() == driver1.XTARGET());
     return hasReachedTarget;
 }
 
@@ -424,13 +424,13 @@ String getShutterDelaySeconds() {
 void setStepperEnabled(bool enable) {
 	if (enable) {
 		delay(10);
-		digitalWrite(EN_PIN, LOW); // enable
+		digitalWrite(EN_1_PIN, LOW); // enable
 		delay(10);
 	}
 
 	if (!enable) {
 		delay(10);
-		digitalWrite(EN_PIN, HIGH); // disable
+		digitalWrite(EN_1_PIN, HIGH); // disable
 		delay(10);
 	}
   stepperEnabled = enable;
@@ -493,7 +493,7 @@ bool isTestingFlash() {
 
 // set target velocity for stepper (VMAX)
 void setTargetVelocity(long velocity) {
-  driver.VMAX(velocity);
+  driver1.VMAX(velocity);
   targetVelocity = velocity;
 }
 

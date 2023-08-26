@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void configStealthChop();
-void configStallGuard();
+void configStealthChop(TMC5160Stepper &driver);
+void configStallGuard(TMC5160Stepper &driver);
 
 #endif

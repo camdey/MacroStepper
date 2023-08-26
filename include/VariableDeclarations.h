@@ -50,7 +50,8 @@
 #include <icons/ToggleOff.h>
 
 extern TouchScreen          ts;
-extern TMC5160Stepper       driver;
+extern TMC5160Stepper       driver1;
+extern TMC5160Stepper       driver2;
 extern MCUFRIEND_kbv 	    tft;
 extern gfxButton            btn;
 
@@ -96,20 +97,20 @@ extern gfxButton            btn;
 // #define TS_MINY 					132
 // #define TS_MAXY 					900
 // Arduino Due + 3.5" TFT
-#define TS_MINX 					846
-#define TS_MAXX 					148
-#define TS_MINY 					937
-#define TS_MAXY 					140
+// #define TS_MINX 					846
+// #define TS_MAXX 					148
+// #define TS_MINY 					937
+// #define TS_MAXY 					140
 // Grand Central M4 + 2.8" TFT
 // #define TS_MINX 					320
 // #define TS_MAXX 					760
 // #define TS_MINY 					235
 // #define TS_MAXY 					810
 // Grand Central M4 + 3.5" TFT
-// #define TS_MINX 					760
-// #define TS_MAXX 					315
-// #define TS_MINY 					852
-// #define TS_MAXY 					220
+#define TS_MINX 					760
+#define TS_MAXX 					315
+#define TS_MINY 					852
+#define TS_MAXY 					220
 
 // pin definitions for touch inputs
 #define YP 							A3              // must be an analog pin, use "An" notation!
@@ -124,25 +125,40 @@ extern gfxButton            btn;
 #define LCD_RD						A0
 #define LCD_RESET 				    A4
 
-// driver pins
-#define DIAG1_PIN 				    24
-#define DIAG0_PIN 				    26
-// #define DIR_PIN 					28              // use SPI stepping with TMC5160
-// #define STEP_PIN 				30              // use SPI stepping with TMC5160
-#define CS_PIN 						32
-#define EN_PIN 						34
-#define R_SENSE                     0.075f          // Watterott TMC5160 uses 0.075
+// driver1 pins
+#define DIAG0_1_PIN 				    38
+#define DIAG1_1_PIN 				    40
+// #define DIR_1_PIN 					30              // use SPI stepping with TMC5160
+// #define STEP_1_PIN                   32              // use SPI stepping with TMC5160
+#define CS_1_PIN 						34
+#define EN_1_PIN 						36
+#define R_1_SENSE                       0.075f          // Watterott TMC5160 uses 0.075
+// handled by SPI library
+// #define MOSI_PIN 				ICSP4
+// #define MISO_PIN 				ICSP1
+// #define SCK_PIN 					ICSP3
+
+// driver2 pins
+#define DIAG0_2_PIN 				    24
+#define DIAG1_2_PIN 				    26
+// #define DIR_2_PIN 					28              // use SPI stepping with TMC5160
+// #define STEP_2_PIN 				    30              // use SPI stepping with TMC5160
+#define CS_2_PIN 						28
+#define EN_2_PIN 						42
+#define R_2_SENSE                       0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
 // #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define XSTICK_PIN 				    A6              // joystick X-axis pin (controls fwd and rev)
-#define ZSTICK_PIN 				    A7              // button-press from joystick
+#define XSTICK_PIN 				    A7              // joystick X-axis pin (controls fwd and rev)
+#define RSTICK_PIN 				    A6              // joystick R-axis pin (controls rotation)
+#define ZSTICK_PIN 				    A5              // button-press from joystick
 #define GODOX_PIN 				    A8              // pin for GA1A12S202 light sensor
+#define POT_PIN 				    A9              // pin for potentiometer to control LED brightnes
 #define PIEZO_PIN                   22              // pin for Piezo buzzer
-#define SONY_PIN                    36              // pin for pulling camera focus and shutter to GND via opto
+#define SONY_PIN                    48              // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long prevButtonCheck;

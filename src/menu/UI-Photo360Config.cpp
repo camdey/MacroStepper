@@ -78,7 +78,7 @@ namespace photoconfig_screen {
       if (!isStepperDirCW()) {
         nrSteps = nrSteps*-1;
       }
-      driver.XTARGET(driver.XACTUAL()+nrSteps);
+      driver1.XTARGET(driver1.XACTUAL()+nrSteps);
     }
   }
 
@@ -92,7 +92,7 @@ namespace photoconfig_screen {
       if (!isStepperDirCW()) {
         nrSteps = nrSteps*-1;
       }
-      driver.XTARGET(driver.XACTUAL()+nrSteps);
+      driver1.XTARGET(driver1.XACTUAL()+nrSteps);
     }
   }
 
@@ -106,7 +106,7 @@ namespace photoconfig_screen {
       if (!isStepperDirCW()) {
         nrSteps = nrSteps*-1;
       }
-      driver.XTARGET(driver.XACTUAL()+nrSteps);
+      driver1.XTARGET(driver1.XACTUAL()+nrSteps);
     }
   }
 
@@ -142,7 +142,7 @@ namespace photoconfig_screen {
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
       readyStealthChop();
       setTargetVelocity(360);
-      driver.XTARGET(driver.XACTUAL()+nrSteps);
+      driver1.XTARGET(driver1.XACTUAL()+nrSteps);
     }
   }
 
@@ -153,7 +153,7 @@ namespace photoconfig_screen {
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
       readyStealthChop();
       setTargetVelocity(360);
-      driver.XTARGET(driver.XACTUAL()-nrSteps);
+      driver1.XTARGET(driver1.XACTUAL()-nrSteps);
     }
   }
 }

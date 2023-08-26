@@ -50,7 +50,7 @@ namespace manual_screen {
     setCurrentScreen("Manual");
 
     stepNr  = String(movementCount);
-    railPos = String(driver.XACTUAL()*(MICROSTEP_DIST/1000), 5);
+    railPos = String(driver1.XACTUAL()*(MICROSTEP_DIST/1000), 5);
 
     // draw buttons
     for (int i=0; i < num_btns; i++) {
@@ -162,7 +162,7 @@ namespace manual_screen {
   // print new position of rail
   void printPosition() {
     // print new position of rail
-    railPos = String(driver.XACTUAL()*(MICROSTEP_DIST/1000), 5);
+    railPos = String(driver1.XACTUAL()*(MICROSTEP_DIST/1000), 5);
     btn_RailPos.writeTextBottomCentre(Arimo_Bold_30, WHITE, railPos);
   }
 

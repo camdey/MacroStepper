@@ -108,7 +108,7 @@ namespace video_screen {
         btn_PlayPause.setButtonActive(false); // reset button state
         setVideo360Active(false);
       }
-      configStealthChop(); // reset VMAX
+      configStealthChop(driver1); // reset VMAX
       populateScreen("Orbis");
     }
   }

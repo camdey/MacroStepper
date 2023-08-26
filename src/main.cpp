@@ -51,7 +51,8 @@
 
 
 TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
-TMC5160Stepper  driver(CS_PIN, R_SENSE);
+TMC5160Stepper  driver1(CS_1_PIN, R_1_SENSE);
+TMC5160Stepper  driver2(CS_2_PIN, R_2_SENSE);
 MCUFRIEND_kbv 	tft;
 gfxButton       btn;
 
@@ -92,18 +93,27 @@ void setup(void) {
 	tft.setRotation(1);
   setScreenRotated(false);
 
-	driver.begin();
-	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
-	driver.microsteps(NR_MICROSTEPS);
-  driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+	driver1.begin();
+  driver2.begin();
+	driver1.rms_current(1400); // max 1900rms, stepper rated for 2.8A 23HM22-2804S
+  driver2.rms_current(850); // max 1900rms, stepper rated for 1.2A SY42STH47-1206A
+	driver1.microsteps(NR_MICROSTEPS);
+  driver2.microsteps(NR_MICROSTEPS);
+  driver1.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+  driver2.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
 
   setStepperEnabled(true);
-  configStealthChop();
+  configStealthChop(driver1);
+  configStealthChop(driver2);
 
-	pinMode(EN_PIN, OUTPUT);
-  digitalWrite(EN_PIN, LOW);
-  pinMode(CS_PIN, OUTPUT);
-  digitalWrite(CS_PIN, HIGH); // unselect SPI slave
+	pinMode(EN_1_PIN, OUTPUT);
+  pinMode(EN_2_PIN, OUTPUT);
+  digitalWrite(EN_1_PIN, LOW);
+  digitalWrite(EN_2_PIN, LOW);
+  pinMode(CS_1_PIN, OUTPUT);
+  pinMode(CS_2_PIN, OUTPUT);
+  digitalWrite(CS_1_PIN, HIGH); // unselect SPI slave
+  digitalWrite(CS_2_PIN, HIGH); // unselect SPI slave
   pinMode(PIEZO_PIN, OUTPUT);
   
   // declare analog pin as digital input
