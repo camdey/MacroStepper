@@ -50,8 +50,8 @@
 #include <icons/ToggleOff.h>
 
 extern TouchScreen          ts;
-extern TMC5160Stepper_Ext   driver1;
-extern TMC5160Stepper_Ext   driver2;
+extern TMC5160Stepper_Ext   stepper1;
+extern TMC5160Stepper_Ext   stepper2;
 extern MCUFRIEND_kbv 	    tft;
 extern gfxButton            btn;
 
@@ -125,7 +125,7 @@ extern gfxButton            btn;
 #define LCD_RD						A0
 #define LCD_RESET 				    A4
 
-// driver1 pins
+// stepper1 pins
 #define DIAG0_1_PIN 				    38
 #define DIAG1_1_PIN 				    40
 // #define DIR_1_PIN 					30          // use SPI stepping with TMC5160
@@ -138,7 +138,7 @@ extern gfxButton            btn;
 // #define MISO_PIN 				ICSP1
 // #define SCK_PIN 					ICSP3
 
-// driver2 pins
+// stepper2 pins
 #define DIAG0_2_PIN 				    24
 #define DIAG1_2_PIN 				    26
 // #define DIR_2_PIN 					28          // use SPI stepping with TMC5160

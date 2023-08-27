@@ -53,7 +53,7 @@ namespace autoconfig_screen {
       btn_array[i]->drawButton();
     }
 
-    int currentPosition = driver1.XACTUAL();
+    int currentPosition = stepper1.XACTUAL();
 
     // draw text
     btn_Start.writeTextTopCentre(Arimo_Regular_30,  WHITE);
@@ -79,7 +79,7 @@ namespace autoconfig_screen {
     if (btnActive && !canEditShutterDelay() && !canEditEndPosition()) {
       setArrowsEnabled(true);
       setEditStartPosition(true);
-      setStartPosition(driver1.XACTUAL()); // set start position to current position
+      setStartPosition(stepper1.XACTUAL()); // set start position to current position
 
       btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
       btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStartPosition()));
@@ -98,7 +98,7 @@ namespace autoconfig_screen {
     if (btnActive && !canEditShutterDelay() && !canEditStartPosition()) {
       setArrowsEnabled(true);
       setEditEndPosition(true);
-      setEndPosition(driver1.XACTUAL()); // set end position to current position
+      setEndPosition(stepper1.XACTUAL()); // set end position to current position
 
       btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
       btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getEndPosition()));
@@ -115,7 +115,7 @@ namespace autoconfig_screen {
 
   void func_Run(bool btnActive) {
     if (btnActive && (canEditShutterDelay() + canEditStartPosition() + canEditEndPosition()) == 0) {
-      int currentPosition = driver1.XACTUAL();
+      int currentPosition = stepper1.XACTUAL();
 
       btn_Run.writeTextTopCentre(Arimo_Regular_30, YELLOW);
       btn_Run.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(currentPosition));
@@ -210,7 +210,7 @@ namespace autoconfig_screen {
       setStartPosition(0);
     }
     // get new value
-    setStartPosition(driver1.XACTUAL());
+    setStartPosition(stepper1.XACTUAL());
     btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
     btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStartPosition()));
     // reset AutoStack
@@ -225,7 +225,7 @@ namespace autoconfig_screen {
       setEndPosition(MAX_RAIL_POSITION);
     }
     else if (!autoStackMax) {
-      setEndPosition(driver1.XACTUAL());
+      setEndPosition(stepper1.XACTUAL());
     }
     btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
     btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getEndPosition()));
@@ -241,6 +241,6 @@ namespace autoconfig_screen {
   // print current position of stepper under RUN text
   void printPosition() {
     btn_Run.writeTextTopCentre(Arimo_Regular_30, WHITE);
-    btn_Run.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(driver1.XACTUAL()));
+    btn_Run.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
   }
 }

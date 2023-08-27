@@ -74,22 +74,22 @@ used to reduce the initial acceleration of the stepper to control
 jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
-void joystickMotion(int xPos) {
+void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
   long velocity = calcVelocity(xPos);
 
-  readyStealthChop();
+  readyStealthChop(stepper);
   // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
   int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
   
   while ((xPos >= xStickUpper || xPos <= xStickLower) && isJoystickBtnActive) {
-    if (isRailHomed()) {                              // don't allow movement if within 2mm of endstops
-      if (dir == 0 && driver1.XACTUAL() <= SAFE_ZONE_BUFFER) {
-        Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of rear end stop): "); Serial.println(driver1.XACTUAL());
+    if (stepper.homed()) {                              // don't allow movement if within 2mm of endstops
+      if (dir == 0 && stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
+        Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of rear end stop): "); Serial.println(stepper.XACTUAL());
          produceTone(1, 250, 0);
         break;
       }
-      else if (dir == 1 && MAX_RAIL_POSITION - driver1.XACTUAL() <= SAFE_ZONE_BUFFER) {
-        Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of front end stop): "); Serial.println(driver1.XACTUAL());
+      else if (dir == 1 && MAX_RAIL_POSITION - stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
+        Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of front end stop): "); Serial.println(stepper.XACTUAL());
         produceTone(1, 250, 0);
         break;
       }
@@ -98,9 +98,9 @@ void joystickMotion(int xPos) {
     if (millis() - getLastMillis() >= 100) {
       velocity = calcVelocity(xPos);
       // Serial.print(" xPos: "); Serial.print(xPos);
-      // Serial.print(" | currentPos: "); Serial.print(driver1.XACTUAL());
-      // Serial.print(" | targetPos: "); Serial.print(driver1.XTARGET());
-      // Serial.print(" | VACTUAL: "); Serial.print(driver1.VACTUAL());
+      // Serial.print(" | currentPos: "); Serial.print(stepper.XACTUAL());
+      // Serial.print(" | targetPos: "); Serial.print(stepper.XTARGET());
+      // Serial.print(" | VACTUAL: "); Serial.print(stepper.VACTUAL());
       // Serial.print(" | velocity: "); Serial.println(velocity);
 
       isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
@@ -110,20 +110,20 @@ void joystickMotion(int xPos) {
     }
     // set target to move stepper
     if (dir == 0) {
-      driver1.XTARGET(-800000);
+      stepper.XTARGET(-800000);
     }
     else if (dir == 1) {
-      driver1.XTARGET(800000);
+      stepper.XTARGET(800000);
     }
   
-    setTargetVelocity(velocity);
+    stepper.targetVelocity(velocity);
     xPos = readJoystick();
   }
-  setTargetVelocity(0);                             // bring stepper to a stop
-  while (driver1.VACTUAL() != 0) {}                 // wait for stepper to decelerate
+  stepper.targetVelocity(0);                        // bring stepper to a stop
+  while (stepper.VACTUAL() != 0) {}                 // wait for stepper to decelerate
   printNewPositions();                              // print final positions now that stepper has stopped
-  driver1.XTARGET(driver1.XACTUAL());               // reset target to actual
-  setTargetVelocity(STEALTH_CHOP_VMAX);             // reset VMAX to stealthChop default
+  stepper.XTARGET(stepper.XACTUAL());               // reset target to actual
+  stepper.targetVelocity(STEALTH_CHOP_VMAX);        // reset VMAX to stealthChop default
 }
 
 

@@ -51,8 +51,8 @@
 
 
 TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
-TMC5160Stepper_Ext  driver1(CS_1_PIN, R_1_SENSE);
-TMC5160Stepper_Ext  driver2(CS_2_PIN, R_2_SENSE);
+TMC5160Stepper_Ext  stepper1(CS_1_PIN, R_1_SENSE);
+TMC5160Stepper_Ext  stepper2(CS_2_PIN, R_2_SENSE);
 MCUFRIEND_kbv 	tft;
 gfxButton       btn;
 
@@ -93,20 +93,20 @@ void setup(void) {
 	tft.setRotation(3);
   setScreenRotated(false);
 
-	initDriver(driver1, 1400, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN);
-  initDriver(driver2, 850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
+	initDriver(stepper1, 1400, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN);
+  initDriver(stepper2, 850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
 
-  configStealthChop(driver1);
-  configStealthChop(driver2);
+  configStealthChop(stepper1);
+  configStealthChop(stepper2);
 
 	pinMode(EN_1_PIN, OUTPUT);
   pinMode(EN_2_PIN, OUTPUT);
-  driver1.stepperEnabled(true);
-  driver2.stepperEnabled(false);
+  stepper1.stepperEnabled(true);
+  stepper2.stepperEnabled(false);
   pinMode(CS_1_PIN, OUTPUT);
   pinMode(CS_2_PIN, OUTPUT);
-  driver1.slaveSelected(true);
-  driver2.slaveSelected(false);
+  stepper1.slaveSelected(true);
+  stepper2.slaveSelected(false);
   pinMode(PIEZO_PIN, OUTPUT);
   
   // declare analog pin as digital input
@@ -128,7 +128,7 @@ void setup(void) {
 void loop() {
   // run AutoStack sequence if enabled
   if (autoStackInitiated && !autoStackPaused) {
-    autoStack();
+    autoStack(stepper1);
     // update duration if on Auto screen
     if (getCurrentScreen() == "Auto") {
 		  auto_screen::estimateDuration();
@@ -141,10 +141,10 @@ void loop() {
 
     // if video360 active, keep updating target so stepper keeps moving
     if (isVideo360Active()) {
-      video360(getVideo360Target());
+      video360(stepper2, getVideo360Target());
     }
     if (photo360Initiated) {
-      photo360();
+      photo360(stepper2);
     }
   }
   // take joystick and limit switch reading, put stepper to sleep
@@ -155,11 +155,11 @@ void loop() {
   
     // move if past threshold and not in autoStack or video360 mode
     if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && !isVideo360Active() && isJoystickBtnActive) {
-      joystickMotion(xStickPos);
+      joystickMotion(stepper1, xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && driver1.stepperEnabled() && getCurrentStage() == idle) {
-      driver1.stepperEnabled(false); // disable stepper
+    if (hasReachedTargetPosition() && stepper1.stepperEnabled() && getCurrentStage() == idle) {
+      stepper1.stepperEnabled(false); // disable stepper
     }
 		// update godoxValue if on Flash screen
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
@@ -170,6 +170,6 @@ void loop() {
 
   // run homing sequence if first loop
   if (runHomingSequence) {
-    homeRail(); // run homing routine
+    homeRail(stepper1); // run homing routine
   }
 }

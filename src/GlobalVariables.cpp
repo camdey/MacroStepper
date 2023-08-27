@@ -23,15 +23,15 @@ long lastStepTime               = 0;            // last millis time a step was e
 // bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
 int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
 int nrMovementsRequired         = 0;            // number of movements (multiples of steps) required for an AutoStack procedure
-bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
+// bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
 long recursiveValue             = 51200;        // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 bool screenRotated              = false;        // check whether screen has been rotated or not
 int shutterDelay                = 500;          // delay in milliseconds between a movement and taking a photo via the shutter pin
 bool shutterTriggered           = true;         // shutter successfully triggered or not
 // bool stepperEnabled             = true;         // current state of stepper motor
-float stepSize                  = 5.0000;       // distance travelled per movement in micrometres, default to 5um
-int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
-long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
+// float stepSize                  = 5.0000;       // distance travelled per movement in micrometres, default to 5um
+// int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step or 5um)
+// long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
 bool testingFlash               = false;        // flag for testing flash threshold
 bool flashSensorEnabled         = false;        // is flash bulb enabled, or only take photos without flash?
 int revsPerMinute               = 50;           // revs per minute for video 360, stored as 10x higher to avoid floating point math
@@ -279,7 +279,7 @@ long getEndPosition() {
 
 // check if the stepper's current position is the same as the target position
 bool hasReachedTargetPosition() {
-    bool hasReachedTarget = (driver1.XACTUAL() == driver1.XTARGET());
+    bool hasReachedTarget = (stepper1.XACTUAL() == stepper1.XTARGET());
     return hasReachedTarget;
 }
 
@@ -350,16 +350,16 @@ int getNrMovementsRequired() {
 }
 
 
-// Set whether the rail has been homed or not
-void setRailHomed(bool homed) {
-    railHomed = homed;
-}
+// // Set whether the rail has been homed or not
+// void setRailHomed(bool homed) {
+//     railHomed = homed;
+// }
 
 
-// Check whether the rail has been homed or not
-bool isRailHomed() {
-    return railHomed;
-}
+// // Check whether the rail has been homed or not
+// bool isRailHomed() {
+//     return railHomed;
+// }
 
 
 // Set the last recursively filtered joystick reading
@@ -443,40 +443,40 @@ String getShutterDelaySeconds() {
 // }
 
 
-// Set number of microsteps taken per movement
-void setStepsPerMovement(int nrSteps) {
-  stepsPerMovement = nrSteps;
-}
+// // Set number of microsteps taken per movement
+// void setStepsPerMovement(int nrSteps) {
+//   stepsPerMovement = nrSteps;
+// }
 
 
-// Increment number of microsteps taken per movement by 1
-void incrementStepsPerMovement() {
-  stepsPerMovement++;
-}
+// // Increment number of microsteps taken per movement by 1
+// void incrementStepsPerMovement() {
+//   stepsPerMovement++;
+// }
 
 
-// Decrement number of microsteps taken per movement by 1
-void decrementStepsPerMovement() {
-  stepsPerMovement--;
-}
+// // Decrement number of microsteps taken per movement by 1
+// void decrementStepsPerMovement() {
+//   stepsPerMovement--;
+// }
 
 
-// Get number of microsteps taken per movement
-int getStepsPerMovement() {
-  return stepsPerMovement;
-}
+// // Get number of microsteps taken per movement
+// int getStepsPerMovement() {
+//   return stepsPerMovement;
+// }
 
 
-// Set float value of distance travelled per movement in μm, called from calculateStepSize()
-void setStepSize(float size) {
-  stepSize = size;
-}
+// // Set float value of distance travelled per movement in μm, called from calculateStepSize()
+// void setStepSize(float size) {
+//   stepSize = size;
+// }
 
 
-// Get float value of distance travelled per movement in μm
-float getStepSize() {
-  return stepSize;
-}
+// // Get float value of distance travelled per movement in μm
+// float getStepSize() {
+//   return stepSize;
+// }
 
 
 // Set when testing flash to prevent navigating away from screen
@@ -491,17 +491,17 @@ bool isTestingFlash() {
 }
 
 
-// set target velocity for stepper (VMAX)
-void setTargetVelocity(long velocity) {
-  driver1.VMAX(velocity);
-  targetVelocity = velocity;
-}
+// // set target velocity for stepper (VMAX)
+// void setTargetVelocity(long velocity) {
+//   stepper1.VMAX(velocity);
+//   targetVelocity = velocity;
+// }
 
 
-// get target velocity for stepper (VMAX)
-long getTargetVelocity() {
-  return targetVelocity;
-}
+// // get target velocity for stepper (VMAX)
+// long getTargetVelocity() {
+//   return targetVelocity;
+// }
 
 
 void setFlashSensorEnabled(bool enabled) {

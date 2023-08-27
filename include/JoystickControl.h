@@ -6,7 +6,7 @@
 
 long calcVelocity(int xVal);
 void calibrateJoyStick();
-void joystickMotion(int xPos);
+void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos);
 void printNewPositions(); 
 int readJoystick();
 

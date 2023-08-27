@@ -96,7 +96,7 @@ namespace target_screen {
     btn_Distance.writeTextTopCentre(Arimo_Regular_30, WHITE);
     btn_Distance.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(targetMillimetres, 4));
     btn_Actual.writeTextTopCentre(Arimo_Regular_30, WHITE);
-    btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(driver1.XACTUAL()));
+    btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
     btn_Cancel.writeTextCentre(Arimo_Bold_30, WHITE);
     btn_Minus.writeTextCentre(Arimo_Bold_30, WHITE);
     btn_Zero.writeTextCentre(Arimo_Bold_30, WHITE);
@@ -127,7 +127,7 @@ namespace target_screen {
       btn_Target.writeTextTopCentre(Arimo_Regular_30, YELLOW);
       btn_Target.writeTextBottomCentre(Arimo_Bold_30, YELLOW, targetValues);
       btn_Distance.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(targetMillimetres, 4));
-      btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(driver1.XACTUAL())); // update in case stepper has moved (e.g. due to joystick)
+      btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL())); // update in case stepper has moved (e.g. due to joystick)
     }
     else {
       canEditTarget = false;
@@ -203,12 +203,12 @@ namespace target_screen {
     if (active && !canEditTarget) {
       long nrSteps = atoi(targetValues);
       btn_Run.drawButton(CUSTOM_RED);
-      driver1.VMAX(20000);
+      stepper1.VMAX(20000);
       executeSteps(nrSteps);
-      driver1.VMAX(STEALTH_CHOP_VMAX);
+      stepper1.VMAX(STEALTH_CHOP_VMAX);
       btn_Run.drawButton(CUSTOM_GREEN);
       btn_Run.setToggleActive(false); // reset button
-      btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(driver1.XACTUAL()));
+      btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
     }
   }
 
