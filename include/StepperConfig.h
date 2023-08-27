@@ -31,9 +31,9 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         bool rotateClockwise() {return m_rotateClockwise;}
         void slaveSelected(bool selected) {
             if (selected) {
-                digitalWrite(chipSelectPin(), HIGH);
-            } else if (!selected) {
                 digitalWrite(chipSelectPin(), LOW);
+            } else if (!selected) {
+                digitalWrite(chipSelectPin(), HIGH);
             }
             m_slaveSelected = selected;
         }
@@ -46,7 +46,10 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         int stepsPerMovement() {return m_stepsPerMovement;}
         void incrementStepsPerMovement() {m_stepsPerMovement++;}
         void decrementStepsPerMovement() {m_stepsPerMovement--;}
-        void targetVelocity(long velocity) {m_targetVelocity = velocity;}
+        void targetVelocity(long velocity) {
+            VMAX(velocity);
+            m_targetVelocity = velocity;
+        }
         long targetVelocity() {return m_targetVelocity;}
         void homed(bool homed) {m_homed = homed;}
         bool homed() {return m_homed;}

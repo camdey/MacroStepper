@@ -76,10 +76,9 @@ control resumes.
 ******************************************************************/
 void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
   long velocity = calcVelocity(xPos);
-
   readyStealthChop(stepper);
   // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
-  int dir = map(xPos, 0, 1024, 0, 2); // 511 = 0, 512 = 1
+  int dir = map(xPos, 1024, 0, 0, 2); // 511 = 0, 512 = 1
   
   while ((xPos >= xStickUpper || xPos <= xStickLower) && isJoystickBtnActive) {
     if (stepper.homed()) {                              // don't allow movement if within 2mm of endstops
@@ -95,13 +94,14 @@ void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
       }
     }
   
+    // update velocity if more than 100ms since last reading
     if (millis() - getLastMillis() >= 100) {
       velocity = calcVelocity(xPos);
-      // Serial.print(" xPos: "); Serial.print(xPos);
-      // Serial.print(" | currentPos: "); Serial.print(stepper.XACTUAL());
-      // Serial.print(" | targetPos: "); Serial.print(stepper.XTARGET());
-      // Serial.print(" | VACTUAL: "); Serial.print(stepper.VACTUAL());
-      // Serial.print(" | velocity: "); Serial.println(velocity);
+      Serial.print(" | xPos: "); Serial.print(xPos);
+      Serial.print(" | currentPos: "); Serial.print(stepper.XACTUAL());
+      Serial.print(" | targetPos: "); Serial.print(stepper.XTARGET());
+      Serial.print(" | VACTUAL: "); Serial.print(stepper.VACTUAL());
+      Serial.print(" | velocity: "); Serial.println(velocity);
 
       isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
 
@@ -110,10 +110,10 @@ void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
     }
     // set target to move stepper
     if (dir == 0) {
-      stepper.XTARGET(-800000);
+      stepper.XTARGET(MAX_RAIL_POSITION*-1);
     }
     else if (dir == 1) {
-      stepper.XTARGET(800000);
+      stepper.XTARGET(MAX_RAIL_POSITION);
     }
   
     stepper.targetVelocity(velocity);
@@ -121,8 +121,8 @@ void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
   }
   stepper.targetVelocity(0);                        // bring stepper to a stop
   while (stepper.VACTUAL() != 0) {}                 // wait for stepper to decelerate
+  stepper.XTARGET(stepper.XACTUAL());               // reset target to actual, call after setting targetVelocity to avoid "bounce"
   printNewPositions();                              // print final positions now that stepper has stopped
-  stepper.XTARGET(stepper.XACTUAL());               // reset target to actual
   stepper.targetVelocity(STEALTH_CHOP_VMAX);        // reset VMAX to stealthChop default
 }
 
