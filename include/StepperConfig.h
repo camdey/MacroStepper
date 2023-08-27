@@ -71,4 +71,7 @@ void initDriver(TMC5160Stepper_Ext &stepper, uint16_t rmsCurrent, uint16_t nrMic
 void configStealthChop(TMC5160Stepper_Ext &stepper);
 void configStallGuard(TMC5160Stepper_Ext &stepper);
 
+extern TMC5160Stepper_Ext   stepper1;
+extern TMC5160Stepper_Ext   stepper2;
+
 #endif

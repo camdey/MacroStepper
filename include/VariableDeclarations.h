@@ -51,8 +51,6 @@
 #include <icons/ToggleOff.h>
 
 extern TouchScreen          ts;
-extern TMC5160Stepper_Ext   stepper1;
-extern TMC5160Stepper_Ext   stepper2;
 extern MCUFRIEND_kbv 	    tft;
 extern gfxButton            btn;
 

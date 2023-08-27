@@ -52,7 +52,7 @@ int getNrMovementsCompleted();
 void incrementNrMovementsCompleted();
 void setNrMovementsRequired(int nrMovements);
 int getNrMovementsRequired();
-void setRailHomed(bool homed);
+// void setRailHomed(bool homed);
 // bool isRailHomed();
 void setRecursiveFilterValue(long val);
 long getRecursiveFilterValue();

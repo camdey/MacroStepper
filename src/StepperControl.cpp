@@ -236,7 +236,7 @@ void homeRail(TMC5160Stepper_Ext &stepper) {
     setEndPosition(stepper.XACTUAL());    // update autoStack positions as rail has moved
 		configStealthChop(stepper);           // set config for silentStep
     runHomingSequence = false;
-    setRailHomed(true);
+    stepper.homed(true);
 	}
 }
 

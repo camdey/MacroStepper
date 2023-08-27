@@ -58,7 +58,7 @@ namespace global {
       setCurrentStage(idle);
     }
     // if function called from elsewhere...
-    else if (!btnActive && autoStackInitiated || photo360Initiated) {
+    else if ((!btnActive && autoStackInitiated) || photo360Initiated) {
       btn_Reset.updateColour(CUSTOM_RED);
     }
   }
