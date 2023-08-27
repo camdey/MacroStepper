@@ -19,21 +19,21 @@ Movement was taken due to delay, this function is called again and
 another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
-void autoStack() {
-  readyStealthChop();
+void autoStack(TMC5160Stepper_Ext &driver) {
+  readyStealthChop(driver);
   
   if (isNewAutoStack) {                     // move to start position if beginning AutoStack
     setTargetVelocity(10000);               // reduce max velocity to minimize vibration
-    goToStart();
+    goToStart(driver);
     setNrMovementsCompleted(0);
-    setExecutedMovement(false);
+    driver.executedMovement(false);
     setShutterTriggered(false);
     setLastStepTime(millis());
     global::func_Reset(false);              // change reset button to red
     auto_screen::stackStatus(start);
   }
 
-  if (getNrMovementsCompleted() <= getNrMovementsRequired() && !hasExecutedMovement()) {
+  if (getNrMovementsCompleted() <= getNrMovementsRequired() && !driver.executedMovement()) {
      // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
       // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
@@ -52,10 +52,10 @@ void autoStack() {
     // only move if autoStack hasn't been paused by flash failure
     if (!autoStackPaused && (!isShutterEnabled() || hasShutterTriggered())) {
       unsigned long delay = getShutterDelay();
-  		executeMovement(1, delay);
+  		executeMovement(driver, 1, delay);
     }
 
-		if (hasExecutedMovement()) {
+		if (driver.executedMovement()) {
 			incrementNrMovementsCompleted();
       auto_screen::stackStatus(newStep);
 	    if (getCurrentScreen() == "Auto") {   // make sure correct screen is displaying
@@ -63,47 +63,47 @@ void autoStack() {
 				auto_screen::estimateDuration();
 	    }
 			setShutterTriggered(false);           // reset shutter triggered flag
-			setExecutedMovement(false);           // reset executed movement flag
+			driver.executedMovement(false);       // reset executed movement flag
 		}
   }
   if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
     auto_screen::stackStatus(stackCompleted);
-    terminateAutoStack();                   // stop AutoStack sequence if end reached
+    terminateAutoStack(driver);                   // stop AutoStack sequence if end reached
   }
 }
 
 
 // print various diagnostics to serial monitor
-void debugStallGuard() {
+void debugStallGuard(TMC5160Stepper_Ext &driver) {
   if (millis() - getLastMillis() >= 100) {
-    Serial.print(" | event_stop_sg: "); Serial.print(driver1.event_stop_sg());
-    Serial.print(" | sg_result: "); Serial.print(driver1.sg_result());
-    Serial.print(" | TSTEP: "); Serial.print(driver1.TSTEP());
-    Serial.print(" | CSACTUAL: "); Serial.print(driver1.cs_actual());
-    Serial.print(" | XACTUAL: "); Serial.println(driver1.XACTUAL());
+    Serial.print(" | event_stop_sg: "); Serial.print(driver.event_stop_sg());
+    Serial.print(" | sg_result: "); Serial.print(driver.sg_result());
+    Serial.print(" | TSTEP: "); Serial.print(driver.TSTEP());
+    Serial.print(" | CSACTUAL: "); Serial.print(driver.cs_actual());
+    Serial.print(" | XACTUAL: "); Serial.println(driver.XACTUAL());
     setLastMillis(millis());
   }
 }
 
 
 // run stepper until stall triggered
-bool detectEndStop() {
-  while (driver1.event_stop_sg() == 0) {
-    debugStallGuard(); // print to serial monitor
+bool detectEndStop(TMC5160Stepper_Ext &driver) {
+  while (driver.event_stop_sg() == 0) {
+    debugStallGuard(driver); // print to serial monitor
   }
   return true;
 }
 
 
 // run through the specified AutoStack procedure using the current start and end values
-void dryRun() {
-  readyStealthChop();
+void dryRun(TMC5160Stepper_Ext &driver) {
+  readyStealthChop(driver);
 
   // reduce stepper velocity
   setTargetVelocity(5000);
   // move to start position
-  driver1.XTARGET(getStartPosition());
-  while (driver1.XACTUAL() != driver1.XTARGET()) {
+  driver.XTARGET(getStartPosition());
+  while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
       autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
@@ -113,8 +113,8 @@ void dryRun() {
   // step slow through procedure
   setTargetVelocity(500);
   // move to end position
-  driver1.XTARGET(getEndPosition());
-  while (driver1.XACTUAL() != driver1.XTARGET()) {
+  driver.XTARGET(getEndPosition());
+  while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
       autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
@@ -123,8 +123,8 @@ void dryRun() {
 
   setTargetVelocity(5000);
   // return to start
-  driver1.XTARGET(getStartPosition());
-  while (driver1.XACTUAL() != driver1.XTARGET()) {
+  driver.XTARGET(getStartPosition());
+  while (driver.XACTUAL() != driver.XTARGET()) {
     if (millis() - getLastMillis() >= 100) {
       autoconfig_screen::printPosition(); // update position
       setLastMillis(millis());
@@ -144,40 +144,44 @@ this function returns false and the calling function should loop
 until it receives a response of true. Prevents stall if rail has
 been homed and will exit autoStack if running.
 ******************************************************************/
-void executeMovement(int stepDirection, unsigned long stepperDelay) {
-  readyStealthChop();
+void executeMovement(TMC5160Stepper_Ext &driver, int stepDirection, unsigned long stepperDelay) {
+  readyStealthChop(driver);
 
   // step after elapsed amount of time
   if ((millis() - getLastStepTime() > stepperDelay)) {
     auto_screen::stackStatus(stepTaken);
     int stepVelocity = stepDirection * getStepsPerMovement();
-    long targetPosition = driver1.XACTUAL() + stepVelocity;
-
+    long targetPosition = driver.XACTUAL() + stepVelocity;
     // set new target position
-    driver1.XTARGET(targetPosition);
+    driver.XTARGET(targetPosition);
+    Serial.print("Actual before: "); Serial.println(driver.XACTUAL());
+    Serial.print("Target before: "); Serial.println(driver.XTARGET());
     // reduce speed
     setTargetVelocity(2000);
     // wait for stepper to reach target position
-    while(driver1.XACTUAL() != driver1.XTARGET()) {}
+    while(driver.XACTUAL() != driver.XTARGET()) {
+      Serial.print("Actual after: "); Serial.println(driver.XACTUAL());
+      Serial.print("Target after: "); Serial.println(driver.XTARGET());
+    }
     setTargetVelocity(STEALTH_CHOP_VMAX);
-    setExecutedMovement(true);  
+    driver.executedMovement(true);  
     setLastStepTime(millis());
   }
   else {
-		setExecutedMovement(false); // no step taken
+		driver.executedMovement(false);
     auto_screen::stackStatus(stepDelay);
 	}
 }
 
 
 // execute a predetermined number of steps
-void executeSteps(long nrSteps) {
-  readyStealthChop();
-  long targetPosition = driver1.XACTUAL() + nrSteps;
+void executeSteps(TMC5160Stepper_Ext &driver, long nrSteps) {
+  readyStealthChop(driver);
+  long targetPosition = driver.XACTUAL() + nrSteps;
   // set new target position
-  driver1.XTARGET(targetPosition);
+  driver.XTARGET(targetPosition);
   // wait for stepper to reach target position
-  while(driver1.XACTUAL() != driver1.XTARGET()) {}
+  while(driver.XACTUAL() != driver.XTARGET()) {}
 }
 
 
@@ -185,53 +189,53 @@ void executeSteps(long nrSteps) {
 // moves stepper backwards until stall detected, records position
 // moves stepper forwards until stall detected, records position and sets position as maximum value (384,000)
 // moves stepper to middle of the rail (192,000)
-void homeRail() {
+void homeRail(TMC5160Stepper_Ext &driver) {
   bool hitRearStop, hitForwardStop = false;
-  readyStallGuard();
+  readyStallGuard(driver);
   // reset positions
   setForwardEndStop(1);
   setBackwardEndStop(1);
 
   // move to rear end stop + 100,000 just to ensure it over-runs without decelerating
-	driver1.XTARGET(-MAX_RAIL_POSITION - 100000);
-  hitRearStop = detectEndStop(); // wait until end stop detected
+	driver.XTARGET(-MAX_RAIL_POSITION - 100000);
+  hitRearStop = detectEndStop(driver); // wait until end stop detected
   // if endstop detected... 
   if (hitRearStop) {
     delay(100);
-    driver1.sg_stop(false);
-    driver1.sg_stop(true);
+    driver.sg_stop(false);
+    driver.sg_stop(true);
 
     // Serial.print("Actual: "); Serial.println(driver1.XACTUAL());
 
     driver1.XACTUAL(0); // set rear end stop position as 0
-    setBackwardEndStop(driver1.XACTUAL()); // set backward position
+    setBackwardEndStop(driver.XACTUAL()); // set backward position
   }
   // move to forward end stop
-  driver1.XTARGET(MAX_RAIL_POSITION + 100000);
-  hitForwardStop = detectEndStop(); // wait until end stop detected
+  driver.XTARGET(MAX_RAIL_POSITION + 100000);
+  hitForwardStop = detectEndStop(driver); // wait until end stop detected
   // if endstop detected...
   if (hitForwardStop) {
     delay(100);
-    driver1.sg_stop(false);
-    driver1.sg_stop(true);
+    driver.sg_stop(false);
+    driver.sg_stop(true);
 
     // Serial.print("Actual: "); Serial.println(driver1.XACTUAL());
 
-    driver1.XACTUAL(MAX_RAIL_POSITION); // set front end stop position as 0
-    setForwardEndStop(driver1.XACTUAL()); // set forward position
+    driver.XACTUAL(MAX_RAIL_POSITION); // set front end stop position as 0
+    setForwardEndStop(driver.XACTUAL()); // set forward position
   }
 
 	// if back and forward position set, move to middle position
 	if (getBackwardEndStop() == MIN_RAIL_POSITION && getForwardEndStop() == MAX_RAIL_POSITION) {
-    driver1.XTARGET(192000);
+    driver.XTARGET(192000);
     // wait to reach position before changing driver config after homing completed
-    while (driver1.XACTUAL() != driver1.XTARGET()) {
-      debugStallGuard(); // print to serial monitor
+    while (driver.XACTUAL() != driver.XTARGET()) {
+      debugStallGuard(driver); // print to serial monitor
     }
 
-    setStartPosition(driver1.XACTUAL());  // update autoStack positions as rail has moved
-    setEndPosition(driver1.XACTUAL());    // update autoStack positions as rail has moved
-		configStealthChop(driver1);           // set config for silentStep
+    setStartPosition(driver.XACTUAL());  // update autoStack positions as rail has moved
+    setEndPosition(driver.XACTUAL());    // update autoStack positions as rail has moved
+		configStealthChop(driver);           // set config for silentStep
     runHomingSequence = false;
     setRailHomed(true);
 	}
@@ -240,9 +244,9 @@ void homeRail() {
 // move stepper to start for AutoStack sequence
 // if current position in front of start, overshoot to remove backlash and return
 // otherwise move forward to start
-void goToStart() {
-  if (driver1.XACTUAL() != getStartPosition()) {
-    int distanceToStart = (driver1.XACTUAL() - getStartPosition());
+void goToStart(TMC5160Stepper_Ext &driver) {
+  if (driver.XACTUAL() != getStartPosition()) {
+    int distanceToStart = (driver.XACTUAL() - getStartPosition());
     // if current position is in front of start position
     if (distanceToStart > 0) {
       // move backwards to start postion
@@ -252,33 +256,33 @@ void goToStart() {
     // if current position is behind start position
     else if (distanceToStart < 0) {
       // move forward to start postion
-      driver1.XTARGET(getStartPosition());
+      driver.XTARGET(getStartPosition());
       // wait for stepper to reach position
-      while (driver1.XACTUAL() != driver1.XTARGET()) {}
+      while (driver.XACTUAL() != driver.XTARGET()) {}
     }
   }
   isNewAutoStack = false;
 }
 
 
-void overshootPosition(int startPosition, int numberOfSteps) {
+void overshootPosition(TMC5160Stepper_Ext &driver, int startPosition, int numberOfSteps) {
   int offsetPosition = startPosition - numberOfSteps;
   // overshoot start position
-  driver1.XTARGET(offsetPosition);
+  driver.XTARGET(offsetPosition);
   // wait for stepper to reach position
-  while (driver1.XACTUAL() != driver1.XTARGET()) {}
+  while (driver.XACTUAL() != driver.XTARGET()) {}
 
   delay(50);
 
   // move to start
-  driver1.XTARGET(startPosition);
+  driver.XTARGET(startPosition);
   // wait for stepper to reach position
-  while (driver1.XACTUAL() != driver1.XTARGET()) {}
+  while (driver.XACTUAL() != driver.XTARGET()) {}
 }
 
 
 // clean up variables etc after completing AutoStack sequence
-void terminateAutoStack() {
+void terminateAutoStack(TMC5160Stepper_Ext &driver) {
   if (getCurrentScreen() != "Auto") {
     populateScreen("Auto");                   // go back to Auto screen if not already on it
   }
@@ -287,32 +291,32 @@ void terminateAutoStack() {
   global::btn_Reset.updateColour(BLACK);      // change reset button back to black
   setShutterTriggered(false);
   setNrMovementsCompleted(0);                 // reset completed movements count
-  setExecutedMovement(false);
+  driver.executedMovement(false);
   produceTone(4, 300, 200);                   // sound 4 tones for 300ms separated by a 200ms delay
   // change max velocity back to normal
   setTargetVelocity(STEALTH_CHOP_VMAX);
 }
 
 
-void video360(long nrSteps) {
+void video360(TMC5160Stepper_Ext &driver, long nrSteps) {
   // change to StealthChop if StallGuard is configured
-  readyStealthChop();
+  readyStealthChop(driver);
   // update target velocity as calling configStealthChop resets this on the driver register but not the function
   setTargetVelocity(getTargetVelocity());
   // set position
-  driver1.XTARGET(driver1.XACTUAL()+nrSteps);
+  driver.XTARGET(driver.XACTUAL()+nrSteps);
 }
 
 
-void photo360() {
+void photo360(TMC5160Stepper_Ext &driver) {
     setTargetVelocity(360); // approx. 5rpm
     // 0 - if start of new photo360, set speed, take first photo, and enable stepper
     if (getCurrentStage() == start && isNewPhoto360 && photo360Initiated) {
         // Serial.print("STARTED: "); Serial.println(millis());
         // reset target to be safe
-        driver1.XTARGET(driver1.XACTUAL());
+        driver.XTARGET(driver.XACTUAL());
         // change to StealthChop if StallGuard is configured
-        readyStealthChop();
+        readyStealthChop(driver);
         setCurrentStage(pullShutter);
         global::func_Reset(false); // change reset button to red
     }
@@ -361,10 +365,10 @@ void photo360() {
             nr360Steps++;
           }
           // if not clockwise, reverse direction of travel
-          if (!isStepperDirCW()) {
+          if (!driver.rotateClockwise()) {
             nr360Steps = nr360Steps*-1;
           }
-          driver1.XTARGET(driver1.XACTUAL() + nr360Steps);
+          driver.XTARGET(driver.XACTUAL() + nr360Steps);
           setCurrentStage(stepTaken);
         }
       }
@@ -385,25 +389,25 @@ void photo360() {
 }
 
 
-void readyStallGuard() {
+void readyStallGuard(TMC5160Stepper_Ext &driver) {
   // enable stepper if disabled
-	if (!isStepperEnabled()) {
-    setStepperEnabled(true);
+	if (!driver.stepperEnabled()) {
+    driver.stepperEnabled(true);
   }
   // change to StallGuard is StealthChop is configured
-  if (!stallGuardConfigured) {
-    configStallGuard(driver1);
+  if (!driver.stallGuardActive()) {
+    configStallGuard(driver);
   }
 }
 
 
-void readyStealthChop() {
+void readyStealthChop(TMC5160Stepper_Ext &driver) {
   // enable stepper if disabled
-	if (!isStepperEnabled()) {
-    setStepperEnabled(true);
+	if (!driver.stepperEnabled()) {
+    driver.stepperEnabled(true);
   }
   // change to StealthChop is StallGuard is configured
-  if (stallGuardConfigured) {
-    configStealthChop(driver1);
+  if (driver.stallGuardActive()) {
+    configStealthChop(driver);
   }
 }

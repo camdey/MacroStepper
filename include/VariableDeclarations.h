@@ -50,8 +50,8 @@
 #include <icons/ToggleOff.h>
 
 extern TouchScreen          ts;
-extern TMC5160Stepper       driver1;
-extern TMC5160Stepper       driver2;
+extern TMC5160Stepper_Ext   driver1;
+extern TMC5160Stepper_Ext   driver2;
 extern MCUFRIEND_kbv 	    tft;
 extern gfxButton            btn;
 
@@ -97,20 +97,20 @@ extern gfxButton            btn;
 // #define TS_MINY 					132
 // #define TS_MAXY 					900
 // Arduino Due + 3.5" TFT
-// #define TS_MINX 					846
-// #define TS_MAXX 					148
-// #define TS_MINY 					937
-// #define TS_MAXY 					140
+#define TS_MINX 					148 // 846
+#define TS_MAXX 					846 // 148
+#define TS_MINY 					140 // 937
+#define TS_MAXY 					937 // 140
 // Grand Central M4 + 2.8" TFT
 // #define TS_MINX 					320
 // #define TS_MAXX 					760
 // #define TS_MINY 					235
 // #define TS_MAXY 					810
 // Grand Central M4 + 3.5" TFT
-#define TS_MINX 					760
-#define TS_MAXX 					315
-#define TS_MINY 					852
-#define TS_MAXY 					220
+// #define TS_MINX 					760
+// #define TS_MAXX 					315
+// #define TS_MINY 					852
+// #define TS_MAXY 					220
 
 // pin definitions for touch inputs
 #define YP 							A3              // must be an analog pin, use "An" notation!

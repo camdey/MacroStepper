@@ -22,8 +22,8 @@ void setEditFlashOnValue(bool state);
 bool canEditFlashOnValue();
 void setEditFlashOffValue(bool state);
 bool canEditFlashOffValue();
-void setExecutedMovement(bool executed);
-bool hasExecutedMovement();
+// void setExecutedMovement(bool executed);
+// bool hasExecutedMovement();
 void setFlashAvailable(bool available);
 bool isFlashAvailableOld();
 void setGodoxValue(int value);
@@ -63,8 +63,8 @@ void incrementShutterDelay();
 void decrementShutterDelay();
 int getShutterDelay();
 String getShutterDelaySeconds();
-void setStepperEnabled(bool enable);
-bool isStepperEnabled();
+// void setStepperEnabled(bool enable);
+// bool isStepperEnabled();
 void setStepsPerMovement(int nrSteps);
 void incrementStepsPerMovement();
 void decrementStepsPerMovement();
@@ -94,8 +94,8 @@ void setNrCompleted360Photos(int nrPhotos);
 int getNrCompleted360Photos();
 void setLastPhoto360Step();
 long getLastPhoto360Step();
-void setStepperDirCW (bool clockwise);
-bool isStepperDirCW();
+// void setStepperDirCW (bool clockwise);
+// bool isStepperDirCW();
 
 enum stages {
     idle,

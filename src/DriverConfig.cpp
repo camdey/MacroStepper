@@ -2,7 +2,22 @@
 #include "VariableDeclarations.h"
 #include "DriverConfig.h"
 
-void configStealthChop(TMC5160Stepper &driver) {
+TMC5160Stepper_Ext::TMC5160Stepper_Ext(uint16_t pinCS, float RS, int8_t link) : TMC5160Stepper(pinCS, RS, link) {};
+
+void initDriver(TMC5160Stepper_Ext &driver, uint16_t rmsCurrent, uint16_t nrMicrosteps, bool shaftDirection, int pinEN, int pinCS) {
+	driver.begin();
+  // 23HM22-2804S: max 1900rms, stepper rated for 2.8A
+  // SY42STH47-1206A: max 850rms, stepper rated for 1.2A
+	driver.rms_current(rmsCurrent); 
+	driver.microsteps(nrMicrosteps);
+  driver.shaft(shaftDirection); // inverse shaft, large target moves away from rear, small target moves towards rear
+
+  driver.enablePin(pinEN);
+  driver.chipSelectPin(pinCS);
+}
+
+
+void configStealthChop(TMC5160Stepper_Ext &driver) {
   driver.GCONF();
   driver.en_pwm_mode(true);
   driver.en_softstop(true);
@@ -41,10 +56,11 @@ void configStealthChop(TMC5160Stepper &driver) {
   // STALLGUARD2 PARAMETERS
   driver.sg_stop(false);                  // stop by stallguard, disable to release motor after stall event
 
-  stallGuardConfigured = false;
+  driver.stallGuardActive(false);
 }
 
-void configStallGuard(TMC5160Stepper &driver) {
+
+void configStallGuard(TMC5160Stepper_Ext &driver) {
   driver.GCONF();
   driver.en_pwm_mode(true);
   driver.en_softstop(false);
@@ -87,5 +103,5 @@ void configStallGuard(TMC5160Stepper &driver) {
   driver.semax(1);                        // If the StallGuard2 result is equal to or above (SEMIN+SEMAX+1)*32, the motor current becomes decreased to save energy.
   driver.sedn(0b00);                      // For each 8 StallGuard2 values decrease current down step speed by one
 
-  stallGuardConfigured = true;
+  driver.stallGuardActive(true);
 }

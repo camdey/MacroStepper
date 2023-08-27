@@ -1,7 +1,7 @@
 // ********* Macro Stepper v2.2 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2020-08-15
+// *** UPDATED: 2023-08-26
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -51,8 +51,8 @@
 
 
 TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
-TMC5160Stepper  driver1(CS_1_PIN, R_1_SENSE);
-TMC5160Stepper  driver2(CS_2_PIN, R_2_SENSE);
+TMC5160Stepper_Ext  driver1(CS_1_PIN, R_1_SENSE);
+TMC5160Stepper_Ext  driver2(CS_2_PIN, R_2_SENSE);
 MCUFRIEND_kbv 	tft;
 gfxButton       btn;
 
@@ -90,30 +90,23 @@ void setup(void) {
 
 	uint16_t identifier = tft.readID();
 	tft.begin(identifier);
-	tft.setRotation(1);
+	tft.setRotation(3);
   setScreenRotated(false);
 
-	driver1.begin();
-  driver2.begin();
-	driver1.rms_current(1400); // max 1900rms, stepper rated for 2.8A 23HM22-2804S
-  driver2.rms_current(850); // max 1900rms, stepper rated for 1.2A SY42STH47-1206A
-	driver1.microsteps(NR_MICROSTEPS);
-  driver2.microsteps(NR_MICROSTEPS);
-  driver1.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
-  driver2.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+	initDriver(driver1, 1400, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN);
+  initDriver(driver2, 850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
 
-  setStepperEnabled(true);
   configStealthChop(driver1);
   configStealthChop(driver2);
 
 	pinMode(EN_1_PIN, OUTPUT);
   pinMode(EN_2_PIN, OUTPUT);
-  digitalWrite(EN_1_PIN, LOW);
-  digitalWrite(EN_2_PIN, LOW);
+  driver1.stepperEnabled(true);
+  driver2.stepperEnabled(false);
   pinMode(CS_1_PIN, OUTPUT);
   pinMode(CS_2_PIN, OUTPUT);
-  digitalWrite(CS_1_PIN, HIGH); // unselect SPI slave
-  digitalWrite(CS_2_PIN, HIGH); // unselect SPI slave
+  driver1.slaveSelected(true);
+  driver2.slaveSelected(false);
   pinMode(PIEZO_PIN, OUTPUT);
   
   // declare analog pin as digital input
@@ -165,8 +158,8 @@ void loop() {
       joystickMotion(xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && isStepperEnabled() && getCurrentStage() == idle) {
-      setStepperEnabled(false); // disable stepper
+    if (hasReachedTargetPosition() && driver1.stepperEnabled() && getCurrentStage() == idle) {
+      driver1.stepperEnabled(false); // disable stepper
     }
 		// update godoxValue if on Flash screen
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {

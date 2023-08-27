@@ -57,6 +57,7 @@ void calibrateJoyStick() {
   xStickUpper = xStickResting + 10;
   xStickLower = xStickResting - 10;
   xStickDiff = 512 - xStickResting;
+  // Serial.print("xStick Calib. Resting: "); Serial.println(xStickResting);
   // Serial.print("xStick Calib. Diff: "); Serial.println(xStickDiff);
 }
 
@@ -104,7 +105,7 @@ void joystickMotion(int xPos) {
 
       isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // check if button still pressed
 
-      printNewPositions();                            // print new positions on the display
+      printNewPositions();                          // print new positions on the display
       setLastMillis(millis());
     }
     // set target to move stepper
@@ -118,11 +119,11 @@ void joystickMotion(int xPos) {
     setTargetVelocity(velocity);
     xPos = readJoystick();
   }
-  setTargetVelocity(0);                               // bring stepper to a stop
-  while (driver1.VACTUAL() != 0) {}                    // wait for stepper to decelerate
-  printNewPositions();                                // print final positions now that stepper has stopped
-  driver1.XTARGET(driver1.XACTUAL());                   // reset target to actual
-  setTargetVelocity(STEALTH_CHOP_VMAX);               // reset VMAX to stealthChop default
+  setTargetVelocity(0);                             // bring stepper to a stop
+  while (driver1.VACTUAL() != 0) {}                 // wait for stepper to decelerate
+  printNewPositions();                              // print final positions now that stepper has stopped
+  driver1.XTARGET(driver1.XACTUAL());               // reset target to actual
+  setTargetVelocity(STEALTH_CHOP_VMAX);             // reset VMAX to stealthChop default
 }
 
 
@@ -153,7 +154,7 @@ int readJoystick() {
   int weight = 40;
 
   // val = (w × XSTICK_PIN + (100 – w) × prevVal)
-  // multiply values by 100 to avoid floating point math, the prevVal part of the formula needs as much precesion as possible
+  // multiply values by 100 to avoid floating point math, the prevVal part of the formula needs as much precision as possible
   adjVal = weight * (analogRead(XSTICK_PIN)*100) + (100 - weight) * getRecursiveFilterValue();
   setRecursiveFilterValue(adjVal/100);
   val = round(adjVal*1.00 / 10000);

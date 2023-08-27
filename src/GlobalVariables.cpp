@@ -20,7 +20,7 @@ long endPosition                = 0;            // end position of an AutoStack 
 long lastMillis                 = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
 long flashTriggerTime           = 0;            // last millis time flash was triggered successfully
 long lastStepTime               = 0;            // last millis time a step was executed
-bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
+// bool executedMovement           = false;        // whether stepper was moved when moveStepper() called
 int nrCompletedMovements        = 0;            // number of completed movements (multiples of steps) within an AutoStack procedure
 int nrMovementsRequired         = 0;            // number of movements (multiples of steps) required for an AutoStack procedure
 bool railHomed                  = false;        // check whether the forward and rear limits of the linear rail have been set
@@ -28,7 +28,7 @@ long recursiveValue             = 51200;        // store filtered value of last 
 bool screenRotated              = false;        // check whether screen has been rotated or not
 int shutterDelay                = 500;          // delay in milliseconds between a movement and taking a photo via the shutter pin
 bool shutterTriggered           = true;         // shutter successfully triggered or not
-bool stepperEnabled             = true;         // current state of stepper motor
+// bool stepperEnabled             = true;         // current state of stepper motor
 float stepSize                  = 5.0000;       // distance travelled per movement in micrometres, default to 5um
 int stepsPerMovement            = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step / 5um)
 long targetVelocity             = 200000;       // target velocity = VMAX for TMC5160
@@ -43,7 +43,7 @@ int nr360Photos                 = 72;           // nr photos taken in a 360 phot
 long photo360Delay              = 1000;         // delay in milliseconds between each photo in a photo360 procedure
 int nrCompleted360Photos        = 0;            // nr of photos taken in a 360 procedure
 long lastPhoto360Step           = 0;            // millis of last photo taken for photo360
-bool stepperDirCW               = true;         // direction of the stepper motor, is it clockwise?
+// bool stepperDirCW               = true;         // direction of the stepper motor, is it clockwise?
 
 stages currentStage = idle;
 #define photoCountArraySize 20 // need to ensure we don't go out of bounds
@@ -167,16 +167,16 @@ bool canEditFlashOffValue() {
 }
 
 
-// Set whether the stepper moved when moveStepper() called
-void setExecutedMovement(bool executed) {
-    executedMovement = executed;
-}
+// // Set whether the stepper moved when moveStepper() called
+// void setExecutedMovement(bool executed) {
+//     executedMovement = executed;
+// }
 
 
-// Check whether the stepper moved when moveStepper() was last called
-bool hasExecutedMovement() {
-    return executedMovement;
-}
+// // Check whether the stepper moved when moveStepper() was last called
+// bool hasExecutedMovement() {
+//     return executedMovement;
+// }
 
 
 // Set flash availability
@@ -421,26 +421,26 @@ String getShutterDelaySeconds() {
 
 
 // Set current state of stepper
-void setStepperEnabled(bool enable) {
-	if (enable) {
-		delay(10);
-		digitalWrite(EN_1_PIN, LOW); // enable
-		delay(10);
-	}
+// void setStepperEnabled(bool enable) {
+// 	if (enable) {
+// 		delay(10);
+// 		digitalWrite(EN_1_PIN, LOW); // enable
+// 		delay(10);
+// 	}
 
-	if (!enable) {
-		delay(10);
-		digitalWrite(EN_1_PIN, HIGH); // disable
-		delay(10);
-	}
-  stepperEnabled = enable;
-}
+// 	if (!enable) {
+// 		delay(10);
+// 		digitalWrite(EN_1_PIN, HIGH); // disable
+// 		delay(10);
+// 	}
+//   stepperEnabled = enable;
+// }
 
 
-// Check current state of stepper
-bool isStepperEnabled() {
-    return stepperEnabled;
-}
+// // Check current state of stepper
+// bool isStepperEnabled() {
+//     return stepperEnabled;
+// }
 
 
 // Set number of microsteps taken per movement
@@ -608,11 +608,11 @@ long getLastPhoto360Step() {
 }
 
 
-void setStepperDirCW (bool clockwise) {
-  stepperDirCW = clockwise;
-}
+// void setStepperDirCW (bool clockwise) {
+//   stepperDirCW = clockwise;
+// }
 
 
-bool isStepperDirCW() {
-  return stepperDirCW;
-}
+// bool isStepperDirCW() {
+//   return stepperDirCW;
+// }
