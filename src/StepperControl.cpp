@@ -1,4 +1,5 @@
-#include "DriverConfig.h"
+#include "VariableDeclarations.h"
+#include "StepperConfig.h"
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
@@ -322,7 +323,7 @@ void photo360(TMC5160Stepper_Ext &stepper) {
     if (photo360Initiated && !photo360Paused) {
       // if not waiting for shutter and we are at the target, trigger flash
       // STEP 1: trigger photo
-      if (getCurrentStage() == pullShutter && hasReachedTargetPosition()) {
+      if (getCurrentStage() == pullShutter && stepper.reachedTarget()) {
         // wait for delay, this should be skipped on the first photo
         if (millis() - getLastPhoto360Step() >= getPhoto360Delay()) {
           // take photo
@@ -372,7 +373,7 @@ void photo360(TMC5160Stepper_Ext &stepper) {
       }
 
       // STEP 3: if arrived at target, take photo and loop back through steps
-      if (getCurrentStage() == stepTaken && hasReachedTargetPosition()) {
+      if (getCurrentStage() == stepTaken && stepper.reachedTarget()) {
         // Serial.print("AT TARGET: "); Serial.println(millis());
         setCurrentStage(pullShutter);
       }
@@ -389,8 +390,8 @@ void photo360(TMC5160Stepper_Ext &stepper) {
 
 void readyStallGuard(TMC5160Stepper_Ext &stepper) {
   // enable stepper if disabled
-	if (!stepper.stepperEnabled()) {
-    stepper.stepperEnabled(true);
+	if (!stepper.enabled()) {
+    stepper.enabled(true);
   }
   // change to StallGuard is StealthChop is configured
   if (!stepper.stallGuardActive()) {
@@ -401,8 +402,8 @@ void readyStallGuard(TMC5160Stepper_Ext &stepper) {
 
 void readyStealthChop(TMC5160Stepper_Ext &stepper) {
   // enable stepper if disabled
-	if (!stepper.stepperEnabled()) {
-    stepper.stepperEnabled(true);
+	if (!stepper.enabled()) {
+    stepper.enabled(true);
   }
   // change to StealthChop is StallGuard is configured
   if (stepper.stallGuardActive()) {

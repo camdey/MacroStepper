@@ -1,6 +1,6 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
-#include "DriverConfig.h"
+#include "StepperConfig.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Video360.h"
 #include "menu/UI-Global.h"
@@ -95,7 +95,7 @@ namespace video_screen {
     }
     // if video360 is active, change direction while moving
     if (isVideo360Active()) {
-      video360(getVideo360Target());
+      video360(stepper2, getVideo360Target());
     }
   }
 
@@ -103,12 +103,12 @@ namespace video_screen {
   void func_Back(bool btnActive) {
     if (btnActive && !areArrowsEnabled()) {
       if (isVideo360Active()) {
-        video360(0); // pause movement
+        video360(stepper2, 0); // pause movement
         func_PlayPause(false); // reset PlayPause button
         btn_PlayPause.setButtonActive(false); // reset button state
         setVideo360Active(false);
       }
-      configStealthChop(stepper1); // reset VMAX
+      configStealthChop(stepper2); // reset VMAX
       populateScreen("Orbis");
     }
   }
@@ -122,7 +122,7 @@ namespace video_screen {
       btn_PlayPause.updateBitmap(pause); // update bitmap image
       btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
       btn_PlayPause.drawButton(); // draw
-      video360(getVideo360Target());
+      video360(stepper2, getVideo360Target());
       setVideo360Active(true);
     }
     else if (!btnActive) {
@@ -130,7 +130,7 @@ namespace video_screen {
       btn_PlayPause.updateBitmap(play); // update bitmap image
       btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
       btn_PlayPause.drawButton(); // draw
-      video360(0);
+      video360(stepper2, 0);
       setVideo360Active(false);
     }
   }
@@ -162,7 +162,7 @@ namespace video_screen {
       int totalSteps = rpm * stepsPerRev*1.00 / 10;           // 50 * 3200 / 10 = 16000
       int stepsPerSecond = totalSteps*1.00 / 60;              // 16000 / 60 = 266 SPS
       int vMax = stepsPerSecond*1.00 / STEPS_PER_VMAX * 1000; // 266 / 727 * 1000 = 365.8
-      setTargetVelocity(vMax);
+      stepper2.targetVelocity(vMax);
   }
 
 }

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
+#include "StepperConfig.h"
 
 void autoStack(TMC5160Stepper_Ext &stepper);
 void dryRun(TMC5160Stepper_Ext &stepper);

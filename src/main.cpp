@@ -28,7 +28,7 @@
 #include "TimerFreeTone.h"                    // produces beep tone for piezo
 #include "gfxButton.h"                        // my library for adding/controlling TFT buttons
 // project definitions and functions
-#include "DriverConfig.h"											// functions for configuring TMC2130 profiles
+#include "StepperConfig.h"										// functions for configuring TMC2130 profiles
 #include "GlobalVariables.h"
 #include "JoystickControl.h"                  // joystick control functions
 #include "MiscFunctions.h"										// miscellaneous functions
@@ -75,7 +75,6 @@ bool runHomingSequence 						= true;       // runs rehoming sequence
 bool isNewAutoStack 						  = true;       // move to start for autoStack procedure
 bool autoStackInitiated 					= false;      // enables function for stack procedure
 bool autoStackPaused 							= false;      // pause stack procedure
-bool stallGuardConfigured 				= true;				// stallGuard config has run
 bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure
 bool isNewPhoto360                = true;       // move to start for photo360 procedure
 bool photo360Initiated            = false;      // enables function for photo360 procedure
@@ -101,8 +100,8 @@ void setup(void) {
 
 	pinMode(EN_1_PIN, OUTPUT);
   pinMode(EN_2_PIN, OUTPUT);
-  stepper1.stepperEnabled(true);
-  stepper2.stepperEnabled(false);
+  stepper1.enabled(true);
+  stepper2.enabled(false);
   pinMode(CS_1_PIN, OUTPUT);
   pinMode(CS_2_PIN, OUTPUT);
   stepper1.slaveSelected(true);
@@ -158,8 +157,8 @@ void loop() {
       joystickMotion(stepper1, xStickPos);
     }
     // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && stepper1.stepperEnabled() && getCurrentStage() == idle) {
-      stepper1.stepperEnabled(false); // disable stepper
+    if (stepper1.reachedTarget() && stepper1.enabled() && getCurrentStage() == idle) {
+      stepper1.enabled(false); // disable stepper
     }
 		// update godoxValue if on Flash screen
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {

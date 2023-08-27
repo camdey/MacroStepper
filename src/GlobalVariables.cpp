@@ -1,4 +1,5 @@
 #include "GlobalVariables.h"
+#include "StepperConfig.h"
 #include "MiscFunctions.h"
 
 bool arrowsEnabled              = false;
@@ -254,7 +255,8 @@ bool hasShutterTriggered() {
 // set the start position for AutoStack, also updates movementsRequired
 void setStartPosition(long position) {
     startPosition = position;
-    setMovementsRequired(); // update movementsRequired as calculation has changed
+    // temporary, change to generic instance later
+    setMovementsRequired(stepper1); // update movementsRequired as calculation has changed
 }
 
 
@@ -267,7 +269,8 @@ long getStartPosition() {
 // set the end position for AutoStack, also updates movementsRequired
 void setEndPosition(long position) {
     endPosition = position;
-    setMovementsRequired(); // update movementsRequired as calculation has changed
+    // temporary, change to generic instance later
+    setMovementsRequired(stepper1); // update movementsRequired as calculation has changed
 }
 
 
@@ -278,10 +281,10 @@ long getEndPosition() {
 
 
 // check if the stepper's current position is the same as the target position
-bool hasReachedTargetPosition() {
-    bool hasReachedTarget = (stepper1.XACTUAL() == stepper1.XTARGET());
-    return hasReachedTarget;
-}
+// bool hasReachedTargetPosition() {
+//     bool hasReachedTarget = (stepper1.XACTUAL() == stepper1.XTARGET());
+//     return hasReachedTarget;
+// }
 
 
 // Set the last millis() reading, useful for doing things within loops every X ms 
@@ -467,7 +470,7 @@ String getShutterDelaySeconds() {
 // }
 
 
-// // Set float value of distance travelled per movement in μm, called from calculateStepSize()
+// // Set float value of distance travelled per movement in μm, called from calculateStepSize(stepper1)
 // void setStepSize(float size) {
 //   stepSize = size;
 // }

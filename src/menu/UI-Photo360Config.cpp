@@ -73,12 +73,12 @@ namespace photoconfig_screen {
     if (btnActive) {
        // calculate number of microsteps to move for each press based on current nrPhotos setting
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / 4;
-      readyStealthChop();
-      setTargetVelocity(360);
-      if (!isStepperDirCW()) {
+      readyStealthChop(stepper2);
+      stepper2.targetVelocity(360);
+      if (!stepper2.rotateClockwise()) {
         nrSteps = nrSteps*-1;
       }
-      stepper1.XTARGET(stepper1.XACTUAL()+nrSteps);
+      stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
     }
   }
 
@@ -87,12 +87,12 @@ namespace photoconfig_screen {
     if (btnActive) {
        // calculate number of microsteps to move for each press based on current nrPhotos setting
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / 2;
-      readyStealthChop();
-      setTargetVelocity(360);
-      if (!isStepperDirCW()) {
+      readyStealthChop(stepper2);
+      stepper2.targetVelocity(360);
+      if (!stepper2.rotateClockwise()) {
         nrSteps = nrSteps*-1;
       }
-      stepper1.XTARGET(stepper1.XACTUAL()+nrSteps);
+      stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
     }
   }
 
@@ -101,12 +101,12 @@ namespace photoconfig_screen {
     if (btnActive) {
        // calculate number of microsteps to move for each press based on current nrPhotos setting
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS);
-      readyStealthChop();
-      setTargetVelocity(360);
-      if (!isStepperDirCW()) {
+      readyStealthChop(stepper2);
+      stepper2.targetVelocity(360);
+      if (!stepper2.rotateClockwise()) {
         nrSteps = nrSteps*-1;
       }
-      stepper1.XTARGET(stepper1.XACTUAL()+nrSteps);
+      stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
     }
   }
 
@@ -124,14 +124,14 @@ namespace photoconfig_screen {
       btn_Direction.updateBitmap(dir_ccw); // update bitmap image
       btn_Direction.updateColour(CUSTOM_RED); // change colour
       btn_Direction.drawButton(); // draw
-      setStepperDirCW(false);
+      stepper2.rotateClockwise(false);
     }
     else if (!btnActive) {
       btn_Direction.drawButton(BLACK); // replace existing button
       btn_Direction.updateBitmap(dir_cw); // update bitmap image
       btn_Direction.updateColour(CUSTOM_GREEN); // change colour
       btn_Direction.drawButton(); // draw
-      setStepperDirCW(true);
+      stepper2.rotateClockwise(true);
     }
   }
 
@@ -140,9 +140,9 @@ namespace photoconfig_screen {
     if (btnActive) {
       // calculate number of microsteps to move for each press based on current nrPhotos setting
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
-      readyStealthChop();
-      setTargetVelocity(360);
-      stepper1.XTARGET(stepper1.XACTUAL()+nrSteps);
+      readyStealthChop(stepper2);
+      stepper2.targetVelocity(360);
+      stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
     }
   }
 
@@ -151,9 +151,9 @@ namespace photoconfig_screen {
     if (btnActive) {
       // calculate number of microsteps to move for each press based on current nrPhotos setting
       int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
-      readyStealthChop();
-      setTargetVelocity(360);
-      stepper1.XTARGET(stepper1.XACTUAL()-nrSteps);
+      readyStealthChop(stepper2);
+      stepper2.targetVelocity(360);
+      stepper2.XTARGET(stepper2.XACTUAL()-nrSteps);
     }
   }
 }

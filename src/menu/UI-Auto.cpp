@@ -77,7 +77,7 @@ namespace auto_screen {
 
     // draw text
     btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-    btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
+    btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
     btn_EstTime.writeTextTopCentre(Arimo_Regular_30, WHITE);
     estimateDuration();
     btn_Progress.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -104,7 +104,7 @@ namespace auto_screen {
       hideArrows(false); // show arrows, hide play/pause
 
       btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
 
       // clear play/pause button
       btn_PlayPause.drawButton(BLACK);
@@ -119,7 +119,7 @@ namespace auto_screen {
 
       // TODO would be nice to not re-write the top line on every arrow press
       btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
 
       btn_ArrowUp.drawButton(BLACK);
       btn_ArrowDown.drawButton(BLACK);
@@ -225,18 +225,18 @@ namespace auto_screen {
 
   void func_ArrowUp(bool btnActive) {
     if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
-      incrementStepsPerMovement();
-      calculateStepSize();
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+      stepper1.incrementStepsPerMovement();
+      calculateStepSize(stepper1);
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
     }
   }
 
 
   void func_ArrowDown(bool btnActive) {
     if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
-      decrementStepsPerMovement();
-      calculateStepSize();
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+      stepper1.decrementStepsPerMovement();
+      calculateStepSize(stepper1);
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
     }
   }
 

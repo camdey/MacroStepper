@@ -1,5 +1,5 @@
-#ifndef DRIVERCONFIG_H
-#define DRIVERCONFIG_H
+#ifndef STEPPERCONFIG_H
+#define STEPPERCONFIG_H
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
@@ -14,7 +14,7 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         int chipSelectPin() {return m_chipSelectPin;}
         void executedMovement(bool executed) {m_executedMovement = executed;}
         bool executedMovement() {return m_executedMovement;}
-        void stepperEnabled(bool enable) {
+        void enabled(bool enable) {
             if (enable) {
                 delay(10);
                 digitalWrite(enablePin(), LOW); // enable
@@ -24,9 +24,9 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
                 digitalWrite(enablePin(), HIGH); // disable
                 delay(10);
             }
-            m_stepperEnabled = enable;
+            m_enabled = enable;
         }
-        bool stepperEnabled() {return m_stepperEnabled;}
+        bool enabled() {return m_enabled;}
         void rotateClockwise (bool clockwise) {m_rotateClockwise = clockwise;}
         bool rotateClockwise() {return m_rotateClockwise;}
         void slaveSelected(bool selected) {
@@ -50,6 +50,7 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         long targetVelocity() {return m_targetVelocity;}
         void homed(bool homed) {m_homed = homed;}
         bool homed() {return m_homed;}
+        bool reachedTarget() {return XACTUAL() == XTARGET();}
 
 
     protected:
@@ -59,14 +60,14 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         int m_stepsPerMovement = 16;        // number of microsteps to travel a specified distance, default to 16 (1 full step or 5um)
         long m_targetVelocity = 200000;     // target velocity = VMAX for TMC5160
         bool m_executedMovement = false;    // whether the stepper successfully executed a movement or if it was deferred
-        bool m_stepperEnabled = true;       // if the stepper is enabled
+        bool m_enabled = true;       // if the stepper is enabled
         bool m_rotateClockwise = true;      // stepper rotation direction
         bool m_slaveSelected = false;       // if the stepper is the currently selected slave device
         bool m_stallGuardActive = false;    // if stallGuard has been configured
-        bool m_homed = false;        // whether the stepper has been homed or not
+        bool m_homed = false;               // whether the stepper has been homed or not
 };
 
-void initDriver(TMC5160Stepper_Ext &stepper, uint16_t rmsCurrent, uint16_t nrMicrosteps, bool shaftDirection, int pinEN, int pinCS) {};
+void initDriver(TMC5160Stepper_Ext &stepper, uint16_t rmsCurrent, uint16_t nrMicrosteps, bool shaftDirection, int pinEN, int pinCS);
 void configStealthChop(TMC5160Stepper_Ext &stepper);
 void configStallGuard(TMC5160Stepper_Ext &stepper);
 

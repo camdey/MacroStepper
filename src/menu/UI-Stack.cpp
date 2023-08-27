@@ -73,7 +73,7 @@ namespace stack_screen {
     if (btnActive) {
       btn_HomeRail.drawButton(CUSTOM_RED);
       runHomingSequence = true;
-      homeRail();
+      homeRail(stepper1);
       btn_HomeRail.drawButton(WHITE);
     }
   }

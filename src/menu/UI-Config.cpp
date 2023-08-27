@@ -15,7 +15,7 @@ namespace config_screen {
   gfxButton btn_FlashSensor =   btn.initBitmapButton(toggleOn,    240,  70,   100,  50,   CUSTOM_RED, true  );
   gfxButton btn_Stepper     =   btn.initBitmapButton(toggleOn,    240,  130,  100,  50,   CUSTOM_GREEN, true  );
   gfxButton btn_Thing2      =   btn.initBitmapButton(toggleOff,   240,  190,  100,  50,   CUSTOM_RED, true  );
-  gfxButton btn_Back        =   btn.initBitmapButton(backArrow,   380,  220,  80,   80,   WHITE,        true  );
+  gfxButton btn_Back        =   btn.initBitmapButton(backArrow,   380,  220,  80,   80,   WHITE,      true  );
 
   void initConfigButtons() {
     btn_array[0] = &btn_FlipScreen;
@@ -113,14 +113,14 @@ namespace config_screen {
       btn_Stepper.updateBitmap(toggleOn);
       btn_Stepper.updateColour(CUSTOM_GREEN);
       btn_Stepper.drawButton();
-      setStepperEnabled(true);
+      stepper1.enabled(true);
     }
     else if (!btnActive) {
       btn_Stepper.drawButton(BLACK);
       btn_Stepper.updateBitmap(toggleOff);
       btn_Stepper.updateColour(CUSTOM_RED);
       btn_Stepper.drawButton();
-      setStepperEnabled(false);
+      stepper1.enabled(false);
     }
   }
 }

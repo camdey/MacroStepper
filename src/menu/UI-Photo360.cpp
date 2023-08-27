@@ -177,7 +177,7 @@ namespace photo_screen {
       btn_PlayPause.updateBitmap(pause); // update bitmap image
       btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
       btn_PlayPause.drawButton(); // draw
-      photo360();
+      photo360(stepper2);
     }
     else if (!btnActive && !areArrowsEnabled()) {
       photo360Paused = true;  // photo360 paused

@@ -1,5 +1,5 @@
 #include "GlobalVariables.h"
-#include "DriverConfig.h"
+#include "StepperConfig.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"

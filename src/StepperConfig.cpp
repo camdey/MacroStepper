@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
-#include "DriverConfig.h"
+#include "StepperConfig.h"
 
 TMC5160Stepper_Ext::TMC5160Stepper_Ext(uint16_t pinCS, float RS, int8_t link) : TMC5160Stepper(pinCS, RS, link) {};
 

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "TMCStepper.h"
+#include "StepperConfig.h"	
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
@@ -179,7 +180,6 @@ extern bool runHomingSequence;
 extern bool isNewAutoStack;
 extern bool autoStackInitiated;
 extern bool autoStackPaused;
-extern bool stallGuardConfigured;
 extern bool autoStackMax;
 extern bool isNewPhoto360;
 extern bool photo360Initiated;

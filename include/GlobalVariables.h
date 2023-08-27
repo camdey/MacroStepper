@@ -40,7 +40,7 @@ void setStartPosition(long position);
 long getStartPosition();
 void setEndPosition(long position);
 long getEndPosition();
-bool hasReachedTargetPosition();
+// bool hasReachedTargetPosition();
 void setLastMillis(long millis);
 long getLastMillis();
 void setFlashTriggerTime(long millis);

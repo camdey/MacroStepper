@@ -120,7 +120,7 @@ namespace autoconfig_screen {
       btn_Run.writeTextTopCentre(Arimo_Regular_30, YELLOW);
       btn_Run.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(currentPosition));
 
-      dryRun();
+      dryRun(stepper1);
 
       btn_Run.writeTextTopCentre(Arimo_Regular_30, WHITE);
       btn_Run.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(currentPosition));
@@ -160,13 +160,13 @@ namespace autoconfig_screen {
     if (btnActive && areArrowsEnabled()) {
       // edit start postion
       if (canEditStartPosition()) {
-        executeMovement(1, 150); // forward
+        executeMovement(stepper1, 1, 150); // forward
         updateStartPosition(); //set start but not end position
         printPosition(); // update rail positon
       }
       // edit end postion
       else if (canEditEndPosition()) {
-        executeMovement(1, 150); // forward
+        executeMovement(stepper1, 1, 150); // forward
         updateEndPosition(); //set end but not start position
         printPosition(); // update rail positon
       }
@@ -184,13 +184,13 @@ namespace autoconfig_screen {
     if (btnActive && areArrowsEnabled()) {
       // edit start postion
       if (canEditStartPosition()) {
-        executeMovement(-1, 150); // backwards
+        executeMovement(stepper1, -1, 150); // backwards
         updateStartPosition(); //set start position
         printPosition(); // update rail positon
       }
       // edit end postion
       else if (canEditEndPosition()) {
-        executeMovement(-1, 150); // forward
+        executeMovement(stepper1, -1, 150); // forward
         updateEndPosition(); //set end position
         printPosition(); // update rail positon
       }

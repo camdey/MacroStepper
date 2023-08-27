@@ -59,7 +59,7 @@ namespace manual_screen {
 
     // draw text
     btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-    btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
+    btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
     btn_StepNr.writeTextTopCentre(Arimo_Regular_30, WHITE);
     btn_StepNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, stepNr);
     btn_RailPos.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -82,7 +82,7 @@ namespace manual_screen {
       setEditMovementDistance(true);
 
       btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
     }
     else {
       setArrowsEnabled(false);
@@ -90,7 +90,7 @@ namespace manual_screen {
 
       // TODO would be nice to not re-write the top line on every arrow press
       btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStepSize(), 4));
+      btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
     }
   }
 
@@ -115,9 +115,9 @@ namespace manual_screen {
     if (btnActive) {
       // if setting step size
       if (canEditMovementDistance() && areArrowsEnabled()) {
-        incrementStepsPerMovement();
-        calculateStepSize();
-        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+        stepper1.incrementStepsPerMovement();
+        calculateStepSize(stepper1);
+        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
       }
       // if not setting step size, move the stepper forward
       else if (!canEditMovementDistance()) {
@@ -125,8 +125,8 @@ namespace manual_screen {
         if (isShutterEnabled()) {
           triggerShutter();
         }
-        executeMovement(1, 400); // forward
-        if (hasExecutedMovement()) {
+        executeMovement(stepper1, 1, 400); // forward
+        if (stepper1.executedMovement()) {
           printPosition();
           updateMovementCount();
         }
@@ -139,9 +139,9 @@ namespace manual_screen {
     if (btnActive) {
       // if setting step size
       if (canEditMovementDistance() && areArrowsEnabled()) {
-        decrementStepsPerMovement();
-        calculateStepSize();
-        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStepSize(), 4));
+        stepper1.decrementStepsPerMovement();
+        calculateStepSize(stepper1);
+        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
       }
       // if not setting step size, move the stepper forward
       else if (!canEditMovementDistance()) {
@@ -149,8 +149,8 @@ namespace manual_screen {
         if (isShutterEnabled()) {
           triggerShutter();
         }
-        executeMovement(-1, 400); // reverse
-        if (hasExecutedMovement()) {
+        executeMovement(stepper1, -1, 400); // reverse
+        if (stepper1.executedMovement()) {
           printPosition();
           updateMovementCount();
         }
