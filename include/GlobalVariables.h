@@ -22,38 +22,29 @@ void setEditFlashOnValue(bool state);
 bool canEditFlashOnValue();
 void setEditFlashOffValue(bool state);
 bool canEditFlashOffValue();
-// void setExecutedMovement(bool executed);
-// bool hasExecutedMovement();
 void setFlashAvailable(bool available);
 bool isFlashAvailableOld();
 void setGodoxValue(int value);
 int getGodoxValue();
 void setGodoxFilterValue(long value);
 long getGodoxFilterValue();
-void setForwardEndStop(long position);
-long getForwardEndStop();
-void setBackwardEndStop(long position);
-long getBackwardEndStop();
 void setShutterTriggered(bool triggered);
 bool hasShutterTriggered();
-void setStartPosition(long position);
-long getStartPosition();
-void setEndPosition(long position);
-long getEndPosition();
-// bool hasReachedTargetPosition();
-void setLastMillis(long millis);
-long getLastMillis();
+// void setStartPosition(long position);
+// long getStartPosition();
+// void setEndPosition(long position);
+// long getEndPosition();
+// void setLastMillis(long millis);
+// long getLastMillis();
 void setFlashTriggerTime(long millis);
 long getFlashTriggerTime();
-void setLastStepTime(long millis);
-long getLastStepTime();
-void setNrMovementsCompleted(int nrMovements);
-int getNrMovementsCompleted();
-void incrementNrMovementsCompleted();
-void setNrMovementsRequired(int nrMovements);
-int getNrMovementsRequired();
-// void setRailHomed(bool homed);
-// bool isRailHomed();
+// void setLastStepTime(long millis);
+// long getLastStepTime();
+// void setNrMovementsCompleted(int nrMovements);
+// int getNrMovementsCompleted();
+// void incrementNrMovementsCompleted();
+// void setNrMovementsRequired(int nrMovements);
+// int getNrMovementsRequired();
 void setRecursiveFilterValue(long val);
 long getRecursiveFilterValue();
 void setScreenRotated(bool rotated);
@@ -63,16 +54,6 @@ void incrementShutterDelay();
 void decrementShutterDelay();
 int getShutterDelay();
 String getShutterDelaySeconds();
-// void setStepperEnabled(bool enable);
-// bool isStepperEnabled();
-// void setStepsPerMovement(int nrSteps);
-// void incrementStepsPerMovement();
-// void decrementStepsPerMovement();
-// int getStepsPerMovement();
-// void setStepSize(float size);
-// float getStepSize();
-// void setTargetVelocity(long velocity);
-// long getTargetVelocity();
 void setTestingFlash(bool state);
 bool isTestingFlash();
 void setFlashSensorEnabled(bool enabled);
@@ -94,22 +75,20 @@ void setNrCompleted360Photos(int nrPhotos);
 int getNrCompleted360Photos();
 void setLastPhoto360Step();
 long getLastPhoto360Step();
-// void setStepperDirCW (bool clockwise);
-// bool isStepperDirCW();
 
 enum stages {
-    idle,
-    start,
-    isFlashAvailable,
-    pullShutter,
-    isFlashUnavailable,
-    releaseShutter,
-    flashSuccessful,
-    flashUnresponsive,
-    stepTaken,
-    stepDelay,
-    newStep,
-    stackCompleted
+        idle,
+        start,
+        isFlashAvailable,
+        pullShutter,
+        isFlashUnavailable,
+        releaseShutter,
+        flashSuccessful,
+        flashUnresponsive,
+        stepTaken,
+        stepDelay,
+        newStep,
+        stackCompleted
 };
 void setCurrentStage(stages stage);
 stages getCurrentStage();

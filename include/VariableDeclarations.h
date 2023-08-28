@@ -51,43 +51,43 @@
 #include <icons/ToggleOff.h>
 
 extern TouchScreen          ts;
-extern MCUFRIEND_kbv 	    tft;
+extern MCUFRIEND_kbv        tft;
 extern gfxButton            btn;
 
 // Definitions for some common 16-bit color values:
-#define	BLACK   						0x0000
-#define	BLUE    						0x001F
-#define	RED     						0xF800
-#define	GREEN   						0x07E0
-#define CYAN    						0x07FF
-#define MAGENTA 						0xF81F
-#define YELLOW  						0xFFE0
-#define WHITE   						0xFFFF
-#define GRAY    						0xE73C
-#define DARKGRAY						0x39E8
-#define CUSTOM_GREEN_LITE		        0x9736
-#define CUSTOM_GREEN				    0x4ECC
-#define CUSTOM_RED					    0xFBCC
-#define CUSTOM_RED_LITE			        0xFCD1
-#define CUSTOM_BLUE					    0x4EDE
-#define CUSTOM_GREY					    0xCE7A
-#define CUSTOM_GREY_LITE		        0xDEFB
-#define CUSTOM_YELLOW                   0xFF46
+#define	BLACK                       0x0000
+#define	BLUE                        0x001F
+#define	RED                         0xF800
+#define	GREEN                       0x07E0
+#define CYAN                        0x07FF
+#define MAGENTA                     0xF81F
+#define YELLOW                      0xFFE0
+#define WHITE                       0xFFFF
+#define GRAY                        0xE73C
+#define DARKGRAY                    0x39E8
+#define CUSTOM_GREEN_LITE           0x9736
+#define CUSTOM_GREEN                0x4ECC
+#define CUSTOM_RED                  0xFBCC
+#define CUSTOM_RED_LITE             0xFCD1
+#define CUSTOM_BLUE                 0x4EDE
+#define CUSTOM_GREY                 0xCE7A
+#define CUSTOM_GREY_LITE            0xDEFB
+#define CUSTOM_YELLOW               0xFF46
 
 // microsteps and positions
-#define AUTOSTACK_MOTOR_STEPS       400             // number of steps per revolution for the autostack stepper
-#define ORBIS_MOTOR_STEPS           200             // number of steps per revolution for the orbis stepper
-#define NR_MICROSTEPS               16              // number of microsteps per full step
-#define MICROSTEP_DIST              0.3125          // distance travelled per microstep in um = 2 / 400 / 16
-#define RAIL_LENGTH                 200             // total length of actuator rails
-#define STAGE_LENGTH                62              // total length of rail stage minus rubber pads on stage ends
-#define END_STOPPER_THICKNESS       18              // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
-#define RAIL_TRAVEL_LENGTH          120.40          // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
+#define AUTOSTACK_MOTOR_STEPS       400                 // number of steps per revolution for the autostack stepper
+#define ORBIS_MOTOR_STEPS           200                 // number of steps per revolution for the orbis stepper
+#define NR_MICROSTEPS               16                  // number of microsteps per full step
+#define MICROSTEP_DIST              0.3125              // distance travelled per microstep in um = 2 / 400 / 16
+#define RAIL_LENGTH                 200                 // total length of actuator rails
+#define STAGE_LENGTH                62                  // total length of rail stage minus rubber pads on stage ends
+#define END_STOPPER_THICKNESS       18                  // rubber bushings protrude and prevents stage from fully reaching rear/front ends plus rubber pads on stage
+#define RAIL_TRAVEL_LENGTH          120.40              // 150mm rail length minus 75mm stage length minus 1.9mm for bushing overhang
 #define MIN_RAIL_POSITION           0
-#define MAX_RAIL_POSITION           384000          // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
-#define SAFE_ZONE_BUFFER            6400            // if homed rail, don't allow movement with 2mm of ends (400 * 16)
-#define STEALTH_CHOP_VMAX           200000          // max target velocity (VMAX) during StealthChop movements 
-#define MAX_STEPS_PER_MOVEMENT      16000           // maximum number of steps allowed per movement. 16000 = 5mm
+#define MAX_RAIL_POSITION           384000              // (120 travel / 2mm pitch) * 400 steps * 16 microsteps
+#define SAFE_ZONE_BUFFER            6400                // if homed rail, don't allow movement with 2mm of ends (400 * 16)
+#define STEALTH_CHOP_VMAX           200000              // max target velocity (VMAX) during StealthChop movements 
+#define MAX_STEPS_PER_MOVEMENT      16000               // maximum number of steps allowed per movement. 16000 = 5mm
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT
@@ -122,40 +122,40 @@ extern gfxButton            btn;
 #define LCD_CD 						A2
 #define LCD_WR 						A1
 #define LCD_RD						A0
-#define LCD_RESET 				    A4
+#define LCD_RESET                   A4
 
 // stepper1 pins
-#define DIAG0_1_PIN 				    38
-#define DIAG1_1_PIN 				    40
-// #define DIR_1_PIN 					30          // use SPI stepping with TMC5160
-// #define STEP_1_PIN                   32          // use SPI stepping with TMC5160
-#define CS_1_PIN 						34
-#define EN_1_PIN 						36
-#define R_1_SENSE                       0.075f      // Watterott TMC5160 uses 0.075
+#define DIAG0_1_PIN                 38
+#define DIAG1_1_PIN                 40
+// #define DIR_1_PIN                   30               // use SPI stepping with TMC5160
+// #define STEP_1_PIN                   32              // use SPI stepping with TMC5160
+#define CS_1_PIN                    34
+#define EN_1_PIN                    36
+#define R_1_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
 // #define SCK_PIN 					ICSP3
 
 // stepper2 pins
-#define DIAG0_2_PIN 				    24
-#define DIAG1_2_PIN 				    26
-// #define DIR_2_PIN 					28          // use SPI stepping with TMC5160
-// #define STEP_2_PIN 				    30          // use SPI stepping with TMC5160
-#define CS_2_PIN 						28
-#define EN_2_PIN 						42
-#define R_2_SENSE                       0.075f      // Watterott TMC5160 uses 0.075
+#define DIAG0_2_PIN                 24
+#define DIAG1_2_PIN                 26
+// #define DIR_2_PIN                    28              // use SPI stepping with TMC5160
+// #define STEP_2_PIN                   30              // use SPI stepping with TMC5160
+#define CS_2_PIN                    28
+#define EN_2_PIN                    42
+#define R_2_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN 				ICSP4
 // #define MISO_PIN 				ICSP1
 // #define SCK_PIN 					ICSP3
 
 // misc hardware pins
-#define XSTICK_PIN 				    A7              // joystick X-axis pin (controls fwd and rev)
-#define RSTICK_PIN 				    A6              // joystick R-axis pin (controls rotation)
-#define ZSTICK_PIN 				    A5              // button-press from joystick
-#define GODOX_PIN 				    A8              // pin for GA1A12S202 light sensor
-#define POT_PIN 				    A9              // pin for potentiometer to control LED brightnes
+#define XSTICK_PIN                  A7              // joystick X-axis pin (controls fwd and rev)
+#define RSTICK_PIN                  A6              // joystick R-axis pin (controls rotation)
+#define ZSTICK_PIN                  A5              // button-press from joystick
+#define GODOX_PIN                   A8              // pin for GA1A12S202 light sensor
+#define POT_PIN                     A9              // pin for potentiometer to control LED brightnes
 #define PIEZO_PIN                   22              // pin for Piezo buzzer
 #define SONY_PIN                    48              // pin for pulling camera focus and shutter to GND via opto
 

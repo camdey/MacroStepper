@@ -7,12 +7,12 @@
 
 
 namespace orbis_screen {
-  void initOrbisButtons();
-  void populateOrbisScreen();
-  void checkOrbisButtons(int touch_x, int touch_y);
-  void func_Video(bool btnActive);
-  void func_Photo(bool btnActive);
-  void func_Back(bool btnActive);
+    void initOrbisButtons();
+    void populateOrbisScreen();
+    void checkOrbisButtons(int touch_x, int touch_y);
+    void func_Video(bool btnActive);
+    void func_Photo(bool btnActive);
+    void func_Back(bool btnActive);
 }
 
 #endif
