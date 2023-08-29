@@ -323,27 +323,3 @@ void photo360(TMC5160Stepper_Ext &stepper) {
             }
         }
 }
-
-
-void readyStallGuard(TMC5160Stepper_Ext &stepper) {
-    // enable stepper if disabled
-  if (!stepper.enabled()) {
-        stepper.enabled(true);
-    }
-    // change to StallGuard is StealthChop is configured
-    if (!stepper.stallGuardActive()) {
-        configStallGuard(stepper);
-    }
-}
-
-
-void readyStealthChop(TMC5160Stepper_Ext &stepper) {
-    // enable stepper if disabled
-  if (!stepper.enabled()) {
-        stepper.enabled(true);
-    }
-    // change to StealthChop is StallGuard is configured
-    if (stepper.stallGuardActive()) {
-        configStealthChop(stepper);
-    }
-}

@@ -1,6 +1,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "ShutterControl.h"
+#include "AutoStack.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-Global.h"
@@ -214,7 +215,7 @@ namespace auto_screen {
         autoStackPaused = false;
         autoStackInitiated = false;
         isNewAutoStack = true;
-        setCurrentStage(idle);
+        setCurrentStage(inactive);
         btn_PlayPause.drawButton(BLACK); // replace existing button
         btn_PlayPause.updateBitmap(play); // update to show play button
         btn_PlayPause.updateColour(CUSTOM_GREEN); // update color

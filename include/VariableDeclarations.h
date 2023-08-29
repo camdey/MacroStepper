@@ -91,51 +91,51 @@ extern gfxButton            btn;
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT
-// #define TS_MINX 					160
-// #define TS_MAXX 					850
-// #define TS_MINY 					132
-// #define TS_MAXY 					900
+// #define TS_MINX                  160
+// #define TS_MAXX                  850
+// #define TS_MINY                  132
+// #define TS_MAXY                  900
 // Arduino Due + 3.5" TFT
-#define TS_MINX 					148 // 846
-#define TS_MAXX 					846 // 148
-#define TS_MINY 					140 // 937
-#define TS_MAXY 					937 // 140
+#define TS_MINX                     148 // 846
+#define TS_MAXX                     846 // 148
+#define TS_MINY                     140 // 937
+#define TS_MAXY                     937 // 140
 // Grand Central M4 + 2.8" TFT
-// #define TS_MINX 					320
-// #define TS_MAXX 					760
-// #define TS_MINY 					235
-// #define TS_MAXY 					810
+// #define TS_MINX                  320
+// #define TS_MAXX                  760
+// #define TS_MINY                  235
+// #define TS_MAXY                  810
 // Grand Central M4 + 3.5" TFT
-// #define TS_MINX 					760
-// #define TS_MAXX 					315
-// #define TS_MINY 					852
-// #define TS_MAXY 					220
+// #define TS_MINX                  760
+// #define TS_MAXX                  315
+// #define TS_MINY                  852
+// #define TS_MAXY                  220
 
 // pin definitions for touch inputs
-#define YP 							A3              // must be an analog pin, use "An" notation!
-#define XM 							A2              // must be an analog pin, use "An" notation!
-#define YM 							9               // can be a digital pin
-#define XP 							8               // can be a digital pin
+#define YP                          A3              // must be an analog pin, use "An" notation!
+#define XM                          A2              // must be an analog pin, use "An" notation!
+#define YM                          9               // can be a digital pin
+#define XP                          8               // can be a digital pin
 
 // pin definitions for tft screen
-#define LCD_CS 						A3
-#define LCD_CD 						A2
-#define LCD_WR 						A1
-#define LCD_RD						A0
+#define LCD_CS                      A3
+#define LCD_CD                      A2
+#define LCD_WR                      A1
+#define LCD_RD                      A0
 #define LCD_RESET                   A4
 
 // stepper1 pins
 #define DIAG0_1_PIN                 38
 #define DIAG1_1_PIN                 40
-// #define DIR_1_PIN                   30               // use SPI stepping with TMC5160
+// #define DIR_1_PIN                    30               // use SPI stepping with TMC5160
 // #define STEP_1_PIN                   32              // use SPI stepping with TMC5160
 #define CS_1_PIN                    34
 #define EN_1_PIN                    36
 #define R_1_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
-// #define MOSI_PIN 				ICSP4
-// #define MISO_PIN 				ICSP1
-// #define SCK_PIN 					ICSP3
+// #define MOSI_PIN                 ICSP4
+// #define MISO_PIN                 ICSP1
+// #define SCK_PIN                  ICSP3
 
 // stepper2 pins
 #define DIAG0_2_PIN                 24
@@ -146,9 +146,9 @@ extern gfxButton            btn;
 #define EN_2_PIN                    42
 #define R_2_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
-// #define MOSI_PIN 				ICSP4
-// #define MISO_PIN 				ICSP1
-// #define SCK_PIN 					ICSP3
+// #define MOSI_PIN                 ICSP4
+// #define MISO_PIN                 ICSP1
+// #define SCK_PIN                  ICSP3
 
 // misc hardware pins
 #define XSTICK_PIN                  A7              // joystick X-axis pin (controls fwd and rev)

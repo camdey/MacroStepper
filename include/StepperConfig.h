@@ -59,6 +59,22 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         void homed(bool homed) {m_homed = homed;}
         bool homed() {return m_homed;}
         bool reachedTarget() {return XACTUAL() == XTARGET();}
+        void readyStallGuard() {
+            if (!enabled()) {           // enable stepper if disabled
+                enabled(true);
+            }
+            if (!stallGuardActive()) {  // change to StallGuard is StealthChop is configured
+                configStallGuard();
+            }
+        }
+        void readyStealthChop() {
+            if (!enabled()) {           // enable stepper if disabled
+                enabled(true);
+            }
+            if (stallGuardActive()) {   // change to StealthChop is StallGuard is configured
+                configStealthChop();
+            }
+        }
 
 
     protected:

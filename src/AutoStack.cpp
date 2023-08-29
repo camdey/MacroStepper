@@ -11,6 +11,21 @@
 #include "menu/UI-Global.h"
 #include "menu/UI-Photo360.h"
 
+
+void AutoStack::init() {
+    if (stackState() == start) {                        // move to start position if beginning AutoStack
+        _stepper.readyStealthChop();
+        _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
+        goToStart(_stepper);
+        completedMovements(0);
+        _stepper.executedMovement(false);
+        setShutterTriggered(false);
+        lastMovementMillis(millis());
+        global::func_Reset(false);                      // change reset button to red
+        auto_screen::stackStatus(start);
+    }
+}
+
 /***********************************************************************
 Runs an AutoStack procedure comprised of multiple Movements. The
 function will first check whether the stage is in the Start position,
@@ -21,55 +36,175 @@ Movement was taken due to delay, this function is called again and
 another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
-void autoStack(TMC5160Stepper_Ext &stepper) {
-    readyStealthChop(stepper);
-    
-    if (isNewAutoStack) {                               // move to start position if beginning AutoStack
-        stepper.targetVelocity(10000);                  // reduce max velocity to minimize vibration
-        goToStart(stepper);
-        setNrMovementsCompleted(0);
-        stepper.executedMovement(false);
-        setShutterTriggered(false);
-        setLastStepTime(millis());
-        global::func_Reset(false);                      // change reset button to red
-        auto_screen::stackStatus(start);
-    }
+void AutoStack::run() {
+    init();
 
-    if (getNrMovementsCompleted() <= getNrMovementsRequired() && !stepper.executedMovement()) {
+    if (completedMovements() <= requiredMovements() && !_stepper.executedMovement()) {
          // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
-		if (isShutterEnabled() && !hasShutterTriggered() && millis() - getLastStepTime() >= 500) {
+		if (isShutterEnabled() && !hasShutterTriggered() && millis() - lastMovementMillis() >= 500) {
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
-            if (getCurrentStage() == start || getCurrentStage() == newStep) {
+            if (stackState() == prepareShutter) {
                 triggerShutter();                       // take photo and trigger flash immediately or start flash procedure
+                stackState(newMovement);
             }
             else {
                 runFlashProcedure(false);               // keep trying to fire flash
             }
-            if (getCurrentStage() == flashUnresponsive) {
-                auto_screen::stackStatus(newStep);      // reset flash procedure
+            if (stackState() == flashUnresponsive) {
+                stackState(paused);                     // reset flash procedure
                 auto_screen::pauseStack();              // pause autostack so user can troubleshoot flash issue
                 populateScreen("Flash");                // go to flashScreen if can't trigger after 10 seconds
             }
 		}
-        // only move if autoStack hasn't been paused by flash failure
-        if (!autoStackPaused && (!isShutterEnabled() || hasShutterTriggered())) {
+        // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
+        if (stackState() == newMovement && (!isShutterEnabled() || hasShutterTriggered())) {
             unsigned long delay = getShutterDelay();
-    		executeMovement(stepper, 1, delay);
+    		executeMovement(1, delay);
         }
 
-		if (stepper.executedMovement()) {
-			incrementNrMovementsCompleted();
-            auto_screen::stackStatus(newStep);
+		if (stackState() == executedMovement) {
+			incrementCompletedMovements();
+            stackState(prepareShutter);
 	        if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
 	            auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
 	        }
 			setShutterTriggered(false);                 // reset shutter triggered flag
-			stepper.executedMovement(false);            // reset executed movement flag
+			_stepper.executedMovement(false);           // reset executed movement flag
 		}
     }
-    if (getNrMovementsCompleted() >= getNrMovementsRequired()) {
-        auto_screen::stackStatus(stackCompleted);
-        terminateAutoStack(stepper);                    // stop AutoStack sequence if end reached
+    if (completedMovements() >= requiredMovements()) {
+        stackState(completed);
+        terminateAutoStack();                           // stop AutoStack sequence if end reached
     }
+}
+
+
+/******************************************************************
+Moves the stepper one Movement in a given direction. A Movement
+is the total number of steps required to travel a given distance.
+If there hasn't been a specified delay since the previous Movement,
+this function returns false and the calling function should loop
+until it receives a response of true. Prevents stall if rail has
+been homed and will exit autoStack if running.
+******************************************************************/
+void AutoStack::executeMovement(int stepDirection, unsigned long stepperDelay) {
+    _stepper.readyStealthChop();
+
+    // step after elapsed amount of time
+    if ((millis() - lastMovementMillis() > stepperDelay)) {
+        int stepVelocity = stepDirection * _stepper.stepsPerMovement();
+        long targetPosition = _stepper.XACTUAL() + stepVelocity;
+        // set new target position
+        _stepper.XTARGET(targetPosition);
+        // reduce speed
+        _stepper.targetVelocity(2000);
+        // wait for stepper to reach target position
+        while(_stepper.XACTUAL() != _stepper.XTARGET()) {}
+        _stepper.targetVelocity(STEALTH_CHOP_VMAX);
+        _stepper.executedMovement(true);
+        stackState(executedMovement);    
+        lastMovementMillis(millis());
+    }
+    else {
+        _stepper.executedMovement(false);
+        stackState(delayMovement);
+  }
+}
+
+
+// move stepper to start for AutoStack sequence
+// if current position in front of start, overshoot to remove backlash and return
+// otherwise move forward to start
+void AutoStack::goToStart() {
+    int distanceToStart = (_stepper.XACTUAL() - startPosition());
+    if (distanceToStart != 0) {
+        // if current position is in front of start position
+        if (distanceToStart > 0) {
+            // move backwards to start postion
+            // overshoot by 3200 steps/1mm and return to start to remove backlash
+            overshootPosition(startPosition(), 3200);
+        }
+        // if current position is behind start position
+        else if (distanceToStart < 0) {
+            // move forward to start postion
+            _stepper.XTARGET(startPosition());
+            // wait for stepper to reach position
+            while (_stepper.XACTUAL() != _stepper.XTARGET()) {}
+        }
+    }
+    stackState(prepareShutter);
+}
+
+
+void AutoStack::overshootPosition(long startPosition, int numberOfSteps) {
+    int offsetPosition = startPosition - numberOfSteps;
+    // overshoot start position
+    _stepper.XTARGET(offsetPosition);
+    // wait for stepper to reach position
+    while (_stepper.XACTUAL() != _stepper.XTARGET()) {}
+
+    delay(50);
+
+    // move to start
+    _stepper.XTARGET(startPosition);
+    // wait for stepper to reach position
+    while (_stepper.XACTUAL() != _stepper.XTARGET()) {}
+}
+
+
+// clean up variables etc after completing AutoStack sequence
+void AutoStack::terminateAutoStack() {
+    if (getCurrentScreen() != "Auto") {
+        populateScreen("Auto");                             // go back to Auto screen if not already on it
+    }
+    stackState(inactive);
+    auto_screen::resetStack();                              // update button and reset button bitmap
+    auto_screen::estimateDuration();                        // update estimate
+    global::btn_Reset.updateColour(BLACK);                  // change reset button back to black
+    setShutterTriggered(false);
+    completedMovements(0);                                  // reset completed movements count
+    _stepper.executedMovement(false);
+    produceTone(4, 300, 200);                               // sound 4 tones for 300ms separated by a 200ms delay
+    // change max velocity back to normal
+    _stepper.targetVelocity(STEALTH_CHOP_VMAX);
+}
+
+
+// run through the specified AutoStack procedure using the current start and end values
+void AutoStack::dryRun() {
+    _stepper.readyStealthChop();
+    // reduce stepper velocity
+    _stepper.targetVelocity(5000);
+    // move to start position
+    _stepper.XTARGET(startPosition());
+    while (_stepper.XACTUAL() != _stepper.XTARGET()) {
+        if (millis() - lastMovementMillis() >= 100) {
+            autoconfig_screen::printPosition();             // update position
+            lastMovementMillis(millis());
+        }
+    }
+    // step slow through procedure
+    _stepper.targetVelocity(500);
+    // move to end position
+    _stepper.XTARGET(endPosition());
+    while (_stepper.XACTUAL() != _stepper.XTARGET()) {
+        if (millis() - lastMovementMillis() >= 100) {
+            autoconfig_screen::printPosition();             // update position
+            lastMovementMillis(millis());
+        }
+    }
+
+    _stepper.targetVelocity(5000);
+    // return to start
+    _stepper.XTARGET(startPosition());
+    while (_stepper.XACTUAL() != _stepper.XTARGET()) {
+        if (millis() - lastMovementMillis() >= 100) {
+            autoconfig_screen::printPosition();             // update position
+            lastMovementMillis(millis());
+        }
+    }
+    // overshoot by 3200 steps/1mm and return to start
+    overshootPosition(startPosition(), 3200);
+    _stepper.targetVelocity(STEALTH_CHOP_VMAX);
 }

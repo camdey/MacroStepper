@@ -3,45 +3,45 @@
 #include "MiscFunctions.h"
 
 // ui
-bool arrowsEnabled                            = false;
-bool shutterEnabled                         = false;                // if true, will try to take a photo during autoStack or manual movement
-String currentScreen                        = "Home";             // set current screen shown to user
-bool editShutterDelay                     = false;                // set shutter delay time
-bool editStartPosition                    = false;                // set start point for auto mode
-bool editEndPosition                        = false;                // set end point for auto mode
-bool editMovementDistance             = false;                // set step distance in any mode
-bool editFlashOnValue                     = false;                // set flash on value
-bool editFlashOffValue                    = false;                // set flash off value
-bool screenRotated                            = false;                // check whether screen has been rotated or not
+bool arrowsEnabled                  = false;
+bool shutterEnabled                 = false;            // if true, will try to take a photo during autoStack or manual movement
+String currentScreen                = "Home";           // set current screen shown to user
+bool editShutterDelay               = false;            // set shutter delay time
+bool editStartPosition              = false;            // set start point for auto mode
+bool editEndPosition                = false;            // set end point for auto mode
+bool editMovementDistance           = false;            // set step distance in any mode
+bool editFlashOnValue               = false;            // set flash on value
+bool editFlashOffValue              = false;            // set flash off value
+bool screenRotated                  = false;            // check whether screen has been rotated or not
 // joystick
-long joystickMaxVelocity                = 100000;             // VMAX when using joystick
-long recursiveValue                         = 51200;                // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
+long joystickMaxVelocity            = 100000;           // VMAX when using joystick
+long recursiveValue                 = 51200;            // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 // autostack
-// long startPosition                            = 0;                        // starting position of an AutoStack sequence
-// long endPosition                                = 0;                        // end position of an AutoStack sequence
-// long lastMillis                                 = 0;                        // store readings of millis() to use for checking conditions within loops every X milliseconds
-// long lastStepTime                             = 0;                        // last millis time a step was executed
-// int nrCompletedMovements                = 0;                        // number of completed movements (multiples of steps) within an AutoStack procedure
-// int nrMovementsRequired                 = 0;                        // number of movements (multiples of steps) required for an AutoStack procedure
+// long startPosition               = 0;                // starting position of an AutoStack sequence
+// long endPosition                 = 0;                // end position of an AutoStack sequence
+// long lastMillis                  = 0;                // store readings of millis() to use for checking conditions within loops every X milliseconds
+// long lastStepTime                = 0;                // last millis time a step was executed
+// int nrCompletedMovements         = 0;                // number of completed movements (multiples of steps) within an AutoStack procedure
+// int nrMovementsRequired          = 0;                // number of movements (multiples of steps) required for an AutoStack procedure
 // shutter / flash
-int shutterDelay                                = 500;                    // delay in milliseconds between a movement and taking a photo via the shutter pin
-bool shutterTriggered                     = true;                 // shutter successfully triggered or not
-bool testingFlash                             = false;                // flag for testing flash threshold
-bool flashSensorEnabled                 = false;                // is flash bulb enabled, or only take photos without flash?
-long flashTriggerTime                     = 0;                        // last millis time flash was triggered successfully
-bool flashAvailable                         = false;                // check whether flash is available to trigger or not
-int godoxValue                                    = 0;                        // light sensor reading from the godox flash LED
-long godoxFilterValue                     = 10000;                // recursive filter value of light sensor reading from the godox flash LED
+int shutterDelay                    = 500;              // delay in milliseconds between a movement and taking a photo via the shutter pin
+bool shutterTriggered               = true;             // shutter successfully triggered or not
+bool testingFlash                   = false;            // flag for testing flash threshold
+bool flashSensorEnabled             = false;            // is flash bulb enabled, or only take photos without flash?
+long flashTriggerTime               = 0;                // last millis time flash was triggered successfully
+bool flashAvailable                 = false;            // check whether flash is available to trigger or not
+int godoxValue                      = 0;                // light sensor reading from the godox flash LED
+long godoxFilterValue               = 10000;            // recursive filter value of light sensor reading from the godox flash LED
 // video360
-int revsPerMinute                             = 50;                     // revs per minute for video 360, stored as 10x higher to avoid floating point math
-bool video360Active                         = false;                // is video 360 running?
-long video360Target                         = 10000;                // set target number of steps for video 360
+int revsPerMinute                   = 50;               // revs per minute for video 360, stored as 10x higher to avoid floating point math
+bool video360Active                 = false;            // is video 360 running?
+long video360Target                 = 10000;            // set target number of steps for video 360
 // photo360
-int nr360PhotosArrayIndex             = 11;                     // index for number of photoCountArray
-int nr360Photos                                 = 72;                     // nr photos taken in a 360 photo
-long photo360Delay                            = 1000;                 // delay in milliseconds between each photo in a photo360 procedure
-int nrCompleted360Photos                = 0;                        // nr of photos taken in a 360 procedure
-long lastPhoto360Step                     = 0;                        // millis of last photo taken for photo360
+int nr360PhotosArrayIndex           = 11;               // index for number of photoCountArray
+int nr360Photos                     = 72;               // nr photos taken in a 360 photo
+long photo360Delay                  = 1000;             // delay in milliseconds between each photo in a photo360 procedure
+int nrCompleted360Photos            = 0;                // nr of photos taken in a 360 procedure
+long lastPhoto360Step               = 0;                // millis of last photo taken for photo360
 
 stages currentStage = idle;
 #define photoCountArraySize 20 // need to ensure we don't go out of bounds
