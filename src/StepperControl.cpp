@@ -33,47 +33,6 @@ bool detectEndStop(TMC5160Stepper_Ext &stepper) {
 }
 
 
-// run through the specified AutoStack procedure using the current start and end values
-void dryRun(TMC5160Stepper_Ext &stepper) {
-    readyStealthChop(stepper);
-
-    // reduce stepper velocity
-    stepper.targetVelocity(5000);
-    // move to start position
-    stepper.XTARGET(getStartPosition());
-    while (stepper.XACTUAL() != stepper.XTARGET()) {
-        if (millis() - getLastMillis() >= 100) {
-            autoconfig_screen::printPosition();             // update position
-            setLastMillis(millis());
-        }
-    }
-
-    // step slow through procedure
-    stepper.targetVelocity(500);
-    // move to end position
-    stepper.XTARGET(getEndPosition());
-    while (stepper.XACTUAL() != stepper.XTARGET()) {
-        if (millis() - getLastMillis() >= 100) {
-            autoconfig_screen::printPosition();             // update position
-            setLastMillis(millis());
-        }
-    }
-
-    stepper.targetVelocity(5000);
-    // return to start
-    stepper.XTARGET(getStartPosition());
-    while (stepper.XACTUAL() != stepper.XTARGET()) {
-        if (millis() - getLastMillis() >= 100) {
-            autoconfig_screen::printPosition();             // update position
-            setLastMillis(millis());
-        }
-    }
-    // overshoot by 3200 steps/1mm and return to start
-    overshootPosition(stepper, getStartPosition(), 3200);
-    stepper.targetVelocity(STEALTH_CHOP_VMAX);
-}
-
-
 /******************************************************************
 Moves the stepper one Movement in a given direction. A Movement
 is the total number of steps required to travel a given distance.
@@ -175,62 +134,6 @@ void homeRail(TMC5160Stepper_Ext &stepper) {
         runHomingSequence = false;
         stepper.homed(true);
   }
-}
-
-// move stepper to start for AutoStack sequence
-// if current position in front of start, overshoot to remove backlash and return
-// otherwise move forward to start
-void goToStart(TMC5160Stepper_Ext &stepper) {
-    if (stepper.XACTUAL() != getStartPosition()) {
-        int distanceToStart = (stepper.XACTUAL() - getStartPosition());
-        // if current position is in front of start position
-        if (distanceToStart > 0) {
-            // move backwards to start postion
-            // overshoot by 3200 steps/1mm and return to start to remove backlash
-            overshootPosition(stepper, getStartPosition(), 3200);
-        }
-        // if current position is behind start position
-        else if (distanceToStart < 0) {
-            // move forward to start postion
-            stepper.XTARGET(getStartPosition());
-            // wait for stepper to reach position
-            while (stepper.XACTUAL() != stepper.XTARGET()) {}
-        }
-    }
-    isNewAutoStack = false;
-}
-
-
-void overshootPosition(TMC5160Stepper_Ext &stepper, int startPosition, int numberOfSteps) {
-    int offsetPosition = startPosition - numberOfSteps;
-    // overshoot start position
-    stepper.XTARGET(offsetPosition);
-    // wait for stepper to reach position
-    while (stepper.XACTUAL() != stepper.XTARGET()) {}
-
-    delay(50);
-
-    // move to start
-    stepper.XTARGET(startPosition);
-    // wait for stepper to reach position
-    while (stepper.XACTUAL() != stepper.XTARGET()) {}
-}
-
-
-// clean up variables etc after completing AutoStack sequence
-void terminateAutoStack(TMC5160Stepper_Ext &stepper) {
-    if (getCurrentScreen() != "Auto") {
-        populateScreen("Auto");                             // go back to Auto screen if not already on it
-    }
-    auto_screen::resetStack();                              // update button and reset button bitmap
-    auto_screen::estimateDuration();                        // update estimate
-    global::btn_Reset.updateColour(BLACK);                  // change reset button back to black
-    setShutterTriggered(false);
-    setNrMovementsCompleted(0);                             // reset completed movements count
-    stepper.executedMovement(false);
-    produceTone(4, 300, 200);                               // sound 4 tones for 300ms separated by a 200ms delay
-    // change max velocity back to normal
-    stepper.targetVelocity(STEALTH_CHOP_VMAX);
 }
 
 

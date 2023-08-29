@@ -34,6 +34,7 @@
 #include "MiscFunctions.h"                  // miscellaneous functions
 #include "ShutterControl.h"                 // functions relating to the camera shutter and flash
 #include "StepperControl.h"                 // functions for controlling the stepper motor
+#include "AutoStack.h"                      // AutoStack class and methods
 #include "VariableDeclarations.h"           // external variable declarations
 #include "menu/UI-Main.h"
 #include "menu/UI-Home.h"
@@ -55,6 +56,7 @@ TMC5160Stepper_Ext      stepper1(CS_1_PIN, R_1_SENSE);
 TMC5160Stepper_Ext      stepper2(CS_2_PIN, R_2_SENSE);
 MCUFRIEND_kbv           tft;
 gfxButton               btn;
+AutoStack               stack(stepper1);
 
 
 // --- currentTimes and elapsed times --- //
@@ -72,7 +74,7 @@ int flashOnValue                    = 300;              // initial value for fla
 int flashOffValue                   = 30;               // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool runHomingSequence              = true;             // runs rehoming sequence
-bool isNewAutoStack                 = true;             // move to start for autoStack procedure
+// bool isNewAutoStack                 = true;             // move to start for autoStack procedure
 bool autoStackInitiated             = false;            // enables function for stack procedure
 bool autoStackPaused                = false;            // pause stack procedure
 bool autoStackMax                   = false;            // set getEndPosition() to max for indetermine autoStack procedure
@@ -126,8 +128,8 @@ void setup(void) {
 
 void loop() {
     // run AutoStack sequence if enabled
-    if (autoStackInitiated && !autoStackPaused) {
-        autoStack(stepper1);
+    if (stack.status() != inactive && stack.status() != paused) {
+        stack.run();
         // update duration if on Auto screen
         if (getCurrentScreen() == "Auto") {
 		    auto_screen::estimateDuration();
@@ -157,7 +159,7 @@ void loop() {
             joystickMotion(stepper1, xStickPos);
         }
         // sleep if stepper inactive, update position on manual screen
-        if (stepper1.reachedTarget() && stepper1.enabled() && getCurrentStage() == idle) {
+        if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == inactive) {
             stepper1.enabled(false); // disable stepper
         }
 		// update godoxValue if on Flash screen

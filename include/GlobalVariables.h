@@ -76,21 +76,21 @@ int getNrCompleted360Photos();
 void setLastPhoto360Step();
 long getLastPhoto360Step();
 
-enum stages {
-        idle,
-        start,
-        isFlashAvailable,
-        pullShutter,
-        isFlashUnavailable,
-        releaseShutter,
-        flashSuccessful,
-        flashUnresponsive,
-        stepTaken,
-        stepDelay,
-        newStep,
-        stackCompleted
-};
-void setCurrentStage(stages stage);
-stages getCurrentStage();
+// enum stages {
+//         idle,
+//         start,
+//         isFlashAvailable,
+//         pullShutter,
+//         isFlashUnavailable,
+//         releaseShutter,
+//         flashSuccessful,
+//         flashUnresponsive,
+//         stepTaken,
+//         stepDelay,
+//         newStep,
+//         stackCompleted
+// };
+// void setCurrentStage(stages stage);
+// stages getCurrentStage();
 
 #endif

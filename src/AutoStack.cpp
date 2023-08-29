@@ -13,16 +13,17 @@
 
 
 void AutoStack::init() {
-    if (stackState() == start) {                        // move to start position if beginning AutoStack
+    if (status() == start) {                        // move to start position if beginning AutoStack
         _stepper.readyStealthChop();
         _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
-        goToStart(_stepper);
+        goToStart();
         completedMovements(0);
         _stepper.executedMovement(false);
         setShutterTriggered(false);
         lastMovementMillis(millis());
         global::func_Reset(false);                      // change reset button to red
-        auto_screen::stackStatus(start);
+        status(prepareShutter);
+        // auto_screen::status(start);
     }
 }
 
@@ -43,28 +44,28 @@ void AutoStack::run() {
          // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
 		if (isShutterEnabled() && !hasShutterTriggered() && millis() - lastMovementMillis() >= 500) {
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
-            if (stackState() == prepareShutter) {
+            if (status() == prepareShutter) {
                 triggerShutter();                       // take photo and trigger flash immediately or start flash procedure
-                stackState(newMovement);
+                status(newMovement);
             }
             else {
                 runFlashProcedure(false);               // keep trying to fire flash
             }
-            if (stackState() == flashUnresponsive) {
-                stackState(paused);                     // reset flash procedure
+            if (status() == flashUnresponsive) {
+                status(paused);                     // reset flash procedure
                 auto_screen::pauseStack();              // pause autostack so user can troubleshoot flash issue
                 populateScreen("Flash");                // go to flashScreen if can't trigger after 10 seconds
             }
 		}
         // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
-        if (stackState() == newMovement && (!isShutterEnabled() || hasShutterTriggered())) {
+        if (status() == newMovement && (!isShutterEnabled() || hasShutterTriggered())) {
             unsigned long delay = getShutterDelay();
     		executeMovement(1, delay);
         }
 
-		if (stackState() == executedMovement) {
+		if (status() == executedMovement) {
 			incrementCompletedMovements();
-            stackState(prepareShutter);
+            status(prepareShutter);
 	        if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
 	            auto_screen::printAutoStackProgress();
 				auto_screen::estimateDuration();
@@ -74,7 +75,7 @@ void AutoStack::run() {
 		}
     }
     if (completedMovements() >= requiredMovements()) {
-        stackState(completed);
+        status(completed);
         terminateAutoStack();                           // stop AutoStack sequence if end reached
     }
 }
@@ -103,12 +104,12 @@ void AutoStack::executeMovement(int stepDirection, unsigned long stepperDelay) {
         while(_stepper.XACTUAL() != _stepper.XTARGET()) {}
         _stepper.targetVelocity(STEALTH_CHOP_VMAX);
         _stepper.executedMovement(true);
-        stackState(executedMovement);    
+        status(executedMovement);    
         lastMovementMillis(millis());
     }
     else {
         _stepper.executedMovement(false);
-        stackState(delayMovement);
+        status(delayMovement);
   }
 }
 
@@ -133,7 +134,6 @@ void AutoStack::goToStart() {
             while (_stepper.XACTUAL() != _stepper.XTARGET()) {}
         }
     }
-    stackState(prepareShutter);
 }
 
 
@@ -158,7 +158,7 @@ void AutoStack::terminateAutoStack() {
     if (getCurrentScreen() != "Auto") {
         populateScreen("Auto");                             // go back to Auto screen if not already on it
     }
-    stackState(inactive);
+    status(inactive);
     auto_screen::resetStack();                              // update button and reset button bitmap
     auto_screen::estimateDuration();                        // update estimate
     global::btn_Reset.updateColour(BLACK);                  // change reset button back to black

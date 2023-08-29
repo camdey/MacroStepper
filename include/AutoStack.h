@@ -6,26 +6,26 @@
 #include "StepperConfig.h"
 #include "MiscFunctions.h"
 
+enum Status {
+    inactive,
+    start,
+    paused,
+    prepareShutter,
+    newMovement,
+    delayMovement,
+    executedMovement,
+    pullShutter,
+    releaseShutter,
+    flashSuccessful,
+    flashUnresponsive,
+    completed
+};
+
 class AutoStack {
     public:
         TMC5160Stepper_Ext _stepper;           // stepper that will be used for the AutoStack
         // ctor
         AutoStack(TMC5160Stepper_Ext &stepper): _stepper(stepper) {}
-
-        enum States {
-            inactive,
-            start,
-            paused,
-            prepareShutter,
-            newMovement,
-            delayMovement,
-            executedMovement,
-            pullShutter,
-            releaseShutter,
-            flashSuccessful,
-            flashUnresponsive,
-            completed
-        };
 
         void init();
         void run();
@@ -63,13 +63,13 @@ class AutoStack {
             m_requiredMovements = nrMovements;
         }
         long requiredMovements() { return m_requiredMovements; }
-        void stackState(States state) { m_state = state; }
-        States stackState() {return m_state; }
+        void status(Status status) { m_status = status; }
+        Status status() {return m_status; }
 
     
     protected:
 
-        States m_state              = inactive; // current state of AutoStack
+        Status m_status             = inactive; // current state of AutoStack
         bool m_isNewStack           = false;    // whether a new autostack sequence has begun
         long m_startPosition        = 0;        // starting position of an AutoStack sequence
         long m_endPosition          = 0;        // end position of an AutoStack sequence

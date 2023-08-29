@@ -153,6 +153,11 @@ namespace auto_screen {
             if (btnActive && !areArrowsEnabled()) {
                 autoStackInitiated = true;     // start autoStack sequence
                 autoStackPaused = false;
+                if (stackStatus == inactive) {
+                    stackStatus = start;
+                } else if (stackStatus == paused) {
+                    stackStatus = newMovement;
+                }
                 btn_StackStatus.hideButton(false); // show status
                 btn_PlayPause.drawButton(BLACK); // replace existing button
                 btn_PlayPause.updateBitmap(pause); // update bitmap image

@@ -16,13 +16,6 @@ bool screenRotated                  = false;            // check whether screen 
 // joystick
 long joystickMaxVelocity            = 100000;           // VMAX when using joystick
 long recursiveValue                 = 51200;            // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
-// autostack
-// long startPosition               = 0;                // starting position of an AutoStack sequence
-// long endPosition                 = 0;                // end position of an AutoStack sequence
-// long lastMillis                  = 0;                // store readings of millis() to use for checking conditions within loops every X milliseconds
-// long lastStepTime                = 0;                // last millis time a step was executed
-// int nrCompletedMovements         = 0;                // number of completed movements (multiples of steps) within an AutoStack procedure
-// int nrMovementsRequired          = 0;                // number of movements (multiples of steps) required for an AutoStack procedure
 // shutter / flash
 int shutterDelay                    = 500;              // delay in milliseconds between a movement and taking a photo via the shutter pin
 bool shutterTriggered               = true;             // shutter successfully triggered or not
@@ -43,19 +36,8 @@ long photo360Delay                  = 1000;             // delay in milliseconds
 int nrCompleted360Photos            = 0;                // nr of photos taken in a 360 procedure
 long lastPhoto360Step               = 0;                // millis of last photo taken for photo360
 
-stages currentStage = idle;
 #define photoCountArraySize 20 // need to ensure we don't go out of bounds
 int photoCountArray[] = {6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108,114,120}; // possible values for nr360Photos
-
-
-void setCurrentStage(stages stage) {
-    currentStage = stage;
-}
-
-
-stages getCurrentStage() {
-    return currentStage;
-}
 
  
 // Set the state of the GUI arrows to on/off 
@@ -213,46 +195,6 @@ bool hasShutterTriggered() {
 }
 
 
-// // set the start position for AutoStack, also updates movementsRequired
-// void setStartPosition(long position) {
-//         startPosition = position;
-//         // temporary, change to generic instance later
-//         setMovementsRequired(stepper1); // update movementsRequired as calculation has changed
-// }
-
-
-// // get the start position for AutoStack
-// long getStartPosition() {
-//         return startPosition;
-// }
-
-
-// // set the end position for AutoStack, also updates movementsRequired
-// void setEndPosition(long position) {
-//         endPosition = position;
-//         // temporary, change to generic instance later
-//         setMovementsRequired(stepper1); // update movementsRequired as calculation has changed
-// }
-
-
-// // get the end position for AutoStack
-// long getEndPosition() {
-//         return endPosition;
-// }
-
-
-// // Set the last millis() reading, useful for doing things within loops every X ms 
-// void setLastMillis(long millis) {
-//     lastMillis = millis;
-// }
-
-
-// // Get the last millis() reading, useful for doing things within loops every X ms
-// long getLastMillis() {
-//     return lastMillis;
-// }
-
-
 // Set the last millis() reading when flash triggering began
 void setFlashTriggerTime(long millis) {
     flashTriggerTime = millis;
@@ -263,48 +205,6 @@ void setFlashTriggerTime(long millis) {
 long getFlashTriggerTime() {
     return flashTriggerTime;
 }
-
-
-// // Set the last millis() reading when a step was taken during AutoStack
-// void setLastStepTime(long millis) {
-//     lastStepTime = millis;
-// }
-
-
-// // Get the last millis() reading when a step was taken during AutoStack
-// long getLastStepTime() {
-//     return lastStepTime;
-// }
-
-
-// // set how many movements have been completed in an AutoStack procedure
-// void setNrMovementsCompleted(int nrMovements) {
-//     nrCompletedMovements = nrMovements;
-// }
-
-
-// // increment how many movements have been completed in an AutoStack procedure by 1
-// void incrementNrMovementsCompleted() {
-//     nrCompletedMovements++;
-// }
-
-
-// // get how many movements have been completed in an AutoStack procedure
-// int getNrMovementsCompleted() {
-//     return nrCompletedMovements;
-// }
-
-
-// // set how many movements are required for a specified AutoStack procedure
-// void setNrMovementsRequired(int nrMovements) {
-//     nrMovementsRequired = nrMovements;
-// }
-
-
-// // get how many movements are required for a specified AutoStack procedure
-// int getNrMovementsRequired() {
-//     return nrMovementsRequired;
-// }
 
 
 // Set the last recursively filtered joystick reading
