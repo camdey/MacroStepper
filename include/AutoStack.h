@@ -79,4 +79,6 @@ class AutoStack {
         int m_requiredMovements     = 0;        // number of movements (multiples of steps) required for an AutoStack procedure
 };
 
+extern AutoStack    stack;
+
 #endif

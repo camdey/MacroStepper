@@ -16,12 +16,11 @@ namespace auto_screen {
     void func_PlayPause(bool btnActive);
     void func_ArrowUp(bool btnActive);
     void func_ArrowDown(bool btnActive);
-    void pauseStack();
-    void resetStack();
+    void displayPauseStack();
+    void displayResetStack();
     void estimateDuration();
     void printAutoStackProgress();
     void hideArrows(bool hide);
-    void status(stages stage);
 }
 
 #endif

@@ -41,8 +41,9 @@ void AutoStack::run() {
     init();
 
     if (completedMovements() <= requiredMovements() && !_stepper.executedMovement()) {
-         // take photo if there's been >= 500ms since a movement was executed successfully (gives time for vibration to settle)
-		if (isShutterEnabled() && !hasShutterTriggered() && millis() - lastMovementMillis() >= 500) {
+        // take photo if there's been >= STACK_DWELL_TIME since a movement was executed successfully (gives time for vibration to settle)
+        // this has likely passed due to the need to wait for shutter to trigger
+        if (isShutterEnabled() && !hasShutterTriggered() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
             if (status() == prepareShutter) {
                 triggerShutter();                       // take photo and trigger flash immediately or start flash procedure
@@ -52,27 +53,27 @@ void AutoStack::run() {
                 runFlashProcedure(false);               // keep trying to fire flash
             }
             if (status() == flashUnresponsive) {
-                status(paused);                     // reset flash procedure
-                auto_screen::pauseStack();              // pause autostack so user can troubleshoot flash issue
+                status(paused);                         // reset flash procedure
+                auto_screen::displayPauseStack();       // display pause autostack interface
                 populateScreen("Flash");                // go to flashScreen if can't trigger after 10 seconds
             }
-		}
+        }
         // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
         if (status() == newMovement && (!isShutterEnabled() || hasShutterTriggered())) {
             unsigned long delay = getShutterDelay();
-    		executeMovement(1, delay);
+            executeMovement(1, delay);
         }
 
-		if (status() == executedMovement) {
-			incrementCompletedMovements();
+        if (status() == executedMovement) {
+            incrementCompletedMovements();
             status(prepareShutter);
-	        if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
-	            auto_screen::printAutoStackProgress();
-				auto_screen::estimateDuration();
-	        }
-			setShutterTriggered(false);                 // reset shutter triggered flag
-			_stepper.executedMovement(false);           // reset executed movement flag
-		}
+            if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
+                auto_screen::printAutoStackProgress();
+                auto_screen::estimateDuration();
+            }
+            setShutterTriggered(false);                 // reset shutter triggered flag
+            _stepper.executedMovement(false);           // reset executed movement flag
+        }
     }
     if (completedMovements() >= requiredMovements()) {
         status(completed);
@@ -159,7 +160,7 @@ void AutoStack::terminateAutoStack() {
         populateScreen("Auto");                             // go back to Auto screen if not already on it
     }
     status(inactive);
-    auto_screen::resetStack();                              // update button and reset button bitmap
+    auto_screen::displayResetStack();                       // update button and reset button bitmap
     auto_screen::estimateDuration();                        // update estimate
     global::btn_Reset.updateColour(BLACK);                  // change reset button back to black
     setShutterTriggered(false);
@@ -208,3 +209,5 @@ void AutoStack::dryRun() {
     overshootPosition(startPosition(), 3200);
     _stepper.targetVelocity(STEALTH_CHOP_VMAX);
 }
+
+

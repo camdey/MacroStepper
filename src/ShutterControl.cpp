@@ -55,7 +55,7 @@ void triggerShutter() {
             }
         }
         // if triggered, don't set LOW until 800ms has passed
-        else if (millis() - getFlashTriggerTime() >= 800) {
+        else if (millis() - getFlashTriggerTime() >= SHUTTER_PULL_TIME) {
             digitalWrite(SONY_PIN, LOW);
             // setShutterTriggered(true);
             Serial.println("releaseShutter");

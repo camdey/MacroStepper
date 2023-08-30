@@ -149,16 +149,16 @@ namespace auto_screen {
 
 
     void func_PlayPause(bool btnActive) {
-        if (getNrMovementsRequired() > 0) {
+        if (stack.requiredMovements() > 0) {
             if (btnActive && !areArrowsEnabled()) {
-                autoStackInitiated = true;     // start autoStack sequence
-                autoStackPaused = false;
-                if (stackStatus == inactive) {
-                    stackStatus = start;
-                } else if (stackStatus == paused) {
-                    stackStatus = newMovement;
+                // autoStackInitiated = true;     // start autoStack sequence
+                // autoStackPaused = false;
+                if (stack.status() == inactive) {
+                    stack.status(start);
+                } else if (stack.status() == paused) {
+                    stack.status(prepareShutter);
                 }
-                btn_StackStatus.hideButton(false); // show status
+                // btn_StackStatus.hideButton(false); // show status
                 btn_PlayPause.drawButton(BLACK); // replace existing button
                 btn_PlayPause.updateBitmap(pause); // update bitmap image
                 btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
@@ -166,7 +166,8 @@ namespace auto_screen {
                 // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
             }
             else if (!btnActive && !areArrowsEnabled()) {
-                autoStackPaused = true;    // autoStack paused
+                // autoStackPaused = true;    // autoStack paused
+                stack.status(paused);
                 btn_PlayPause.drawButton(BLACK); // replace existing button
                 btn_PlayPause.updateBitmap(play); // update bitmap image
                 btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
@@ -177,55 +178,6 @@ namespace auto_screen {
         else {
             btn_PlayPause.setToggleActive(!btnActive); // reset button state
         }
-    }
-
-
-    void stackStatus(stages stage) {
-        // unhide if hidden
-        if (btn_StackStatus.isHidden()) {
-            btn_StackStatus.hideButton(false);
-        }
-
-        // String stageString = stackProcedureValues[stage];
-        // int textColour = WHITE;
-
-         // only print if on correct screen and value has changed
-        if (getCurrentScreen() == "Auto" && stage != getCurrentStage()) {
-            // btn_StackStatus.writeTextCentre(Arimo_Bold_20, textColour, stageString);
-            // char* newLabel = strdup(stageString.c_str());
-            // btn_StackStatus.updateLabel(newLabel);
-            // Serial.print("status char: "); Serial.println(newLabel);
-        }
-        setCurrentStage(stage); // update to new value
-    }
-
-
-    /***********************************************************************
-    Used to pause autostack when needing to be called from another file.
-    ***********************************************************************/
-    void pauseStack() {
-        autoStackPaused = true; // pause autostack
-        btn_PlayPause.drawButton(BLACK); // replace existing button
-        btn_PlayPause.updateBitmap(play); // update bitmap image
-        btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
-        btn_PlayPause.drawButton(); // draw button
-        btn_PlayPause.setButtonActive(false); // set button state to "pause" mode
-    }
-
-
-    /***********************************************************************
-    Used to reset autostack after completed stack.
-    ***********************************************************************/
-    void resetStack() {
-        autoStackPaused = false;
-        autoStackInitiated = false;
-        isNewAutoStack = true;
-        setCurrentStage(inactive);
-        btn_PlayPause.drawButton(BLACK); // replace existing button
-        btn_PlayPause.updateBitmap(play); // update to show play button
-        btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
-        btn_PlayPause.drawButton(); // draw button
-        btn_PlayPause.setButtonActive(false);
     }
 
 
@@ -247,14 +199,48 @@ namespace auto_screen {
     }
 
 
+    void hideArrows(bool hide) {
+        btn_ArrowUp.hideButton(hide);
+        btn_ArrowDown.hideButton(hide);
+        btn_PlayPause.hideButton(!hide); // PlayPause takes opposite state to arrow buttons
+    }
+
+
     /***********************************************************************
-    Updates the autoStack screen with est. remaining time of stack sequence.
+    Used to display pause autostack when needing to be called from another file.
+    ***********************************************************************/
+    void displayPauseStack() {
+        btn_PlayPause.drawButton(BLACK); // replace existing button
+        btn_PlayPause.updateBitmap(play); // update bitmap image
+        btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
+        btn_PlayPause.drawButton(); // draw button
+        btn_PlayPause.setButtonActive(false); // set button state to "pause" mode
+    }
+
+
+    /***********************************************************************
+    Used to display reset autostack after completed or terminated stack.
+    ***********************************************************************/
+    void displayResetStack() {
+        // autoStackPaused = false;
+        // autoStackInitiated = false;
+        // isNewAutoStack = true;
+        btn_PlayPause.drawButton(BLACK); // replace existing button
+        btn_PlayPause.updateBitmap(play); // update to show play button
+        btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
+        btn_PlayPause.drawButton(); // draw button
+        btn_PlayPause.setButtonActive(false);
+    }
+
+
+    /***********************************************************************
+    Updates the AutoStack screen with est. remaining time of stack sequence.
     Uses sprintf_P function to concatenate minutes and seconds and format
     them as "mm:ss" on the screen.
     ***********************************************************************/
     void estimateDuration() {
-        float duration = getNrMovementsRequired() * (getShutterDelay()*0.001);
-        float elapsed = getNrMovementsCompleted() * (getShutterDelay()*0.001);
+        float duration = stack.requiredMovements() * ((getShutterDelay() + SHUTTER_PULL_TIME)*0.001);
+        float elapsed = stack.requiredMovements() * ((getShutterDelay() + SHUTTER_PULL_TIME)*0.001);
         float remaining = duration - elapsed;
         int minutes = floor(remaining / 60);
         int seconds = int(remaining) % 60;
@@ -277,17 +263,9 @@ namespace auto_screen {
     ***********************************************************************/
     void printAutoStackProgress() {
         char autoStackProgress[10]    = "0/0";
-
         // format progress in "Completed / Total" string
-        sprintf_P(autoStackProgress, PSTR("%02d/%02d"), getNrMovementsCompleted(), getNrMovementsRequired());
+        sprintf_P(autoStackProgress, PSTR("%02d/%02d"), stack.completedMovements(), stack.requiredMovements());
         // print to screen
         btn_Progress.writeTextBottomCentre(Arimo_Bold_30, WHITE, autoStackProgress);
-    }
-
-
-    void hideArrows(bool hide) {
-        btn_ArrowUp.hideButton(hide);
-        btn_ArrowDown.hideButton(hide);
-        btn_PlayPause.hideButton(!hide); // PlayPause takes opposite state to arrow buttons
     }
 }

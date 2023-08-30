@@ -98,13 +98,13 @@ namespace flash_screen {
             btn_FlashSensor.updateColour(CUSTOM_GREEN);
             btn_FlashSensor.drawButton();
             setFlashSensorEnabled(true);
-            auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
+            // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
         else if (!btnActive) {
             btn_FlashSensor.updateColour(CUSTOM_RED);
             btn_FlashSensor.drawButton();
             setFlashSensorEnabled(false);
-            auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
+            // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
     }
 

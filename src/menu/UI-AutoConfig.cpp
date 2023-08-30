@@ -1,6 +1,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
+#include "AutoStack.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
@@ -57,9 +58,9 @@ namespace autoconfig_screen {
 
         // draw text
         btn_Start.writeTextTopCentre(Arimo_Regular_30,  WHITE);
-        btn_Start.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String(getStartPosition()));
+        btn_Start.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String(stack.startPosition()));
         btn_End.writeTextTopCentre(Arimo_Regular_30,    WHITE);
-        btn_End.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(getEndPosition()));
+        btn_End.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(stack.endPosition()));
         btn_Run.writeTextTopCentre(Arimo_Regular_30,    WHITE);
         btn_Run.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(currentPosition));
         btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  getShutterDelaySeconds());
@@ -79,17 +80,17 @@ namespace autoconfig_screen {
         if (btnActive && !canEditShutterDelay() && !canEditEndPosition()) {
             setArrowsEnabled(true);
             setEditStartPosition(true);
-            setStartPosition(stepper1.XACTUAL()); // set start position to current position
+            stack.startPosition(stepper1.XACTUAL()); // set start position to current position
 
             btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStartPosition()));
+            btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
         }
         else if (!btnActive && canEditStartPosition()) {
             setArrowsEnabled(false);
             setEditStartPosition(false);
 
             btn_Start.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Start.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getStartPosition()));
+            btn_Start.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stack.startPosition()));
         }
     }
 
@@ -98,17 +99,17 @@ namespace autoconfig_screen {
         if (btnActive && !canEditShutterDelay() && !canEditStartPosition()) {
             setArrowsEnabled(true);
             setEditEndPosition(true);
-            setEndPosition(stepper1.XACTUAL()); // set end position to current position
+            stack.endPosition(stepper1.XACTUAL()); // set end position to current position
 
             btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getEndPosition()));
+            btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.endPosition()));
         }
         else if (!btnActive && canEditEndPosition()) {
             setArrowsEnabled(false);
             setEditEndPosition(false);
 
             btn_End.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_End.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getEndPosition()));
+            btn_End.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stack.endPosition()));
         }
     }
 
@@ -120,7 +121,7 @@ namespace autoconfig_screen {
             btn_Run.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_Run.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(currentPosition));
 
-            dryRun(stepper1);
+            stack.dryRun();
 
             btn_Run.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_Run.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(currentPosition));
@@ -206,13 +207,13 @@ namespace autoconfig_screen {
     // sets and prints new Start position for AutoStack
     void updateStartPosition() {
         // lower limit
-        if (getStartPosition() < 0) {
-            setStartPosition(0);
+        if (stack.startPosition() < 0) {
+            stack.startPosition(0);
         }
         // get new value
-        setStartPosition(stepper1.XACTUAL());
+        stack.startPosition(stepper1.XACTUAL());
         btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-        btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getStartPosition()));
+        btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
         // reset AutoStack
         isNewAutoStack = true;
     }
@@ -222,13 +223,13 @@ namespace autoconfig_screen {
     void updateEndPosition() {
         // set new end value
         if (autoStackMax) {
-            setEndPosition(MAX_RAIL_POSITION);
+            stack.endPosition(MAX_RAIL_POSITION);
         }
         else if (!autoStackMax) {
-            setEndPosition(stepper1.XACTUAL());
+            stack.endPosition(stepper1.XACTUAL());
         }
         btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-        btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getEndPosition()));
+        btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.endPosition()));
     }
 
 
