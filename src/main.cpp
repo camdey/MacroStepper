@@ -112,8 +112,8 @@ void setup(void) {
     
     // declare analog pin as digital input
     pinMode(ZSTICK_PIN, INPUT_PULLUP);    // pullup needed for consistent readings
-    pinMode(SONY_PIN, OUTPUT);
-    digitalWrite(SONY_PIN, LOW);
+    pinMode(SHUTTER_PIN, OUTPUT);
+    digitalWrite(SHUTTER_PIN, LOW);
 
     // find stable resting point of joystick
     // calibrateJoyStick();
@@ -162,9 +162,9 @@ void loop() {
         if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == inactive) {
             stepper1.enabled(false); // disable stepper
         }
-		// update godoxValue if on Flash screen
+		// update flashSensorValue if on Flash screen
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
-			flash_screen::updateGodoxValue();
+			flash_screen::updateFlashSensorValue();
 		}
         prevJoystickCheck = millis();
     }

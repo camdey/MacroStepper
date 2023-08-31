@@ -156,10 +156,10 @@ extern gfxButton            btn;
 #define XSTICK_PIN                  A7              // joystick X-axis pin (controls fwd and rev)
 #define RSTICK_PIN                  A6              // joystick R-axis pin (controls rotation)
 #define ZSTICK_PIN                  A5              // button-press from joystick
-#define GODOX_PIN                   A8              // pin for GA1A12S202 light sensor
 #define POT_PIN                     A9              // pin for potentiometer to control LED brightnes
 #define PIEZO_PIN                   22              // pin for Piezo buzzer
-#define SONY_PIN                    48              // pin for pulling camera focus and shutter to GND via opto
+#define FLASH_SENSOR_PIN            A8              // pin for GA1A12S202 light sensor
+#define SHUTTER_PIN                 48              // pin for pulling camera focus and shutter to GND via opto
 
 // --- currentTimes and elapsed times --- //
 extern unsigned long prevButtonCheck;

@@ -111,7 +111,7 @@ namespace flash_screen {
 
     void func_FlashTest(bool btnActive) {
         if (btnActive) {
-         setTestingFlash(true); // prevents leaving screen while testing flash
+            setTestingFlash(true); // prevents leaving screen while testing flash
             // enable shutter
             if (!isShutterEnabled()) {
                 setShutterEnabled(true);
@@ -160,20 +160,20 @@ namespace flash_screen {
     to calibrate optimal trigger point for flash given lighting conditions
     at the time that may affect the light sensor.
     ***********************************************************************/
-    void updateGodoxValue() {
-        // get latest godoxValue reading
+    void updateFlashSensorValue() {
+        // get latest flashSensorValue reading
         isFlashReady();
 
         // if difference from previous reading > 1, updates value on screen
-        if (abs(getGodoxValue() - flashOffValue) > 1 && canEditFlashOffValue()) {
+        if (abs(getFlashSensorValue() - flashOffValue) > 1 && canEditFlashOffValue()) {
             func_FlashOff(true);
             // set OFF value for flash
-            flashOffValue = getGodoxValue();
+            flashOffValue = getFlashSensorValue();
             }
-        if (abs(getGodoxValue() - flashOnValue) > 1 && canEditFlashOnValue()) {
+        if (abs(getFlashSensorValue() - flashOnValue) > 1 && canEditFlashOnValue()) {
             func_FlashOn(true);
             // set ON value for flash
-            flashOnValue = getGodoxValue();
+            flashOnValue = getFlashSensorValue();
         }
     }
 

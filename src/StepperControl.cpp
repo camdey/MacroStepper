@@ -168,7 +168,7 @@ void photo360(TMC5160Stepper_Ext &stepper) {
                 if (millis() - getLastPhoto360Step() >= getPhoto360Delay()) {
                     // take photo
                     // Serial.print("PULL SHUTTER: "); Serial.println(millis());
-                    digitalWrite(SONY_PIN, HIGH);
+                    digitalWrite(SHUTTER_PIN, HIGH);
                     setFlashTriggerTime(millis());
                     // set this at the start of the "loop" (pull, release, move)
                     setLastPhoto360Step();
@@ -180,7 +180,7 @@ void photo360(TMC5160Stepper_Ext &stepper) {
             if (getCurrentStage() == releaseShutter) {
                 if (millis() - getFlashTriggerTime() >= 800) {
                     // Serial.print("RELEASE SHUTTER: "); Serial.println(millis());
-                    digitalWrite(SONY_PIN, LOW);
+                    digitalWrite(SHUTTER_PIN, LOW);
                     // increment nr completed 360 photos
                     setNrCompleted360Photos(getNrCompleted360Photos()+1);
                     if (getCurrentScreen() == "Photo360") {

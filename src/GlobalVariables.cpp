@@ -17,14 +17,14 @@ bool screenRotated                  = false;            // check whether screen 
 long joystickMaxVelocity            = 100000;           // VMAX when using joystick
 long recursiveValue                 = 51200;            // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
 // shutter / flash
-int shutterDelay                    = 500;              // delay in milliseconds between a movement and taking a photo via the shutter pin
-bool shutterTriggered               = true;             // shutter successfully triggered or not
-bool testingFlash                   = false;            // flag for testing flash threshold
-bool flashSensorEnabled             = false;            // is flash bulb enabled, or only take photos without flash?
-long flashTriggerTime               = 0;                // last millis time flash was triggered successfully
-bool flashAvailable                 = false;            // check whether flash is available to trigger or not
-int godoxValue                      = 0;                // light sensor reading from the godox flash LED
-long godoxFilterValue               = 10000;            // recursive filter value of light sensor reading from the godox flash LED
+// int shutterDelay                    = 500;              // delay in milliseconds between a movement and taking a photo via the shutter pin
+// bool shutterTriggered               = true;             // shutter successfully triggered or not
+// bool testingFlash                   = false;            // flag for testing flash threshold
+// bool flashSensorEnabled             = false;            // is flash bulb enabled, or only take photos without flash?
+// long flashTriggerTime               = 0;                // last millis time flash was triggered successfully
+// bool flashAvailable                 = false;            // check whether flash is available to trigger or not
+// int flashSensorValue                      = 0;                // light sensor reading from the godox flash LED
+// long godoxFilterValue               = 10000;            // recursive filter value of light sensor reading from the godox flash LED
 // video360
 int revsPerMinute                   = 50;               // revs per minute for video 360, stored as 10x higher to avoid floating point math
 bool video360Active                 = false;            // is video 360 running?
@@ -147,64 +147,64 @@ bool canEditFlashOffValue() {
 }
 
 
-// Set flash availability
-void setFlashAvailable(bool available) {
-    flashAvailable = available;
-}
+// // Set flash availability
+// void setFlashAvailable(bool available) {
+//     flashAvailable = available;
+// }
 
 
-// Check if flash is available to trigger or not
-bool isFlashAvailableOld() {
-    return flashAvailable;
-}
+// // Check if flash is available to trigger or not
+// bool isFlashAvailableOld() {
+//     return flashAvailable;
+// }
 
 
-// Set the light sensor reading from the godox pin
-void setGodoxValue(int value) {
-    godoxValue = value;
-}
+// // Set the light sensor reading from the godox pin
+// void setFlashSensorValue(int value) {
+//     flashSensorValue = value;
+// }
 
 
-// Get the last light sensor reading from the godox pin
-int getGodoxValue() {
-    return godoxValue;
-}
+// // Get the last light sensor reading from the godox pin
+// int getFlashSensorValue() {
+//     return flashSensorValue;
+// }
 
 
-// Set the recursive filter value of the light sensor reading from the godox pin
-void setGodoxFilterValue(long value) {
-    godoxFilterValue = value;
-}
+// // Set the recursive filter value of the light sensor reading from the godox pin
+// void setGodoxFilterValue(long value) {
+//     godoxFilterValue = value;
+// }
 
 
-// Get the recursive filter value of the last light sensor reading from the godox pin
-long getGodoxFilterValue() {
-    return godoxFilterValue;
-}
+// // Get the recursive filter value of the last light sensor reading from the godox pin
+// long getGodoxFilterValue() {
+//     return godoxFilterValue;
+// }
 
 
-// set whether shutter was successfully triggered or not
-void setShutterTriggered(bool triggered) {
-    shutterTriggered = triggered;
-}
+// // set whether shutter was successfully triggered or not
+// void setShutterTriggered(bool triggered) {
+//     shutterTriggered = triggered;
+// }
 
 
-// check whether the shutter was triggered when called
-bool hasShutterTriggered() {
-    return shutterTriggered;
-}
+// // check whether the shutter was triggered when called
+// bool hasShutterTriggered() {
+//     return shutterTriggered;
+// }
 
 
-// Set the last millis() reading when flash triggering began
-void setFlashTriggerTime(long millis) {
-    flashTriggerTime = millis;
-}
+// // Set the last millis() reading when flash triggering began
+// void setFlashTriggerTime(long millis) {
+//     flashTriggerTime = millis;
+// }
 
 
-// Get the last millis() reading when flash triggering began
-long getFlashTriggerTime() {
-    return flashTriggerTime;
-}
+// // Get the last millis() reading when flash triggering began
+// long getFlashTriggerTime() {
+//     return flashTriggerTime;
+// }
 
 
 // Set the last recursively filtered joystick reading
@@ -230,59 +230,33 @@ bool isScreenRotated() {
     return screenRotated;
 }
 
+// // Get delay in seconds in a displayable String format between a movement and taking a photo via shutter pin
+// String getShutterDelaySeconds() {
+//     int delay = getShutterDelay();
+//     int thousandths = delay*0.001;
+//     int hundreths = (delay-(thousandths*1000))*0.01;
+//     return String(thousandths) + '.' + String(hundreths);
+// }
 
-// Set delay between a movement and taking a photo via shutter pin
-void setShutterDelay(int delay) {
-    shutterDelay = valueCheck(delay, 500, 5900);
-}
-
-
-// Increment delay between a movement and taking a photo via shutter pin
-void incrementShutterDelay() {
-    shutterDelay+=100;
-    shutterDelay = valueCheck(shutterDelay, 500, 5900);
-}
-
-
-// Decrement delay between a movement and taking a photo via shutter pin
-void decrementShutterDelay() {
-    shutterDelay-=100;
-    shutterDelay = valueCheck(shutterDelay, 500, 5900);
-}
+// // Set when testing flash to prevent navigating away from screen
+// void setTestingFlash(bool state) {
+//     testingFlash = state;
+// }
 
 
-// Get delay between a movement and taking a photo via shutter pin
-int getShutterDelay() {
-    return shutterDelay;
-}
-
-// Get delay in seconds in a displayable String format between a movement and taking a photo via shutter pin
-String getShutterDelaySeconds() {
-    int delay = getShutterDelay();
-    int thousandths = delay*0.001;
-    int hundreths = (delay-(thousandths*1000))*0.01;
-    return String(thousandths) + '.' + String(hundreths);
-}
-
-// Set when testing flash to prevent navigating away from screen
-void setTestingFlash(bool state) {
-    testingFlash = state;
-}
+// // Check whether the flash is mid-test to prevent navigation away
+// bool isTestingFlash() {
+//     return testingFlash;
+// }
 
 
-// Check whether the flash is mid-test to prevent navigation away
-bool isTestingFlash() {
-    return testingFlash;
-}
+// void setFlashSensorEnabled(bool enabled) {
+//     flashSensorEnabled = enabled;
+// }
 
-
-void setFlashSensorEnabled(bool enabled) {
-    flashSensorEnabled = enabled;
-}
-
-bool isFlashSensorEnabled() {
-    return flashSensorEnabled;
-}
+// bool isFlashSensorEnabled() {
+//     return flashSensorEnabled;
+// }
 
 
 void setRevsPerMinute(int rpm) {
