@@ -6,19 +6,16 @@
 #include "StepperConfig.h"
 #include "MiscFunctions.h"
 
-enum Status {
+enum StackStatus {
     inactive,
     start,
     paused,
-    prepareShutter,
+    waitShutter,
     newMovement,
     delayMovement,
     executedMovement,
-    pullShutter,
-    releaseShutter,
-    flashSuccessful,
-    flashUnresponsive,
-    completed
+    debugFlash,
+    completedStack
 };
 
 class AutoStack {
@@ -63,13 +60,13 @@ class AutoStack {
             m_requiredMovements = nrMovements;
         }
         long requiredMovements() { return m_requiredMovements; }
-        void status(Status status) { m_status = status; }
-        Status status() {return m_status; }
+        void status(StackStatus status) { m_status = status; }
+        StackStatus status() {return m_status; }
 
     
     protected:
 
-        Status m_status             = inactive; // current state of AutoStack
+        StackStatus m_status        = inactive; // current state of AutoStack
         bool m_isNewStack           = false;    // whether a new autostack sequence has begun
         long m_startPosition        = 0;        // starting position of an AutoStack sequence
         long m_endPosition          = 0;        // end position of an AutoStack sequence

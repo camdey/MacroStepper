@@ -1,5 +1,5 @@
 #include "GlobalVariables.h"
-#include "ShutterControl.h"
+#include "CameraControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Flash.h"
 #include "menu/UI-Manual.h"
@@ -40,7 +40,7 @@ namespace flash_screen {
 
     void populateFlashScreen() {
         setCurrentScreen("Flash");
-        isFlashReady(); // get latest values
+        checkFlashAvailability(); // get latest values
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();
@@ -162,7 +162,7 @@ namespace flash_screen {
     ***********************************************************************/
     void updateFlashSensorValue() {
         // get latest flashSensorValue reading
-        isFlashReady();
+        checkFlashAvailability();
 
         // if difference from previous reading > 1, updates value on screen
         if (abs(getFlashSensorValue() - flashOffValue) > 1 && canEditFlashOffValue()) {

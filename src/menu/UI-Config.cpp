@@ -1,6 +1,6 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
-#include "ShutterControl.h"
+#include "CameraControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Config.h"
 #include "menu/UI-Auto.h"

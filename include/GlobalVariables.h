@@ -84,7 +84,7 @@ long getLastPhoto360Step();
 //         isFlashUnavailable,
 //         releaseShutter,
 //         flashSuccessful,
-//         flashUnresponsive,
+//         debugFlash,
 //         stepTaken,
 //         stepDelay,
 //         newStep,

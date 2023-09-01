@@ -3,7 +3,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "ShutterControl.h"
+#include "CameraControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
@@ -169,7 +169,7 @@ void photo360(TMC5160Stepper_Ext &stepper) {
                     // take photo
                     // Serial.print("PULL SHUTTER: "); Serial.println(millis());
                     digitalWrite(SHUTTER_PIN, HIGH);
-                    setFlashTriggerTime(millis());
+                    lastFlashMillis(millis());
                     // set this at the start of the "loop" (pull, release, move)
                     setLastPhoto360Step();
                     setCurrentStage(releaseShutter);
@@ -178,7 +178,7 @@ void photo360(TMC5160Stepper_Ext &stepper) {
 
             // if shutter hasn't triggered yet, keep retrying until 800ms has passed
             if (getCurrentStage() == releaseShutter) {
-                if (millis() - getFlashTriggerTime() >= 800) {
+                if (millis() - lastFlashMillis() >= 800) {
                     // Serial.print("RELEASE SHUTTER: "); Serial.println(millis());
                     digitalWrite(SHUTTER_PIN, LOW);
                     // increment nr completed 360 photos

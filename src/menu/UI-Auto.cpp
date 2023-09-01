@@ -1,6 +1,6 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
-#include "ShutterControl.h"
+#include "CameraControl.h"
 #include "AutoStack.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
@@ -156,7 +156,7 @@ namespace auto_screen {
                 if (stack.status() == inactive) {
                     stack.status(start);
                 } else if (stack.status() == paused) {
-                    stack.status(prepareShutter);
+                    stack.status(waitShutter);
                 }
                 // btn_StackStatus.hideButton(false); // show status
                 btn_PlayPause.drawButton(BLACK); // replace existing button

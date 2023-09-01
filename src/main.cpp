@@ -32,7 +32,7 @@
 #include "GlobalVariables.h"
 #include "JoystickControl.h"                // joystick control functions
 #include "MiscFunctions.h"                  // miscellaneous functions
-#include "ShutterControl.h"                 // functions relating to the camera shutter and flash
+#include "CameraControl.h"                 // functions relating to the camera shutter and flash
 #include "StepperControl.h"                 // functions for controlling the stepper motor
 #include "AutoStack.h"                      // AutoStack class and methods
 #include "VariableDeclarations.h"           // external variable declarations
@@ -57,6 +57,7 @@ TMC5160Stepper_Ext      stepper2(CS_2_PIN, R_2_SENSE);
 MCUFRIEND_kbv           tft;
 gfxButton               btn;
 AutoStack               stack(stepper1);
+CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
 
 
 // --- currentTimes and elapsed times --- //
@@ -69,9 +70,9 @@ int xStickResting                   = 512;              // Resting point of joys
 int xStickLower                     = 502;              // Lower boundary of of joystick resting point, calibrated during setup
 int xStickDiff                      = 0;                // Difference between ideal middle (512) and actual resting point
 bool isJoystickBtnActive            = 0;                // check if joystick button is pressed (ZSTICK_PIN)
-int flashThreshold                  = 280;              // threshold value for flash being ready to fire
-int flashOnValue                    = 300;              // initial value for flash considered as being ready
-int flashOffValue                   = 30;               // initial value for flash considered as recycling
+// int flashThreshold                  = 280;              // threshold value for flash being ready to fire
+// int flashOnValue                    = 300;              // initial value for flash considered as being ready
+// int flashOffValue                   = 30;               // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
 bool runHomingSequence              = true;             // runs rehoming sequence
 // bool isNewAutoStack                 = true;             // move to start for autoStack procedure

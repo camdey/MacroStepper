@@ -4,7 +4,7 @@
 #include "MiscFunctions.h"
 #include "AutoStack.h"
 #include "StepperControl.h"
-#include "ShutterControl.h"
+#include "CameraControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
@@ -22,7 +22,7 @@ void AutoStack::init() {
         setShutterTriggered(false);
         lastMovementMillis(millis());
         global::func_Reset(false);                      // change reset button to red
-        status(prepareShutter);
+        status(waitShutter);
         // auto_screen::status(start);
     }
 }
@@ -45,14 +45,13 @@ void AutoStack::run() {
         // this has likely passed due to the need to wait for shutter to trigger
         if (isShutterEnabled() && !hasShutterTriggered() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
-            if (status() == prepareShutter) {
+            if (status() == waitShutter) {
                 triggerShutter();                       // take photo and trigger flash immediately or start flash procedure
-                status(newMovement);
             }
             else {
                 runFlashProcedure(false);               // keep trying to fire flash
             }
-            if (status() == flashUnresponsive) {
+            if (status() == debugFlash) {
                 status(paused);                         // reset flash procedure
                 auto_screen::displayPauseStack();       // display pause autostack interface
                 populateScreen("Flash");                // go to flashScreen if can't trigger after 10 seconds
@@ -66,7 +65,7 @@ void AutoStack::run() {
 
         if (status() == executedMovement) {
             incrementCompletedMovements();
-            status(prepareShutter);
+            status(waitShutter);
             if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
                 auto_screen::printAutoStackProgress();
                 auto_screen::estimateDuration();
@@ -76,7 +75,7 @@ void AutoStack::run() {
         }
     }
     if (completedMovements() >= requiredMovements()) {
-        status(completed);
+        status(completedStack);
         terminateAutoStack();                           // stop AutoStack sequence if end reached
     }
 }
