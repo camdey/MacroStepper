@@ -1,5 +1,4 @@
 #include "VariableDeclarations.h"
-#include "StepperConfig.h"
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "AutoStack.h"
@@ -19,7 +18,7 @@ void AutoStack::init() {
         goToStart();
         completedMovements(0);
         _stepper.executedMovement(false);
-        setShutterTriggered(false);
+        camera.photoTaken(false);
         lastMovementMillis(millis());
         global::func_Reset(false);                      // change reset button to red
         status(waitShutter);
@@ -43,13 +42,12 @@ void AutoStack::run() {
     if (completedMovements() <= requiredMovements() && !_stepper.executedMovement()) {
         // take photo if there's been >= STACK_DWELL_TIME since a movement was executed successfully (gives time for vibration to settle)
         // this has likely passed due to the need to wait for shutter to trigger
-        if (isShutterEnabled() && !hasShutterTriggered() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
+        if (camera.shutterEnabled() && !camera.photoTaken() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
-            if (status() == waitShutter) {
-                triggerShutter();                       // take photo and trigger flash immediately or start flash procedure
-            }
-            else {
-                runFlashProcedure(false);               // keep trying to fire flash
+            if (status() == newShutter) {
+                camera.triggerShutter(true);            // take photo and trigger flash immediately or start flash procedure
+            } else if (status() == waitShutter) {
+                camera.triggerShutter(false);           // loop through flashProcedure until photo taken
             }
             if (status() == debugFlash) {
                 status(paused);                         // reset flash procedure
@@ -58,19 +56,18 @@ void AutoStack::run() {
             }
         }
         // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
-        if (status() == newMovement && (!isShutterEnabled() || hasShutterTriggered())) {
-            unsigned long delay = getShutterDelay();
+        if (status() == newMovement && (!camera.shutterEnabled() || camera.photoTaken())) {
+            unsigned long delay = camera.shutterDelay();
             executeMovement(1, delay);
         }
 
         if (status() == executedMovement) {
             incrementCompletedMovements();
-            status(waitShutter);
+            status(newShutter);                         // reset status so we take a photo on the next loop
             if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
                 auto_screen::printAutoStackProgress();
                 auto_screen::estimateDuration();
             }
-            setShutterTriggered(false);                 // reset shutter triggered flag
             _stepper.executedMovement(false);           // reset executed movement flag
         }
     }
@@ -162,7 +159,7 @@ void AutoStack::terminateAutoStack() {
     auto_screen::displayResetStack();                       // update button and reset button bitmap
     auto_screen::estimateDuration();                        // update estimate
     global::btn_Reset.updateColour(BLACK);                  // change reset button back to black
-    setShutterTriggered(false);
+    camera.photoTaken(false);
     completedMovements(0);                                  // reset completed movements count
     _stepper.executedMovement(false);
     produceTone(4, 300, 200);                               // sound 4 tones for 300ms separated by a 200ms delay

@@ -1,5 +1,5 @@
 #include "VariableDeclarations.h"
-#include "StepperConfig.h"
+#include "StepperControl.h"
 #include "GlobalVariables.h"
 #include "AutoStack.h"
 #include "StepperControl.h"
@@ -53,14 +53,19 @@ It first checks if the flash has recycled (red LED is on) and then
 sets the shutter pin to HIGH. A loop will start where the flash is
 continually checked to see if it has triggered (red LED goes off)
 ******************************************************************/
-void CameraControl::triggerShutter() {
+void CameraControl::triggerShutter(bool resetProcedure = false) {
+    // if in stack procedure, set status to wait shutter
+    if (stack.status() == newShutter) {
+        stack.status(waitShutter);
+    }
     if (flashSensorEnabled()) {
-        runFlashProcedure(true);
+        runFlashProcedure(resetProcedure);
     }
     else {
         // if not yet triggered, trigger
         if (digitalRead(shutterPin() == LOW)) {
             digitalWrite(shutterPin(), HIGH);
+            photoTaken(false);
             status(shutterHigh);
             lastFlashMillis(millis());
         }
@@ -68,7 +73,7 @@ void CameraControl::triggerShutter() {
         else if (millis() - lastFlashMillis() >= SHUTTER_PULL_TIME) {
             digitalWrite(shutterPin(), LOW);
             status(shutterCompleted);
-
+            photoTaken(true);
             if (stack.status() == waitShutter) {
                 stack.status(newMovement);
             }
@@ -118,7 +123,11 @@ void CameraControl::runFlashProcedure(bool restart) {
         photoTaken(true);
         checkFlashAvailability();
     }
+    // completed procedure
     if (status() == flashAvailable && photoTaken()) {
+        if (stack.status() == waitShutter) {
+            stack.status(newMovement);
+        }
         recycleTime(millis() - lastFlashMillis());
     }
     // if status is still shutterHigh after 1000ms, it may be that we didn't detect the flash recycling
@@ -128,6 +137,9 @@ void CameraControl::runFlashProcedure(bool restart) {
     }
     // fail over if we still don't detect a successful flash after 6000ms
     if (status() == shutterHigh && millisSinceLastFlash >= 6000 ) {
+        if (stack.status() == waitShutter) {
+            stack.status(debugFlash);
+        }
         status(flashUnresponsive);
         digitalWrite(shutterPin(), LOW);
     }
@@ -143,7 +155,7 @@ void CameraControl::runFlashProcedure(bool restart) {
 // -- -- -- pull pin high, set status to shutterHigh
 // -- -- if shutter is high
 // -- -- -- check flash availability, status should change to flashRecycling
-// -- -- if flash recucling and pin is high
+// -- -- if flash recycling and pin is high
 // -- -- -- set pin low, set status completed
 // -- -- if shutter completed
 // -- -- -- photo is taken, check availability for change back to flash available

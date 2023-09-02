@@ -1,6 +1,5 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
-#include "StepperConfig.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Video360.h"
 #include "menu/UI-Global.h"
@@ -95,7 +94,7 @@ namespace video_screen {
         }
         // if video360 is active, change direction while moving
         if (isVideo360Active()) {
-            video360(stepper2, getVideo360Target());
+            stepper2.video360(getVideo360Target());
         }
     }
 
@@ -103,12 +102,12 @@ namespace video_screen {
     void func_Back(bool btnActive) {
         if (btnActive && !areArrowsEnabled()) {
             if (isVideo360Active()) {
-                video360(stepper2, 0); // pause movement
+                stepper2.video360(0); // pause movement
                 func_PlayPause(false); // reset PlayPause button
                 btn_PlayPause.setButtonActive(false); // reset button state
                 setVideo360Active(false);
             }
-            configStealthChop(stepper2); // reset VMAX
+            stepper2.configStealthChop(); // reset VMAX
             populateScreen("Orbis");
         }
     }
@@ -122,7 +121,7 @@ namespace video_screen {
             btn_PlayPause.updateBitmap(pause); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
             btn_PlayPause.drawButton(); // draw
-            video360(stepper2, getVideo360Target());
+            stepper2.video360(getVideo360Target());
             setVideo360Active(true);
         }
         else if (!btnActive) {
@@ -130,7 +129,7 @@ namespace video_screen {
             btn_PlayPause.updateBitmap(play); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
             btn_PlayPause.drawButton(); // draw
-            video360(stepper2, 0);
+            stepper2.video360(0);
             setVideo360Active(false);
         }
     }

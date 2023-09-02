@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "TMCStepper.h"
-#include "StepperConfig.h"	
+#include "StepperControl.h"	
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
@@ -164,7 +164,7 @@ extern gfxButton            btn;
 // --- currentTimes and elapsed times --- //
 extern unsigned long prevButtonCheck;
 extern unsigned long prevJoystickCheck;
-extern unsigned long recycleTime;
+// extern unsigned long recycleTime;
 // --- Input and Output values --- //
 extern int xStickPos;
 extern int xStickUpper;
@@ -176,7 +176,6 @@ extern int flashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
-extern bool runHomingSequence;
 extern bool isNewAutoStack;
 extern bool autoStackInitiated;
 extern bool autoStackPaused;

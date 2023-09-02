@@ -6,8 +6,8 @@
 
 void setArrowsEnabled(bool state);
 bool areArrowsEnabled();
-void setShutterEnabled(bool enabled);
-bool isShutterEnabled();
+// void setShutterEnabled(bool enabled);
+// bool isShutterEnabled();
 void setCurrentScreen(String screen);
 String getCurrentScreen();
 void setEditShutterDelay(bool state);

@@ -1,5 +1,4 @@
 #include "GlobalVariables.h"
-#include "StepperConfig.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
@@ -76,7 +75,7 @@ control resumes.
 ******************************************************************/
 void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
     long velocity = calcVelocity(xPos);
-    readyStealthChop(stepper);
+    stepper.readyStealthChop();
     // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
     int dir = map(xPos, 1024, 0, 0, 2); // 511 = 0, 512 = 1
     
@@ -96,7 +95,7 @@ void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
         }
     
         // update velocity if more than 100ms since last reading
-        if (millis() - getLastMillis() >= 100) {
+        if (millis() - stepper.lastCheckMillis() >= 100) {
             velocity = calcVelocity(xPos);
             Serial.print(" | xPos: "); Serial.print(xPos);
             Serial.print(" | currentPos: "); Serial.print(stepper.XACTUAL());
@@ -107,7 +106,7 @@ void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
             isJoystickBtnActive = !digitalRead(ZSTICK_PIN);         // check if button still pressed
 
             printNewPositions();                                    // print new positions on the display
-            setLastMillis(millis());
+            stepper.lastCheckMillis(millis());
         }
         // set target to move stepper
         if (dir == 0) {

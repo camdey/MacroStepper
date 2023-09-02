@@ -3,13 +3,14 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
-#include "StepperConfig.h"
+#include "StepperControl.h"
 #include "MiscFunctions.h"
 
 enum StackStatus {
     inactive,
     start,
     paused,
+    newShutter,
     waitShutter,
     newMovement,
     delayMovement,

@@ -72,8 +72,7 @@ namespace stack_screen {
     void func_HomeRail(bool btnActive) {
         if (btnActive) {
             btn_HomeRail.drawButton(CUSTOM_RED);
-            runHomingSequence = true;
-            homeRail(stepper1);
+            stepper1.homeRail();
             btn_HomeRail.drawButton(WHITE);
         }
     }

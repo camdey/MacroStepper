@@ -28,7 +28,6 @@
 #include "TimerFreeTone.h"                  // produces beep tone for piezo
 #include "gfxButton.h"                      // my library for adding/controlling TFT buttons
 // project definitions and functions
-#include "StepperConfig.h"                  // functions for configuring TMC2130 profiles
 #include "GlobalVariables.h"
 #include "JoystickControl.h"                // joystick control functions
 #include "MiscFunctions.h"                  // miscellaneous functions
@@ -63,7 +62,7 @@ CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
 // --- currentTimes and elapsed times --- //
 unsigned long prevButtonCheck       = 0;
 unsigned long prevJoystickCheck     = 0;
-unsigned long recycleTime           = 0;                // duration to take photo
+// unsigned long recycleTime           = 0;                // duration to take photo
 // --- Input and Output values --- //
 int xStickUpper                     = 522;              // Upper boundary of joystick resting point, calibrated during setup
 int xStickResting                   = 512;              // Resting point of joystick reading, calibrated during setup
@@ -74,7 +73,6 @@ bool isJoystickBtnActive            = 0;                // check if joystick but
 // int flashOnValue                    = 300;              // initial value for flash considered as being ready
 // int flashOffValue                   = 30;               // initial value for flash considered as recycling
 // --- Enable/Disable functionality --- //
-bool runHomingSequence              = true;             // runs rehoming sequence
 // bool isNewAutoStack                 = true;             // move to start for autoStack procedure
 bool autoStackInitiated             = false;            // enables function for stack procedure
 bool autoStackPaused                = false;            // pause stack procedure
@@ -168,10 +166,5 @@ void loop() {
 			flash_screen::updateFlashSensorValue();
 		}
         prevJoystickCheck = millis();
-    }
-
-    // run homing sequence if first loop
-    if (runHomingSequence) {
-        homeRail(stepper1); // run homing routine
     }
 }

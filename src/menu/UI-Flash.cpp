@@ -40,7 +40,7 @@ namespace flash_screen {
 
     void populateFlashScreen() {
         setCurrentScreen("Flash");
-        checkFlashAvailability(); // get latest values
+        camera.checkFlashAvailability(); // get latest values
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();
@@ -97,13 +97,13 @@ namespace flash_screen {
         if (btnActive) {
             btn_FlashSensor.updateColour(CUSTOM_GREEN);
             btn_FlashSensor.drawButton();
-            setFlashSensorEnabled(true);
+            camera.flashSensorEnabled(true);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
         else if (!btnActive) {
             btn_FlashSensor.updateColour(CUSTOM_RED);
             btn_FlashSensor.drawButton();
-            setFlashSensorEnabled(false);
+            camera.flashSensorEnabled(false);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
     }
@@ -111,21 +111,21 @@ namespace flash_screen {
 
     void func_FlashTest(bool btnActive) {
         if (btnActive) {
-            setTestingFlash(true); // prevents leaving screen while testing flash
+            camera.isTestingFlash(true); // prevents leaving screen while testing flash
             // enable shutter
-            if (!isShutterEnabled()) {
-                setShutterEnabled(true);
+            if (!camera.shutterEnabled()) {
+                camera.shutterEnabled(true);
             }
             // print as yellow until result returned
             btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, YELLOW, String("TEST"));
             btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String("FLASH"));
 
             // trigger shutter
-            triggerShutter();
+            camera.triggerShutter(true);
             // wait for result
-            setLastMillis(millis());
-            while (millis() - getLastMillis() <= 6500) {
-                runFlashProcedure(false);
+            camera.lastFlashMillis(millis());
+            while (millis() - camera.lastFlashMillis() <= 6500) {
+                camera.triggerShutter(false);
                 if (getCurrentStage() == flashSuccessful) {
                     break;
                 }
@@ -134,21 +134,21 @@ namespace flash_screen {
             auto_screen::stackStatus(newStep);
 
             // check result
-            if (!hasShutterTriggered()) {
+            if (!camera.photoTaken()) {
                 btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, CUSTOM_RED, String("TEST"));
                 btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, CUSTOM_RED, String("FLASH"));
             }
-            else if (hasShutterTriggered()) {
+            else if (camera.photoTaken()) {
                 btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, CUSTOM_GREEN, String("TEST"));
                 btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, CUSTOM_GREEN, String("FLASH"));
             }
-            setTestingFlash(false);
+            camera.isTestingFlash(false);
         }
     }
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !canEditFlashOnValue() && !canEditFlashOffValue() && !isTestingFlash()) {
+        if (btnActive && !canEditFlashOnValue() && !canEditFlashOffValue() && !camera.isTestingFlash()) {
             // go back to start screen
             populateScreen("Home");
         }
@@ -162,18 +162,18 @@ namespace flash_screen {
     ***********************************************************************/
     void updateFlashSensorValue() {
         // get latest flashSensorValue reading
-        checkFlashAvailability();
+        camera.checkFlashAvailability();
 
         // if difference from previous reading > 1, updates value on screen
-        if (abs(getFlashSensorValue() - flashOffValue) > 1 && canEditFlashOffValue()) {
+        if (abs(camera.sensorValue() - camera.flashOffValue()) > 1 && canEditFlashOffValue()) {
             func_FlashOff(true);
             // set OFF value for flash
-            flashOffValue = getFlashSensorValue();
+            camera.flashOffValue(camera.sensorValue());
             }
-        if (abs(getFlashSensorValue() - flashOnValue) > 1 && canEditFlashOnValue()) {
+        if (abs(camera.sensorValue() - camera.flashOnValue()) > 1 && canEditFlashOnValue()) {
             func_FlashOn(true);
             // set ON value for flash
-            flashOnValue = getFlashSensorValue();
+            camera.flashOnValue(camera.sensorValue());
         }
     }
 

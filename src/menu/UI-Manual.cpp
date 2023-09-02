@@ -122,7 +122,7 @@ namespace manual_screen {
             // if not setting step size, move the stepper forward
             else if (!canEditMovementDistance()) {
                 // take photo if shutter enabled
-                if (isShutterEnabled()) {
+                if (camera.shutterEnabled()) {
                     triggerShutter();
                 }
                 executeMovement(stepper1, 1, 400); // forward
@@ -146,7 +146,7 @@ namespace manual_screen {
             // if not setting step size, move the stepper forward
             else if (!canEditMovementDistance()) {
                 // take photo if shutter enabled
-                if (isShutterEnabled()) {
+                if (camera.shutterEnabled()) {
                     triggerShutter();
                 }
                 executeMovement(stepper1, -1, 400); // reverse

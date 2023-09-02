@@ -1,10 +1,10 @@
 #include "GlobalVariables.h"
-#include "StepperConfig.h"
+#include "StepperControl.h"
 #include "MiscFunctions.h"
 
 // ui
 bool arrowsEnabled                  = false;
-bool shutterEnabled                 = false;            // if true, will try to take a photo during autoStack or manual movement
+// bool shutterEnabled                 = false;            // if true, will try to take a photo during autoStack or manual movement
 String currentScreen                = "Home";           // set current screen shown to user
 bool editShutterDelay               = false;            // set shutter delay time
 bool editStartPosition              = false;            // set start point for auto mode
@@ -52,16 +52,16 @@ bool areArrowsEnabled() {
 }
 
 
-// Set camera state, if true program will try to trigger the camera shutter after a step
-void setShutterEnabled(bool enabled) {
-    shutterEnabled = enabled;
-}
+// // Set camera state, if true program will try to trigger the camera shutter after a step
+// void setShutterEnabled(bool enabled) {
+//     shutterEnabled = enabled;
+// }
 
 
-// Check if camera is enabled, if true program will try to trigger the camera shutter after a step
-bool isShutterEnabled() {
-    return shutterEnabled;
-}
+// // Check if camera is enabled, if true program will try to trigger the camera shutter after a step
+// bool isShutterEnabled() {
+//     return shutterEnabled;
+// }
 
 // Set the current screen displayed to the user
 void setCurrentScreen(String screen) {

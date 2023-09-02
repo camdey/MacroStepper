@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
-#include "StepperConfig.h"
+#include "StepperControl.h"
 #include "MiscFunctions.h"
 
 enum FlashStatus {
@@ -24,8 +24,9 @@ class CameraControl {
             m_flashPin = flashPin;
         }
 
-        // Set delay between a movement and taking a photo via shutter pin
-        void shutterDelay(int delay) {m_shutterDelay = valueCheck(delay, 500, 5900);}
+        void shutterEnabled(bool enable) { m_shutterEnabled = enable; }                 // set shutter state to determine if a photo will be taken or not
+        bool shutterEnabled() { return m_shutterEnabled; }                              // get shutter state to determine if a photo will be taken or not
+        void shutterDelay(int delay) {m_shutterDelay = valueCheck(delay, 500, 5900);}   // Set delay between a movement and taking a photo via shutter pin
         int shutterDelay() { return m_shutterDelay; }
         void incrementShutterDelay() {
             m_shutterDelay+=100;
@@ -63,7 +64,7 @@ class CameraControl {
         void photoTaken (bool taken) { m_photoTaken = taken; }                  // record if a photo was successfully taken
         bool photoTaken() { return m_photoTaken; }
         void checkFlashAvailability();
-        void triggerShutter();
+        void triggerShutter(bool resetProcedure);
         void runFlashProcedure(bool restart);
         int shutterPin() { return m_shutterPin; }
         int flashPin() { return m_flashPin; }
@@ -78,6 +79,7 @@ class CameraControl {
         int m_flashOnValue          = 300;          // initial value for flash considered as being ready
         int m_flashOffValue         = 30;           // initial value for flash considered as recycling
         int m_shutterDelay          = 500;          // delay in milliseconds between a movement and taking a photo via the shutter pin
+        bool m_shutterEnabled       = true;         // enable/disable shutter for taken a photo automatically after a step
         bool m_shutterTriggered     = true;         // shutter successfully triggered or not
         bool m_testingFlash         = false;        // flag for testing flash threshold
         bool m_flashSensorEnabled   = false;        // is flash bulb enabled, or only take photos without flash?
@@ -90,6 +92,6 @@ class CameraControl {
 };
 
 
-extern CameraControl flash;
+extern CameraControl camera;
 
 #endif

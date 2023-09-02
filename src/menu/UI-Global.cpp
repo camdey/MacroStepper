@@ -1,4 +1,6 @@
 #include "GlobalVariables.h"
+#include "AutoStack.h"
+#include "CameraControl.h"
 #include "menu/UI-Global.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
@@ -16,14 +18,14 @@ namespace global {
 
     void func_Flash(bool btnActive) {
         if (btnActive) {
-            setShutterEnabled(true);
+            camera.shutterEnabled(true);
             btn_Flash.updateBitmap(flashOn);
             btn_Flash.updateColour(CUSTOM_GREEN);
             btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
             auto_screen::stackStatus(newStep);
         }
         else if (!btnActive) {
-            setShutterEnabled(false);
+            camera.shutterEnabled(false);
             btn_Flash.updateBitmap(flashOff);
             btn_Flash.updateColour(CUSTOM_RED);
             btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
@@ -38,13 +40,13 @@ namespace global {
             autoStackInitiated = false;
             isNewAutoStack = true;
             autoStackPaused = false;
-            setNrMovementsCompleted(0);
+            stack.completedMovements(0);
             // setNrMovementsRequired(0);
             // setStartPosition(stepper1.XACTUAL());
             // setEndPosition(stepper1.XACTUAL());
             btn_Reset.updateColour(BLACK);
             btn_Reset.drawButton(BLACK);
-            setCurrentStage(idle);
+            stack.status(inactive);
         }
         // if button pressed and photo360 active...
         else if (btnActive && photo360Initiated) {
@@ -55,7 +57,7 @@ namespace global {
             btn_Reset.updateColour(BLACK);
             btn_Reset.drawButton(BLACK);
             // setTargetVelocity(STEALTH_CHOP_VMAX);
-            setCurrentStage(idle);
+            stack.status(inactive);
         }
         // if function called from elsewhere...
         else if ((!btnActive && autoStackInitiated) || photo360Initiated) {
