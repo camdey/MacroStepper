@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "Photo360.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Photo360.h"
 #include "menu/UI-Photo360Config.h"
 #include "menu/UI-Global.h"
@@ -45,7 +45,7 @@ namespace photoconfig_screen {
 
 
     void populatePhoto360ConfigScreen() {
-        setCurrentScreen("Photo360Config");
+        ui.activeScreen(routines::ui_Photo360Config);
         setJoystickMaxVelocity(5000); // lower joystick speed
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -114,7 +114,7 @@ namespace photoconfig_screen {
 
     void func_Back(bool btnActive) {
         if (btnActive) {
-            populateScreen("Photo360");
+            ui.populateScreen(routines::ui_Photo360);
         }
     }
 

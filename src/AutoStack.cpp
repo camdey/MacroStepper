@@ -5,7 +5,7 @@
 #include "StepperControl.h"
 #include "CameraControl.h"
 #include "StatusEnums.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
@@ -53,7 +53,7 @@ void AutoStack::run() {
             if (status() == routines::debugFlash) {
                 status(routines::paused);               // reset flash procedure
                 auto_screen::displayPauseStack();       // display pause autostack interface
-                populateScreen("Flash");                // go to flashScreen if can't trigger after 10 seconds
+                ui.populateScreen(routines::ui_Flash);  // go to flashScreen if can't trigger after 10 seconds
             }
         }
         // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
@@ -63,8 +63,8 @@ void AutoStack::run() {
 
         if (status() == routines::executedMovement) {
             incrementCompletedMovements();
-            status(routines::newShutter);               // reset status so we take a photo on the next loop
-            if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
+            status(routines::newShutter);                   // reset status so we take a photo on the next loop
+            if (ui.activeScreen() == routines::ui_Auto) {   // make sure correct screen is displaying
                 auto_screen::printAutoStackProgress();
                 auto_screen::estimateDuration();
             }
@@ -152,8 +152,8 @@ void AutoStack::overshootPosition(long startPosition, int numberOfSteps) {
 
 // clean up variables etc after completing AutoStack sequence
 void AutoStack::terminateAutoStack() {
-    if (getCurrentScreen() != "Auto") {
-        populateScreen("Auto");                             // go back to Auto screen if not already on it
+    if (ui.activeScreen() != routines::ui_Auto) {
+        ui.populateScreen(routines::ui_Auto);                             // go back to Auto screen if not already on it
     }
     status(routines::inactive);
     auto_screen::displayResetStack();                       // update button and reset button bitmap

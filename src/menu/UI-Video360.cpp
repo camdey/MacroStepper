@@ -1,6 +1,7 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
+#include "JoystickControl.h"
 #include "menu/UI-Video360.h"
 #include "menu/UI-Global.h"
 
@@ -38,8 +39,8 @@ namespace video_screen {
 
 
     void populateVideo360Screen() {
-        setCurrentScreen("Video360");
-        setJoystickMaxVelocity(5000); // lower joystick speed
+        ui.activeScreen(routines::ui_Video360);
+        rStick.maxVelocity(5000); // lower joystick speed
 
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -65,12 +66,12 @@ namespace video_screen {
 
     void func_Speed(bool btnActive) {
         if (btnActive ) {
-            setArrowsEnabled(true);
+            ui.canEdit(routines::btn_arrows, true);
             btn_Speed.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10.00, 1));
         }
         else if (!btnActive) {
-            setArrowsEnabled(false);
+            ui.canEdit(routines::btn_arrows, false);
             btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getRevsPerMinute()/10.00, 1));
         }
@@ -100,7 +101,7 @@ namespace video_screen {
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
             if (isVideo360Active()) {
                 stepper2.video360(0); // pause movement
                 func_PlayPause(false); // reset PlayPause button
@@ -108,7 +109,7 @@ namespace video_screen {
                 setVideo360Active(false);
             }
             stepper2.configStealthChop(); // reset VMAX
-            populateScreen("Orbis");
+            ui.populateScreen(routines::ui_Orbis);
         }
     }
 
@@ -136,7 +137,7 @@ namespace video_screen {
 
 
     void func_ArrowUp(bool btnActive) {
-        if (btnActive && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_arrows)) {
             setRevsPerMinute(getRevsPerMinute()+1);
             btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10.00, 1));
             rpmToVmax();
@@ -145,7 +146,7 @@ namespace video_screen {
 
 
     void func_ArrowDown(bool btnActive) {
-        if (btnActive && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_arrows)) {
             setRevsPerMinute(getRevsPerMinute()-1);
             btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10.00, 1));
             rpmToVmax();

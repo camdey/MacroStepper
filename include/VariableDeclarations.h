@@ -161,21 +161,5 @@ extern gfxButton            btn;
 #define FLASH_SENSOR_PIN            A8              // pin for GA1A12S202 light sensor
 #define SHUTTER_PIN                 48              // pin for pulling camera focus and shutter to GND via opto
 
-// --- currentTimes and elapsed times --- //
-extern unsigned long prevButtonCheck;
-extern unsigned long prevJoystickCheck;
-// extern unsigned long recycleTime;
-// --- Input and Output values --- //
-extern int xStickPos;
-extern int xStickUpper;
-extern int xStickDiff;
-extern int xStickResting;
-extern int xStickLower;
-extern bool isJoystickBtnActive;
-extern int flashThreshold;
-extern int flashOnValue;
-extern int flashOffValue;
-// --- Enable/Disable functionality --- //
-extern bool autoStackMax;
 
 #endif

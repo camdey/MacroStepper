@@ -36,8 +36,8 @@
 #include "AutoStack.h"                      // AutoStack class and methods
 #include "Photo360.h"
 #include "VariableDeclarations.h"           // external variable declarations
+#include "UserInterface.h"
 #include "StatusEnums.h"                    // enums containing statuses for various routines, namespace routines::
-#include "menu/UI-Main.h"
 #include "menu/UI-Home.h"
 #include "menu/UI-Stack.h"
 #include "menu/UI-Orbis.h"
@@ -60,20 +60,9 @@ gfxButton               btn;
 AutoStack               stack(stepper1);
 Photo360                photo360(stepper2);
 CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
-
-
-// --- currentTimes and elapsed times --- //
-unsigned long prevButtonCheck       = 0;
-unsigned long prevJoystickCheck     = 0;
-// unsigned long recycleTime           = 0;                // duration to take photo
-// --- Input and Output values --- //
-int xStickUpper                     = 522;              // Upper boundary of joystick resting point, calibrated during setup
-int xStickResting                   = 512;              // Resting point of joystick reading, calibrated during setup
-int xStickLower                     = 502;              // Lower boundary of of joystick resting point, calibrated during setup
-int xStickDiff                      = 0;                // Difference between ideal middle (512) and actual resting point
-bool isJoystickBtnActive            = 0;                // check if joystick button is pressed (ZSTICK_PIN)
-
-
+Joystick                xStick(stepper1, XSTICK_PIN, ZSTICK_PIN);
+Joystick                rStick(stepper2, RSTICK_PIN);
+UserInterface           ui;
 
 
 // ***** --- MAIN PROGRAM --- ***** //
@@ -85,7 +74,7 @@ void setup(void) {
 	uint16_t identifier = tft.readID();
 	tft.begin(identifier);
 	tft.setRotation(3);
-    setScreenRotated(false);
+    ui.screenRotated(false);
 
 	stepper1.initDriver(1400, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN);
     stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
@@ -113,8 +102,8 @@ void setup(void) {
 
     btn.begin(&tft);
     btn.setScreenSize(480, 320);
-    initButtons(200, 75);
-    populateScreen("Home");
+    ui.initButtons(200, 75);
+    ui.populateScreen(routines::ui_Home);
 }
 
 void loop() {
@@ -122,14 +111,14 @@ void loop() {
     if (stack.busy()) {
         stack.run();
         // update duration if on Auto screen
-        if (getCurrentScreen() == "Auto") {
+        if (ui.activeScreen() == routines::ui_Auto) {
 		    auto_screen::estimateDuration();
         }
     }
     // take touch reading
-    if (millis() - prevButtonCheck >= 50) {
-        readTouchScreen(getCurrentScreen());
-        prevButtonCheck = millis();
+    if (millis() - ui.lastCheckMillis() >= 50) {
+        ui.readTouchScreen(ui.activeScreen());
+        ui.lastCheckMillis(millis());
 
         // if video360 active, keep updating target so stepper keeps moving
         if (isVideo360Active()) {
@@ -140,14 +129,10 @@ void loop() {
         }
     }
     // take joystick and limit switch reading, put stepper to sleep
-    if (millis() - prevJoystickCheck >= 100) {
-        // check joystick for movement
-        int xStickPos = readJoystick();
-        isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
-    
-        // move if past threshold and not in autoStack or video360 mode
-        if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !stack.busy() && !photo360.busy() && !isVideo360Active() && isJoystickBtnActive) {
-            joystickMotion(stepper1, xStickPos);
+    if (millis() - xStick.lastCheckMillis() >= 100) {
+        // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
+        if (!stack.busy() && !photo360.busy() && !isVideo360Active() && xStick.buttonActive()) {
+            xStick.motion();
         }
         // sleep if stepper inactive, update position on manual screen
         if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == routines::inactive) {
@@ -158,9 +143,9 @@ void loop() {
             stepper2.enabled(false); // disable stepper
         }
 		// update flashSensorValue if on Flash screen
-		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
+		if (ui.activeScreen() == routines::ui_Flash && (ui.canEdit(routines::btn_flashOff) || ui.canEdit(routines::btn_flashOn))) {
 			flash_screen::updateFlashSensorValue();
 		}
-        prevJoystickCheck = millis();
+        xStick.lastCheckMillis(millis());
     }
 }

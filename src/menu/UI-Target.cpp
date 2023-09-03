@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "MiscFunctions.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Target.h"
 
 namespace target_screen {
@@ -83,7 +83,7 @@ namespace target_screen {
 
 
     void populateTargetScreen() {
-        setCurrentScreen("Target");
+        ui.activeScreen(routines::ui_Target);
 
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -194,7 +194,7 @@ namespace target_screen {
 
     void func_Back(bool active) {
         if (active && !canEditTarget) {
-            populateScreen("Stack");
+            ui.populateScreen(routines::Stack);
         }
     }
 

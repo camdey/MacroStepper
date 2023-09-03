@@ -3,7 +3,7 @@
 #include "StepperControl.h"
 #include "AutoStack.h"
 #include "CameraControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
 
@@ -48,7 +48,7 @@ namespace autoconfig_screen {
 
 
     void populateAutoConfigScreen() {
-        setCurrentScreen("AutoConfig");
+        ui.activeScreen(routines::ui_AutoConfig);
 
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -78,16 +78,16 @@ namespace autoconfig_screen {
 
 
     void func_Start(bool btnActive) {
-        if (btnActive && !canEditShutterDelay() && !canEditEndPosition()) {
-            setArrowsEnabled(true);
+        if (btnActive && !ui.canEdit(routines::btn_shutterDelay) && !ui.canEdit(routines::btn_endPosition)) {
+            canEdit(routines::btn_arrows, true);
             setEditStartPosition(true);
             stack.startPosition(stepper1.XACTUAL()); // set start position to current position
 
             btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
         }
-        else if (!btnActive && canEditStartPosition()) {
-            setArrowsEnabled(false);
+        else if (!btnActive && ui.canEdit(routines::btn_startPosition)) {
+            canEdit(routines::btn_arrows, false);
             setEditStartPosition(false);
 
             btn_Start.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -97,16 +97,16 @@ namespace autoconfig_screen {
 
 
     void func_End(bool btnActive) {
-        if (btnActive && !canEditShutterDelay() && !canEditStartPosition()) {
-            setArrowsEnabled(true);
+        if (btnActive && !ui.canEdit(routines::btn_shutterDelay) && !ui.canEdit(routines::btn_startPosition)) {
+            canEdit(routines::btn_arrows, true);
             setEditEndPosition(true);
             stack.endPosition(stepper1.XACTUAL()); // set end position to current position
 
             btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.endPosition()));
         }
-        else if (!btnActive && canEditEndPosition()) {
-            setArrowsEnabled(false);
+        else if (!btnActive && ui.canEdit(routines::btn_endPosition)) {
+            canEdit(routines::btn_arrows, false);
             setEditEndPosition(false);
 
             btn_End.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -116,7 +116,7 @@ namespace autoconfig_screen {
 
 
     void func_Run(bool btnActive) {
-        if (btnActive && (canEditShutterDelay() + canEditStartPosition() + canEditEndPosition()) == 0) {
+        if (btnActive && (ui.canEdit(routines::btn_shutterDelay) + ui.canEdit(routines::btn_startPosition) + ui.canEdit(routines::btn_endPosition)) == 0) {
             int currentPosition = stepper1.XACTUAL();
 
             btn_Run.writeTextTopCentre(Arimo_Regular_30, YELLOW);
@@ -133,14 +133,14 @@ namespace autoconfig_screen {
 
     void func_Delay(bool btnActive) {
         if (btnActive) {
-            setArrowsEnabled(true);
+            canEdit(routines::btn_arrows, true);
             setEditShutterDelay(true);
 
             btn_Delay.drawButton(YELLOW);
             btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, stack.getShutterDelaySeconds());
         }
-        else if (!btnActive && canEditShutterDelay()) {
-            setArrowsEnabled(false);
+        else if (!btnActive && ui.canEdit(routines::btn_shutterDelay)) {
+            canEdit(routines::btn_arrows, false);
             setEditShutterDelay(false);
 
             btn_Delay.drawButton(WHITE);
@@ -151,29 +151,29 @@ namespace autoconfig_screen {
 
     // called when back arrow is pressed
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Auto");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_Auto);
         }
     }
 
 
     // called when up arrow is pressed, either updates start/end or shutterDelay
     void func_ArrowUp(bool btnActive) {
-        if (btnActive && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_arrows)) {
             // edit start postion
-            if (canEditStartPosition()) {
+            if (ui.canEdit(routines::btn_startPosition)) {
                 stepper1.executeMovement(1, 150); // forward
                 updateStartPosition(); //set start but not end position
                 printPosition(); // update rail positon
             }
             // edit end postion
-            else if (canEditEndPosition()) {
+            else if (ui.canEdit(routines::btn_endPosition)) {
                 stepper1.executeMovement(1, 150); // forward
                 updateEndPosition(); //set end but not start position
                 printPosition(); // update rail positon
             }
             // edit shutter delay
-            else if (canEditShutterDelay()) {
+            else if (ui.canEdit(routines::btn_shutterDelay)) {
                 stack.incrementShutterDelay();
                 printShutterDelay();
             }
@@ -183,21 +183,21 @@ namespace autoconfig_screen {
 
     // called when down arrow is pressed, either updates start/end or shutterDelay
     void func_ArrowDown(bool btnActive) {
-        if (btnActive && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_arrows)) {
             // edit start postion
-            if (canEditStartPosition()) {
+            if (ui.canEdit(routines::btn_startPosition)) {
                 stepper1.executeMovement(-1, 150); // backwards
                 updateStartPosition(); //set start position
                 printPosition(); // update rail positon
             }
             // edit end postion
-            else if (canEditEndPosition()) {
+            else if (ui.canEdit(routines::btn_endPosition)) {
                 stepper1.executeMovement(-1, 150); // backwards
                 updateEndPosition(); //set end position
                 printPosition(); // update rail positon
             }
             // edit shutter delay
-            else if (canEditShutterDelay()) {
+            else if (ui.canEdit(routines::btn_shutterDelay)) {
                 stack.decrementShutterDelay();
                 printShutterDelay();
             }

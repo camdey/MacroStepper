@@ -3,6 +3,7 @@
 #include "AutoStack.h"
 #include "StepperControl.h"
 #include "StatusEnums.h"
+#include "UserInterface.h"
 #include "CameraControl.h"
 #include "menu/UI-Global.h"
 #include "menu/UI-Photo360.h"
@@ -45,7 +46,7 @@ void Photo360::run() {
         if (status() == routines::executedMovement) {
             // increment nr completed 360 photos
             completedPhotos(completedPhotos()+1);
-            if (getCurrentScreen() == "Photo360") {
+            if (ui.activeScreen() == routines::ui_Photo360) {
                 photo_screen::printPhoto360Progress();
             }
         }

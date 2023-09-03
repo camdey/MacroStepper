@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "AutoStack.h"
 #include "CameraControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Flash.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-Auto.h"
@@ -40,7 +40,7 @@ namespace flash_screen {
 
 
     void populateFlashScreen() {
-        setCurrentScreen("Flash");
+        ui.activeScreen(routines::ui_Flash);
         camera.checkFlashAvailability(); // get latest values
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -152,9 +152,9 @@ namespace flash_screen {
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !canEditFlashOnValue() && !canEditFlashOffValue() && !camera.isTestingFlash()) {
+        if (btnActive && !ui.canEdit(routines::btn_flashOn) && !ui.canEdit(routines::btn_flashOff) && !camera.isTestingFlash()) {
             // go back to start screen
-            populateScreen("Home");
+            ui.populateScreen(routines::ui_Home);
         }
     }
 
@@ -169,12 +169,12 @@ namespace flash_screen {
         camera.checkFlashAvailability();
 
         // if difference from previous reading > 1, updates value on screen
-        if (abs(camera.sensorValue() - camera.flashOffValue()) > 1 && canEditFlashOffValue()) {
+        if (abs(camera.sensorValue() - camera.flashOffValue()) > 1 && ui.canEdit(routines::btn_flashOff)) {
             func_FlashOff(true);
             // set OFF value for flash
             camera.flashOffValue(camera.sensorValue());
             }
-        if (abs(camera.sensorValue() - camera.flashOnValue()) > 1 && canEditFlashOnValue()) {
+        if (abs(camera.sensorValue() - camera.flashOnValue()) > 1 && ui.canEdit(routines::btn_flashOn)) {
             func_FlashOn(true);
             // set ON value for flash
             camera.flashOnValue(camera.sensorValue());

@@ -1,5 +1,5 @@
 #include "GlobalVariables.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Orbis.h"
 
 namespace orbis_screen {
@@ -26,7 +26,7 @@ namespace orbis_screen {
 
 
     void populateOrbisScreen() {
-        setCurrentScreen("Orbis");
+        ui.activeScreen(routines::ui_Orbis);
         setJoystickMaxVelocity(5000); // lower joystick speed
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -51,21 +51,21 @@ namespace orbis_screen {
 
     void func_Video(bool btnActive) {
         if (btnActive) {
-            populateScreen("Video360");
+            ui.populateScreen(routines::ui_Video360);
         }
     }
 
 
     void func_Photo(bool btnActive) {
         if (btnActive) {
-            populateScreen("Photo360");
+            ui.populateScreen(routines::ui_Photo360);
         }
     }
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Home");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_Home);
             setJoystickMaxVelocity(100000); // reset back to original value
         }
     }

@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "Photo360.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Photo360.h"
 #include "menu/UI-Global.h"
 
@@ -52,7 +52,7 @@ namespace photo_screen {
 
 
     void populatePhoto360Screen() {
-        setCurrentScreen("Photo360");
+        ui.activeScreen(routines::ui_Photo360);
         setJoystickMaxVelocity(5000); // lower joystick speed
 
         // draw buttons
@@ -85,7 +85,7 @@ namespace photo_screen {
     void func_PhotoNr(bool btnActive) {
         // don't allow changing mid-procedure
         if (btnActive && photo360.status() == routines::inactive && !canEditPhotoDelay) {
-            setArrowsEnabled(true);
+            canEdit(routines::btn_arrows, true);
             canEditPhotoNr = true;
             hideArrows(false); // show arrows, hide play/pause
 
@@ -98,7 +98,7 @@ namespace photo_screen {
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && photo360.status() == routines::inactive && !canEditPhotoDelay) {
-            setArrowsEnabled(false);
+            canEdit(routines::btn_arrows, false);
             canEditPhotoNr = false;
             hideArrows(true); // hide arrows, show play/pause
 
@@ -121,7 +121,7 @@ namespace photo_screen {
     void func_Delay(bool btnActive) {
         // don't allow changing unless paused or not started
         if (btnActive && !photo360.busy() && !canEditPhotoNr) {
-            setArrowsEnabled(true);
+            canEdit(routines::btn_arrows, true);
             canEditPhotoDelay = true;
             hideArrows(false); // show arrows, hide play/pause
 
@@ -134,7 +134,7 @@ namespace photo_screen {
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && !photo360.busy() && !canEditPhotoNr) {
-            setArrowsEnabled(false);
+            canEdit(routines::btn_arrows, false);
             canEditPhotoDelay = false;
             hideArrows(true); // hide arrows, show play/pause
 
@@ -153,21 +153,21 @@ namespace photo_screen {
 
 
     void func_Config(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Photo360Config");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_Photo360Config);
         }
     }
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Orbis");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_Orbis);
         }
     }
 
 
     void func_PlayPause(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
             if (photo360.status() == routines::inactive) {
                 photo360.completedPhotos(0);
                 photo360.status(routines::start);
@@ -181,7 +181,7 @@ namespace photo_screen {
             btn_PlayPause.drawButton(); // draw
             photo360.run();
         }
-        else if (!btnActive && !areArrowsEnabled()) {
+        else if (!btnActive && !ui.canEdit(routines::btn_arrows)) {
             photo360.status(routines::paused);  // photo360 paused
             btn_PlayPause.drawButton(BLACK);    // replace existing button
             btn_PlayPause.updateBitmap(play);   // update bitmap image
@@ -223,7 +223,7 @@ namespace photo_screen {
 
 
     void func_ArrowUp(bool btnActive) {
-        if (btnActive && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_arrows)) {
             if (canEditPhotoNr) {
                 photo360.incrementRequiredPhotos();
                 photo360.completedPhotos(0); // reset in case adjusting after previous run
@@ -239,7 +239,7 @@ namespace photo_screen {
 
 
     void func_ArrowDown(bool btnActive) {
-        if (btnActive && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_arrows)) {
             if (canEditPhotoNr) {
                 photo360.decrementRequiredPhotos();
                 photo360.completedPhotos(0); // reset in case adjusting after previous run

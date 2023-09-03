@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Home.h"
 
 namespace home_screen {
@@ -34,7 +34,7 @@ namespace home_screen {
 
 
     void populateHomeScreen() {
-        setCurrentScreen("Home");
+        ui.activeScreen(routines::ui_Home);
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();
@@ -56,28 +56,28 @@ namespace home_screen {
 
     void func_Stack(bool btnActive) {
         if (btnActive) {
-            populateScreen("Stack");
+            ui.populateScreen(routines::Stack);
         }
     }
 
 
     void func_Orbis(bool btnActive) {
         if (btnActive) {
-            populateScreen("Orbis");
+            ui.populateScreen(routines::ui_Orbis);
         }
     }
 
 
     void func_Flash(bool btnActive) {
         if (btnActive) {
-            populateScreen("Flash");
+            ui.populateScreen(routines::ui_Flash);
         }
     }
 
 
     void func_Config(bool btnActive) {
         if (btnActive) {
-            populateScreen("Config");
+            ui.populateScreen(routines::ui_Config);
         }
     }
 }

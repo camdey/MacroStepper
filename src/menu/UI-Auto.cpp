@@ -3,7 +3,7 @@
 #include "CameraControl.h"
 #include "AutoStack.h"
 #include "StatusEnums.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-Global.h"
 
@@ -54,7 +54,7 @@ namespace auto_screen {
 
 
     void populateAutoScreen() {
-        setCurrentScreen("Auto");
+        ui.activeScreen(routines::ui_Auto);
 
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -87,7 +87,7 @@ namespace auto_screen {
 
     void func_StepDistance(bool btnActive) {
         if (btnActive && !stack.busy()) {
-            setArrowsEnabled(true);
+            canEdit(routines::btn_arrows, true);
             setEditMovementDistance(true);
             hideArrows(false); // show arrows, hide play/pause
 
@@ -101,7 +101,7 @@ namespace auto_screen {
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && !stack.busy()) {
-            setArrowsEnabled(false);
+            canEdit(routines::btn_arrows, false);
             setEditMovementDistance(false);
             hideArrows(true); // hide arrows, show play/pause
 
@@ -122,22 +122,22 @@ namespace auto_screen {
 
 
     void func_Config(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("AutoConfig");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_AutoConfig);
         }
     }
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Stack");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::Stack);
         }
     }
 
 
     void func_PlayPause(bool btnActive) {
         if (stack.requiredMovements() > 0) {
-            if (btnActive && !areArrowsEnabled()) {
+            if (btnActive && !ui.canEdit(routines::btn_arrows)) {
                 // autoStackInitiated = true;     // start autoStack sequence
                 // autoStackPaused = false;
                 if (stack.status() == routines::inactive) {
@@ -152,7 +152,7 @@ namespace auto_screen {
                 btn_PlayPause.drawButton(); // draw
                 // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
             }
-            else if (!btnActive && !areArrowsEnabled()) {
+            else if (!btnActive && !ui.canEdit(routines::btn_arrows)) {
                 // autoStackPaused = true;    // autoStack paused
                 stack.status(routines::paused);
                 btn_PlayPause.drawButton(BLACK); // replace existing button
@@ -169,7 +169,7 @@ namespace auto_screen {
 
 
     void func_ArrowUp(bool btnActive) {
-        if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_distance)() && ui.canEdit(routines::btn_arrows)) {
             stepper1.incrementStepsPerMovement();
             stepper1.calculateStepSize();
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
@@ -178,7 +178,7 @@ namespace auto_screen {
 
 
     void func_ArrowDown(bool btnActive) {
-        if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
+        if (btnActive && ui.canEdit(routines::btn_distance)() && ui.canEdit(routines::btn_arrows)) {
             stepper1.decrementStepsPerMovement();
             stepper1.calculateStepSize();
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));

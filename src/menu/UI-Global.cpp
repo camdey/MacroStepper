@@ -4,7 +4,7 @@
 #include "Photo360.h"
 #include "StatusEnums.h"
 #include "menu/UI-Global.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-Photo360.h"
 

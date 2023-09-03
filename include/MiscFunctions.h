@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 
-void rotateScreen();
 void produceTone(int reps, int duration, int delay);
 int valueCheck(int value, int min, int max);
 

@@ -1,0 +1,83 @@
+#ifndef USERINTERFACE_H
+#define USERINTERFACE_H
+
+#include <Arduino.h>
+#include "VariableDeclarations.h"
+#include "StatusEnums.h"
+
+class UserInterface {
+    public:
+        // ctor
+        UserInterface();
+
+        void activeScreen(routines::Screens screen) { m_screen = screen; }
+        routines::Screens activeScreen() {return m_screen; }
+        void rotateScreen() {
+            if (!screenRotated()) {
+                tft.setRotation(1);
+                screenRotated(true);
+            }
+            else if (screenRotated()) {
+                tft.setRotation(3);
+                screenRotated(false);
+            }
+        }
+        void screenRotated(bool rotated) { m_screenRotated = rotated; }
+        bool screenRotated() { return m_screenRotated; }
+        void lastCheckMillis(long millis) { m_lastCheckMillis = millis; }
+        long lastCheckMillis() { return m_lastCheckMillis; }
+        void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce);
+        void populateScreen(routines::Screens screen);
+        void readTouchScreen(routines::Screens screen);
+        void canEdit(routines::Buttons button, bool state) {
+            if (button == routines::btn_flashOn) {
+                m_flashOn = state;
+            } else if (button == routines::btn_flashOff) {
+                m_flashOff = state;
+            } else if (button == routines::btn_distance) {
+                m_distance = state;
+            } else if (button == routines::btn_startPosition) {
+                m_startPosition = state;
+            } else if (button == routines::btn_endPosition) {
+                m_endPosition = state;
+            } else if (button == routines::btn_shutterDelay) {
+                m_shutterDelay = state;
+            } else if (button == routines::btn_arrows) {
+                m_arrows = state;
+            }
+        }
+        bool canEdit(routines::Buttons button) {
+            if (button == routines::btn_flashOn) {
+                return m_flashOn;
+            } else if (button == routines::btn_flashOff) {
+                return m_flashOff;
+            } else if (button == routines::btn_distance) {
+                return m_distance;
+            } else if (button == routines::btn_startPosition) {
+                return m_startPosition;
+            } else if (button == routines::btn_endPosition) {
+                return m_endPosition;
+            } else if (button == routines::btn_shutterDelay) {
+                return m_shutterDelay;
+            } else if (button == routines::btn_arrows) {
+                return m_arrows;
+            }
+        }
+
+    protected:
+        routines::Screens m_screen      = routines::ui_Home;   // set current screen shown to user
+        bool m_screenRotated            = false;            // check whether screen has been rotated or not
+        bool m_arrows                   = false;
+        bool m_shutterDelay             = false;            // set shutter delay time
+        bool m_startPosition            = false;            // set start point for auto mode
+        bool m_endPosition              = false;            // set end point for auto mode
+        bool m_distance                 = false;            // set step distance in any mode
+        bool m_flashOn                  = false;            // set flash on value
+        bool m_flashOff                 = false;            // set flash off value
+        long m_lastCheckMillis          = 0;
+
+};
+
+extern UserInterface    ui;
+
+#endif

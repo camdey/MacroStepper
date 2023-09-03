@@ -6,7 +6,7 @@
 #include "StepperControl.h"
 #include "AutoStack.h"
 #include "CameraControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
@@ -268,7 +268,7 @@ void TMC5160Stepper_Ext::calculateStepSize() {
         stack.updateRequiredMovements();
         stepSize(distancePerMovement);
 
-        if (getCurrentScreen() == "Auto") {
+        if (ui.activeScreen() == routines::ui_Auto) {
             // update estimated time
             auto_screen::estimateDuration();
             // update progress

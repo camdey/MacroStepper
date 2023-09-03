@@ -1,20 +1,8 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-Auto.h"
-
-
-void rotateScreen() {
-    if (!isScreenRotated()) {
-        tft.setRotation(3);
-        setScreenRotated(true);
-    }
-    else if (isScreenRotated()) {
-        tft.setRotation(1);
-        setScreenRotated(false);
-    }
-}
 
 
 // sound a tone with a given number of repetitions each for a specified length of time (ms) separated by an interval (ms)

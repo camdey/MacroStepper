@@ -2,27 +2,26 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
-#include "menu/UI-Main.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-AutoConfig.h"
 
 
 // calculate new velocity (VMAX) value while using joystick motion
 // velocity value is a log-transformation of the joystick position
-long calcVelocity(int xPos) {
+long Joystick::calculateVelocity(int pos) {
     long velocity;
     int xAdj;
 
-    if (xPos < 512) {
-        xAdj = xPos + 1;                                        // prevent taking log of 0
+    if (pos < 512) {
+        xAdj = pos + 1;                 // prevent taking log of 0
     }
-    else if (xPos >= 512) {
-        xAdj = (1024 - xPos);
+    else if (pos >= 512) {
+        xAdj = (1024 - pos);
     }
-    xAdj = round(log(xAdj)*100);                                // multiply by 100 as value will be truncated to integer
+    xAdj = round(log(xAdj)*100);        // multiply by 100 as value will be truncated to integer
     // 624 = log(512)*100 rounded
     // Serial.print("joystick vel: "); Serial.println(getJoystickMaxVelocity());
-    velocity = map(xAdj, 0, 624, getJoystickMaxVelocity(), 0);
+    velocity = map(xAdj, 0, 624, maxVelocity(), 0);
 
     return velocity;
 }
@@ -33,31 +32,29 @@ the result. This becomes the resting value for the joystick. If
 out of the estimated range (500, 524), set at 512 to be safe.
 Add/substract 10 to this resting value to get an upper and lower
 bound for detecting movement. Also record difference between the
-resting value and ideal mid-point (511.5) to offset xPOS readings
+resting value and ideal mid-point (511.5) to offset pos readings
 by in other functions that use this variable.
 ******************************************************************/
-void calibrateJoyStick() {
+void Joystick::calibrateRestPosition() {
     int numReadings = 10;
     int sumReadings = 0;
-    xStickDiff = 0; // ensure reset to 0 when this function is called
+    restValDiff(0); // ensure reset to 0 when this function is called
 
     for (int xth_reading = 0; xth_reading < numReadings; xth_reading++) {
-        int xStickPos = readJoystick();
-        sumReadings += xStickPos; // add reading to total
+        int pos = read();
+        sumReadings += pos; // add reading to total
         delay(20); // wait 20ms
     }
 
-    xStickResting = (sumReadings / numReadings) + 0.5;              // "round" to nearest whole number
+    restVal((sumReadings / numReadings) + 0.5);  // "round" to nearest whole number
 
-    // if xStickresting below/above these values, set at middle point to be safe
-    if (xStickResting < 500 || xStickResting > 524) {
-        xStickResting = 512;
+    // if restVal() below/above these values, set at middle point to be safe
+    if (restVal() < 500 || restVal() > 524) {
+        restVal(512);
     }
-    xStickUpper = xStickResting + 10;
-    xStickLower = xStickResting - 10;
-    xStickDiff = 512 - xStickResting;
-    // Serial.print("xStick Calib. Resting: "); Serial.println(xStickResting);
-    // Serial.print("xStick Calib. Diff: "); Serial.println(xStickDiff);
+    restValDiff(restVal() + 10);
+    restValLower(restVal() - 10);
+    restValDiff(512 - restVal());
 }
 
 
@@ -73,74 +70,73 @@ used to reduce the initial acceleration of the stepper to control
 jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
-void joystickMotion(TMC5160Stepper_Ext &stepper, int xPos) {
-    long velocity = calcVelocity(xPos);
-    stepper.readyStealthChop();
-    // use maxIn of 1024 and maxOut of 2 due to how map() is calculated. 
-    int dir = map(xPos, 1024, 0, 0, 2); // 511 = 0, 512 = 1
-    
-    while ((xPos >= xStickUpper || xPos <= xStickLower) && isJoystickBtnActive) {
+void Joystick::motion() {
+    _stepper.readyStealthChop();
+    int pos = readSmoothed();
+    int dir = getDirection(pos);
+    long velocity = calculateVelocity(pos);
+
+    while ((pos >= restValUpper() || pos <= restValLower()) && buttonActive()) {
         // don't allow movement if within 2mm of endstops if homed
-        if (stepper.homed()) {
-            if (dir == 0 && stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
-                Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of rear end stop): "); Serial.println(stepper.XACTUAL());
+        if (_stepper.homed()) {
+            if (dir == 0 && _stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
+                Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of rear end stop): "); Serial.println(_stepper.XACTUAL());
                 produceTone(1, 250, 0);
                 break;
             }
-            else if (dir == 1 && MAX_RAIL_POSITION - stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
-                Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of front end stop): "); Serial.println(stepper.XACTUAL());
+            else if (dir == 1 && MAX_RAIL_POSITION - _stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
+                Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of front end stop): "); Serial.println(_stepper.XACTUAL());
                 produceTone(1, 250, 0);
                 break;
             }
         }
     
         // update velocity if more than 100ms since last reading
-        if (millis() - stepper.lastCheckMillis() >= 100) {
-            velocity = calcVelocity(xPos);
-            Serial.print(" | xPos: "); Serial.print(xPos);
-            Serial.print(" | currentPos: "); Serial.print(stepper.XACTUAL());
-            Serial.print(" | targetPos: "); Serial.print(stepper.XTARGET());
-            Serial.print(" | VACTUAL: "); Serial.print(stepper.VACTUAL());
-            Serial.print(" | velocity: "); Serial.println(velocity);
+        if (millis() - lastCheckMillis() >= 100) {
+            velocity = calculateVelocity(pos);
+            // Serial.print(" | pos: "); Serial.print(pos);
+            // Serial.print(" | currentPos: "); Serial.print(_stepper.XACTUAL());
+            // Serial.print(" | targetPos: "); Serial.print(_stepper.XTARGET());
+            // Serial.print(" | VACTUAL: "); Serial.print(_stepper.VACTUAL());
+            // Serial.print(" | velocity: "); Serial.println(velocity);
 
-            isJoystickBtnActive = !digitalRead(ZSTICK_PIN);         // check if button still pressed
-
-            printNewPositions();                                    // print new positions on the display
-            stepper.lastCheckMillis(millis());
+            // buttonActive();                      // check if button still pressed, no longer needed as the call in the while clause should update automatically
+            printNewPositions();                    // print new positions on the display
+            lastCheckMillis(millis());
         }
         // set target to move stepper
         if (dir == 0) {
-            stepper.XTARGET(MAX_RAIL_POSITION*-1);
+            _stepper.XTARGET(MAX_RAIL_POSITION*-1);
         }
         else if (dir == 1) {
-            stepper.XTARGET(MAX_RAIL_POSITION);
+            _stepper.XTARGET(MAX_RAIL_POSITION);
         }
     
-        stepper.targetVelocity(velocity);
-        xPos = readJoystick();
+        _stepper.targetVelocity(velocity);
+        pos = readSmoothed();
     }
-    stepper.targetVelocity(0);                                      // bring stepper to a stop
-    while (stepper.VACTUAL() != 0) {}                               // wait for stepper to decelerate
-    stepper.XTARGET(stepper.XACTUAL());                             // reset target to actual, call after setting targetVelocity to avoid "bounce"
-    printNewPositions();                                            // print final positions now that stepper has stopped
-    stepper.targetVelocity(STEALTH_CHOP_VMAX);                      // reset VMAX to stealthChop default
+    _stepper.targetVelocity(0);                     // bring stepper to a stop
+    while (_stepper.VACTUAL() != 0) {}              // wait for stepper to decelerate
+    _stepper.XTARGET(_stepper.XACTUAL());           // reset target to actual, call after setting targetVelocity to avoid "bounce"
+    printNewPositions();                            // print final positions now that stepper has stopped
+    _stepper.targetVelocity(STEALTH_CHOP_VMAX);     // reset VMAX to stealthChop default
 }
 
 
 // Print new rail positions depending on what screen and buttons are active
 // Called during joystick movement and after joystick movement when stepper has stopped
 // otherwise the position values will be out of sync across different fields
-void printNewPositions() {
-    if (getCurrentScreen() == "Manual") {                           // if on Manual screen, print new positon
+void Joystick::printNewPositions() {
+    if (ui.activeScreen() == routines::ui_Manual) {                           // if on Manual screen, print new positon
         manual_screen::printPosition();
     }
-    else if (getCurrentScreen() == "AutoConfig") {                  // else if Auto Config screen, print new position
+    else if (ui.activeScreen() == routines::ui_AutoConfig) {                  // else if Auto Config screen, print new position
         autoconfig_screen::printPosition();
 
-        if (canEditStartPosition()) {
+        if (ui.canEdit(routines::btn_startPosition)) {
         autoconfig_screen::updateStartPosition();                   // if editing Start position, set start but not end position
         }
-        else if (canEditEndPosition()) {
+        else if (ui.canEdit(routines::btn_endPosition)) {
             autoconfig_screen::updateEndPosition(); 	            // if editing End position, set end but not start position
         }
     }
@@ -149,14 +145,14 @@ void printNewPositions() {
 
 // read value from XSTICK_PIN and use recursive filtering to minimize noise
 // the previous filtered value from the joystick is used with a weight constant
-int readJoystick() {
+int Joystick::readSmoothed() {
     long val, adjVal;
     int weight = 40;
 
     // val = (w × XSTICK_PIN + (100 – w) × prevVal)
     // multiply values by 100 to avoid floating point math, the prevVal part of the formula needs as much precision as possible
-    adjVal = weight * (analogRead(XSTICK_PIN)*100) + (100 - weight) * getRecursiveFilterValue();
-    setRecursiveFilterValue(adjVal/100);
+    adjVal = weight * (read()*100) + (100 - weight) * recursiveFilterValue();
+    recursiveFilterValue(adjVal/100);
     val = round(adjVal*1.00 / 10000);
 
     if (isScreenRotated()) {

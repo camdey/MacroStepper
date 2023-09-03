@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "CameraControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Config.h"
 #include "menu/UI-Auto.h"
 
@@ -33,7 +33,7 @@ namespace config_screen {
 
 
     void populateConfigScreen() {
-        setCurrentScreen("Config");
+        ui.activeScreen(routines::ui_Config);
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();
@@ -60,8 +60,8 @@ namespace config_screen {
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Home");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_Home);
         }
     }
 
@@ -72,13 +72,13 @@ namespace config_screen {
             btn_FlipScreen.updateBitmap(toggleOn);
             btn_FlipScreen.updateColour(CUSTOM_GREEN);
             rotateScreen(); // rotate screen, touch controls, and joystick
-            populateScreen("Config");
+            ui.populateScreen(routines::ui_Config);
         }
         else if (!btnActive) {
             btn_FlipScreen.updateBitmap(toggleOff);
             btn_FlipScreen.updateColour(CUSTOM_RED);
             rotateScreen(); // rotate screen, touch controls, and joystick
-            populateScreen("Config");
+            ui.populateScreen(routines::ui_Config);
         }
     }
 

@@ -1,7 +1,7 @@
 #include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
-#include "menu/UI-Main.h"
+#include "UserInterface.h"
 #include "menu/UI-Stack.h"
 
 namespace stack_screen {
@@ -35,7 +35,7 @@ namespace stack_screen {
 
 
     void populateStackScreen() {
-        setCurrentScreen("Stack");
+        ui.activeScreen(routines::Stack);
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();
@@ -57,14 +57,14 @@ namespace stack_screen {
 
     void func_Auto(bool btnActive) {
         if (btnActive) {
-            populateScreen("Auto");
+            ui.populateScreen(routines::ui_Auto);
         }
     }
 
 
     void func_Manual(bool btnActive) {
         if (btnActive) {
-            populateScreen("Manual");
+            ui.populateScreen(routines::ui_Manual);
         }
     }
 
@@ -80,14 +80,14 @@ namespace stack_screen {
 
     void func_Target(bool btnActive) {
         if (btnActive) {
-            populateScreen("Target");
+            ui.populateScreen(routines::ui_Target);
         }
     }
 
 
     void func_Back(bool btnActive) {
-        if (btnActive && !areArrowsEnabled()) {
-            populateScreen("Home");
+        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
+            ui.populateScreen(routines::ui_Home);
         }
     }
 }
