@@ -116,16 +116,16 @@ namespace manual_screen {
             // if setting step size
             if (canEditMovementDistance() && areArrowsEnabled()) {
                 stepper1.incrementStepsPerMovement();
-                calculateStepSize(stepper1);
+                stepper1.calculateStepSize();
                 btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!canEditMovementDistance()) {
                 // take photo if shutter enabled
                 if (camera.shutterEnabled()) {
-                    triggerShutter();
+                    camera.triggerShutter(true);
                 }
-                executeMovement(stepper1, 1, 400); // forward
+                stepper1.executeMovement(1, 400); // forward
                 if (stepper1.executedMovement()) {
                     printPosition();
                     updateMovementCount();
@@ -140,16 +140,16 @@ namespace manual_screen {
             // if setting step size
             if (canEditMovementDistance() && areArrowsEnabled()) {
                 stepper1.decrementStepsPerMovement();
-                calculateStepSize(stepper1);
+                stepper1.calculateStepSize();
                 btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!canEditMovementDistance()) {
                 // take photo if shutter enabled
                 if (camera.shutterEnabled()) {
-                    triggerShutter();
+                    camera.triggerShutter(true);
                 }
-                executeMovement(stepper1, -1, 400); // reverse
+                stepper1.executeMovement(-1, 400); // reverse
                 if (stepper1.executedMovement()) {
                     printPosition();
                     updateMovementCount();

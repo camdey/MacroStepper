@@ -4,6 +4,7 @@
 #include "AutoStack.h"
 #include "StepperControl.h"
 #include "CameraControl.h"
+#include "StatusEnums.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
@@ -12,7 +13,7 @@
 
 
 void AutoStack::init() {
-    if (status() == start) {                        // move to start position if beginning AutoStack
+    if (status() == routines::start) {                  // move to start position if beginning AutoStack
         _stepper.readyStealthChop();
         _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
         goToStart();
@@ -21,7 +22,7 @@ void AutoStack::init() {
         camera.photoTaken(false);
         lastMovementMillis(millis());
         global::func_Reset(false);                      // change reset button to red
-        status(waitShutter);
+        status(routines::waitShutter);
         // auto_screen::status(start);
     }
 }
@@ -44,26 +45,25 @@ void AutoStack::run() {
         // this has likely passed due to the need to wait for shutter to trigger
         if (camera.shutterEnabled() && !camera.photoTaken() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
-            if (status() == newShutter) {
+            if (status() == routines::newShutter) {
                 camera.triggerShutter(true);            // take photo and trigger flash immediately or start flash procedure
-            } else if (status() == waitShutter) {
+            } else if (status() == routines::waitShutter) {
                 camera.triggerShutter(false);           // loop through flashProcedure until photo taken
             }
-            if (status() == debugFlash) {
-                status(paused);                         // reset flash procedure
+            if (status() == routines::debugFlash) {
+                status(routines::paused);               // reset flash procedure
                 auto_screen::displayPauseStack();       // display pause autostack interface
                 populateScreen("Flash");                // go to flashScreen if can't trigger after 10 seconds
             }
         }
         // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
-        if (status() == newMovement && (!camera.shutterEnabled() || camera.photoTaken())) {
-            unsigned long delay = camera.shutterDelay();
-            executeMovement(1, delay);
+        if (status() == routines::newMovement && (!camera.shutterEnabled() || camera.photoTaken())) {
+            executeMovement(1, stack.shutterDelay());
         }
 
-        if (status() == executedMovement) {
+        if (status() == routines::executedMovement) {
             incrementCompletedMovements();
-            status(newShutter);                         // reset status so we take a photo on the next loop
+            status(routines::newShutter);               // reset status so we take a photo on the next loop
             if (getCurrentScreen() == "Auto") {         // make sure correct screen is displaying
                 auto_screen::printAutoStackProgress();
                 auto_screen::estimateDuration();
@@ -72,7 +72,7 @@ void AutoStack::run() {
         }
     }
     if (completedMovements() >= requiredMovements()) {
-        status(completedStack);
+        status(routines::completedStack);
         terminateAutoStack();                           // stop AutoStack sequence if end reached
     }
 }
@@ -101,12 +101,12 @@ void AutoStack::executeMovement(int stepDirection, unsigned long stepperDelay) {
         while(_stepper.XACTUAL() != _stepper.XTARGET()) {}
         _stepper.targetVelocity(STEALTH_CHOP_VMAX);
         _stepper.executedMovement(true);
-        status(executedMovement);    
+        status(routines::executedMovement);    
         lastMovementMillis(millis());
     }
     else {
         _stepper.executedMovement(false);
-        status(delayMovement);
+        status(routines::delayMovement);
   }
 }
 
@@ -155,7 +155,7 @@ void AutoStack::terminateAutoStack() {
     if (getCurrentScreen() != "Auto") {
         populateScreen("Auto");                             // go back to Auto screen if not already on it
     }
-    status(inactive);
+    status(routines::inactive);
     auto_screen::displayResetStack();                       // update button and reset button bitmap
     auto_screen::estimateDuration();                        // update estimate
     global::btn_Reset.updateColour(BLACK);                  // change reset button back to black

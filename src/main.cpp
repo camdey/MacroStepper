@@ -34,7 +34,9 @@
 #include "CameraControl.h"                 // functions relating to the camera shutter and flash
 #include "StepperControl.h"                 // functions for controlling the stepper motor
 #include "AutoStack.h"                      // AutoStack class and methods
+#include "Photo360.h"
 #include "VariableDeclarations.h"           // external variable declarations
+#include "StatusEnums.h"                    // enums containing statuses for various routines, namespace routines::
 #include "menu/UI-Main.h"
 #include "menu/UI-Home.h"
 #include "menu/UI-Stack.h"
@@ -56,6 +58,7 @@ TMC5160Stepper_Ext      stepper2(CS_2_PIN, R_2_SENSE);
 MCUFRIEND_kbv           tft;
 gfxButton               btn;
 AutoStack               stack(stepper1);
+Photo360                photo360(stepper2);
 CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
 
 
@@ -69,17 +72,8 @@ int xStickResting                   = 512;              // Resting point of joys
 int xStickLower                     = 502;              // Lower boundary of of joystick resting point, calibrated during setup
 int xStickDiff                      = 0;                // Difference between ideal middle (512) and actual resting point
 bool isJoystickBtnActive            = 0;                // check if joystick button is pressed (ZSTICK_PIN)
-// int flashThreshold                  = 280;              // threshold value for flash being ready to fire
-// int flashOnValue                    = 300;              // initial value for flash considered as being ready
-// int flashOffValue                   = 30;               // initial value for flash considered as recycling
-// --- Enable/Disable functionality --- //
-// bool isNewAutoStack                 = true;             // move to start for autoStack procedure
-bool autoStackInitiated             = false;            // enables function for stack procedure
-bool autoStackPaused                = false;            // pause stack procedure
-bool autoStackMax                   = false;            // set getEndPosition() to max for indeterminate autoStack procedure
-bool isNewPhoto360                  = true;             // move to start for photo360 procedure
-bool photo360Initiated              = false;            // enables function for photo360 procedure
-bool photo360Paused                 = false;            // pause photo360 procedure
+
+
 
 
 // ***** --- MAIN PROGRAM --- ***** //
@@ -117,8 +111,6 @@ void setup(void) {
     // find stable resting point of joystick
     // calibrateJoyStick();
 
-    // don't home rail on start up
-    runHomingSequence = false;
     btn.begin(&tft);
     btn.setScreenSize(480, 320);
     initButtons(200, 75);
@@ -126,8 +118,8 @@ void setup(void) {
 }
 
 void loop() {
-    // run AutoStack sequence if enabled
-    if (stack.status() != inactive && stack.status() != paused) {
+    // run AutoStack sequence if not paused or inactive
+    if (stack.busy()) {
         stack.run();
         // update duration if on Auto screen
         if (getCurrentScreen() == "Auto") {
@@ -141,10 +133,10 @@ void loop() {
 
         // if video360 active, keep updating target so stepper keeps moving
         if (isVideo360Active()) {
-            video360(stepper2, getVideo360Target());
+            stepper2.video360(getVideo360Target());
         }
-        if (photo360Initiated) {
-            photo360(stepper2);
+        if (photo360.status() != routines::inactive) {
+            photo360.run();
         }
     }
     // take joystick and limit switch reading, put stepper to sleep
@@ -154,12 +146,16 @@ void loop() {
         isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
     
         // move if past threshold and not in autoStack or video360 mode
-        if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && !isVideo360Active() && isJoystickBtnActive) {
+        if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !stack.busy() && !photo360.busy() && !isVideo360Active() && isJoystickBtnActive) {
             joystickMotion(stepper1, xStickPos);
         }
         // sleep if stepper inactive, update position on manual screen
-        if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == inactive) {
+        if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == routines::inactive) {
             stepper1.enabled(false); // disable stepper
+        }
+        // sleep if stepper inactive, update position on manual screen
+        if (stepper2.reachedTarget() && stepper2.enabled() && photo360.status() == routines::inactive) {
+            stepper2.enabled(false); // disable stepper
         }
 		// update flashSensorValue if on Flash screen
 		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {

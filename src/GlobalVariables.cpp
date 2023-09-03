@@ -16,28 +16,10 @@ bool screenRotated                  = false;            // check whether screen 
 // joystick
 long joystickMaxVelocity            = 100000;           // VMAX when using joystick
 long recursiveValue                 = 51200;            // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
-// shutter / flash
-// int shutterDelay                    = 500;              // delay in milliseconds between a movement and taking a photo via the shutter pin
-// bool shutterTriggered               = true;             // shutter successfully triggered or not
-// bool testingFlash                   = false;            // flag for testing flash threshold
-// bool flashSensorEnabled             = false;            // is flash bulb enabled, or only take photos without flash?
-// long flashTriggerTime               = 0;                // last millis time flash was triggered successfully
-// bool flashAvailable                 = false;            // check whether flash is available to trigger or not
-// int flashSensorValue                      = 0;                // light sensor reading from the godox flash LED
-// long godoxFilterValue               = 10000;            // recursive filter value of light sensor reading from the godox flash LED
 // video360
 int revsPerMinute                   = 50;               // revs per minute for video 360, stored as 10x higher to avoid floating point math
 bool video360Active                 = false;            // is video 360 running?
 long video360Target                 = 10000;            // set target number of steps for video 360
-// photo360
-int nr360PhotosArrayIndex           = 11;               // index for number of photoCountArray
-int nr360Photos                     = 72;               // nr photos taken in a 360 photo
-long photo360Delay                  = 1000;             // delay in milliseconds between each photo in a photo360 procedure
-int nrCompleted360Photos            = 0;                // nr of photos taken in a 360 procedure
-long lastPhoto360Step               = 0;                // millis of last photo taken for photo360
-
-#define photoCountArraySize 20 // need to ensure we don't go out of bounds
-int photoCountArray[] = {6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108,114,120}; // possible values for nr360Photos
 
  
 // Set the state of the GUI arrows to on/off 
@@ -51,17 +33,6 @@ bool areArrowsEnabled() {
     return arrowsEnabled;
 }
 
-
-// // Set camera state, if true program will try to trigger the camera shutter after a step
-// void setShutterEnabled(bool enabled) {
-//     shutterEnabled = enabled;
-// }
-
-
-// // Check if camera is enabled, if true program will try to trigger the camera shutter after a step
-// bool isShutterEnabled() {
-//     return shutterEnabled;
-// }
 
 // Set the current screen displayed to the user
 void setCurrentScreen(String screen) {
@@ -147,66 +118,6 @@ bool canEditFlashOffValue() {
 }
 
 
-// // Set flash availability
-// void setFlashAvailable(bool available) {
-//     flashAvailable = available;
-// }
-
-
-// // Check if flash is available to trigger or not
-// bool isFlashAvailableOld() {
-//     return flashAvailable;
-// }
-
-
-// // Set the light sensor reading from the godox pin
-// void setFlashSensorValue(int value) {
-//     flashSensorValue = value;
-// }
-
-
-// // Get the last light sensor reading from the godox pin
-// int getFlashSensorValue() {
-//     return flashSensorValue;
-// }
-
-
-// // Set the recursive filter value of the light sensor reading from the godox pin
-// void setGodoxFilterValue(long value) {
-//     godoxFilterValue = value;
-// }
-
-
-// // Get the recursive filter value of the last light sensor reading from the godox pin
-// long getGodoxFilterValue() {
-//     return godoxFilterValue;
-// }
-
-
-// // set whether shutter was successfully triggered or not
-// void setShutterTriggered(bool triggered) {
-//     shutterTriggered = triggered;
-// }
-
-
-// // check whether the shutter was triggered when called
-// bool hasShutterTriggered() {
-//     return shutterTriggered;
-// }
-
-
-// // Set the last millis() reading when flash triggering began
-// void setFlashTriggerTime(long millis) {
-//     flashTriggerTime = millis;
-// }
-
-
-// // Get the last millis() reading when flash triggering began
-// long getFlashTriggerTime() {
-//     return flashTriggerTime;
-// }
-
-
 // Set the last recursively filtered joystick reading
 void setRecursiveFilterValue(long val) {
     recursiveValue = val;
@@ -229,34 +140,6 @@ void setScreenRotated(bool rotated) {
 bool isScreenRotated() {
     return screenRotated;
 }
-
-// // Get delay in seconds in a displayable String format between a movement and taking a photo via shutter pin
-// String getShutterDelaySeconds() {
-//     int delay = getShutterDelay();
-//     int thousandths = delay*0.001;
-//     int hundreths = (delay-(thousandths*1000))*0.01;
-//     return String(thousandths) + '.' + String(hundreths);
-// }
-
-// // Set when testing flash to prevent navigating away from screen
-// void setTestingFlash(bool state) {
-//     testingFlash = state;
-// }
-
-
-// // Check whether the flash is mid-test to prevent navigation away
-// bool isTestingFlash() {
-//     return testingFlash;
-// }
-
-
-// void setFlashSensorEnabled(bool enabled) {
-//     flashSensorEnabled = enabled;
-// }
-
-// bool isFlashSensorEnabled() {
-//     return flashSensorEnabled;
-// }
 
 
 void setRevsPerMinute(int rpm) {
@@ -296,59 +179,4 @@ void setJoystickMaxVelocity(long velocity) {
 
 long getJoystickMaxVelocity() {
     return joystickMaxVelocity;
-}
-
-
-void incrementNr360Photos() {
-    // minus one as array index starts at 0
-    if (nr360PhotosArrayIndex < photoCountArraySize-1) {
-        nr360PhotosArrayIndex++;
-    }
-}
-
-
-void decrementNr360Photos() {
-    if (nr360PhotosArrayIndex > 0) {
-        nr360PhotosArrayIndex--;
-    }
-}
-
-
-int getNr360Photos() {
-    nr360Photos = photoCountArray[nr360PhotosArrayIndex];
-    return nr360Photos;
-}
-
-
-void setPhoto360Delay(long delay) {
-    photo360Delay = delay;
-    // 500ms is min time needed for pulling shutter
-    if (photo360Delay < 500) {
-        photo360Delay = 500;
-    }
-}
-
-
-long getPhoto360Delay() {
-    return photo360Delay;
-}
-
-
-void setNrCompleted360Photos(int nrPhotos) {
-    nrCompleted360Photos = nrPhotos;
-}
-
-
-int getNrCompleted360Photos() {
-    return nrCompleted360Photos;
-}
-
-
-void setLastPhoto360Step() {
-    lastPhoto360Step = millis();
-}
-
-
-long getLastPhoto360Step() {
-    return lastPhoto360Step;
 }

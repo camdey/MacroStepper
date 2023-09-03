@@ -90,7 +90,7 @@ namespace config_screen {
             btn_FlashSensor.updateBitmap(toggleOff);
             btn_FlashSensor.updateColour(CUSTOM_RED);
             btn_FlashSensor.drawButton();
-            setFlashSensorEnabled(false);
+            camera.flashSensorEnabled(false);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
         else if (!btnActive) {
@@ -98,7 +98,7 @@ namespace config_screen {
             btn_FlashSensor.updateBitmap(toggleOn);
             btn_FlashSensor.updateColour(CUSTOM_GREEN);
             btn_FlashSensor.drawButton();
-            setFlashSensorEnabled(true);
+            camera.flashSensorEnabled(true);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
     }

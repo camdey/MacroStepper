@@ -2,6 +2,7 @@
 #include "MiscFunctions.h"
 #include "CameraControl.h"
 #include "AutoStack.h"
+#include "StatusEnums.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-Global.h"
@@ -9,20 +10,6 @@
 namespace auto_screen {
     #define num_btns 10
     gfxButton *btn_array[num_btns];
-
-    char* stackProcedureValues[] {
-        "Started",
-        "Flash On?",
-        "Pull Shutter",
-        "Flash Off?",
-        "Release Shutter",
-        "Flash Fired",
-        "Flash Error",
-        "Step Taken",
-        "Step Delay",
-        "New Step",
-        "Completed"
-    };
 
 
     gfxButton btn_StepSize      =   btn.initButton("Step Size",     "fillRoundRect",    0,      20,     160,    80,     15, DARKGRAY,   true);
@@ -99,7 +86,7 @@ namespace auto_screen {
 
 
     void func_StepDistance(bool btnActive) {
-        if (btnActive && (!autoStackInitiated || autoStackPaused)) {
+        if (btnActive && !stack.busy()) {
             setArrowsEnabled(true);
             setEditMovementDistance(true);
             hideArrows(false); // show arrows, hide play/pause
@@ -113,7 +100,7 @@ namespace auto_screen {
             btn_ArrowUp.drawButton(CUSTOM_GREEN);
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
-        else if (!btnActive && (!autoStackInitiated || autoStackPaused)) {
+        else if (!btnActive && !stack.busy()) {
             setArrowsEnabled(false);
             setEditMovementDistance(false);
             hideArrows(true); // hide arrows, show play/pause
@@ -153,10 +140,10 @@ namespace auto_screen {
             if (btnActive && !areArrowsEnabled()) {
                 // autoStackInitiated = true;     // start autoStack sequence
                 // autoStackPaused = false;
-                if (stack.status() == inactive) {
-                    stack.status(start);
-                } else if (stack.status() == paused) {
-                    stack.status(waitShutter);
+                if (stack.status() == routines::inactive) {
+                    stack.status(routines::start);
+                } else if (stack.status() == routines::paused) {
+                    stack.status(routines::waitShutter);
                 }
                 // btn_StackStatus.hideButton(false); // show status
                 btn_PlayPause.drawButton(BLACK); // replace existing button
@@ -167,7 +154,7 @@ namespace auto_screen {
             }
             else if (!btnActive && !areArrowsEnabled()) {
                 // autoStackPaused = true;    // autoStack paused
-                stack.status(paused);
+                stack.status(routines::paused);
                 btn_PlayPause.drawButton(BLACK); // replace existing button
                 btn_PlayPause.updateBitmap(play); // update bitmap image
                 btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
@@ -184,7 +171,7 @@ namespace auto_screen {
     void func_ArrowUp(bool btnActive) {
         if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
             stepper1.incrementStepsPerMovement();
-            calculateStepSize(stepper1);
+            stepper1.calculateStepSize();
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
         }
     }
@@ -193,7 +180,7 @@ namespace auto_screen {
     void func_ArrowDown(bool btnActive) {
         if (btnActive && canEditMovementDistance() && areArrowsEnabled()) {
             stepper1.decrementStepsPerMovement();
-            calculateStepSize(stepper1);
+            stepper1.calculateStepSize();
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
         }
     }
@@ -222,9 +209,6 @@ namespace auto_screen {
     Used to display reset autostack after completed or terminated stack.
     ***********************************************************************/
     void displayResetStack() {
-        // autoStackPaused = false;
-        // autoStackInitiated = false;
-        // isNewAutoStack = true;
         btn_PlayPause.drawButton(BLACK); // replace existing button
         btn_PlayPause.updateBitmap(play); // update to show play button
         btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
@@ -239,8 +223,8 @@ namespace auto_screen {
     them as "mm:ss" on the screen.
     ***********************************************************************/
     void estimateDuration() {
-        float duration = stack.requiredMovements() * ((getShutterDelay() + SHUTTER_PULL_TIME)*0.001);
-        float elapsed = stack.requiredMovements() * ((getShutterDelay() + SHUTTER_PULL_TIME)*0.001);
+        float duration = stack.requiredMovements() * ((stack.shutterDelay() + SHUTTER_PULL_TIME)*0.001);
+        float elapsed = stack.requiredMovements() * ((stack.shutterDelay() + SHUTTER_PULL_TIME)*0.001);
         float remaining = duration - elapsed;
         int minutes = floor(remaining / 60);
         int seconds = int(remaining) % 60;

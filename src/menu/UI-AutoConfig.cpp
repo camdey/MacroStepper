@@ -2,6 +2,7 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "AutoStack.h"
+#include "CameraControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
@@ -63,7 +64,7 @@ namespace autoconfig_screen {
         btn_End.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(stack.endPosition()));
         btn_Run.writeTextTopCentre(Arimo_Regular_30,    WHITE);
         btn_Run.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(currentPosition));
-        btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  getShutterDelaySeconds());
+        btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  stack.getShutterDelaySeconds());
     }
 
 
@@ -136,14 +137,14 @@ namespace autoconfig_screen {
             setEditShutterDelay(true);
 
             btn_Delay.drawButton(YELLOW);
-            btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, getShutterDelaySeconds());
+            btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, stack.getShutterDelaySeconds());
         }
         else if (!btnActive && canEditShutterDelay()) {
             setArrowsEnabled(false);
             setEditShutterDelay(false);
 
             btn_Delay.drawButton(WHITE);
-            btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, getShutterDelaySeconds());
+            btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, stack.getShutterDelaySeconds());
         }
     }
 
@@ -161,19 +162,19 @@ namespace autoconfig_screen {
         if (btnActive && areArrowsEnabled()) {
             // edit start postion
             if (canEditStartPosition()) {
-                executeMovement(stepper1, 1, 150); // forward
+                stepper1.executeMovement(1, 150); // forward
                 updateStartPosition(); //set start but not end position
                 printPosition(); // update rail positon
             }
             // edit end postion
             else if (canEditEndPosition()) {
-                executeMovement(stepper1, 1, 150); // forward
+                stepper1.executeMovement(1, 150); // forward
                 updateEndPosition(); //set end but not start position
                 printPosition(); // update rail positon
             }
             // edit shutter delay
             else if (canEditShutterDelay()) {
-                incrementShutterDelay();
+                stack.incrementShutterDelay();
                 printShutterDelay();
             }
         }
@@ -185,19 +186,19 @@ namespace autoconfig_screen {
         if (btnActive && areArrowsEnabled()) {
             // edit start postion
             if (canEditStartPosition()) {
-                executeMovement(stepper1, -1, 150); // backwards
+                stepper1.executeMovement(-1, 150); // backwards
                 updateStartPosition(); //set start position
                 printPosition(); // update rail positon
             }
             // edit end postion
             else if (canEditEndPosition()) {
-                executeMovement(stepper1, -1, 150); // forward
+                stepper1.executeMovement(-1, 150); // backwards
                 updateEndPosition(); //set end position
                 printPosition(); // update rail positon
             }
             // edit shutter delay
             else if (canEditShutterDelay()) {
-                decrementShutterDelay();
+                stack.decrementShutterDelay();
                 printShutterDelay();
             }
         }
@@ -215,17 +216,17 @@ namespace autoconfig_screen {
         btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
         btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
         // reset AutoStack
-        isNewAutoStack = true;
+        stack.status(routines::inactive);
     }
 
 
     // sets and prints new End position for AutoStack
     void updateEndPosition() {
         // set new end value
-        if (autoStackMax) {
+        if (stack.runMax()) {
             stack.endPosition(MAX_RAIL_POSITION);
         }
-        else if (!autoStackMax) {
+        else if (!stack.runMax()) {
             stack.endPosition(stepper1.XACTUAL());
         }
         btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
@@ -235,7 +236,7 @@ namespace autoconfig_screen {
 
     // print the new shutterDelay value to screen
     void printShutterDelay() {
-        btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, getShutterDelaySeconds());
+        btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, stack.getShutterDelaySeconds());
     }
 
 

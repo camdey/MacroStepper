@@ -4,6 +4,7 @@
 #include "AutoStack.h"
 #include "StepperControl.h"
 #include "CameraControl.h"
+#include "StatusEnums.h"
 #include "menu/UI-Auto.h"
 
 
@@ -29,19 +30,19 @@ void CameraControl::checkFlashAvailability() {
     // Serial.print("godoxVal: "); Serial.println(getFlashSensorValue());
     if (sensorValue() >= flashThreshold()) {
         // if we are mid-flash procedure, status will be shutterHigh so keep this status unless flash becomes unavailable
-        if (status() == shutterHigh) {
-            status(shutterHigh);
+        if (status() == routines::shutterHigh) {
+            status(routines::shutterHigh);
         } else {
-            status(flashAvailable);
+            status(routines::flashAvailable);
         }
     }
     else {
         // if we are mid-flash proecdure, status will be shutterHigh so if flash becomes unavailable it likely means we triggered
         // the flash successfully
-        if (status() == shutterHigh) {
-            status(flashRecycling);
+        if (status() == routines::shutterHigh) {
+            status(routines::flashRecycling);
         } else {
-            status(flashUnavailable);
+            status(routines::flashUnavailable);
         }
     }
 }
@@ -55,8 +56,8 @@ continually checked to see if it has triggered (red LED goes off)
 ******************************************************************/
 void CameraControl::triggerShutter(bool resetProcedure = false) {
     // if in stack procedure, set status to wait shutter
-    if (stack.status() == newShutter) {
-        stack.status(waitShutter);
+    if (stack.status() == routines::newShutter) {
+        stack.status(routines::waitShutter);
     }
     if (flashSensorEnabled()) {
         runFlashProcedure(resetProcedure);
@@ -66,16 +67,16 @@ void CameraControl::triggerShutter(bool resetProcedure = false) {
         if (digitalRead(shutterPin() == LOW)) {
             digitalWrite(shutterPin(), HIGH);
             photoTaken(false);
-            status(shutterHigh);
+            status(routines::shutterHigh);
             lastFlashMillis(millis());
         }
         // if triggered, don't set LOW until 800ms has passed
         else if (millis() - lastFlashMillis() >= SHUTTER_PULL_TIME) {
             digitalWrite(shutterPin(), LOW);
-            status(shutterCompleted);
+            status(routines::shutterCompleted);
             photoTaken(true);
-            if (stack.status() == waitShutter) {
-                stack.status(newMovement);
+            if (stack.status() == routines::waitShutter) {
+                stack.status(routines::newMovement);
             }
         }
     }
@@ -93,54 +94,54 @@ void CameraControl::runFlashProcedure(bool restart) {
     if (restart) {
         checkFlashAvailability();
         // begin flash sequence, make sure shutter pin is pulled low
-        if (status() == flashAvailable) {
+        if (status() == routines::flashAvailable) {
             photoTaken(false);
             lastFlashMillis(millis());
             digitalWrite(shutterPin(), LOW);
-            status(shutterLow);
-        } else if (status() == flashUnavailable) {
-            status(flashUnresponsive);
+            status(routines::shutterLow);
+        } else if (status() == routines::flashUnavailable) {
+            status(routines::flashUnresponsive);
         }
     }
     // if shutter low, pull it high to begin shutter triggering
-    if (status() == shutterLow) {
+    if (status() == routines::shutterLow) {
         digitalWrite(shutterPin(), HIGH);
-        status(shutterHigh);
+        status(routines::shutterHigh);
     }
     // continually check flash availability while shutter is pulled high
-    if (status() == shutterHigh) {
+    if (status() == routines::shutterHigh) {
         checkFlashAvailability();
     }
     // if checkFlashAvailability() detected a successful trigger and pin is currently high
     // it means we are mid-procedure and can sent the shutterPin low
-    if (status() == flashRecycling && digitalRead(shutterPin() == HIGH)) {
+    if (status() == routines::flashRecycling && digitalRead(shutterPin() == HIGH)) {
         digitalWrite(shutterPin(), LOW);
-        status(shutterCompleted);
+        status(routines::shutterCompleted);
     }
     // continually check flash availability after successful recycle detection
     // we can then know when the flash is available again
-    if (status() == shutterCompleted) {
+    if (status() == routines::shutterCompleted) {
         photoTaken(true);
         checkFlashAvailability();
     }
     // completed procedure
-    if (status() == flashAvailable && photoTaken()) {
-        if (stack.status() == waitShutter) {
-            stack.status(newMovement);
+    if (status() == routines::flashAvailable && photoTaken()) {
+        if (stack.status() == routines::waitShutter) {
+            stack.status(routines::newMovement);
         }
         recycleTime(millis() - lastFlashMillis());
     }
     // if status is still shutterHigh after 1000ms, it may be that we didn't detect the flash recycling
     // or the flash failed to trigger, keep trying for 5000ms longer
-    if (status() == shutterHigh && millisSinceLastFlash > 1000 && millisSinceLastFlash < 6000) {
+    if (status() == routines::shutterHigh && millisSinceLastFlash > 1000 && millisSinceLastFlash < 6000) {
         checkFlashAvailability();
     }
     // fail over if we still don't detect a successful flash after 6000ms
-    if (status() == shutterHigh && millisSinceLastFlash >= 6000 ) {
-        if (stack.status() == waitShutter) {
-            stack.status(debugFlash);
+    if (status() == routines::shutterHigh && millisSinceLastFlash >= 6000 ) {
+        if (stack.status() == routines::waitShutter) {
+            stack.status(routines::debugFlash);
         }
-        status(flashUnresponsive);
+        status(routines::flashUnresponsive);
         digitalWrite(shutterPin(), LOW);
     }
 }

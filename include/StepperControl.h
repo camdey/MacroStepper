@@ -88,7 +88,6 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         void executeMovement(int stepDirection, unsigned long stepperDelay);
         void executeSteps(long nrSteps);
         void video360(long nrSteps);
-        void photo360();
         void calculateStepSize();
 
 

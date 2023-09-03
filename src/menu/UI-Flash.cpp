@@ -1,4 +1,5 @@
 #include "GlobalVariables.h"
+#include "AutoStack.h"
 #include "CameraControl.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Flash.h"
@@ -46,14 +47,14 @@ namespace flash_screen {
             btn_array[i]->drawButton();
         }
         // draw text
-        btn_FlashOff.writeTextTopCentre(Arimo_Regular_30,     WHITE);
-        btn_FlashOff.writeTextBottomCentre(Arimo_Bold_30,     WHITE,    String(flashOffValue));
-        btn_FlashOn.writeTextTopCentre(Arimo_Regular_30,        WHITE);
-        btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30,        WHITE,    String(flashOnValue));
-        btn_Threshold.writeTextTopCentre(Arimo_Regular_30,    WHITE);
-        btn_Threshold.writeTextBottomCentre(Arimo_Bold_30,    WHITE,    String(flashThreshold));
-        btn_FlashTest.writeTextTopCentre(Arimo_Bold_30,         WHITE,    String("TEST"));
-        btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30,    WHITE,    String("FLASH"));
+        btn_FlashOff.writeTextTopCentre(Arimo_Regular_30,   WHITE);
+        btn_FlashOff.writeTextBottomCentre(Arimo_Bold_30,   WHITE,  String(camera.flashOffValue()));
+        btn_FlashOn.writeTextTopCentre(Arimo_Regular_30,    WHITE);
+        btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(camera.flashOnValue()));
+        btn_Threshold.writeTextTopCentre(Arimo_Regular_30,  WHITE);
+        btn_Threshold.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String(camera.flashThreshold()));
+        btn_FlashTest.writeTextTopCentre(Arimo_Bold_30,     WHITE,  String("TEST"));
+        btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String("FLASH"));
     }
 
 
@@ -68,13 +69,13 @@ namespace flash_screen {
     void func_FlashOff(bool btnActive) {
         if (btnActive) {
             setEditFlashOffValue(true);
-            btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, YELLOW, String(flashOffValue));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(flashThreshold));
+            btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, YELLOW, String(camera.flashOffValue()));
+            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
         else {
             setEditFlashOffValue(false);
-            btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, WHITE, String(flashOffValue));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(flashThreshold));
+            btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, WHITE, String(camera.flashOffValue()));
+            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
     }
 
@@ -82,13 +83,13 @@ namespace flash_screen {
     void func_FlashOn(bool btnActive) {
         if (btnActive) {
             setEditFlashOnValue(true);
-            btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(flashOnValue));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(flashThreshold));
+            btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(camera.flashOnValue()));
+            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
         else {
             setEditFlashOnValue(false);
-            btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(flashOnValue));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(flashThreshold));
+            btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashOffValue()));
+            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
     }
 
@@ -122,25 +123,28 @@ namespace flash_screen {
 
             // trigger shutter
             camera.triggerShutter(true);
-            // wait for result
-            camera.lastFlashMillis(millis());
             while (millis() - camera.lastFlashMillis() <= 6500) {
                 camera.triggerShutter(false);
-                if (getCurrentStage() == flashSuccessful) {
+                if (camera.status() == routines::shutterCompleted) {
                     break;
                 }
             }
-            // reset stackProcedureStage
-            auto_screen::stackStatus(newStep);
 
             // check result
             if (!camera.photoTaken()) {
                 btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, CUSTOM_RED, String("TEST"));
                 btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, CUSTOM_RED, String("FLASH"));
+                // reset stackProcedureStage if active
+                if (stack.status() != routines::inactive) {
+                    stack.status(routines::newShutter);
+                }
             }
             else if (camera.photoTaken()) {
                 btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, CUSTOM_GREEN, String("TEST"));
                 btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, CUSTOM_GREEN, String("FLASH"));
+                if (stack.status() != routines::inactive) {
+                    stack.status(routines::newMovement);
+                }
             }
             camera.isTestingFlash(false);
         }

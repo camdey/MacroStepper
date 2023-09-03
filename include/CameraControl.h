@@ -5,16 +5,7 @@
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
 #include "MiscFunctions.h"
-
-enum FlashStatus {
-    flashAvailable,
-    shutterLow,
-    shutterHigh,
-    flashRecycling,
-    shutterCompleted,
-    flashUnavailable,
-    flashUnresponsive
-};
+#include "StatusEnums.h"
 
 class CameraControl {
     public:
@@ -26,23 +17,6 @@ class CameraControl {
 
         void shutterEnabled(bool enable) { m_shutterEnabled = enable; }                 // set shutter state to determine if a photo will be taken or not
         bool shutterEnabled() { return m_shutterEnabled; }                              // get shutter state to determine if a photo will be taken or not
-        void shutterDelay(int delay) {m_shutterDelay = valueCheck(delay, 500, 5900);}   // Set delay between a movement and taking a photo via shutter pin
-        int shutterDelay() { return m_shutterDelay; }
-        void incrementShutterDelay() {
-            m_shutterDelay+=100;
-            m_shutterDelay = valueCheck(m_shutterDelay, 500, 5900);
-        }
-        void decrementShutterDelay() {
-            m_shutterDelay-=100;
-            m_shutterDelay = valueCheck(m_shutterDelay, 500, 5900);
-        }
-        // Get delay in seconds in a displayable String format between a movement and taking a photo via shutter pin
-        String getShutterDelaySeconds() {
-            int delay = shutterDelay();
-            int thousandths = delay*0.001;
-            int hundreths = (delay-(thousandths*1000))*0.01;
-            return String(thousandths) + '.' + String(hundreths);
-        }
         void isTestingFlash(bool testing) { m_testingFlash = testing; }
         bool isTestingFlash() { return m_testingFlash; }
         void flashSensorEnabled(bool enable) { m_flashSensorEnabled = enable; } // Set whether the sensor for detecting flash availability is being used
@@ -68,17 +42,16 @@ class CameraControl {
         void runFlashProcedure(bool restart);
         int shutterPin() { return m_shutterPin; }
         int flashPin() { return m_flashPin; }
-        void status(FlashStatus status) { m_status = status; }
-        FlashStatus status() {return m_status; }
+        void status(routines::Flash status) { m_status = status; }
+        routines::Flash status() {return m_status; }
 
     protected:
         int m_flashPin;
         uint8_t m_shutterPin;
-        FlashStatus m_status        = flashUnavailable;  // current state of flash availability
+        routines::Flash m_status    = routines::flashUnavailable;  // current state of flash availability
         int m_flashThreshold        = 280;
         int m_flashOnValue          = 300;          // initial value for flash considered as being ready
         int m_flashOffValue         = 30;           // initial value for flash considered as recycling
-        int m_shutterDelay          = 500;          // delay in milliseconds between a movement and taking a photo via the shutter pin
         bool m_shutterEnabled       = true;         // enable/disable shutter for taken a photo automatically after a step
         bool m_shutterTriggered     = true;         // shutter successfully triggered or not
         bool m_testingFlash         = false;        // flag for testing flash threshold

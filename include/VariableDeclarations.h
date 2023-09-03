@@ -176,12 +176,6 @@ extern int flashThreshold;
 extern int flashOnValue;
 extern int flashOffValue;
 // --- Enable/Disable functionality --- //
-extern bool isNewAutoStack;
-extern bool autoStackInitiated;
-extern bool autoStackPaused;
 extern bool autoStackMax;
-extern bool isNewPhoto360;
-extern bool photo360Initiated;
-extern bool photo360Paused;
 
 #endif

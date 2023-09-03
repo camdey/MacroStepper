@@ -204,7 +204,7 @@ namespace target_screen {
             long nrSteps = atoi(targetValues);
             btn_Run.drawButton(CUSTOM_RED);
             stepper1.VMAX(20000);
-            executeSteps(stepper1, nrSteps);
+            stepper1.executeSteps(nrSteps);
             stepper1.VMAX(STEALTH_CHOP_VMAX);
             btn_Run.drawButton(CUSTOM_GREEN);
             btn_Run.setToggleActive(false); // reset button
@@ -217,7 +217,7 @@ namespace target_screen {
         if (active && !canEditTarget) {
             long nrSteps = atoi(targetValues);
             stepper1.stepsPerMovement(nrSteps);
-            calculateStepSize(stepper1); // update step size
+            stepper1.calculateStepSize(); // update step size
             btn_Save.drawButton(CUSTOM_GREEN);
             delay(250);
             btn_Save.drawButton(WHITE);

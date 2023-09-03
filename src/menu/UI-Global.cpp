@@ -1,6 +1,8 @@
 #include "GlobalVariables.h"
 #include "AutoStack.h"
 #include "CameraControl.h"
+#include "Photo360.h"
+#include "StatusEnums.h"
 #include "menu/UI-Global.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Auto.h"
@@ -22,45 +24,37 @@ namespace global {
             btn_Flash.updateBitmap(flashOn);
             btn_Flash.updateColour(CUSTOM_GREEN);
             btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
-            auto_screen::stackStatus(newStep);
+            // auto_screen::stackStatus(routines::newStep);
         }
         else if (!btnActive) {
             camera.shutterEnabled(false);
             btn_Flash.updateBitmap(flashOff);
             btn_Flash.updateColour(CUSTOM_RED);
             btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
-            auto_screen::stackStatus(newStep);
+            // auto_screen::stackStatus(routines::newStep);
         }
     }
 
     // reset AutoStack procedure to default values
     void func_Reset(bool btnActive) {
         // if button pressed and autostack active...
-        if (btnActive && autoStackInitiated) {
-            autoStackInitiated = false;
-            isNewAutoStack = true;
-            autoStackPaused = false;
+        if (btnActive && stack.status() != routines::inactive) {
+            stack.status(routines::inactive);
             stack.completedMovements(0);
-            // setNrMovementsRequired(0);
-            // setStartPosition(stepper1.XACTUAL());
-            // setEndPosition(stepper1.XACTUAL());
             btn_Reset.updateColour(BLACK);
             btn_Reset.drawButton(BLACK);
-            stack.status(inactive);
+            stack.status(routines::inactive);
         }
         // if button pressed and photo360 active...
-        else if (btnActive && photo360Initiated) {
-            photo360Paused = false;
-            photo360Initiated = false;
-            isNewPhoto360 = true;
-            setNrCompleted360Photos(0);
+        else if (btnActive && photo360.status() != routines::inactive) {
+            photo360.status(routines::inactive);
+            photo360.completedPhotos(0);
             btn_Reset.updateColour(BLACK);
             btn_Reset.drawButton(BLACK);
-            // setTargetVelocity(STEALTH_CHOP_VMAX);
-            stack.status(inactive);
+            stack.status(routines::inactive);
         }
         // if function called from elsewhere...
-        else if ((!btnActive && autoStackInitiated) || photo360Initiated) {
+        else if (!btnActive && (stack.status() == routines::inactive || photo360.status() == routines::inactive)) {
             btn_Reset.updateColour(CUSTOM_RED);
         }
     }

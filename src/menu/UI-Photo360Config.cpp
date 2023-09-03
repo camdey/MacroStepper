@@ -1,5 +1,6 @@
 #include "GlobalVariables.h"
 #include "StepperControl.h"
+#include "Photo360.h"
 #include "menu/UI-Main.h"
 #include "menu/UI-Photo360.h"
 #include "menu/UI-Photo360Config.h"
@@ -29,13 +30,13 @@ namespace photoconfig_screen {
         btn_array[6] = &btn_Direction;
         btn_array[7] = &global::btn_Reset;
 
-        btn_90.addMomentary(func_90,                                0 );
-        btn_180.addMomentary(func_180,                            0 );
-        btn_360.addMomentary(func_360,                            0 );
-        btn_Direction.addToggle(func_Direction,         0 );
-        btn_Back.addMomentary(func_Back,                        0 );
-        btn_ArrowUp.addMomentary(func_ArrowUp,            0 );
-        btn_ArrowDown.addMomentary(func_ArrowDown,    0 );
+        btn_90.addMomentary(func_90,                0 );
+        btn_180.addMomentary(func_180,              0 );
+        btn_360.addMomentary(func_360,              0 );
+        btn_Direction.addToggle(func_Direction,     0 );
+        btn_Back.addMomentary(func_Back,            0 );
+        btn_ArrowUp.addMomentary(func_ArrowUp,      0 );
+        btn_ArrowDown.addMomentary(func_ArrowDown,  0 );
 
         btn_90.addBorder(3, WHITE);
         btn_180.addBorder(3, WHITE);
@@ -73,7 +74,7 @@ namespace photoconfig_screen {
         if (btnActive) {
              // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / 4;
-            readyStealthChop(stepper2);
+            stepper2.readyStealthChop();
             stepper2.targetVelocity(360);
             if (!stepper2.rotateClockwise()) {
                 nrSteps = nrSteps*-1;
@@ -87,7 +88,7 @@ namespace photoconfig_screen {
         if (btnActive) {
              // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / 2;
-            readyStealthChop(stepper2);
+            stepper2.readyStealthChop();
             stepper2.targetVelocity(360);
             if (!stepper2.rotateClockwise()) {
                 nrSteps = nrSteps*-1;
@@ -101,7 +102,7 @@ namespace photoconfig_screen {
         if (btnActive) {
              // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS);
-            readyStealthChop(stepper2);
+            stepper2.readyStealthChop();
             stepper2.targetVelocity(360);
             if (!stepper2.rotateClockwise()) {
                 nrSteps = nrSteps*-1;
@@ -139,8 +140,8 @@ namespace photoconfig_screen {
     void func_ArrowUp(bool btnActive) {
         if (btnActive) {
             // calculate number of microsteps to move for each press based on current nrPhotos setting
-            int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
-            readyStealthChop(stepper2);
+            int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / photo360.requiredPhotos();
+            stepper2.readyStealthChop();
             stepper2.targetVelocity(360);
             stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
         }
@@ -150,8 +151,8 @@ namespace photoconfig_screen {
     void func_ArrowDown(bool btnActive) {
         if (btnActive) {
             // calculate number of microsteps to move for each press based on current nrPhotos setting
-            int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / getNr360Photos();
-            readyStealthChop(stepper2);
+            int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / photo360.requiredPhotos();
+            stepper2.readyStealthChop();
             stepper2.targetVelocity(360);
             stepper2.XTARGET(stepper2.XACTUAL()-nrSteps);
         }
