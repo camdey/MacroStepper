@@ -2,6 +2,7 @@
 #include "StepperControl.h"
 #include "Photo360.h"
 #include "UserInterface.h"
+#include "JoystickControl.h"
 #include "menu/UI-Photo360.h"
 #include "menu/UI-Photo360Config.h"
 #include "menu/UI-Global.h"
@@ -46,7 +47,7 @@ namespace photoconfig_screen {
 
     void populatePhoto360ConfigScreen() {
         ui.activeScreen(routines::ui_Photo360Config);
-        setJoystickMaxVelocity(5000); // lower joystick speed
+        rStick.maxVelocity(5000); // lower joystick speed
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             if (!btn_array[i]->isHidden()) { // if button is not hidden, draw it

@@ -79,16 +79,16 @@ namespace autoconfig_screen {
 
     void func_Start(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_shutterDelay) && !ui.canEdit(routines::btn_endPosition)) {
-            canEdit(routines::btn_arrows, true);
-            setEditStartPosition(true);
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_startPosition, true);
             stack.startPosition(stepper1.XACTUAL()); // set start position to current position
 
             btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
         }
         else if (!btnActive && ui.canEdit(routines::btn_startPosition)) {
-            canEdit(routines::btn_arrows, false);
-            setEditStartPosition(false);
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_startPosition, false);
 
             btn_Start.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_Start.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stack.startPosition()));
@@ -98,16 +98,16 @@ namespace autoconfig_screen {
 
     void func_End(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_shutterDelay) && !ui.canEdit(routines::btn_startPosition)) {
-            canEdit(routines::btn_arrows, true);
-            setEditEndPosition(true);
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_endPosition, true);
             stack.endPosition(stepper1.XACTUAL()); // set end position to current position
 
             btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.endPosition()));
         }
         else if (!btnActive && ui.canEdit(routines::btn_endPosition)) {
-            canEdit(routines::btn_arrows, false);
-            setEditEndPosition(false);
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_endPosition, false);
 
             btn_End.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_End.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stack.endPosition()));
@@ -133,15 +133,15 @@ namespace autoconfig_screen {
 
     void func_Delay(bool btnActive) {
         if (btnActive) {
-            canEdit(routines::btn_arrows, true);
-            setEditShutterDelay(true);
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_shutterDelay, true);
 
             btn_Delay.drawButton(YELLOW);
             btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, stack.getShutterDelaySeconds());
         }
         else if (!btnActive && ui.canEdit(routines::btn_shutterDelay)) {
-            canEdit(routines::btn_arrows, false);
-            setEditShutterDelay(false);
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_shutterDelay, false);
 
             btn_Delay.drawButton(WHITE);
             btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, stack.getShutterDelaySeconds());

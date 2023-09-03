@@ -35,7 +35,7 @@ namespace stack_screen {
 
 
     void populateStackScreen() {
-        ui.activeScreen(routines::Stack);
+        ui.activeScreen(routines::ui_Stack);
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();

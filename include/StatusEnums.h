@@ -53,7 +53,9 @@ namespace routines {
         btn_startPosition,
         btn_endPosition,
         btn_shutterDelay,
-        btn_arrows
+        btn_arrows,
+        btn_photo360Nr,
+        btn_photo360Delay
     };
 }
 #endif

@@ -2,15 +2,13 @@
 #include "StepperControl.h"
 #include "Photo360.h"
 #include "UserInterface.h"
+#include "JoystickControl.h"
 #include "menu/UI-Photo360.h"
 #include "menu/UI-Global.h"
 
 namespace photo_screen {
     #define num_btns 9
     gfxButton *btn_array[num_btns];
-    bool canEditPhotoNr         = false; // flag for editing photoNr with arrows
-    bool canEditPhotoDelay    = false; // flag for editing photoDelay with arrows
-
 
     gfxButton btn_PhotoNr       =   btn.initButton("Nr Photos",     "fillRoundRect",    0,  20,     160,    80,     15, DARKGRAY,   true);
     gfxButton btn_Delay         =   btn.initButton("Delay",         "fillRoundRect",    0,  120,    160,    80,     15, DARKGRAY,   true);
@@ -53,7 +51,7 @@ namespace photo_screen {
 
     void populatePhoto360Screen() {
         ui.activeScreen(routines::ui_Photo360);
-        setJoystickMaxVelocity(5000); // lower joystick speed
+        rStick.maxVelocity(5000); // lower joystick speed
 
         // draw buttons
         for (int i=0; i < num_btns; i++) {
@@ -84,9 +82,9 @@ namespace photo_screen {
     // set number of photos required for photo360 procedure
     void func_PhotoNr(bool btnActive) {
         // don't allow changing mid-procedure
-        if (btnActive && photo360.status() == routines::inactive && !canEditPhotoDelay) {
-            canEdit(routines::btn_arrows, true);
-            canEditPhotoNr = true;
+        if (btnActive && photo360.status() == routines::inactive && !ui.canEdit(routines::btn_photo360Delay)) {
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_photo360Nr, true);
             hideArrows(false); // show arrows, hide play/pause
 
             btn_PhotoNr.writeTextTopCentre(Arimo_Regular_30, YELLOW);
@@ -97,9 +95,9 @@ namespace photo_screen {
             btn_ArrowUp.drawButton(CUSTOM_GREEN);
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
-        else if (!btnActive && photo360.status() == routines::inactive && !canEditPhotoDelay) {
-            canEdit(routines::btn_arrows, false);
-            canEditPhotoNr = false;
+        else if (!btnActive && photo360.status() == routines::inactive && !ui.canEdit(routines::btn_photo360Delay)) {
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_photo360Delay, false);
             hideArrows(true); // hide arrows, show play/pause
 
             // TODO would be nice to not re-write the top line on every arrow press
@@ -120,9 +118,9 @@ namespace photo_screen {
     // set delay between photos for photo360 procedure
     void func_Delay(bool btnActive) {
         // don't allow changing unless paused or not started
-        if (btnActive && !photo360.busy() && !canEditPhotoNr) {
-            canEdit(routines::btn_arrows, true);
-            canEditPhotoDelay = true;
+        if (btnActive && !photo360.busy() && !ui.canEdit(routines::btn_photo360Nr)) {
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_photo360Delay, true);
             hideArrows(false); // show arrows, hide play/pause
 
             btn_Delay.writeTextTopCentre(Arimo_Regular_30, YELLOW);
@@ -133,9 +131,9 @@ namespace photo_screen {
             btn_ArrowUp.drawButton(CUSTOM_GREEN);
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
-        else if (!btnActive && !photo360.busy() && !canEditPhotoNr) {
-            canEdit(routines::btn_arrows, false);
-            canEditPhotoDelay = false;
+        else if (!btnActive && !photo360.busy() && !ui.canEdit(routines::btn_photo360Nr)) {
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_photo360Delay, false);
             hideArrows(true); // hide arrows, show play/pause
 
             btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -224,13 +222,13 @@ namespace photo_screen {
 
     void func_ArrowUp(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_arrows)) {
-            if (canEditPhotoNr) {
+            if (ui.canEdit(routines::btn_photo360Nr)) {
                 photo360.incrementRequiredPhotos();
                 photo360.completedPhotos(0); // reset in case adjusting after previous run
                 printPhoto360Progress();
                 btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.requiredPhotos()));
             }
-            else if (canEditPhotoDelay) {
+            else if (ui.canEdit(routines::btn_photo360Delay)) {
                 photo360.incrementShutterDelay();
                 btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.shutterDelay()));
             }
@@ -240,13 +238,13 @@ namespace photo_screen {
 
     void func_ArrowDown(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_arrows)) {
-            if (canEditPhotoNr) {
+            if (ui.canEdit(routines::btn_photo360Nr)) {
                 photo360.decrementRequiredPhotos();
                 photo360.completedPhotos(0); // reset in case adjusting after previous run
                 printPhoto360Progress();
                 btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.requiredPhotos()));
             }
-            else if (canEditPhotoDelay) {
+            else if (ui.canEdit(routines::btn_photo360Delay)) {
                 photo360.decrementShutterDelay();
                 btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.shutterDelay()));
             }

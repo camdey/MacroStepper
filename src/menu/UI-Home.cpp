@@ -56,7 +56,7 @@ namespace home_screen {
 
     void func_Stack(bool btnActive) {
         if (btnActive) {
-            ui.populateScreen(routines::Stack);
+            ui.populateScreen(routines::ui_Stack);
         }
     }
 

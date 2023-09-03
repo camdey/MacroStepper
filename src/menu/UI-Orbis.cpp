@@ -1,5 +1,6 @@
 #include "GlobalVariables.h"
 #include "UserInterface.h"
+#include "JoystickControl.h"
 #include "menu/UI-Orbis.h"
 
 namespace orbis_screen {
@@ -27,7 +28,7 @@ namespace orbis_screen {
 
     void populateOrbisScreen() {
         ui.activeScreen(routines::ui_Orbis);
-        setJoystickMaxVelocity(5000); // lower joystick speed
+        rStick.maxVelocity(5000); // lower joystick speed
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             if (!btn_array[i]->isHidden()) { // if button is not hidden, draw it
@@ -66,7 +67,7 @@ namespace orbis_screen {
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
             ui.populateScreen(routines::ui_Home);
-            setJoystickMaxVelocity(100000); // reset back to original value
+            rStick.maxVelocity(100000); // reset back to original value
         }
     }
 }

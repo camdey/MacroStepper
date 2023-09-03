@@ -68,12 +68,13 @@ namespace flash_screen {
 
     void func_FlashOff(bool btnActive) {
         if (btnActive) {
-            setEditFlashOffValue(true);
+            ui.canEdit(routines::btn_flashOff, true);
+            ui.canEdit(routines::btn_shutterDelay, true);
             btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, YELLOW, String(camera.flashOffValue()));
             btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
         else {
-            setEditFlashOffValue(false);
+            ui.canEdit(routines::btn_flashOff, false);
             btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, WHITE, String(camera.flashOffValue()));
             btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
@@ -82,12 +83,12 @@ namespace flash_screen {
 
     void func_FlashOn(bool btnActive) {
         if (btnActive) {
-            setEditFlashOnValue(true);
+            ui.canEdit(routines::btn_flashOn, true);
             btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(camera.flashOnValue()));
             btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }
         else {
-            setEditFlashOnValue(false);
+            ui.canEdit(routines::btn_flashOn, false);
             btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashOffValue()));
             btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
         }

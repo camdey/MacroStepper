@@ -78,15 +78,15 @@ namespace manual_screen {
 
     void func_StepDistance(bool btnActive) {
         if (btnActive) {
-            canEdit(routines::btn_arrows, true);
-            setEditMovementDistance(true);
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_distance, true);
 
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
         }
         else {
-            canEdit(routines::btn_arrows, false);
-            setEditMovementDistance(false);
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_distance, false);
 
             // TODO would be nice to not re-write the top line on every arrow press
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -106,7 +106,7 @@ namespace manual_screen {
 
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(routines::Stack);
+            ui.populateScreen(routines::ui_Stack);
         }
     }
 
@@ -114,13 +114,13 @@ namespace manual_screen {
     void func_ArrowUp(bool btnActive) {
         if (btnActive) {
             // if setting step size
-            if (ui.canEdit(routines::btn_distance)() && ui.canEdit(routines::btn_arrows)) {
+            if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.incrementStepsPerMovement();
                 stepper1.calculateStepSize();
                 btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
             }
             // if not setting step size, move the stepper forward
-            else if (!ui.canEdit(routines::btn_distance)()) {
+            else if (!ui.canEdit(routines::btn_distance)) {
                 // take photo if shutter enabled
                 if (camera.shutterEnabled()) {
                     camera.triggerShutter(true);
@@ -138,13 +138,13 @@ namespace manual_screen {
     void func_ArrowDown(bool btnActive) {
         if (btnActive) {
             // if setting step size
-            if (ui.canEdit(routines::btn_distance)() && ui.canEdit(routines::btn_arrows)) {
+            if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.decrementStepsPerMovement();
                 stepper1.calculateStepSize();
                 btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
             }
             // if not setting step size, move the stepper forward
-            else if (!ui.canEdit(routines::btn_distance)()) {
+            else if (!ui.canEdit(routines::btn_distance)) {
                 // take photo if shutter enabled
                 if (camera.shutterEnabled()) {
                     camera.triggerShutter(true);

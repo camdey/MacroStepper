@@ -2,6 +2,7 @@
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "JoystickControl.h"
+#include "UserInterface.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-AutoConfig.h"
 
@@ -155,7 +156,7 @@ int Joystick::readSmoothed() {
     recursiveFilterValue(adjVal/100);
     val = round(adjVal*1.00 / 10000);
 
-    if (isScreenRotated()) {
+    if (ui.screenRotated()) {
         val = map(val, 0, 1023, 1023, 0);
     }
     // offset reading by difference between resting state and ideal middle point

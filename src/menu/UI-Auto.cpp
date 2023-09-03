@@ -87,8 +87,8 @@ namespace auto_screen {
 
     void func_StepDistance(bool btnActive) {
         if (btnActive && !stack.busy()) {
-            canEdit(routines::btn_arrows, true);
-            setEditMovementDistance(true);
+            ui.canEdit(routines::btn_arrows, true);
+            ui.canEdit(routines::btn_distance, true);
             hideArrows(false); // show arrows, hide play/pause
 
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
@@ -101,8 +101,8 @@ namespace auto_screen {
             btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && !stack.busy()) {
-            canEdit(routines::btn_arrows, false);
-            setEditMovementDistance(false);
+            ui.canEdit(routines::btn_arrows, false);
+            ui.canEdit(routines::btn_distance, false);
             hideArrows(true); // hide arrows, show play/pause
 
             // TODO would be nice to not re-write the top line on every arrow press
@@ -130,7 +130,7 @@ namespace auto_screen {
 
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(routines::Stack);
+            ui.populateScreen(routines::ui_Stack);
         }
     }
 
@@ -169,7 +169,7 @@ namespace auto_screen {
 
 
     void func_ArrowUp(bool btnActive) {
-        if (btnActive && ui.canEdit(routines::btn_distance)() && ui.canEdit(routines::btn_arrows)) {
+        if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.incrementStepsPerMovement();
             stepper1.calculateStepSize();
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
@@ -178,7 +178,7 @@ namespace auto_screen {
 
 
     void func_ArrowDown(bool btnActive) {
-        if (btnActive && ui.canEdit(routines::btn_distance)() && ui.canEdit(routines::btn_arrows)) {
+        if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.decrementStepsPerMovement();
             stepper1.calculateStepSize();
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));

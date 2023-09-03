@@ -71,13 +71,13 @@ namespace config_screen {
         if (btnActive) {
             btn_FlipScreen.updateBitmap(toggleOn);
             btn_FlipScreen.updateColour(CUSTOM_GREEN);
-            rotateScreen(); // rotate screen, touch controls, and joystick
+            ui.rotateScreen(); // rotate screen, touch controls, and joystick
             ui.populateScreen(routines::ui_Config);
         }
         else if (!btnActive) {
             btn_FlipScreen.updateBitmap(toggleOff);
             btn_FlipScreen.updateColour(CUSTOM_RED);
-            rotateScreen(); // rotate screen, touch controls, and joystick
+            ui.rotateScreen(); // rotate screen, touch controls, and joystick
             ui.populateScreen(routines::ui_Config);
         }
     }
