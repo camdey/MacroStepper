@@ -98,10 +98,11 @@ extern gfxButton            btn;
 // #define TS_MINY                  132
 // #define TS_MAXY                  900
 // Arduino Due + 3.5" TFT
-#define TS_MINX                     148 // 846
-#define TS_MAXX                     846 // 148
-#define TS_MINY                     140 // 937
-#define TS_MAXY                     937 // 140
+#define TS_MINX                     900 // down
+#define TS_MAXX                     120 // up
+#define TS_MINY                     100 // left
+#define TS_MAXY                     940 // right
+
 // Grand Central M4 + 2.8" TFT
 // #define TS_MINX                  320
 // #define TS_MAXX                  760
@@ -114,25 +115,25 @@ extern gfxButton            btn;
 // #define TS_MAXY                  220
 
 // pin definitions for touch inputs
-#define YP                          A3              // must be an analog pin, use "An" notation!
-#define XM                          A2              // must be an analog pin, use "An" notation!
-#define YM                          9               // can be a digital pin
-#define XP                          8               // can be a digital pin
+#define YP                          A1          // must be an analog pin
+#define XM                          A2          // must be an analog pin
+#define YM                          7           // can be a digital pin
+#define XP                          6           // can be a digital pin
 
 // pin definitions for tft screen
-#define LCD_CS                      A3
-#define LCD_CD                      A2
-#define LCD_WR                      A1
-#define LCD_RD                      A0
-#define LCD_RESET                   A4
+// #define LCD_CS                      A3
+// #define LCD_CD                      A2
+// #define LCD_WR                      A1
+// #define LCD_RD                      A0
+// #define LCD_RESET                   A4
 
 // stepper1 pins
 #define DIAG0_1_PIN                 38
 #define DIAG1_1_PIN                 40
-// #define DIR_1_PIN                    30               // use SPI stepping with TMC5160
-// #define STEP_1_PIN                   32              // use SPI stepping with TMC5160
+// #define DIR_1_PIN                    30          // use SPI stepping with TMC5160
+// #define STEP_1_PIN                   32          // use SPI stepping with TMC5160
 #define CS_1_PIN                    34
-#define EN_1_PIN                    36
+#define EN_1_PIN                    37              // pin 36 is meant to be connected but not working on the Grand Central, 37 is tied to 36 and 36 does not connect to arduino
 #define R_1_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
 // handled by SPI library
 // #define MOSI_PIN                 ICSP4
@@ -142,8 +143,8 @@ extern gfxButton            btn;
 // stepper2 pins
 #define DIAG0_2_PIN                 24
 #define DIAG1_2_PIN                 26
-// #define DIR_2_PIN                    28              // use SPI stepping with TMC5160
-// #define STEP_2_PIN                   30              // use SPI stepping with TMC5160
+// #define DIR_2_PIN                    28          // use SPI stepping with TMC5160
+// #define STEP_2_PIN                   30          // use SPI stepping with TMC5160
 #define CS_2_PIN                    28
 #define EN_2_PIN                    42
 #define R_2_SENSE                   0.075f          // Watterott TMC5160 uses 0.075

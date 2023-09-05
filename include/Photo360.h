@@ -25,7 +25,7 @@ class Photo360 {
         routines::Photo status() {return m_status; }
         // whether photo360 is currently mid procedure, i.e. not inactive or paused
         bool busy() {
-            bool isBusy = (status() != routines::inactive || status() != routines::paused);
+            bool isBusy = (status() != routines::inactive && status() != routines::paused);
             return isBusy;
         }
         int requiredPhotos() {

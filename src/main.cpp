@@ -61,7 +61,7 @@ AutoStack               stack(stepper1);
 Photo360                photo360(stepper2);
 CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
 Joystick                xStick(stepper1, XSTICK_PIN, ZSTICK_PIN);
-Joystick                rStick(stepper2, RSTICK_PIN);
+Joystick                rStick(stepper2, RSTICK_PIN, ZSTICK_PIN);
 UserInterface           ui;
 
 
@@ -76,21 +76,20 @@ void setup(void) {
 	tft.setRotation(3);
     ui.screenRotated(false);
 
-	stepper1.initDriver(1400, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN);
+	stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN); //1400
     stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
 
-    stepper1.configStealthChop();
-    stepper2.configStealthChop();
-
+    pinMode(PIEZO_PIN, OUTPUT);
 	pinMode(EN_1_PIN, OUTPUT);
     pinMode(EN_2_PIN, OUTPUT);
-    stepper1.enabled(true);
-    stepper2.enabled(false);
     pinMode(CS_1_PIN, OUTPUT);
     pinMode(CS_2_PIN, OUTPUT);
     stepper1.slaveSelected(true);
+    stepper1.configStealthChop();
+    stepper1.enabled(true);
+
     stepper2.slaveSelected(false);
-    pinMode(PIEZO_PIN, OUTPUT);
+    stepper2.enabled(false);
     
     // declare analog pin as digital input
     pinMode(ZSTICK_PIN, INPUT_PULLUP);    // pullup needed for consistent readings
@@ -104,48 +103,59 @@ void setup(void) {
     btn.setScreenSize(480, 320);
     ui.initButtons(200, 75);
     ui.populateScreen(routines::ui_Home);
+
+    rStick.restVal(50);
+    rStick.restValUpper(60);
+    rStick.restValLower(40);
 }
 
 void loop() {
     // run AutoStack sequence if not paused or inactive
-    if (stack.busy()) {
-        stack.run();
-        // update duration if on Auto screen
-        if (ui.activeScreen() == routines::ui_Auto) {
-		    auto_screen::estimateDuration();
-        }
-    }
+    // if (stack.busy()) {
+    //     stack.run();
+    //     // update duration if on Auto screen
+    //     if (ui.activeScreen() == routines::ui_Auto) {
+	// 	    auto_screen::estimateDuration();
+    //     }
+    // }
     // take touch reading
     if (millis() - ui.lastCheckMillis() >= 50) {
         ui.readTouchScreen(ui.activeScreen());
         ui.lastCheckMillis(millis());
-
         // if video360 active, keep updating target so stepper keeps moving
-        if (isVideo360Active()) {
-            stepper2.video360(getVideo360Target());
-        }
-        if (photo360.status() != routines::inactive) {
-            photo360.run();
-        }
+        // if (isVideo360Active()) {
+        //     stepper2.video360(getVideo360Target());
+        // }
+        // if (photo360.status() != routines::inactive) {
+        //     photo360.run();
+        // }
     }
     // take joystick and limit switch reading, put stepper to sleep
     if (millis() - xStick.lastCheckMillis() >= 100) {
-        // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
-        if (!stack.busy() && !photo360.busy() && !isVideo360Active() && xStick.buttonActive()) {
-            xStick.motion();
+    //     // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
+        if (!stack.busy() && !photo360.busy() && !isVideo360Active()) {
+            int xPos = xStick.readSmoothed();
+            int rPos = rStick.read();
+            Serial.print("rpos: "); Serial.println(rPos);
+            if ((xPos >= xStick.restValUpper() || xPos <= xStick.restValLower()) && xStick.buttonActive()) {
+                xStick.motion(true);
+            }
+            // else if ((rPos >= rStick.restValUpper() || rPos <= rStick.restValLower()) && !rStick.buttonActive()) {
+            //     rStick.motion(false);
+            // }
         }
-        // sleep if stepper inactive, update position on manual screen
-        if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == routines::inactive) {
-            stepper1.enabled(false); // disable stepper
-        }
-        // sleep if stepper inactive, update position on manual screen
-        if (stepper2.reachedTarget() && stepper2.enabled() && photo360.status() == routines::inactive) {
-            stepper2.enabled(false); // disable stepper
-        }
-		// update flashSensorValue if on Flash screen
-		if (ui.activeScreen() == routines::ui_Flash && (ui.canEdit(routines::btn_flashOff) || ui.canEdit(routines::btn_flashOn))) {
-			flash_screen::updateFlashSensorValue();
-		}
+    //     // sleep if stepper inactive, update position on manual screen
+    //     if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == routines::inactive) {
+    //         stepper1.enabled(false); // disable stepper
+    //     }
+    //     // sleep if stepper inactive, update position on manual screen
+    //     if (stepper2.reachedTarget() && stepper2.enabled() && photo360.status() == routines::inactive) {
+    //         stepper2.enabled(false); // disable stepper
+    //     }
+	// 	// update flashSensorValue if on Flash screen
+	// 	if (ui.activeScreen() == routines::ui_Flash && (ui.canEdit(routines::btn_flashOff) || ui.canEdit(routines::btn_flashOn))) {
+	// 		flash_screen::updateFlashSensorValue();
+	// 	}
         xStick.lastCheckMillis(millis());
     }
 }

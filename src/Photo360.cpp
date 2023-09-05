@@ -9,6 +9,8 @@
 #include "menu/UI-Photo360.h"
 
 void Photo360::run() {
+    _stepper.slaveSelected(true);
+    _stepper.enabled(true);
     _stepper.targetVelocity(360); // approx. 5rpm
     // 0 - if start of new photo360, set speed, take first photo, and enable stepper
     if (status() == routines::start) {
@@ -58,6 +60,8 @@ void Photo360::run() {
             photo_screen::resetPhoto360();
         }
     }
+    _stepper.slaveSelected(false);
+    _stepper.enabled(false);
 }
 
 
@@ -71,7 +75,6 @@ been homed and will exit autoStack if running.
 ******************************************************************/
 void Photo360::executeMovement(int stepDirection, unsigned long stepperDelay) {
     _stepper.readyStealthChop();
-
     // step after elapsed amount of time
     if ((millis() - lastMovementMillis() > stepperDelay)) {
         int stepVelocity = stepDirection * _stepper.stepsPerMovement();
@@ -90,5 +93,5 @@ void Photo360::executeMovement(int stepDirection, unsigned long stepperDelay) {
     else {
         _stepper.executedMovement(false);
         status(routines::delayMovement);
-  }
+    }
 }

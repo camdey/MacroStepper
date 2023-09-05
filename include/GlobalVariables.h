@@ -2,8 +2,6 @@
 #define GLOBALVARIABLES_H
 
 #include <Arduino.h>
-#include "VariableDeclarations.h"
-
 
 void setRevsPerMinute(int rpm);
 int getRevsPerMinute();

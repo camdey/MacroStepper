@@ -36,17 +36,17 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         bool rotateClockwise() {return m_rotateClockwise;}
         void slaveSelected(bool selected) {
             if (selected) {
-                digitalWrite(chipSelectPin(), LOW);
-            } else if (!selected) {
                 digitalWrite(chipSelectPin(), HIGH);
+            } else if (!selected) {
+                digitalWrite(chipSelectPin(), LOW);
             }
             m_slaveSelected = selected;
         }
         bool slaveSelected() {return m_slaveSelected;}
         void stallGuardActive(bool active) {m_stallGuardActive = active;}
         bool stallGuardActive() {return m_stallGuardActive;}
-        void stepSize(int stepSize) {m_stepSize = stepSize;}
-        int stepSize() {return m_stepSize;}
+        void stepSize(float stepSize) {m_stepSize = stepSize;}
+        float stepSize() {return m_stepSize;}
         void stepsPerMovement(int steps) {m_stepsPerMovement = steps;}
         int stepsPerMovement() {return m_stepsPerMovement;}
         void incrementStepsPerMovement() {m_stepsPerMovement++;}
@@ -60,17 +60,11 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         bool homed() {return m_homed;}
         bool reachedTarget() {return XACTUAL() == XTARGET();}
         void readyStallGuard() {
-            if (!enabled()) {           // enable stepper if disabled
-                enabled(true);
-            }
             if (!stallGuardActive()) {  // change to StallGuard is StealthChop is configured
                 configStallGuard();
             }
         }
         void readyStealthChop() {
-            if (!enabled()) {           // enable stepper if disabled
-                enabled(true);
-            }
             if (stallGuardActive()) {   // change to StealthChop is StallGuard is configured
                 configStealthChop();
             }

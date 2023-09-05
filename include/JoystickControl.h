@@ -13,7 +13,7 @@ class Joystick {
 
         long calculateVelocity(int pos);
         void calibrateRestPosition();
-        void motion();
+        void motion(bool btnTrigger);
         void printNewPositions(); 
         int read() { return analogRead(m_stickPin); }                       // Get the input reading from the analog pin
         int readSmoothed();                                                 // Smooth the joystick reading using recursive filtering
@@ -35,15 +35,13 @@ class Joystick {
         long maxVelocity() { return m_maxVelocity; }
 
     protected:
-        long m_maxVelocity              = 100000;       // VMAX when using joystick
-        long m_recursiveValue           = 51200;        // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
-        unsigned long prevButtonCheck       = 0;
-        unsigned long prevJoystickCheck     = 0;
-        long m_lastCheckMillis              = 0;        // store readings of millis() to use for checking conditions within loops every X milliseconds
-        int m_restValUpper                  = 522;      // Upper boundary of joystick resting point, calibrated during setup
-        int m_restVal                       = 512;      // Resting point of joystick reading, calibrated during setup
-        int m_restValLower                  = 502;      // Lower boundary of of joystick resting point, calibrated during setup
-        int m_restValDiff                   = 0;        // Difference between ideal middle (512) and actual resting point
+        long m_maxVelocity              = 100000;   // VMAX when using joystick
+        long m_recursiveValue           = 51200;    // store filtered value of last joystick reading, initialize as 51200 since formula multiplies values by 100 to avoid floats
+        long m_lastCheckMillis          = 0;        // store readings of millis() to use for checking conditions within loops every X milliseconds
+        int m_restValUpper              = 522;      // Upper boundary of joystick resting point, calibrated during setup
+        int m_restVal                   = 512;      // Resting point of joystick reading, calibrated during setup
+        int m_restValLower              = 502;      // Lower boundary of of joystick resting point, calibrated during setup
+        int m_restValDiff               = 0;        // Difference between ideal middle (512) and actual resting point
         uint8_t m_stickPin;
         uint8_t m_buttonPin;
 };

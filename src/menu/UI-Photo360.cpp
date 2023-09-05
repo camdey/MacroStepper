@@ -64,7 +64,7 @@ namespace photo_screen {
         btn_PhotoNr.writeTextTopCentre(Arimo_Regular_30, WHITE);
         btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.requiredPhotos()));
         btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.requiredPhotos()));
+        btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.shutterDelay()));
         btn_Progress.writeTextTopCentre(Arimo_Regular_30, WHITE);
         printPhoto360Progress();
     }
@@ -97,7 +97,7 @@ namespace photo_screen {
         }
         else if (!btnActive && photo360.status() == routines::inactive && !ui.canEdit(routines::btn_photo360Delay)) {
             ui.canEdit(routines::btn_arrows, false);
-            ui.canEdit(routines::btn_photo360Delay, false);
+            ui.canEdit(routines::btn_photo360Nr, false);
             hideArrows(true); // hide arrows, show play/pause
 
             // TODO would be nice to not re-write the top line on every arrow press
@@ -124,7 +124,7 @@ namespace photo_screen {
             hideArrows(false); // show arrows, hide play/pause
 
             btn_Delay.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.requiredPhotos()));
+            btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.shutterDelay()));
 
             // clear play/pause button
             btn_PlayPause.drawButton(BLACK);
@@ -137,7 +137,7 @@ namespace photo_screen {
             hideArrows(true); // hide arrows, show play/pause
 
             btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.requiredPhotos()));
+            btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.shutterDelay()));
 
             btn_ArrowUp.drawButton(BLACK);
             btn_ArrowDown.drawButton(BLACK);

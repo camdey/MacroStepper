@@ -78,7 +78,7 @@ void TMC5160Stepper_Ext::configStallGuard() {
     pwm_autoscale(true);                            // Needed for stealthChop
     pwm_autograd(true);
     TZEROWAIT(10000);                               // wait time before next movement, approx 300ms, range 0 - 65,536
-    TPOWERDOWN(10000);
+    TPOWERDOWN(0b00);
     TPWMTHRS(0);                                    // TSTEP ≥ TPWMTHRS: StealthChop enabled, DcStep disabled
     TCOOLTHRS(400);                                 // TCOOLTHRS ≥ TSTEP ≥ THIGH: CoolStep enabled, StealthChop PWM disabled.
                                                     // TCOOLTHRS ≥ TSTEP: Stop on stall enabled.
@@ -148,8 +148,9 @@ until it receives a response of true. Prevents stall if rail has
 been homed and will exit autoStack if running.
 ******************************************************************/
 void TMC5160Stepper_Ext::executeMovement(int stepDirection, unsigned long stepperDelay) {
-    readyStealthChop();
-
+    slaveSelected(true);
+    enabled(true);
+    readyStallGuard();
     // step after elapsed amount of time
     if ((millis() - lastCheckMillis() > stepperDelay)) {
         int stepVelocity = stepDirection * stepsPerMovement();
@@ -172,17 +173,23 @@ void TMC5160Stepper_Ext::executeMovement(int stepDirection, unsigned long steppe
     else {
         executedMovement(false);
   }
+  slaveSelected(false);
+  enabled(false);
 }
 
 
 // execute a predetermined number of steps
 void TMC5160Stepper_Ext::executeSteps(long nrSteps) {
-    readyStealthChop();
+    slaveSelected(true);
+    enabled(true);
+    readyStallGuard();
     long targetPosition = XACTUAL() + nrSteps;
     // set new target position
     XTARGET(targetPosition);
     // wait for stepper to reach target position
     while(XACTUAL() != XTARGET()) {}
+    slaveSelected(false);
+    enabled(false);
 }
 
 
@@ -192,6 +199,8 @@ void TMC5160Stepper_Ext::executeSteps(long nrSteps) {
 // moves stepper to middle of the rail (192,000)
 void TMC5160Stepper_Ext::homeRail() {
     bool hitRearStop, hitForwardStop = false;
+    slaveSelected(true);
+    enabled(true);
     readyStallGuard();
     // reset positions
     forwardEndStop(1);
@@ -237,16 +246,18 @@ void TMC5160Stepper_Ext::homeRail() {
         configStealthChop();                    // set config for silentStep
         homed(true);
     }
+    slaveSelected(false);
+    enabled(false);
 }
 
 
 void TMC5160Stepper_Ext::video360(long nrSteps) {
-    // change to StealthChop if StallGuard is configured
-    readyStealthChop();
-    // update target velocity as calling configStealthChop resets this on the driver register but not the function
-    targetVelocity(targetVelocity());
-    // set position
-    XTARGET(XACTUAL()+nrSteps);
+    // // change to StealthChop if StallGuard is configured
+    // readyStealthChop();
+    // // update target velocity as calling configStealthChop resets this on the driver register but not the function
+    // targetVelocity(targetVelocity());
+    // // set position
+    // XTARGET(XACTUAL()+nrSteps);
 }
 
 

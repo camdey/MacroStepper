@@ -13,18 +13,16 @@
 
 
 void AutoStack::init() {
-    if (status() == routines::start) {                  // move to start position if beginning AutoStack
-        _stepper.readyStealthChop();
-        _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
-        goToStart();
-        completedMovements(0);
-        _stepper.executedMovement(false);
-        camera.photoTaken(false);
-        lastMovementMillis(millis());
-        global::func_Reset(false);                      // change reset button to red
-        status(routines::waitShutter);
-        // auto_screen::status(start);
-    }
+    _stepper.readyStealthChop();
+    _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
+    goToStart();
+    completedMovements(0);
+    _stepper.executedMovement(false);
+    camera.photoTaken(false);
+    lastMovementMillis(millis());
+    global::func_Reset(false);                      // change reset button to red
+    status(routines::waitShutter);
+    // auto_screen::status(start);
 }
 
 /***********************************************************************
@@ -38,7 +36,11 @@ another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void AutoStack::run() {
-    init();
+    _stepper.slaveSelected(true);
+    _stepper.enabled(true);
+    if (status() == routines::start) {                  // move to start position if beginning AutoStack
+        init();
+    }
 
     if (completedMovements() <= requiredMovements() && !_stepper.executedMovement()) {
         // take photo if there's been >= STACK_DWELL_TIME since a movement was executed successfully (gives time for vibration to settle)
@@ -75,6 +77,8 @@ void AutoStack::run() {
         status(routines::completedStack);
         terminateAutoStack();                           // stop AutoStack sequence if end reached
     }
+    _stepper.slaveSelected(false);
+    _stepper.enabled(false);
 }
 
 
@@ -107,7 +111,7 @@ void AutoStack::executeMovement(int stepDirection, unsigned long stepperDelay) {
     else {
         _stepper.executedMovement(false);
         status(routines::delayMovement);
-  }
+    }
 }
 
 
@@ -170,6 +174,8 @@ void AutoStack::terminateAutoStack() {
 
 // run through the specified AutoStack procedure using the current start and end values
 void AutoStack::dryRun() {
+    _stepper.slaveSelected(true);
+    _stepper.enabled(true);
     _stepper.readyStealthChop();
     // reduce stepper velocity
     _stepper.targetVelocity(5000);
@@ -204,6 +210,8 @@ void AutoStack::dryRun() {
     // overshoot by 3200 steps/1mm and return to start
     overshootPosition(startPosition(), 3200);
     _stepper.targetVelocity(STEALTH_CHOP_VMAX);
+    _stepper.slaveSelected(false);
+    _stepper.enabled(false);
 }
 
 

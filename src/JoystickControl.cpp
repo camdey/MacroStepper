@@ -71,13 +71,15 @@ used to reduce the initial acceleration of the stepper to control
 jerk. After 5000 steps, modifier is redundant and normal speed
 control resumes.
 ******************************************************************/
-void Joystick::motion() {
+void Joystick::motion(bool btnTrigger) {
+    _stepper.slaveSelected(true);
+    _stepper.enabled(true);
     _stepper.readyStealthChop();
     int pos = readSmoothed();
     int dir = getDirection(pos);
     long velocity = calculateVelocity(pos);
 
-    while ((pos >= restValUpper() || pos <= restValLower()) && buttonActive()) {
+    while ((pos >= restValUpper() || pos <= restValLower()) && (buttonActive() || !btnTrigger)) {
         // don't allow movement if within 2mm of endstops if homed
         if (_stepper.homed()) {
             if (dir == 0 && _stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
@@ -121,6 +123,8 @@ void Joystick::motion() {
     _stepper.XTARGET(_stepper.XACTUAL());           // reset target to actual, call after setting targetVelocity to avoid "bounce"
     printNewPositions();                            // print final positions now that stepper has stopped
     _stepper.targetVelocity(STEALTH_CHOP_VMAX);     // reset VMAX to stealthChop default
+    _stepper.slaveSelected(false);
+    _stepper.enabled(false);
 }
 
 

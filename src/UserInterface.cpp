@@ -95,6 +95,7 @@ void UserInterface::populateScreen(routines::Screens screen) {
 
 void UserInterface::readTouchScreen(routines::Screens screen) {
     TSPoint point = ts.getPoint();
+    // Serial.print("x: "); Serial.print(point.x); Serial.print(" | y: "); Serial.print(point.y); Serial.print(" | z: "); Serial.println(point.z);
 
     // reset pinModes for tft (otherwise can't draw!)
     pinMode(XM, OUTPUT);

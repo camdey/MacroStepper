@@ -1,7 +1,4 @@
 #include "GlobalVariables.h"
-#include "StepperControl.h"
-#include "MiscFunctions.h"
-
 
 // video360
 int revsPerMinute                   = 50;               // revs per minute for video 360, stored as 10x higher to avoid floating point math

@@ -45,7 +45,7 @@ class UserInterface {
             } else if (button == routines::btn_arrows) {
                 m_arrows = state;
             } else if (button == routines::btn_photo360Delay) {
-                m_Photo360Delay = state;
+                m_photo360Delay = state;
             } else if (button == routines::btn_photo360Nr) {
                 m_photo360Nr = state;
             }
@@ -66,7 +66,7 @@ class UserInterface {
             } else if (button == routines::btn_arrows) {
                 return m_arrows;
             } else if (button == routines::btn_photo360Delay) {
-                return m_Photo360Delay;
+                return m_photo360Delay;
             } else if (button == routines::btn_photo360Nr) {
                 return m_photo360Nr;
             }
@@ -83,7 +83,7 @@ class UserInterface {
         bool m_distance                 = false;            // set step distance in any mode
         bool m_flashOn                  = false;            // set flash on value
         bool m_flashOff                 = false;            // set flash off value
-        bool m_Photo360Delay            = false;            // set photo360 delay
+        bool m_photo360Delay            = false;            // set photo360 delay
         bool m_photo360Nr               = false;            // set photo360 required photos
         long m_lastCheckMillis          = 0;
 
