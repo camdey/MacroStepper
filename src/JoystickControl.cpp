@@ -75,10 +75,11 @@ void Joystick::motion(bool btnTrigger) {
     _stepper.slaveSelected(true);
     _stepper.enabled(true);
     _stepper.readyStealthChop();
-    Serial.print("en pin: "); Serial.println(_stepper.enablePin());
+    Serial.print(btnTrigger); Serial.print(": "); Serial.print(_stepper.enablePin()); Serial.print("-"); Serial.println(_stepper.chipSelectPin());
     int pos = readSmoothed();
     int dir = getDirection(pos);
     long velocity = calculateVelocity(pos);
+    // Serial.print(millis()); Serial.print(" - btnTrig: "); Serial.print(btnTrigger); Serial.print(" - enabled: "); Serial.print(digitalRead(_stepper.enablePin())); Serial.print(" - pos: "); Serial.println(pos);
 
     while ((pos >= restValUpper() || pos <= restValLower()) && (buttonActive() || !btnTrigger)) {
         // don't allow movement if within 2mm of endstops if homed

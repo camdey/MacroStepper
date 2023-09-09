@@ -60,14 +60,10 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         bool homed() {return m_homed;}
         bool reachedTarget() {return XACTUAL() == XTARGET();}
         void readyStallGuard() {
-            if (!stallGuardActive()) {  // change to StallGuard is StealthChop is configured
-                configStallGuard();
-            }
+            configStallGuard();
         }
         void readyStealthChop() {
-            if (stallGuardActive()) {   // change to StealthChop is StallGuard is configured
-                configStealthChop();
-            }
+            configStealthChop();
         }
         void lastCheckMillis(long millis) { m_lastCheckMillis = millis; }
         long lastCheckMillis() { return m_lastCheckMillis; }

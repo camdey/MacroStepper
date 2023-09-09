@@ -97,8 +97,8 @@ void setup(void) {
     
     digitalWrite(SHUTTER_PIN, LOW);
 
-    // find stable resting point of joystick
-    // calibrateJoyStick();
+    rStick.restValLower(490);
+    rStick.restValUpper(530);
 
     btn.begin(&tft);
     btn.setScreenSize(480, 320);
@@ -131,11 +131,13 @@ void loop() {
         // }
     }
     // take joystick and limit switch reading, put stepper to sleep
-    if (millis() - xStick.lastCheckMillis() >= 100) {
-    //     // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
+    if (millis() - xStick.lastCheckMillis() >= 50) {
+        // int rPos = rStick.read();
+        // Serial.print("rpos: "); Serial.println(rPos);
+        // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
         if (!stack.busy() && !photo360.busy() && !isVideo360Active()) {
             int xPos = xStick.readSmoothed();
-            int rPos = rStick.read();
+            int rPos = rStick.readSmoothed();
             // Serial.print("rpos: "); Serial.println(rPos);
             if ((xPos >= xStick.restValUpper() || xPos <= xStick.restValLower()) && xStick.buttonActive()) {
                 xStick.motion(true);
