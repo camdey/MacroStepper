@@ -75,6 +75,7 @@ void Joystick::motion(bool btnTrigger) {
     _stepper.slaveSelected(true);
     _stepper.enabled(true);
     _stepper.readyStealthChop();
+    Serial.print("en pin: "); Serial.println(_stepper.enablePin());
     int pos = readSmoothed();
     int dir = getDirection(pos);
     long velocity = calculateVelocity(pos);
@@ -97,11 +98,11 @@ void Joystick::motion(bool btnTrigger) {
         // update velocity if more than 100ms since last reading
         if (millis() - lastCheckMillis() >= 100) {
             velocity = calculateVelocity(pos);
-            // Serial.print(" | pos: "); Serial.print(pos);
-            // Serial.print(" | currentPos: "); Serial.print(_stepper.XACTUAL());
-            // Serial.print(" | targetPos: "); Serial.print(_stepper.XTARGET());
-            // Serial.print(" | VACTUAL: "); Serial.print(_stepper.VACTUAL());
-            // Serial.print(" | velocity: "); Serial.println(velocity);
+            Serial.print(" | pos: "); Serial.print(pos);
+            Serial.print(" | currentPos: "); Serial.print(_stepper.XACTUAL());
+            Serial.print(" | targetPos: "); Serial.print(_stepper.XTARGET());
+            Serial.print(" | VACTUAL: "); Serial.print(_stepper.VACTUAL());
+            Serial.print(" | velocity: "); Serial.println(velocity);
 
             // buttonActive();                      // check if button still pressed, no longer needed as the call in the while clause should update automatically
             printNewPositions();                    // print new positions on the display

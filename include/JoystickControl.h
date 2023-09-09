@@ -7,9 +7,9 @@
 
 class Joystick {
     public:
-        TMC5160Stepper_Ext _stepper;           // stepper that will be used for the AutoStack
+        TMC5160Stepper_Ext &_stepper;           // stepper that will be used for the AutoStack
         // ctor
-        Joystick(TMC5160Stepper_Ext &stepper, uint8_t stickPin, uint8_t buttonPin = ZSTICK_PIN): _stepper(stepper), m_stickPin(stickPin), m_buttonPin(buttonPin) {}
+        Joystick(TMC5160Stepper_Ext &stepper, uint8_t stickPin, uint8_t buttonPin = ZSTICK_PIN): _stepper{stepper}, m_stickPin{stickPin}, m_buttonPin{buttonPin} {}
 
         long calculateVelocity(int pos);
         void calibrateRestPosition();

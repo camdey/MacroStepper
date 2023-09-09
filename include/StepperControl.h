@@ -36,9 +36,9 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         bool rotateClockwise() {return m_rotateClockwise;}
         void slaveSelected(bool selected) {
             if (selected) {
-                digitalWrite(chipSelectPin(), HIGH);
-            } else if (!selected) {
                 digitalWrite(chipSelectPin(), LOW);
+            } else if (!selected) {
+                digitalWrite(chipSelectPin(), HIGH);
             }
             m_slaveSelected = selected;
         }

@@ -15,15 +15,16 @@
 TMC5160Stepper_Ext::TMC5160Stepper_Ext(uint16_t pinCS, float RS, int8_t link) : TMC5160Stepper(pinCS, RS, link) {};
 
 void TMC5160Stepper_Ext::initDriver(uint16_t rmsCurrent, uint16_t nrMicrosteps, bool shaftDirection, int pinEN, int pinCS) {
+    enablePin(pinEN);
+    chipSelectPin(pinCS);
     begin();
+    slaveSelected(true);
     // 23HM22-2804S: max 1900rms, stepper rated for 2.8A
     // SY42STH47-1206A: max 850rms, stepper rated for 1.2A
     rms_current(rmsCurrent); 
     microsteps(nrMicrosteps);
     shaft(shaftDirection); // inverse shaft, large target moves away from rear, small target moves towards rear
-
-    enablePin(pinEN);
-    chipSelectPin(pinCS);
+    slaveSelected(false);
 }
 
 

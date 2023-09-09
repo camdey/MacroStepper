@@ -71,29 +71,30 @@ void setup(void) {
 	SPI.begin();
     tft.reset();
 
+    pinMode(PIEZO_PIN, OUTPUT);
+	pinMode(EN_1_PIN, OUTPUT);
+    pinMode(EN_2_PIN, OUTPUT);
+    pinMode(CS_1_PIN, OUTPUT);
+    pinMode(CS_2_PIN, OUTPUT);
+    // declare analog pin as digital input
+    pinMode(ZSTICK_PIN, INPUT_PULLUP);    // pullup needed for consistent readings
+    pinMode(SHUTTER_PIN, OUTPUT);
+
 	uint16_t identifier = tft.readID();
 	tft.begin(identifier);
 	tft.setRotation(3);
     ui.screenRotated(false);
 
 	stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN); //1400
-    stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
+    stepper2.initDriver(850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
 
-    pinMode(PIEZO_PIN, OUTPUT);
-	pinMode(EN_1_PIN, OUTPUT);
-    pinMode(EN_2_PIN, OUTPUT);
-    pinMode(CS_1_PIN, OUTPUT);
-    pinMode(CS_2_PIN, OUTPUT);
-    stepper1.slaveSelected(true);
+    stepper1.slaveSelected(false);
+    stepper1.enabled(false);
     stepper1.configStealthChop();
-    stepper1.enabled(true);
 
     stepper2.slaveSelected(false);
     stepper2.enabled(false);
     
-    // declare analog pin as digital input
-    pinMode(ZSTICK_PIN, INPUT_PULLUP);    // pullup needed for consistent readings
-    pinMode(SHUTTER_PIN, OUTPUT);
     digitalWrite(SHUTTER_PIN, LOW);
 
     // find stable resting point of joystick
@@ -104,9 +105,8 @@ void setup(void) {
     ui.initButtons(200, 75);
     ui.populateScreen(routines::ui_Home);
 
-    rStick.restVal(50);
-    rStick.restValUpper(60);
-    rStick.restValLower(40);
+    rStick.restValUpper(530);
+    rStick.restValLower(490);
 }
 
 void loop() {
@@ -136,13 +136,13 @@ void loop() {
         if (!stack.busy() && !photo360.busy() && !isVideo360Active()) {
             int xPos = xStick.readSmoothed();
             int rPos = rStick.read();
-            Serial.print("rpos: "); Serial.println(rPos);
+            // Serial.print("rpos: "); Serial.println(rPos);
             if ((xPos >= xStick.restValUpper() || xPos <= xStick.restValLower()) && xStick.buttonActive()) {
                 xStick.motion(true);
             }
-            // else if ((rPos >= rStick.restValUpper() || rPos <= rStick.restValLower()) && !rStick.buttonActive()) {
-            //     rStick.motion(false);
-            // }
+            else if ((rPos >= rStick.restValUpper() || rPos <= rStick.restValLower()) && !rStick.buttonActive()) {
+                rStick.motion(false);
+            }
         }
     //     // sleep if stepper inactive, update position on manual screen
     //     if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == routines::inactive) {
