@@ -21,7 +21,11 @@ void AutoStack::init() {
     camera.photoTaken(false);
     lastMovementMillis(millis());
     global::func_Reset(false);                      // change reset button to red
-    status(routines::waitShutter);
+    if (camera.shutterEnabled()) {
+        status(routines::newShutter);               // reset status so we take a photo on the next loop
+    } else {
+        status(routines::newMovement);              // set to new movement if shutter isnt enabled
+    }
     // auto_screen::status(start);
 }
 
@@ -36,49 +40,78 @@ another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void AutoStack::run() {
-    _stepper.slaveSelected(true);
-    _stepper.enabled(true);
     if (status() == routines::start) {                  // move to start position if beginning AutoStack
+        _stepper.slaveSelected(true);
+        _stepper.enabled(true);
         init();
     }
 
-    if (completedMovements() <= requiredMovements() && !_stepper.executedMovement()) {
+    // make sure to disable/enable pins 
+    if (stack.status() == routines::paused) {
+        // disable spi pin while paused
+        if (_stepper.slaveSelected()) {
+            _stepper.slaveSelected(false);
+        }
+    } else {
+        if (!_stepper.slaveSelected() || !_stepper.enabled()) {
+            _stepper.slaveSelected(true);
+            _stepper.enabled(true);
+        }
+    }
+
+    if (stack.status() != routines::paused && completedMovements() <= requiredMovements() && !_stepper.executedMovement()) {
+        Serial.print("step 1: "); Serial.println(status());
         // take photo if there's been >= STACK_DWELL_TIME since a movement was executed successfully (gives time for vibration to settle)
         // this has likely passed due to the need to wait for shutter to trigger
+        // ****** some bug here with newShutter state perhaps)
         if (camera.shutterEnabled() && !camera.photoTaken() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
+            Serial.println("step 2");
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
             if (status() == routines::newShutter) {
                 camera.triggerShutter(true);            // take photo and trigger flash immediately or start flash procedure
+                Serial.println("step 2b");
             } else if (status() == routines::waitShutter) {
                 camera.triggerShutter(false);           // loop through flashProcedure until photo taken
+                Serial.println("step 2c");
             }
             if (status() == routines::debugFlash) {
                 status(routines::paused);               // reset flash procedure
                 auto_screen::displayPauseStack();       // display pause autostack interface
                 ui.populateScreen(routines::ui_Flash);  // go to flashScreen if can't trigger after 10 seconds
+                Serial.println("step 2d");
             }
         }
         // only move if autoStack hasn't been paused by flash failure and shutter has triggered or didn't need to trigger
         if (status() == routines::newMovement && (!camera.shutterEnabled() || camera.photoTaken())) {
             executeMovement(1, stack.shutterDelay());
+            Serial.println("step 3");
+        } else if (status() == routines::delayMovement && (!camera.shutterEnabled() || camera.photoTaken())) {
+            executeMovement(1, stack.shutterDelay());
+            Serial.println("step 3b");
         }
 
         if (status() == routines::executedMovement) {
+            Serial.println("step 4");
             incrementCompletedMovements();
-            status(routines::newShutter);                   // reset status so we take a photo on the next loop
+            if (camera.shutterEnabled()) {
+                status(routines::newShutter);               // reset status so we take a photo on the next loop
+            } else {
+                status(routines::newMovement);              // set to new movement if shutter isnt enabled
+            }
             if (ui.activeScreen() == routines::ui_Auto) {   // make sure correct screen is displaying
                 auto_screen::printAutoStackProgress();
                 auto_screen::estimateDuration();
             }
-            _stepper.executedMovement(false);           // reset executed movement flag
+            _stepper.executedMovement(false);               // reset executed movement flag
         }
     }
     if (completedMovements() >= requiredMovements()) {
+        _stepper.slaveSelected(false);
+        _stepper.enabled(false);
         status(routines::completedStack);
         terminateAutoStack();                           // stop AutoStack sequence if end reached
+        Serial.println("step 5");
     }
-    _stepper.slaveSelected(false);
-    _stepper.enabled(false);
 }
 
 
@@ -92,7 +125,8 @@ been homed and will exit autoStack if running.
 ******************************************************************/
 void AutoStack::executeMovement(int stepDirection, unsigned long stepperDelay) {
     _stepper.readyStealthChop();
-
+    Serial.print("en: ");Serial.print(_stepper.enabled());Serial.print(" - cs: "); Serial.println(_stepper.slaveSelected());
+    Serial.print("stepperDelay: ");Serial.print(stepperDelay);Serial.print(" - millis: "); Serial.print(millis());Serial.print(" - lastmillis: "); Serial.println(lastMovementMillis());
     // step after elapsed amount of time
     if ((millis() - lastMovementMillis() > stepperDelay)) {
         int stepVelocity = stepDirection * _stepper.stepsPerMovement();

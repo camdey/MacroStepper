@@ -15,8 +15,8 @@ class CameraControl {
             m_flashPin = flashPin;
         }
 
-        void shutterEnabled(bool enable) { m_shutterEnabled = enable; }                 // set shutter state to determine if a photo will be taken or not
-        bool shutterEnabled() { return m_shutterEnabled; }                              // get shutter state to determine if a photo will be taken or not
+        void shutterEnabled(bool enable) { m_shutterEnabled = enable; }         // set shutter state to determine if a photo will be taken or not
+        bool shutterEnabled() { return m_shutterEnabled; }                      // get shutter state to determine if a photo will be taken or not
         void isTestingFlash(bool testing) { m_testingFlash = testing; }
         bool isTestingFlash() { return m_testingFlash; }
         void flashSensorEnabled(bool enable) { m_flashSensorEnabled = enable; } // Set whether the sensor for detecting flash availability is being used
@@ -52,12 +52,10 @@ class CameraControl {
         int m_flashThreshold        = 280;
         int m_flashOnValue          = 300;          // initial value for flash considered as being ready
         int m_flashOffValue         = 30;           // initial value for flash considered as recycling
-        bool m_shutterEnabled       = true;         // enable/disable shutter for taken a photo automatically after a step
-        bool m_shutterTriggered     = true;         // shutter successfully triggered or not
+        bool m_shutterEnabled       = false;        // enable/disable shutter for taken a photo automatically after a step
         bool m_testingFlash         = false;        // flag for testing flash threshold
         bool m_flashSensorEnabled   = false;        // is flash bulb enabled, or only take photos without flash?
         long m_lastFlashMillis      = 0;            // last millis time flash was triggered successfully
-        bool m_flashAvailable       = false;        // check whether flash is available to trigger or not
         int m_sensorValue           = 0;            // light sensor reading from the godox flash LED
         long m_sensorAdjValue       = 10000;        // recursive filter value of light sensor reading from the godox flash LED
         long m_recycleTime          = 200;          // time for the flash to recycle after a photo

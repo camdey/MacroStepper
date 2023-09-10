@@ -11,9 +11,9 @@
 
 class Photo360 {
     public:
-        TMC5160Stepper_Ext _stepper;           // stepper that will be used for the AutoStack
+        TMC5160Stepper_Ext &_stepper;           // stepper that will be used for the AutoStack
         // ctor
-        Photo360(TMC5160Stepper_Ext &stepper): _stepper(stepper) {}
+        Photo360(TMC5160Stepper_Ext &stepper): _stepper{stepper} {}
 
         void run();
         void executeMovement(int stepDirection, unsigned long stepperDelay);

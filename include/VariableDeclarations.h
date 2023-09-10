@@ -161,6 +161,7 @@ extern gfxButton            btn;
 #define PIEZO_PIN                   22              // pin for Piezo buzzer
 #define FLASH_SENSOR_PIN            A8              // pin for GA1A12S202 light sensor
 #define SHUTTER_PIN                 48              // pin for pulling camera focus and shutter to GND via opto
+#define LED_PIN                     12              // pin for outputting PWM signal for LED light
 
 
 #endif

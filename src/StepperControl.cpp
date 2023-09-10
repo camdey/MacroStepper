@@ -263,8 +263,8 @@ void TMC5160Stepper_Ext::video360(long nrSteps) {
 
 
 // calculate and set the step size in μm that is travelled per movement
-void TMC5160Stepper_Ext::calculateStepSize() {
-    float distancePerMovement;
+void TMC5160Stepper_Ext::calculateDistancePerMovement() {
+    float distance;
 
     // constrain multiplier range
     if (stepsPerMovement() < 1) {
@@ -273,12 +273,11 @@ void TMC5160Stepper_Ext::calculateStepSize() {
         stepsPerMovement(MAX_STEPS_PER_MOVEMENT);
     }
 
-    distancePerMovement = MICROSTEP_DIST * stepsPerMovement();
+    distance = MICROSTEP_DIST * stepsPerMovement();
 
-    if (distancePerMovement != stepSize()) {
-        // print new delay value
+    if (distance != distancePerMovement()) {
         stack.updateRequiredMovements();
-        stepSize(distancePerMovement);
+        distancePerMovement(distance);
 
         if (ui.activeScreen() == routines::ui_Auto) {
             // update estimated time

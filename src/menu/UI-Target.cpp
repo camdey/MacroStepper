@@ -217,7 +217,7 @@ namespace target_screen {
         if (active && !canEditTarget) {
             long nrSteps = atoi(targetValues);
             stepper1.stepsPerMovement(nrSteps);
-            stepper1.calculateStepSize(); // update step size
+            stepper1.calculateDistancePerMovement();
             btn_Save.drawButton(CUSTOM_GREEN);
             delay(250);
             btn_Save.drawButton(WHITE);

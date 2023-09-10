@@ -33,6 +33,7 @@
 #include "MiscFunctions.h"                  // miscellaneous functions
 #include "CameraControl.h"                 // functions relating to the camera shutter and flash
 #include "StepperControl.h"                 // functions for controlling the stepper motor
+#include "LedControl.h"
 #include "AutoStack.h"                      // AutoStack class and methods
 #include "Photo360.h"
 #include "VariableDeclarations.h"           // external variable declarations
@@ -62,6 +63,7 @@ Photo360                photo360(stepper2);
 CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
 Joystick                xStick(stepper1, XSTICK_PIN, ZSTICK_PIN);
 Joystick                rStick(stepper2, RSTICK_PIN, ZSTICK_PIN);
+ledLight                led(LED_PIN, POT_PIN);
 UserInterface           ui;
 
 
@@ -76,6 +78,7 @@ void setup(void) {
     pinMode(EN_2_PIN, OUTPUT);
     pinMode(CS_1_PIN, OUTPUT);
     pinMode(CS_2_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
     // declare analog pin as digital input
     pinMode(ZSTICK_PIN, INPUT_PULLUP);    // pullup needed for consistent readings
     pinMode(SHUTTER_PIN, OUTPUT);
@@ -111,13 +114,13 @@ void setup(void) {
 
 void loop() {
     // run AutoStack sequence if not paused or inactive
-    // if (stack.busy()) {
-    //     stack.run();
-    //     // update duration if on Auto screen
-    //     if (ui.activeScreen() == routines::ui_Auto) {
-	// 	    auto_screen::estimateDuration();
-    //     }
-    // }
+    if (stack.busy()) {
+        stack.run();
+        // update duration if on Auto screen
+        if (ui.activeScreen() == routines::ui_Auto) {
+		    auto_screen::estimateDuration();
+        }
+    }
     // take touch reading
     if (millis() - ui.lastCheckMillis() >= 50) {
         ui.readTouchScreen(ui.activeScreen());
@@ -132,8 +135,6 @@ void loop() {
     }
     // take joystick and limit switch reading, put stepper to sleep
     if (millis() - xStick.lastCheckMillis() >= 50) {
-        // int rPos = rStick.read();
-        // Serial.print("rpos: "); Serial.println(rPos);
         // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
         if (!stack.busy() && !photo360.busy() && !isVideo360Active()) {
             int xPos = xStick.readSmoothed();
@@ -159,5 +160,11 @@ void loop() {
 	// 		flash_screen::updateFlashSensorValue();
 	// 	}
         xStick.lastCheckMillis(millis());
+    }
+
+    if (millis() - led.lastCheckMillis() >= 300) {
+        // only updates if value has changed
+        led.updateBrightness();
+        // Serial.print("pot val: "); Serial.println(led.readDimmer());
     }
 }

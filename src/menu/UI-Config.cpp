@@ -10,7 +10,7 @@ namespace config_screen {
     gfxButton *btn_array[num_btns];
 
     gfxButton btn_FlipScreen    =   btn.initBitmapButton(toggleOff,     240,    10,     100,    50,     CUSTOM_RED,     true);
-    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOn,      240,    70,     100,    50,     CUSTOM_RED,     true);
+    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOff,     240,    70,     100,    50,     CUSTOM_RED,     true);
     gfxButton btn_Stepper       =   btn.initBitmapButton(toggleOn,      240,    130,    100,    50,     CUSTOM_GREEN,   true);
     gfxButton btn_Thing2        =   btn.initBitmapButton(toggleOff,     240,    190,    100,    50,     CUSTOM_RED,     true);
     gfxButton btn_Back          =   btn.initBitmapButton(backArrow,     380,    220,    80,     80,     WHITE,          true);
@@ -27,8 +27,8 @@ namespace config_screen {
         btn_FlashSensor.addToggle(func_FlashSensor, 0);
         btn_Stepper.addToggle(func_Stepper, 0);
 
-        // btn_Stepper.setToggleActive(true); // init as active
-        // btn_FlashSensor.setToggleActive(true); // init as active
+        btn_Stepper.setToggleActive(true); // init as active
+        btn_FlashSensor.setToggleActive(false); // init as inactive
     }
 
 
@@ -87,18 +87,18 @@ namespace config_screen {
     void func_FlashSensor(bool btnActive) {
         if (btnActive) {
             btn_FlashSensor.drawButton(BLACK);
-            btn_FlashSensor.updateBitmap(toggleOff);
-            btn_FlashSensor.updateColour(CUSTOM_RED);
-            btn_FlashSensor.drawButton();
-            camera.flashSensorEnabled(false);
-            // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
-        }
-        else if (!btnActive) {
-            btn_FlashSensor.drawButton(BLACK);
             btn_FlashSensor.updateBitmap(toggleOn);
             btn_FlashSensor.updateColour(CUSTOM_GREEN);
             btn_FlashSensor.drawButton();
             camera.flashSensorEnabled(true);
+            // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
+        }
+        else if (!btnActive) {
+            btn_FlashSensor.drawButton(BLACK);
+            btn_FlashSensor.updateBitmap(toggleOff);
+            btn_FlashSensor.updateColour(CUSTOM_RED);
+            btn_FlashSensor.drawButton();
+            camera.flashSensorEnabled(false);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
     }
@@ -108,17 +108,17 @@ namespace config_screen {
     void func_Stepper(bool btnActive) {
         if (btnActive) {
             btn_Stepper.drawButton(BLACK);
-            btn_Stepper.updateBitmap(toggleOn);
-            btn_Stepper.updateColour(CUSTOM_GREEN);
-            btn_Stepper.drawButton();
-            stepper1.enabled(true);
-        }
-        else if (!btnActive) {
-            btn_Stepper.drawButton(BLACK);
             btn_Stepper.updateBitmap(toggleOff);
             btn_Stepper.updateColour(CUSTOM_RED);
             btn_Stepper.drawButton();
             stepper1.enabled(false);
+        }
+        else if (!btnActive) {
+            btn_Stepper.drawButton(BLACK);
+            btn_Stepper.updateBitmap(toggleOn);
+            btn_Stepper.updateColour(CUSTOM_GREEN);
+            btn_Stepper.drawButton();
+            stepper1.enabled(true);
         }
     }
 }

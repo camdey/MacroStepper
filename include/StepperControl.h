@@ -45,8 +45,8 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         bool slaveSelected() {return m_slaveSelected;}
         void stallGuardActive(bool active) {m_stallGuardActive = active;}
         bool stallGuardActive() {return m_stallGuardActive;}
-        void stepSize(float stepSize) {m_stepSize = stepSize;}
-        float stepSize() {return m_stepSize;}
+        void distancePerMovement(float distance) {m_distancePerMovement = distance;}
+        float distancePerMovement() {return m_distancePerMovement;}
         void stepsPerMovement(int steps) {m_stepsPerMovement = steps;}
         int stepsPerMovement() {return m_stepsPerMovement;}
         void incrementStepsPerMovement() {m_stepsPerMovement++;}
@@ -78,13 +78,13 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         void executeMovement(int stepDirection, unsigned long stepperDelay);
         void executeSteps(long nrSteps);
         void video360(long nrSteps);
-        void calculateStepSize();
+        void calculateDistancePerMovement();
 
 
     protected:
         int m_enablePin;                                // Arduino pin for the stepper enable pin
         int m_chipSelectPin;                            // Arduino pin for the stepper chip select
-        float m_stepSize                = 5.0000;       // distance travelled per movement in micrometres, default to 5um
+        float m_distancePerMovement                = 5.0000;       // distance travelled per movement in micrometres, default to 5um
         int m_stepsPerMovement          = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step or 5um)
         long m_targetVelocity           = 200000;       // target velocity = VMAX for TMC5160
         bool m_executedMovement         = false;        // whether the stepper successfully executed a movement or if it was deferred

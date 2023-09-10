@@ -10,9 +10,9 @@
 
 class AutoStack {
     public:
-        TMC5160Stepper_Ext _stepper;           // stepper that will be used for the AutoStack
+        TMC5160Stepper_Ext &_stepper;           // stepper that will be used for the AutoStack
         // ctor
-        AutoStack(TMC5160Stepper_Ext &stepper): _stepper(stepper) {}
+        AutoStack(TMC5160Stepper_Ext &stepper): _stepper{stepper} {}
 
         void init();
         void run();
@@ -73,7 +73,7 @@ class AutoStack {
         routines::Photo status() {return m_status; }
         // whether AutoStack is currently mid procedure, i.e. not inactive or paused
         bool busy() {
-            bool isBusy = (status() != routines::inactive && status() != routines::paused);
+            bool isBusy = (status() != routines::inactive);
             return isBusy;
         }
 

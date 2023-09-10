@@ -59,7 +59,7 @@ namespace manual_screen {
 
         // draw text
         btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
+        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
         btn_StepNr.writeTextTopCentre(Arimo_Regular_30, WHITE);
         btn_StepNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, stepNr);
         btn_RailPos.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -82,7 +82,7 @@ namespace manual_screen {
             ui.canEdit(routines::btn_distance, true);
 
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
+            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
         }
         else {
             ui.canEdit(routines::btn_arrows, false);
@@ -90,7 +90,7 @@ namespace manual_screen {
 
             // TODO would be nice to not re-write the top line on every arrow press
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
+            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -116,8 +116,8 @@ namespace manual_screen {
             // if setting step size
             if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.incrementStepsPerMovement();
-                stepper1.calculateStepSize();
-                btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
+                stepper1.calculateDistancePerMovement();
+                btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!ui.canEdit(routines::btn_distance)) {
@@ -140,8 +140,8 @@ namespace manual_screen {
             // if setting step size
             if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.decrementStepsPerMovement();
-                stepper1.calculateStepSize();
-                btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
+                stepper1.calculateDistancePerMovement();
+                btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!ui.canEdit(routines::btn_distance)) {

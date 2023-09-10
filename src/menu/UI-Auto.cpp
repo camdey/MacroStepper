@@ -65,7 +65,7 @@ namespace auto_screen {
 
         // draw text
         btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
+        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
         btn_EstTime.writeTextTopCentre(Arimo_Regular_30, WHITE);
         estimateDuration();
         btn_Progress.writeTextTopCentre(Arimo_Regular_30, WHITE);
@@ -92,7 +92,7 @@ namespace auto_screen {
             hideArrows(false); // show arrows, hide play/pause
 
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
+            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
 
             // clear play/pause button
             btn_PlayPause.drawButton(BLACK);
@@ -107,7 +107,7 @@ namespace auto_screen {
 
             // TODO would be nice to not re-write the top line on every arrow press
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.stepSize(), 4));
+            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
 
             btn_ArrowUp.drawButton(BLACK);
             btn_ArrowDown.drawButton(BLACK);
@@ -171,8 +171,8 @@ namespace auto_screen {
     void func_ArrowUp(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.incrementStepsPerMovement();
-            stepper1.calculateStepSize();
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
+            stepper1.calculateDistancePerMovement();
+            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -180,8 +180,8 @@ namespace auto_screen {
     void func_ArrowDown(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.decrementStepsPerMovement();
-            stepper1.calculateStepSize();
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.stepSize(), 4));
+            stepper1.calculateDistancePerMovement();
+            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -246,7 +246,7 @@ namespace auto_screen {
     "completed / remaining" on the screen.
     ***********************************************************************/
     void printAutoStackProgress() {
-        char autoStackProgress[10]    = "0/0";
+        char autoStackProgress[10]  = "0/0";
         // format progress in "Completed / Total" string
         sprintf_P(autoStackProgress, PSTR("%02d/%02d"), stack.completedMovements(), stack.requiredMovements());
         // print to screen
