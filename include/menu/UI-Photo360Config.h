@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
-#include "GlobalVariables.h"
 
 
 namespace photoconfig_screen {

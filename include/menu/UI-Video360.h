@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
-#include "GlobalVariables.h"
 
 
 namespace video_screen {
@@ -16,7 +15,6 @@ namespace video_screen {
     void func_PlayPause(bool btnActive);
     void func_ArrowUp(bool btnActive);
     void func_ArrowDown(bool btnActive);
-    void rpmToVmax();
 }
 
 #endif

@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "Photo360.h"
 #include "UserInterface.h"
@@ -75,12 +74,11 @@ namespace photoconfig_screen {
         if (btnActive) {
              // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / 4;
-            stepper2.readyStealthChop();
-            stepper2.targetVelocity(360);
-            if (!stepper2.rotateClockwise()) {
-                nrSteps = nrSteps*-1;
-            }
-            stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
+            stepper2.slaveSelected(true);
+            stepper2.enabled(true);
+            photo360.executeMovement(photo360.getDirection(), 0, nrSteps);
+            stepper2.slaveSelected(false);
+            stepper2.enabled(false);
         }
     }
 
@@ -89,12 +87,11 @@ namespace photoconfig_screen {
         if (btnActive) {
              // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / 2;
-            stepper2.readyStealthChop();
-            stepper2.targetVelocity(360);
-            if (!stepper2.rotateClockwise()) {
-                nrSteps = nrSteps*-1;
-            }
-            stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
+            stepper2.slaveSelected(true);
+            stepper2.enabled(true);
+            photo360.executeMovement(photo360.getDirection(), 0, nrSteps);
+            stepper2.slaveSelected(false);
+            stepper2.enabled(false);
         }
     }
 
@@ -103,12 +100,11 @@ namespace photoconfig_screen {
         if (btnActive) {
              // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS);
-            stepper2.readyStealthChop();
-            stepper2.targetVelocity(360);
-            if (!stepper2.rotateClockwise()) {
-                nrSteps = nrSteps*-1;
-            }
-            stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
+            stepper2.slaveSelected(true);
+            stepper2.enabled(true);
+            photo360.executeMovement(photo360.getDirection(), 0, nrSteps);
+            stepper2.slaveSelected(false);
+            stepper2.enabled(false);
         }
     }
 
@@ -142,9 +138,11 @@ namespace photoconfig_screen {
         if (btnActive) {
             // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / photo360.requiredPhotos();
-            stepper2.readyStealthChop();
-            stepper2.targetVelocity(360);
-            stepper2.XTARGET(stepper2.XACTUAL()+nrSteps);
+            stepper2.slaveSelected(true);
+            stepper2.enabled(true);
+            photo360.executeMovement(photo360.getDirection(), 0, nrSteps);
+            stepper2.slaveSelected(false);
+            stepper2.enabled(false);
         }
     }
 
@@ -153,9 +151,11 @@ namespace photoconfig_screen {
         if (btnActive) {
             // calculate number of microsteps to move for each press based on current nrPhotos setting
             int nrSteps = (ORBIS_MOTOR_STEPS*NR_MICROSTEPS) / photo360.requiredPhotos();
-            stepper2.readyStealthChop();
-            stepper2.targetVelocity(360);
-            stepper2.XTARGET(stepper2.XACTUAL()-nrSteps);
+            stepper2.slaveSelected(true);
+            stepper2.enabled(true);
+            photo360.executeMovement(photo360.getDirection(), 0, nrSteps*-1);
+            stepper2.slaveSelected(false);
+            stepper2.enabled(false);
         }
     }
 }

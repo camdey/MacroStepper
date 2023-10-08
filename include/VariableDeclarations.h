@@ -90,6 +90,8 @@ extern gfxButton            btn;
 #define MAX_STEPS_PER_MOVEMENT      16000               // maximum number of steps allowed per movement. 16000 = 5mm
 #define STACK_DWELL_TIME            250                 // time between movements in an AutoStack to give the rail a moment to settle
 #define SHUTTER_PULL_TIME           800                 // time the shutter is pulled low to ensure successful triggering
+#define MAX_LED_VAL                 570                 // max dimmer value to send to pwm to keep current of driver at 1.2A or below (60% of 2A)
+#define STEPS_PER_VMAX              727                 // number of steps per second for every 1000 VMAX
 
 //=====definitions for touch screen coordinates=====//
 // Arduino Due + 2.8" TFT

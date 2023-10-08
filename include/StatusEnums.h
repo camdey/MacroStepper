@@ -16,6 +16,12 @@ namespace routines {
         completedStack
     };
 
+    enum Video {
+        stopped,
+        stopping,
+        running
+    };
+
     // enums for the possible status values of the flash procedure
     enum Flash {
         flashAvailable,

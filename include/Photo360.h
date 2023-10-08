@@ -16,7 +16,8 @@ class Photo360 {
         Photo360(TMC5160Stepper_Ext &stepper): _stepper{stepper} {}
 
         void run();
-        void executeMovement(int stepDirection, unsigned long stepperDelay);
+        void executeMovement(int stepDirection, unsigned long stepperDelay, int stepsPerMovement);
+        void terminatePhoto360();
         void lastCheckMillis(long millis) { m_lastCheckMillis = millis; }
         long lastCheckMillis() { return m_lastCheckMillis; }
         void lastMovementMillis(long millis) { m_lastMovementMillis = millis; }
@@ -25,7 +26,7 @@ class Photo360 {
         routines::Photo status() {return m_status; }
         // whether photo360 is currently mid procedure, i.e. not inactive or paused
         bool busy() {
-            bool isBusy = (status() != routines::inactive && status() != routines::paused);
+            bool isBusy = (status() != routines::inactive);
             return isBusy;
         }
         int requiredPhotos() {
@@ -62,6 +63,19 @@ class Photo360 {
         }
         void completedPhotos(int nrPhotos) { m_completedPhotos = nrPhotos; }
         int completedPhotos() { return m_completedPhotos; }
+        int getDirection() {
+            int shaft_modifier;
+            if (_stepper.shaft()) {
+                shaft_modifier = 1;
+            } else {
+                shaft_modifier = -1;
+            }
+            if (_stepper.rotateClockwise()) {
+                return 1*shaft_modifier;
+            } else {
+                return -1*shaft_modifier;
+            }
+        }
 
     
     protected:

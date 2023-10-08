@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "CameraControl.h"
 #include "AutoStack.h"
@@ -224,7 +223,7 @@ namespace auto_screen {
     ***********************************************************************/
     void estimateDuration() {
         float duration = stack.requiredMovements() * ((stack.shutterDelay() + SHUTTER_PULL_TIME)*0.001);
-        float elapsed = stack.requiredMovements() * ((stack.shutterDelay() + SHUTTER_PULL_TIME)*0.001);
+        float elapsed = stack.completedMovements() * ((stack.shutterDelay() + SHUTTER_PULL_TIME)*0.001);
         float remaining = duration - elapsed;
         int minutes = floor(remaining / 60);
         int seconds = int(remaining) % 60;

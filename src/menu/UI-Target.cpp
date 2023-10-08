@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "MiscFunctions.h"
 #include "UserInterface.h"

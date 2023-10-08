@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "UserInterface.h"
 #include "menu/UI-Manual.h"

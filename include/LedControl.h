@@ -19,12 +19,21 @@ class ledLight {
         m_enabled = enable;
     }
     bool enabled() { return m_enabled; }                        // get current state of led
-    int readDimmer() { return analogRead(dimmerPin()); }        // get value from potentiometer for setting brightness
+    int readDimmer() {                                          // get value from potentiometer for setting brightness
+        int val = analogRead(dimmerPin());
+        val = map(val, 0, 1023, 0, MAX_LED_VAL);
+        if (abs(val - m_previousVal) > 3) {
+            m_previousVal = val;
+        } else {
+            val = m_previousVal;
+        }
+        return val;
+    }
     void updateBrightness() {                                   // update led brightness based on current potentiometer reading
-        m_previousValue = m_brightness;
         m_brightness = map(readDimmer(), 0, 1023, 0, 255);
-        if (m_brightness != previousValue()) {
+        if (m_brightness != m_previousBrightness) {
             analogWrite(pwmPin(), m_brightness);
+            m_previousBrightness = m_brightness;
         }
     }
     void setBrightness(int value) {                             // set led brightness to specific value
@@ -34,17 +43,16 @@ class ledLight {
     int getBrightness() { return m_brightness; }               // get current led brightness
     void lastCheckMillis(long millis) { m_lastCheckMillis = millis; }
     long lastCheckMillis() { return m_lastCheckMillis; }
-    int previousValue() { return m_previousValue; }
 
 
     protected:
-
+    int m_previousVal           =   0;
     int m_pwmPin;
     int m_dimmerPin;
-    int m_brightness        =   0;
-    int m_previousValue     =   1;
-    bool m_enabled          =   false;
-    long m_lastCheckMillis  =   0;
+    int m_brightness            =   0;
+    int m_previousBrightness    =   1;
+    bool m_enabled              =   false;
+    long m_lastCheckMillis      =   0;
 
 };
 

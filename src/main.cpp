@@ -28,7 +28,6 @@
 #include "TimerFreeTone.h"                  // produces beep tone for piezo
 #include "gfxButton.h"                      // my library for adding/controlling TFT buttons
 // project definitions and functions
-#include "GlobalVariables.h"
 #include "JoystickControl.h"                // joystick control functions
 #include "MiscFunctions.h"                  // miscellaneous functions
 #include "CameraControl.h"                 // functions relating to the camera shutter and flash
@@ -36,6 +35,7 @@
 #include "LedControl.h"
 #include "AutoStack.h"                      // AutoStack class and methods
 #include "Photo360.h"
+#include "Video360.h"
 #include "VariableDeclarations.h"           // external variable declarations
 #include "UserInterface.h"
 #include "StatusEnums.h"                    // enums containing statuses for various routines, namespace routines::
@@ -60,6 +60,7 @@ MCUFRIEND_kbv           tft;
 gfxButton               btn;
 AutoStack               stack(stepper1);
 Photo360                photo360(stepper2);
+Video360                video360(stepper2);
 CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
 Joystick                xStick(stepper1, XSTICK_PIN, ZSTICK_PIN);
 Joystick                rStick(stepper2, RSTICK_PIN, ZSTICK_PIN);
@@ -89,7 +90,7 @@ void setup(void) {
     ui.screenRotated(false);
 
 	stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN); //1400
-    stepper2.initDriver(850, NR_MICROSTEPS, 1, EN_2_PIN, CS_2_PIN);
+    stepper2.initDriver(850, NR_MICROSTEPS, 0, EN_2_PIN, CS_2_PIN);
 
     stepper1.slaveSelected(false);
     stepper1.enabled(false);
@@ -121,22 +122,29 @@ void loop() {
 		    auto_screen::estimateDuration();
         }
     }
+    // if not running AutoStack, we manually check for camera shutter to see if it needs to be set to low again
+    // else if (camera.lastCheckMillis() >= 50) {
+    //     if (digitalRead(camera.shutterPin()) == HIGH) {
+    //         camera.triggerShutter(false);
+    //     }
+    //     camera.lastCheckMillis(millis());
+    // }
     // take touch reading
     if (millis() - ui.lastCheckMillis() >= 50) {
         ui.readTouchScreen(ui.activeScreen());
         ui.lastCheckMillis(millis());
         // if video360 active, keep updating target so stepper keeps moving
-        // if (isVideo360Active()) {
-        //     stepper2.video360(getVideo360Target());
-        // }
-        // if (photo360.status() != routines::inactive) {
-        //     photo360.run();
-        // }
+        if (video360.busy()) {
+            video360.run();
+        }
+        if (photo360.busy()) {
+            photo360.run();
+        }
     }
     // take joystick and limit switch reading, put stepper to sleep
     if (millis() - xStick.lastCheckMillis() >= 50) {
         // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
-        if (!stack.busy() && !photo360.busy() && !isVideo360Active()) {
+        if (!stack.busy() && !photo360.busy() && !video360.busy()) {
             int xPos = xStick.readSmoothed();
             int rPos = rStick.readSmoothed();
             // Serial.print("rpos: "); Serial.println(rPos);
@@ -156,9 +164,9 @@ void loop() {
     //         stepper2.enabled(false); // disable stepper
     //     }
 	// 	// update flashSensorValue if on Flash screen
-	// 	if (ui.activeScreen() == routines::ui_Flash && (ui.canEdit(routines::btn_flashOff) || ui.canEdit(routines::btn_flashOn))) {
-	// 		flash_screen::updateFlashSensorValue();
-	// 	}
+		if (ui.activeScreen() == routines::ui_Flash && (ui.canEdit(routines::btn_flashOff) || ui.canEdit(routines::btn_flashOn))) {
+			flash_screen::updateFlashSensorValue();
+		}
         xStick.lastCheckMillis(millis());
     }
 

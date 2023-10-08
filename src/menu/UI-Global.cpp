@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "AutoStack.h"
 #include "CameraControl.h"
 #include "Photo360.h"

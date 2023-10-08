@@ -27,6 +27,8 @@ class CameraControl {
         long sensorAdjValue() { return m_sensorAdjValue; }                      // Get the recursive filter value of the light sensor reading from the godox pin
         void lastFlashMillis(long millis) { m_lastFlashMillis = millis; }       // Set the time of the last successful flash trigger
         long lastFlashMillis() { return m_lastFlashMillis; }                    // Get the time of the last successful flash trigger
+        void lastCheckMillis(long millis) { m_lastCheckMillis = millis; }
+        long lastCheckMillis() { return m_lastCheckMillis; }
         void flashThreshold(int val) { m_flashThreshold = val; }                // Set threshold value for flash being ready to fire
         int flashThreshold() { return m_flashThreshold; }                       // Get threshold value for flash being ready to fire
         void flashOnValue(int val) { m_flashOnValue = val; }                    // Set flash on value that initially determines whether the flash is likely ready or not
@@ -55,6 +57,7 @@ class CameraControl {
         bool m_shutterEnabled       = false;        // enable/disable shutter for taken a photo automatically after a step
         bool m_testingFlash         = false;        // flag for testing flash threshold
         bool m_flashSensorEnabled   = false;        // is flash bulb enabled, or only take photos without flash?
+        long m_lastCheckMillis      = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
         long m_lastFlashMillis      = 0;            // last millis time flash was triggered successfully
         int m_sensorValue           = 0;            // light sensor reading from the godox flash LED
         long m_sensorAdjValue       = 10000;        // recursive filter value of light sensor reading from the godox flash LED

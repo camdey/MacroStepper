@@ -1,6 +1,5 @@
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
-#include "GlobalVariables.h"
 #include "AutoStack.h"
 #include "StepperControl.h"
 #include "CameraControl.h"
@@ -64,19 +63,21 @@ void CameraControl::triggerShutter(bool resetProcedure = false) {
     }
     else {
         // if not yet triggered, trigger
-        if (digitalRead(shutterPin() == LOW)) {
+        if (digitalRead(shutterPin()) == LOW) {
             digitalWrite(shutterPin(), HIGH);
             photoTaken(false);
             status(routines::shutterHigh);
             lastFlashMillis(millis());
         }
-        // if triggered, don't set LOW until 800ms has passed
-        else if (millis() - lastFlashMillis() >= SHUTTER_PULL_TIME) {
-            digitalWrite(shutterPin(), LOW);
-            status(routines::shutterCompleted);
-            photoTaken(true);
-            if (stack.status() == routines::waitShutter) {
-                stack.status(routines::newMovement);
+        while(digitalRead(shutterPin()) == HIGH) {
+            // if triggered, don't set LOW until 800ms has passed
+            if (millis() - lastFlashMillis() >= SHUTTER_PULL_TIME) {
+                status(routines::shutterCompleted);
+                photoTaken(true);
+                if (stack.status() == routines::waitShutter) {
+                    stack.status(routines::newMovement);
+                }
+                digitalWrite(shutterPin(), LOW);
             }
         }
     }
@@ -114,7 +115,7 @@ void CameraControl::runFlashProcedure(bool restart) {
     }
     // if checkFlashAvailability() detected a successful trigger and pin is currently high
     // it means we are mid-procedure and can sent the shutterPin low
-    if (status() == routines::flashRecycling && digitalRead(shutterPin() == HIGH)) {
+    if (status() == routines::flashRecycling && digitalRead(shutterPin()) == HIGH) {
         digitalWrite(shutterPin(), LOW);
         status(routines::shutterCompleted);
     }

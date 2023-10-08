@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "Photo360.h"
 #include "UserInterface.h"
@@ -258,7 +257,7 @@ namespace photo_screen {
     "completed / remaining" on the screen.
     ***********************************************************************/
     void printPhoto360Progress() {
-        char photo360Progress[10]    = "0/0";
+        char photo360Progress[10] = "0/0";
 
         // format progress in "Completed / Total" string
         sprintf_P(photo360Progress, PSTR("%02d/%02d"), photo360.completedPhotos(), photo360.requiredPhotos());

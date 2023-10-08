@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "VariableDeclarations.h"
-#include "GlobalVariables.h"
 
 
 namespace orbis_screen {

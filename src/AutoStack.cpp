@@ -1,5 +1,4 @@
 #include "VariableDeclarations.h"
-#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "AutoStack.h"
 #include "StepperControl.h"
@@ -63,7 +62,6 @@ void AutoStack::run() {
         Serial.print("step 1: "); Serial.println(status());
         // take photo if there's been >= STACK_DWELL_TIME since a movement was executed successfully (gives time for vibration to settle)
         // this has likely passed due to the need to wait for shutter to trigger
-        // ****** some bug here with newShutter state perhaps)
         if (camera.shutterEnabled() && !camera.photoTaken() && millis() - lastMovementMillis() >= STACK_DWELL_TIME) {
             Serial.println("step 2");
             // if flashProcedure idle or is successful, start new procedure or trigger flash if !isFlashSensorEnabled
@@ -95,6 +93,7 @@ void AutoStack::run() {
             incrementCompletedMovements();
             if (camera.shutterEnabled()) {
                 status(routines::newShutter);               // reset status so we take a photo on the next loop
+                camera.photoTaken(false);
             } else {
                 status(routines::newMovement);              // set to new movement if shutter isnt enabled
             }
@@ -105,12 +104,12 @@ void AutoStack::run() {
             _stepper.executedMovement(false);               // reset executed movement flag
         }
     }
-    if (completedMovements() >= requiredMovements()) {
+    if (completedMovements() >= requiredMovements() && status() != routines::paused) {
+        Serial.println("step 5");
         _stepper.slaveSelected(false);
         _stepper.enabled(false);
         status(routines::completedStack);
-        terminateAutoStack();                           // stop AutoStack sequence if end reached
-        Serial.println("step 5");
+        terminateAutoStack();                               // stop AutoStack sequence if end reached
     }
 }
 
@@ -125,8 +124,8 @@ been homed and will exit autoStack if running.
 ******************************************************************/
 void AutoStack::executeMovement(int stepDirection, unsigned long stepperDelay) {
     _stepper.readyStealthChop();
-    Serial.print("en: ");Serial.print(_stepper.enabled());Serial.print(" - cs: "); Serial.println(_stepper.slaveSelected());
-    Serial.print("stepperDelay: ");Serial.print(stepperDelay);Serial.print(" - millis: "); Serial.print(millis());Serial.print(" - lastmillis: "); Serial.println(lastMovementMillis());
+    // Serial.print("en: ");Serial.print(_stepper.enabled());Serial.print(" - cs: "); Serial.println(_stepper.slaveSelected());
+    // Serial.print("stepperDelay: ");Serial.print(stepperDelay);Serial.print(" - millis: "); Serial.print(millis());Serial.print(" - lastmillis: "); Serial.println(lastMovementMillis());
     // step after elapsed amount of time
     if ((millis() - lastMovementMillis() > stepperDelay)) {
         int stepVelocity = stepDirection * _stepper.stepsPerMovement();

@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "AutoStack.h"

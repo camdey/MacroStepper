@@ -1,9 +1,9 @@
-#include "GlobalVariables.h"
 #include "StepperControl.h"
 #include "UserInterface.h"
 #include "JoystickControl.h"
 #include "menu/UI-Video360.h"
 #include "menu/UI-Global.h"
+#include "Video360.h"
 
 namespace video_screen {
     #define num_btns 6
@@ -15,10 +15,7 @@ namespace video_screen {
     gfxButton btn_Direction     =     btn.initBitmapButton(dir_cw,              200,    120,    80,     80,     CUSTOM_GREEN,   true    );
     gfxButton btn_ArrowUp       =     btn.initBitmapButton(arrowUp,             350,    20,     120,    120,    CUSTOM_GREEN,   true    );
     gfxButton btn_ArrowDown     =     btn.initBitmapButton(arrowDown,           350,    180,    120,    120,    CUSTOM_RED,     true    );
- 
 
-    #define STEPS_PER_VMAX 727 // number of steps per second for every 1000 VMAX
-    int nrSteps = 10000;
 
 
     void initVideo360Buttons() {
@@ -29,12 +26,12 @@ namespace video_screen {
         btn_array[4] = &btn_ArrowDown;
         btn_array[5] = &btn_Direction;
 
-        btn_Speed.addToggle(func_Speed,                         0 );
-        btn_Direction.addToggle(func_Direction,         0 );
-        btn_Back.addMomentary(func_Back,                        0 );
-        btn_PlayPause.addToggle(func_PlayPause,         0 );
-        btn_ArrowUp.addMomentary(func_ArrowUp,            0 );
-        btn_ArrowDown.addMomentary(func_ArrowDown,    0 );
+        btn_Speed.addToggle(func_Speed,             0 );
+        btn_Direction.addToggle(func_Direction,     0 );
+        btn_Back.addMomentary(func_Back,            0 );
+        btn_PlayPause.addToggle(func_PlayPause,     0 );
+        btn_ArrowUp.addMomentary(func_ArrowUp,      0 );
+        btn_ArrowDown.addMomentary(func_ArrowDown,  0 );
     }
 
 
@@ -51,7 +48,7 @@ namespace video_screen {
 
         // draw text
         btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getRevsPerMinute()/10.00, 1));
+        btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(video360.revsPerMinute()/10.00, 1));
     }
 
 
@@ -68,12 +65,12 @@ namespace video_screen {
         if (btnActive ) {
             ui.canEdit(routines::btn_arrows, true);
             btn_Speed.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10.00, 1));
+            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
         }
         else if (!btnActive) {
             ui.canEdit(routines::btn_arrows, false);
             btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(getRevsPerMinute()/10.00, 1));
+            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(video360.revsPerMinute()/10.00, 1));
         }
     }
 
@@ -84,31 +81,25 @@ namespace video_screen {
             btn_Direction.updateBitmap(dir_ccw); // update bitmap image
             btn_Direction.updateColour(CUSTOM_RED); // change colour
             btn_Direction.drawButton(); // draw
-            setVideo360Target(getVideo360Target()*-1); // change direction
+            stepper2.rotateClockwise(false);
         }
         else if (!btnActive) {
             btn_Direction.drawButton(BLACK); // replace existing button
             btn_Direction.updateBitmap(dir_cw); // update bitmap image
             btn_Direction.updateColour(CUSTOM_GREEN); // change colour
             btn_Direction.drawButton(); // draw
-            setVideo360Target(getVideo360Target()*-1); // change direction
-        }
-        // if video360 is active, change direction while moving
-        if (isVideo360Active()) {
-            stepper2.video360(getVideo360Target());
+            stepper2.rotateClockwise(true);
         }
     }
 
 
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            if (isVideo360Active()) {
-                stepper2.video360(0); // pause movement
+            if (video360.busy()) {
+                video360.status(routines::stopping); // pause movement
                 func_PlayPause(false); // reset PlayPause button
                 btn_PlayPause.setButtonActive(false); // reset button state
-                setVideo360Active(false);
             }
-            stepper2.configStealthChop(); // reset VMAX
             ui.populateScreen(routines::ui_Orbis);
         }
     }
@@ -116,53 +107,38 @@ namespace video_screen {
 
     void func_PlayPause(bool btnActive) {
         // make sure VMAX is updated before starting
-        rpmToVmax();
+        video360.rpmToVmax();
         if (btnActive) {
             btn_PlayPause.drawButton(BLACK); // replace existing button
             btn_PlayPause.updateBitmap(pause); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
             btn_PlayPause.drawButton(); // draw
-            stepper2.video360(getVideo360Target());
-            setVideo360Active(true);
+            video360.status(routines::running);
         }
         else if (!btnActive) {
             btn_PlayPause.drawButton(BLACK); // replace existing button
             btn_PlayPause.updateBitmap(play); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
             btn_PlayPause.drawButton(); // draw
-            stepper2.video360(0);
-            setVideo360Active(false);
+            video360.status(routines::stopping);
         }
     }
 
 
     void func_ArrowUp(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_arrows)) {
-            setRevsPerMinute(getRevsPerMinute()+1);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10.00, 1));
-            rpmToVmax();
+            video360.revsPerMinute(video360.revsPerMinute()+1);
+            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
+            video360.rpmToVmax();
         }
     }
 
 
     void func_ArrowDown(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_arrows)) {
-            setRevsPerMinute(getRevsPerMinute()-1);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(getRevsPerMinute()/10.00, 1));
-            rpmToVmax();
+            video360.revsPerMinute(video360.revsPerMinute()-1);
+            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
+            video360.rpmToVmax();
         }
     }
-
-
-    // convert desired RPM to VMAX for setting max speed
-    // store STEPS_PER_VMAX and RPM as integers and then divide by necessary denominator to convert back
-    void rpmToVmax() {
-            int stepsPerRev = ORBIS_MOTOR_STEPS * NR_MICROSTEPS;        // 200 * 16 = 3200
-            int rpm = getRevsPerMinute();                               // e.g. 5.0rpm = 50
-            int totalSteps = rpm * stepsPerRev*1.00 / 10;               // 50 * 3200 / 10 = 16000
-            int stepsPerSecond = totalSteps*1.00 / 60;                  // 16000 / 60 = 266 SPS
-            int vMax = stepsPerSecond*1.00 / STEPS_PER_VMAX * 1000;     // 266 / 727 * 1000 = 365.8
-            stepper2.targetVelocity(vMax);
-    }
-
 }

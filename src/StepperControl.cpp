@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
-#include "GlobalVariables.h"
 #include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "AutoStack.h"
@@ -249,16 +248,6 @@ void TMC5160Stepper_Ext::homeRail() {
     }
     slaveSelected(false);
     enabled(false);
-}
-
-
-void TMC5160Stepper_Ext::video360(long nrSteps) {
-    // // change to StealthChop if StallGuard is configured
-    // readyStealthChop();
-    // // update target velocity as calling configStealthChop resets this on the driver register but not the function
-    // targetVelocity(targetVelocity());
-    // // set position
-    // XTARGET(XACTUAL()+nrSteps);
 }
 
 

@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "UserInterface.h"
 #include "JoystickControl.h"
 #include "menu/UI-Orbis.h"
