@@ -1,7 +1,7 @@
 // ********* Macro Stepper v2.2 *********
 // *** AUTHOR: Cam Dey
 // *** DATE: 2019-01-27
-// *** UPDATED: 2020-08-15
+// *** UPDATED: 2023-08-26
 // **************************************
 
 // Macro Stepper was written to automate the focus stacking procedure commonly used
@@ -13,29 +13,32 @@
 // This delay can be used to allow your camera flash time to recharge before the next shot.
 
 // ----- DEFINITIONS ----- //
-// STEP 				= one microstep step of the stepper stepper motor
+// STEP             = one microstep step of the stepper stepper motor
 // MOVEMENT 		= one full movement of linear rail by specified distance, consisting of multiple steps
 // PROCEDURE 		= one completed stack procedure, consisting of multiple movements
 // DISTANCE 		= distance travelled per movement = number of steps per movement * 0.0025mm
-// MANUAL MODE 	= user input required to step motor by specified distance
-// AUTOSTACK 		= automatic mode, stepper completes procedure without further input
+// MANUAL MODE      = user input required to step motor by specified distance
+// AUTOSTACK        = automatic mode, stepper completes procedure without further input
 
 #include "Arduino.h"
-#include "Adafruit_GFX.h"    									// core graphics library
-#include "TouchScreen.h"											// touchscreen library
-#include "MCUFRIEND_kbv.h"										// display driver for IL9481
+#include "Adafruit_GFX.h"                   // core graphics library
+#include "TouchScreen.h"                    // touchscreen library
+#include "MCUFRIEND_kbv.h"                  // display driver for IL9481
 #include "TMCStepper.h"
-#include "TimerFreeTone.h"                    // produces beep tone for piezo
-#include "gfxButton.h"                        // my library for adding/controlling TFT buttons
+#include "TimerFreeTone.h"                  // produces beep tone for piezo
+#include "gfxButton.h"                      // my library for adding/controlling TFT buttons
 // project definitions and functions
-#include "DriverConfig.h"											// functions for configuring TMC2130 profiles
-#include "GlobalVariables.h"
-#include "JoystickControl.h"                  // joystick control functions
-#include "MiscFunctions.h"										// miscellaneous functions
-#include "ShutterControl.h"										// functions relating to the camera shutter and flash
-#include "StepperControl.h"										// functions for controlling the stepper motor
-#include "VariableDeclarations.h"							// external variable declarations
-#include "menu/UI-Main.h"
+#include "JoystickControl.h"                // joystick control functions
+#include "MiscFunctions.h"                  // miscellaneous functions
+#include "CameraControl.h"                 // functions relating to the camera shutter and flash
+#include "StepperControl.h"                 // functions for controlling the stepper motor
+#include "LedControl.h"
+#include "AutoStack.h"                      // AutoStack class and methods
+#include "Photo360.h"
+#include "Video360.h"
+#include "VariableDeclarations.h"           // external variable declarations
+#include "UserInterface.h"
+#include "StatusEnums.h"                    // enums containing statuses for various routines, namespace routines::
 #include "menu/UI-Home.h"
 #include "menu/UI-Stack.h"
 #include "menu/UI-Orbis.h"
@@ -50,123 +53,126 @@
 #include "Wire.h"
 
 
-TouchScreen 		ts = TouchScreen(XP, YP, XM, YM, 300);
-TMC5160Stepper  driver(CS_PIN, R_SENSE);
-MCUFRIEND_kbv 	tft;
-gfxButton       btn;
-
-
-// --- currentTimes and elapsed times --- //
-unsigned long prevButtonCheck 		= 0;    		
-unsigned long prevJoystickCheck 	= 0;    			
-unsigned long recycleTime 				= 0;    		// duration to take photo
-// --- Input and Output values --- //
-int xStickUpper                   = 522; 				// Upper boundary of joystick resting point, calibrated during setup
-int xStickResting                 = 512;				// Resting point of joystick reading, calibrated during setup
-int xStickLower                   = 502;				// Lower boundary of of joystick resting point, calibrated during setup
-int xStickDiff                    = 0;          // Difference between ideal middle (512) and actual resting point
-bool isJoystickBtnActive          = 0;          // check if joystick button is pressed (ZSTICK_PIN)
-int flashThreshold                = 280;        // threshold value for flash being ready to fire
-int flashOnValue                  = 300;        // initial value for flash considered as being ready
-int flashOffValue                 = 30;         // initial value for flash considered as recycling
-// --- Enable/Disable functionality --- //
-bool runHomingSequence 						= true;       // runs rehoming sequence
-bool isNewAutoStack 						  = true;       // move to start for autoStack procedure
-bool autoStackInitiated 					= false;      // enables function for stack procedure
-bool autoStackPaused 							= false;      // pause stack procedure
-bool stallGuardConfigured 				= true;				// stallGuard config has run
-bool autoStackMax                 = false;      // set getEndPosition() to max for indetermine autoStack procedure
-bool isNewPhoto360                = true;       // move to start for photo360 procedure
-bool photo360Initiated            = false;      // enables function for photo360 procedure
-bool photo360Paused               = false;      // pause photo360 procedure
+TouchScreen             ts = TouchScreen(XP, YP, XM, YM, 300);
+TMC5160Stepper_Ext      stepper1(CS_1_PIN, R_1_SENSE);
+TMC5160Stepper_Ext      stepper2(CS_2_PIN, R_2_SENSE);
+MCUFRIEND_kbv           tft;
+gfxButton               btn;
+AutoStack               stack(stepper1);
+Photo360                photo360(stepper2);
+Video360                video360(stepper2);
+CameraControl           camera(SHUTTER_PIN, FLASH_SENSOR_PIN);
+Joystick                xStick(stepper1, XSTICK_PIN, ZSTICK_PIN);
+Joystick                rStick(stepper2, RSTICK_PIN, ZSTICK_PIN);
+ledLight                led(LED_PIN, POT_PIN);
+UserInterface           ui;
 
 
 // ***** --- MAIN PROGRAM --- ***** //
 void setup(void) {
-  Serial.begin(250000);
+    Serial.begin(250000);
 	SPI.begin();
-  tft.reset();
+    tft.reset();
+
+    pinMode(PIEZO_PIN, OUTPUT);
+	pinMode(EN_1_PIN, OUTPUT);
+    pinMode(EN_2_PIN, OUTPUT);
+    pinMode(CS_1_PIN, OUTPUT);
+    pinMode(CS_2_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
+    // declare analog pin as digital input
+    pinMode(ZSTICK_PIN, INPUT_PULLUP);    // pullup needed for consistent readings
+    pinMode(SHUTTER_PIN, OUTPUT);
 
 	uint16_t identifier = tft.readID();
 	tft.begin(identifier);
-	tft.setRotation(1);
-  setScreenRotated(false);
+	tft.setRotation(3);
+    ui.screenRotated(false);
 
-	driver.begin();
-	driver.rms_current(1400); // max 1900rms, stepper rated for 2.8A
-	driver.microsteps(NR_MICROSTEPS);
-  driver.shaft(1); // inverse shaft, large target moves away from rear, small target moves towards rear
+	stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN); //1400
+    stepper2.initDriver(850, NR_MICROSTEPS, 0, EN_2_PIN, CS_2_PIN);
 
-  setStepperEnabled(true);
-  configStealthChop();
+    stepper1.slaveSelected(false);
+    stepper1.enabled(false);
+    stepper1.configStealthChop();
 
-	pinMode(EN_PIN, OUTPUT);
-  digitalWrite(EN_PIN, LOW);
-  pinMode(CS_PIN, OUTPUT);
-  digitalWrite(CS_PIN, HIGH); // unselect SPI slave
-  pinMode(PIEZO_PIN, OUTPUT);
-  
-  // declare analog pin as digital input
-  pinMode(ZSTICK_PIN, INPUT_PULLUP);  // pullup needed for consistent readings
-  pinMode(SONY_PIN, OUTPUT);
-  digitalWrite(SONY_PIN, LOW);
+    stepper2.slaveSelected(false);
+    stepper2.enabled(false);
+    
+    digitalWrite(SHUTTER_PIN, LOW);
 
-  // find stable resting point of joystick
-  // calibrateJoyStick();
+    rStick.restValLower(490);
+    rStick.restValUpper(530);
 
-  // don't home rail on start up
-  runHomingSequence = false;
-  btn.begin(&tft);
-  btn.setScreenSize(480, 320);
-  initButtons(200, 75);
-  populateScreen("Home");
+    btn.begin(&tft);
+    btn.setScreenSize(480, 320);
+    ui.initButtons(200, 75);
+    ui.populateScreen(routines::ui_Home);
+
+    rStick.restValUpper(530);
+    rStick.restValLower(490);
 }
 
 void loop() {
-  // run AutoStack sequence if enabled
-  if (autoStackInitiated && !autoStackPaused) {
-    autoStack();
-    // update duration if on Auto screen
-    if (getCurrentScreen() == "Auto") {
-		  auto_screen::estimateDuration();
+    // run AutoStack sequence if not paused or inactive
+    if (stack.busy()) {
+        stack.run();
+        // update duration if on Auto screen
+        if (ui.activeScreen() == routines::ui_Auto) {
+		    auto_screen::estimateDuration();
+        }
     }
-  }
-  // take touch reading
-  if (millis() - prevButtonCheck >= 50) {
-    readTouchScreen(getCurrentScreen());
-    prevButtonCheck = millis();
-
-    // if video360 active, keep updating target so stepper keeps moving
-    if (isVideo360Active()) {
-      video360(getVideo360Target());
+    // if not running AutoStack, we manually check for camera shutter to see if it needs to be set to low again
+    // else if (camera.lastCheckMillis() >= 50) {
+    //     if (digitalRead(camera.shutterPin()) == HIGH) {
+    //         camera.triggerShutter(false);
+    //     }
+    //     camera.lastCheckMillis(millis());
+    // }
+    // take touch reading
+    if (millis() - ui.lastCheckMillis() >= 50) {
+        ui.readTouchScreen(ui.activeScreen());
+        ui.lastCheckMillis(millis());
+        // if video360 active, keep updating target so stepper keeps moving
+        if (video360.busy()) {
+            video360.run();
+        }
+        if (photo360.busy()) {
+            photo360.run();
+        }
     }
-    if (photo360Initiated) {
-      photo360();
-    }
-  }
-  // take joystick and limit switch reading, put stepper to sleep
-  if (millis() - prevJoystickCheck >= 100) {
-    // check joystick for movement
-    int xStickPos = readJoystick();
-    isJoystickBtnActive = !digitalRead(ZSTICK_PIN); // invert reading as 1 is not active and 0 is active
-  
-    // move if past threshold and not in autoStack or video360 mode
-    if ((xStickPos >= xStickUpper || xStickPos <= xStickLower) && !autoStackInitiated && !isVideo360Active() && isJoystickBtnActive) {
-      joystickMotion(xStickPos);
-    }
-    // sleep if stepper inactive, update position on manual screen
-    if (hasReachedTargetPosition() && isStepperEnabled() && getCurrentStage() == idle) {
-      setStepperEnabled(false); // disable stepper
-    }
-		// update godoxValue if on Flash screen
-		if (getCurrentScreen() == "Flash" && (canEditFlashOffValue() || canEditFlashOnValue())) {
-			flash_screen::updateGodoxValue();
+    // take joystick and limit switch reading, put stepper to sleep
+    if (millis() - xStick.lastCheckMillis() >= 50) {
+        // check joystick for movement if button depressed and not in autoStack or photo360/video360 mode
+        if (!stack.busy() && !photo360.busy() && !video360.busy()) {
+            int xPos = xStick.readSmoothed();
+            int rPos = rStick.readSmoothed();
+            // Serial.print("rpos: "); Serial.println(rPos);
+            if ((xPos >= xStick.restValUpper() || xPos <= xStick.restValLower()) && xStick.buttonActive()) {
+                xStick.motion(true);
+            }
+            else if ((rPos >= rStick.restValUpper() || rPos <= rStick.restValLower()) && !rStick.buttonActive()) {
+                rStick.motion(false);
+            }
+        }
+    //     // sleep if stepper inactive, update position on manual screen
+    //     if (stepper1.reachedTarget() && stepper1.enabled() && stack.status() == routines::inactive) {
+    //         stepper1.enabled(false); // disable stepper
+    //     }
+    //     // sleep if stepper inactive, update position on manual screen
+    //     if (stepper2.reachedTarget() && stepper2.enabled() && photo360.status() == routines::inactive) {
+    //         stepper2.enabled(false); // disable stepper
+    //     }
+	// 	// update flashSensorValue if on Flash screen
+		if (ui.activeScreen() == routines::ui_Flash && (ui.canEdit(routines::btn_flashOff) || ui.canEdit(routines::btn_flashOn))) {
+			flash_screen::updateFlashSensorValue();
 		}
-    prevJoystickCheck = millis();
-  }
+        xStick.lastCheckMillis(millis());
+    }
 
-  // run homing sequence if first loop
-  if (runHomingSequence) {
-    homeRail(); // run homing routine
-  }
+    if (millis() - led.lastCheckMillis() >= 300) {
+        // only updates if value has changed
+        led.updateBrightness();
+        // Serial.print("pot val: "); Serial.println(led.readDimmer());
+    }
 }
