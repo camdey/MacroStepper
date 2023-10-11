@@ -1,55 +1,17 @@
-# MacroStepper v2.0
+# MacroStepper v3.0
 Author: Cam Dey
 
 Created: 2018-12-18
 
-v2.0 added: 2020-01-01
+v2.0: 2020-01-01
+v3.0: 2023-10-11 // refactor, introduces breaking changes
 
-Last Revised: 2020-08-16
-
-Note: v1.0 documentation hasn't been updated to incorporate the TMC2130 driver or the other hardware changes.
 
 The MacroStepper is a fully automated macrophotography rig designed to enable a camera to take photos at precisely incremented steps. The macroStack can work with or without an automated shutter and also in manual mode if the user prefers to control the stepping themselves.
 
 # Schematic
-![PCB_top](https://github.com/camdey/MacroStepper/blob/master/schematics/MacroStepper_v2.0_top.png)
-![PCB_bottom](https://github.com/camdey/MacroStepper/blob/master/schematics/MacroStepper_v2.0_bottom.png)
-
-## Pinouts
-**2.8" TFT Touch Screen Display**
-
- - Connected via custom PCB shield
- 
-| TMC2130     | PCB 		|
-| ----------- | --------------- |
-| VMOT        | 12V Power Supply|
-| VIO         | Arduino 3.3V	|
-| GND         | GND		|
-| M1A         | Black wire	|
-| M1B         | Green wire	|
-| M2A         | Red wire        |
-| M2B         | Blue wire	|
-| DIR         | D28		|
-| STEP        | D30		|
-| CS          | D32		|
-| MISO        | ICSP1		|
-| SCK         | ICSP3		|
-| MOSI        | ICSP4		|
-| EN          | D34		|
-
-| Joystick    | PCB	|
-| ----------- | ------- |
-| X Axis      | A6	|
-| Z Axis      | A7	|
-
-| Camera      | PCB 	|
-| ----------- | ------- |
-| GODOX       | A8	|
-| SHT         | D36	|
-
-| Misc        | PCB 	|
-| ----------- | ------- |
-| PIEZO       | D22	|
+![PCB_top](https://github.com/camdey/MacroStepper/blob/master/schematics/v3/pcb_top.png)
+![PCB_bottom](https://github.com/camdey/MacroStepper/blob/master/schematics/v3/pcb_bottom.png)
 
 
 # Interface
