@@ -17,10 +17,10 @@ namespace manual_screen {
     gfxButton btn_StepSize  =   btn.initButton("Step Size", "fillRoundRect",    0,  20,     160,    80,     15, DARKGRAY,   true);
     gfxButton btn_StepNr    =   btn.initButton("Step Nr.",  "fillRoundRect",    0,  120,    160,    80,     15, DARKGRAY,   false);
     gfxButton btn_RailPos   =   btn.initButton("Rail Pos.", "fillRoundRect",    0,  220,    160,    80,     15, DARKGRAY,   false);
-    gfxButton btn_Reset     =   btn.initBitmapButton(cancel,    200,    120,    80,     80,     WHITE,          true);
-    gfxButton btn_Back      =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          true);
-    gfxButton btn_ArrowUp   =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowDown =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     true);
+    gfxButton btn_Reset     =   btn.initBitmapButton(cancel,    200,    120,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_Back      =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_ArrowUp   =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_ArrowDown =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
 
 
     void initManualButtons() {

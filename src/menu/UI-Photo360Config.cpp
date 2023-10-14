@@ -14,10 +14,10 @@ namespace photoconfig_screen {
     gfxButton btn_90            =   btn.initButton("Move 90",   "fillRoundRect",    0,        20,     160,    80,     15,   DARKGRAY,   true);
     gfxButton btn_180           =   btn.initButton("Move 180",  "fillRoundRect",    0,        120,    160,    80,     15,   DARKGRAY,   true);
     gfxButton btn_360           =   btn.initButton("Move 360",  "fillRoundRect",    0,        220,    160,    80,     15,   DARKGRAY,   true);
-    gfxButton btn_Direction     =   btn.initBitmapButton(dir_cw,    200,    20,     80,     80,     CUSTOM_GREEN,   true);
-    gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     true);
+    gfxButton btn_Direction     =   btn.initBitmapButton(dir_cw,    200,    20,     80,     80,     CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
 
 
     void initPhoto360ConfigButtons() {

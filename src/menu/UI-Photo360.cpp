@@ -12,11 +12,11 @@ namespace photo_screen {
     gfxButton btn_PhotoNr       =   btn.initButton("Nr Photos",     "fillRoundRect",    0,  20,     160,    80,     15, DARKGRAY,   true);
     gfxButton btn_Delay         =   btn.initButton("Delay",         "fillRoundRect",    0,  120,    160,    80,     15, DARKGRAY,   true);
     gfxButton btn_Progress      =   btn.initButton("Progress",      "fillRoundRect",    0,  220,    160,    80,     15, DARKGRAY,   false);
-    gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,      200,    120,    80,     80,     WHITE,          true);
-    gfxButton btn_Back          =   btn.initBitmapButton(backArrow,     200,    220,    80,     80,     WHITE,          true);
-    gfxButton btn_PlayPause     =   btn.initBitmapButton(play,          350,    100,    120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,       350,    20,     120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,     350,    180,    120,    120,    CUSTOM_RED,     true);
+    gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,      200,    120,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_Back          =   btn.initBitmapButton(backArrow,     200,    220,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_PlayPause     =   btn.initBitmapButton(play,          350,    100,    120,    120,    CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,       350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,     350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
 
 
     void initPhoto360Buttons() {

@@ -8,11 +8,11 @@ namespace config_screen {
     #define num_btns 5
     gfxButton *btn_array[num_btns];
 
-    gfxButton btn_FlipScreen    =   btn.initBitmapButton(toggleOff,     240,    10,     100,    50,     CUSTOM_RED,     true);
-    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOff,     240,    70,     100,    50,     CUSTOM_RED,     true);
-    gfxButton btn_Stepper       =   btn.initBitmapButton(toggleOn,      240,    130,    100,    50,     CUSTOM_GREEN,   true);
-    gfxButton btn_Thing2        =   btn.initBitmapButton(toggleOff,     240,    190,    100,    50,     CUSTOM_RED,     true);
-    gfxButton btn_Back          =   btn.initBitmapButton(backArrow,     380,    220,    80,     80,     WHITE,          true);
+    gfxButton btn_FlipScreen    =   btn.initBitmapButton(toggleOff,     240,    10,     100,    50,     CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOff,     240,    70,     100,    50,     CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_Stepper       =   btn.initBitmapButton(toggleOn,      240,    130,    100,    50,     CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_Thing2        =   btn.initBitmapButton(toggleOff,     240,    190,    100,    50,     CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_Back          =   btn.initBitmapButton(backArrow,     380,    220,    80,     80,     WHITE,          BLACK,  true);
 
     void initConfigButtons() {
         btn_array[0] = &btn_FlipScreen;

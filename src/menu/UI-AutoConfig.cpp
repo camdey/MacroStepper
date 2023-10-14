@@ -14,11 +14,11 @@ namespace autoconfig_screen {
     gfxButton btn_Start         =   btn.initButton("START", "fillRoundRect",    0,  20,     160,    80,     15,     CUSTOM_GREEN,   true);
     gfxButton btn_End           =   btn.initButton("END",   "fillRoundRect",    0,  120,    160,    80,     15,     CUSTOM_RED,     true);
     gfxButton btn_Run           =   btn.initButton("RUN",   "fillRoundRect",    0,  220,    160,    80,     15,     CUSTOM_BLUE,    true);
-    gfxButton btn_Delay         =   btn.initBitmapButton(timer,     200,    20,     80,     80,     WHITE,          true);
+    gfxButton btn_Delay         =   btn.initBitmapButton(timer,     200,    20,     80,     80,     WHITE,          BLACK,  true);
     gfxButton btn_DelayVal      =   btn.initTransparentButton(      280,    20,     60,     30,                     false);
-    gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     true);
+    gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
 
 
     void initAutoConfigButtons() {

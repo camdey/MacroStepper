@@ -106,12 +106,12 @@ void UserInterface::readTouchScreen(routines::Screens screen) {
     int touch_z = point.z;
 
     if (!ui.screenRotated()) {
-        touch_x = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());        // rotate & scale to TFT boundaries
-        touch_y = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());     //     ... USB port at upper left
+        touch_x = map(point.y, TS_MINY, TS_MAXY, 0, tft.width());       // rotate & scale to TFT boundaries
+        touch_y = map(point.x, TS_MINX, TS_MAXX, 0, tft.height());      //     ... USB port at upper left
     }
     else if (ui.screenRotated()) {
-        touch_x = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);        // rotate & scale to TFT boundaries
-        touch_y = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);     //     ... USB port at lower right
+        touch_x = map(point.y, TS_MINY, TS_MAXY, tft.width(), 0);       // rotate & scale to TFT boundaries
+        touch_y = map(point.x, TS_MINX, TS_MAXX, tft.height(), 0);      //     ... USB port at lower right
     }
     
     if (touch_z >= 50 && touch_z <= 1000) {

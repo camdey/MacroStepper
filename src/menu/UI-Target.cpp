@@ -30,9 +30,9 @@ namespace target_screen {
     gfxButton btn_Seven     =   btn.initButton("7",    "fillRoundRect", 264,    22,     60, 60,    5,   CUSTOM_BLUE,    true);
     gfxButton btn_Eight     =   btn.initButton("8",    "fillRoundRect", 336,    22,     60, 60,    5,   CUSTOM_BLUE,    true);
     gfxButton btn_Nine      =   btn.initButton("9",    "fillRoundRect", 408,    22,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Back      =   btn.initBitmapButton(backArrow,         172,    220,    80, 80,         WHITE,          true);
-    gfxButton btn_Run       =   btn.initBitmapButton(rocket,            172,    20,     80, 80,         WHITE,          true);
-    gfxButton btn_Save      =   btn.initBitmapButton(save,              172,    120,    80, 80,         WHITE,          true);
+    gfxButton btn_Back      =   btn.initBitmapButton(backArrow,         172,    220,    80, 80,         WHITE,          BLACK,  true);
+    gfxButton btn_Run       =   btn.initBitmapButton(rocket,            172,    20,     80, 80,         WHITE,          BLACK,  true);
+    gfxButton btn_Save      =   btn.initBitmapButton(save,              172,    120,    80, 80,         WHITE,          BLACK,  true);
 
 
     gfxButton *btn_array[num_btns];

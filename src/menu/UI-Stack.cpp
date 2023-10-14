@@ -10,9 +10,9 @@ namespace stack_screen {
 
     gfxButton btn_Manual    =   btn.initButton("Manual",    "fillRoundRect",    30,     120,    180,    80,     15,     CUSTOM_BLUE,    true);
     gfxButton btn_Auto      =   btn.initButton("Auto",      "fillRoundRect",    270,    120,    180,    80,     15,     CUSTOM_GREEN,   true);
-    gfxButton btn_HomeRail  =   btn.initBitmapButton(home,          20,     230,    80,     80,     WHITE,  true);
-    gfxButton btn_Back      =   btn.initBitmapButton(backArrow,     200,    230,    80,     80,     WHITE,  true);
-    gfxButton btn_Target    =   btn.initBitmapButton(target,        380,    230,    80,     80,     WHITE,  true);
+    gfxButton btn_HomeRail  =   btn.initBitmapButton(home,          20,     230,    80,     80,     WHITE,  BLACK,  true);
+    gfxButton btn_Back      =   btn.initBitmapButton(backArrow,     200,    230,    80,     80,     WHITE,  BLACK,  true);
+    gfxButton btn_Target    =   btn.initBitmapButton(target,        380,    230,    80,     80,     WHITE,  BLACK,  true);
 
 
     void initStackButtons() {

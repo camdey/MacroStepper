@@ -8,8 +8,8 @@
 #include "menu/UI-Photo360.h"
 
 namespace global {
-    gfxButton btn_Flash = btn.initBitmapButton(flashOff,    200,    20,     80,     80,     CUSTOM_RED, true);
-    gfxButton btn_Reset = btn.initBitmapButton(cancel,      200,    120,    80,     80,     BLACK,      true);
+    gfxButton btn_Flash = btn.initBitmapButton(flashOff,    200,    20,     80,     80,     CUSTOM_RED, BLACK,  true);
+    gfxButton btn_Reset = btn.initBitmapButton(cancel,      200,    120,    80,     80,     BLACK,      BLACK,  true);
 
 
     void initGlobalButtons() {
