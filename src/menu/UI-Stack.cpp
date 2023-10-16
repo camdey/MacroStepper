@@ -2,46 +2,45 @@
 #include "StepperControl.h"
 #include "UserInterface.h"
 #include "menu/UI-Stack.h"
+#include "menu/UI-Global.h"
 
 namespace stack_screen {
-    #define num_btns 5
+    #define num_btns 6
     gfxButton *btn_array[num_btns];
 
-
-    gfxButton btn_Manual    =   btn.initButton("Manual",    "fillRoundRect",    30,     120,    180,    80,     15,     CUSTOM_BLUE,    true);
-    gfxButton btn_Auto      =   btn.initButton("Auto",      "fillRoundRect",    270,    120,    180,    80,     15,     CUSTOM_GREEN,   true);
-    gfxButton btn_HomeRail  =   btn.initBitmapButton(home,          20,     230,    80,     80,     WHITE,  BLACK,  true);
-    gfxButton btn_Back      =   btn.initBitmapButton(backArrow,     200,    230,    80,     80,     WHITE,  BLACK,  true);
-    gfxButton btn_Target    =   btn.initBitmapButton(target,        380,    230,    80,     80,     WHITE,  BLACK,  true);
+    gfxButton btn_Manual    =   btn.initButton("Manual",    "fillRoundRect",    150,     35,    220,    110,     5,     WHITE,  true);
+    gfxButton btn_Auto      =   btn.initButton("Auto",      "fillRoundRect",    150,    175,    220,    110,     5,     WHITE,  true);
+    // gfxButton btn_HomeRail  =   btn.initBitmapButton(home,          200,    230,    80,     80,     WHITE,  BLACK,  true);
 
 
     void initStackButtons() {
-        btn_array[0] = &btn_Manual;
-        btn_array[1] = &btn_Auto;
-        btn_array[2] = &btn_HomeRail;
-        btn_array[3] = &btn_Target;
-        btn_array[4] = &btn_Back;
+        btn_array[0] = &global::btn_Home;
+        btn_array[1] = &global::btn_Stack;
+        btn_array[2] = &global::btn_360;
+        btn_array[3] = &global::btn_3D;
+        btn_array[4] = &btn_Manual;
+        btn_array[5] = &btn_Auto;
+        // btn_array[6] = &btn_HomeRail;
 
         btn_Manual.addMomentary(func_Manual, 0);
         btn_Auto.addMomentary(func_Auto, 0);
-        btn_HomeRail.addMomentary(func_HomeRail, 0);
-        btn_Target.addMomentary(func_Target, 0);
-        btn_Back.addMomentary(func_Back,        0 );
+        // btn_HomeRail.addMomentary(func_HomeRail, 0);
 
-        btn_Manual.addBorder(4, WHITE);
-        btn_Auto.addBorder(4, WHITE);
+        btn_Manual.addBorder(5, CUSTOM_GREY);
+        btn_Auto.addBorder(5, CUSTOM_GREY);
     }
 
 
     void populateStackScreen() {
         ui.activeScreen(routines::ui_Stack);
+        tft.fillRect(80, 0, 5, 320, WHITE);
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();
         }
         // draw text
-        btn_Auto.writeTextCentre(Lato_Black_34, WHITE);
-        btn_Manual.writeTextCentre(Lato_Black_34, WHITE);
+        btn_Manual.writeTextCentre(Lato_Black_40, DARKGRAY);
+        btn_Auto.writeTextCentre(Lato_Black_40, DARKGRAY);
     }
 
 
@@ -69,24 +68,10 @@ namespace stack_screen {
 
 
     void func_HomeRail(bool btnActive) {
-        if (btnActive) {
-            btn_HomeRail.drawButton(CUSTOM_RED);
-            stepper1.homeRail();
-            btn_HomeRail.drawButton(WHITE);
-        }
-    }
-
-
-    void func_Target(bool btnActive) {
-        if (btnActive) {
-            ui.populateScreen(routines::ui_Target);
-        }
-    }
-
-
-    void func_Back(bool btnActive) {
-        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(routines::ui_Home);
-        }
+        // if (btnActive) {
+        //     btn_HomeRail.drawButton(CUSTOM_RED);
+        //     stepper1.homeRail();
+        //     btn_HomeRail.drawButton(WHITE);
+        // }
     }
 }

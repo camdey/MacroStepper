@@ -89,7 +89,9 @@ void setup(void) {
 	tft.setRotation(3);
     ui.screenRotated(false);
 
-	stepper1.initDriver(850, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN); //1400
+    led.setBrightness(0);
+
+	stepper1.initDriver(1400, NR_MICROSTEPS, 1, EN_1_PIN, CS_1_PIN); //1400
     stepper2.initDriver(850, NR_MICROSTEPS, 0, EN_2_PIN, CS_2_PIN);
 
     stepper1.slaveSelected(false);

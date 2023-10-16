@@ -11,7 +11,6 @@ namespace target_screen {
     char targetValues[7] = {'0'};
     int targetValueIndex = 0;
     int maxTargetValueIndex = 5;
-    bool canEditTarget = false;
     float targetMillimetres = 0.0000;
 
 
@@ -96,18 +95,18 @@ namespace target_screen {
         btn_Distance.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(targetMillimetres, 4));
         btn_Actual.writeTextTopCentre(Arimo_Regular_30, WHITE);
         btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
-        btn_Cancel.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Minus.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Zero.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_One.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Two.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Three.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Four.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Five.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Six.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Seven.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Eight.writeTextCentre(Arimo_Bold_30, WHITE);
-        btn_Nine.writeTextCentre(Arimo_Bold_30, WHITE);
+        btn_Cancel.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Minus.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Zero.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_One.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Two.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Three.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Four.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Five.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Six.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Seven.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Eight.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Nine.writeTextCentre(Arimo_Bold_36, WHITE);
     }
 
 
@@ -122,14 +121,14 @@ namespace target_screen {
 
     void func_Distance(bool active) {
         if (active) {
-            canEditTarget = true;
+            ui.canEdit(routines::btn_targetPosition, true);
             btn_Target.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_Target.writeTextBottomCentre(Arimo_Bold_30, YELLOW, targetValues);
             btn_Distance.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(targetMillimetres, 4));
             btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL())); // update in case stepper has moved (e.g. due to joystick)
         }
         else {
-            canEditTarget = false;
+            ui.canEdit(routines::btn_targetPosition, false);
             btn_Target.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_Target.writeTextBottomCentre(Arimo_Bold_30, WHITE, targetValues);
             btn_Distance.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(targetMillimetres, 4));
@@ -138,7 +137,7 @@ namespace target_screen {
 
 
     void func_Input(char* label) {
-        if (canEditTarget) {
+        if (ui.canEdit(routines::btn_targetPosition)) {
             // if input starts with negative, increase max index
             maxTargetValueIndex = targetValues[0] == '-' ? 6 : 5;
             // if input is numeric value, add to array
@@ -192,14 +191,14 @@ namespace target_screen {
 
 
     void func_Back(bool active) {
-        if (active && !canEditTarget) {
-            ui.populateScreen(routines::ui_Stack);
+        if (active && !ui.canEdit(routines::btn_targetPosition)) {
+            ui.populateScreen(routines::ui_Home);
         }
     }
 
 
     void func_Run(bool active) {
-        if (active && !canEditTarget) {
+        if (active && !ui.canEdit(routines::btn_targetPosition)) {
             long nrSteps = atoi(targetValues);
             btn_Run.drawButton(CUSTOM_RED);
             stepper1.VMAX(20000);
@@ -213,7 +212,7 @@ namespace target_screen {
 
 
     void func_saveStepDist(bool active) {
-        if (active && !canEditTarget) {
+        if (active && !ui.canEdit(routines::btn_targetPosition)) {
             long nrSteps = atoi(targetValues);
             stepper1.stepsPerMovement(nrSteps);
             stepper1.calculateDistancePerMovement();

@@ -48,6 +48,8 @@ class UserInterface {
                 m_photo360Delay = state;
             } else if (button == routines::btn_photo360Nr) {
                 m_photo360Nr = state;
+            } else if (button == routines::btn_targetPosition) {
+                m_targetPosition = state;
             }
         }
         bool canEdit(routines::Buttons button) {
@@ -69,6 +71,8 @@ class UserInterface {
                 return m_photo360Delay;
             } else if (button == routines::btn_photo360Nr) {
                 return m_photo360Nr;
+            } else if (button == routines::btn_targetPosition) {
+                return m_targetPosition;
             }
             return false;
         }
@@ -85,6 +89,7 @@ class UserInterface {
         bool m_flashOff                 = false;            // set flash off value
         bool m_photo360Delay            = false;            // set photo360 delay
         bool m_photo360Nr               = false;            // set photo360 required photos
+        bool m_targetPosition           = false;            // set target position
         long m_lastCheckMillis          = 0;
 
 };

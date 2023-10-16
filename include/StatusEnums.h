@@ -53,6 +53,7 @@ namespace routines {
 
     // enums for various buttons where we want to check their state
     enum Buttons {
+        enum_first,
         btn_flashOn,
         btn_flashOff,
         btn_distance,
@@ -61,7 +62,9 @@ namespace routines {
         btn_shutterDelay,
         btn_arrows,
         btn_photo360Nr,
-        btn_photo360Delay
+        btn_photo360Delay,
+        btn_targetPosition,
+        enum_last
     };
 }
 #endif

@@ -49,14 +49,22 @@
 #include <icons/Timer.h>
 #include <icons/ToggleOn.h>
 #include <icons/ToggleOff.h>
-#include <icons/rgb_Settings_80.h>
-#include <icons/rgb_Settings_120.h>
-#include <icons/rgb_Autostack_80.h>
-#include <icons/rgb_Autostack_120.h>
+#include <icons/rgb_home_70.h>
+#include <icons/rgb_settings_80.h>
+#include <icons/rgb_settings_120.h>
+#include <icons/rgb_autostack_70.h>
+#include <icons/rgb_autostack_80.h>
+#include <icons/rgb_autostack_120.h>
+#include <icons/rgb_3D_70.h>
 #include <icons/rgb_3D_80.h>
 #include <icons/rgb_3D_120.h>
+#include <icons/rgb_360_70.h>
 #include <icons/rgb_360_80.h>
 #include <icons/rgb_360_120.h>
+#include <icons/rgb_flash_80.h>
+#include <icons/rgb_flash_120.h>
+#include <icons/rgb_target_80.h>
+#include <icons/rgb_target_120.h>
 
 extern TouchScreen          ts;
 extern MCUFRIEND_kbv        tft;

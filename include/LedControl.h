@@ -40,7 +40,7 @@ class ledLight {
         analogWrite(pwmPin(), value);
         m_brightness = value;
     }
-    int getBrightness() { return m_brightness; }               // get current led brightness
+    int getBrightness() { return m_brightness; }                // get current led brightness
     void lastCheckMillis(long millis) { m_lastCheckMillis = millis; }
     long lastCheckMillis() { return m_lastCheckMillis; }
 
