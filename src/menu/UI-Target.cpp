@@ -17,21 +17,21 @@ namespace target_screen {
     gfxButton btn_Target    =   btn.initButton("Target st.",    "fillRoundRect", 0,     20,    160,    80,    15,   DARKGRAY, true);
     gfxButton btn_Distance  =   btn.initButton("Target mm",     "fillRoundRect", 0,    120,    160,    80,    15,   DARKGRAY, false);
     gfxButton btn_Actual    =   btn.initButton("Actual",        "fillRoundRect", 0,    220,    160,    80,    15,   DARKGRAY, false);
-    gfxButton btn_Cancel    =   btn.initButton("X",    "fillRoundRect", 264,    238,    60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Minus     =   btn.initButton("-",    "fillRoundRect", 336,    238,    60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Zero      =   btn.initButton("0",    "fillRoundRect", 408,    238,    60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_One       =   btn.initButton("1",    "fillRoundRect", 264,    166,    60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Two       =   btn.initButton("2",    "fillRoundRect", 336,    166,    60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Three     =   btn.initButton("3",    "fillRoundRect", 408,    166,    60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Four      =   btn.initButton("4",    "fillRoundRect", 264,    94,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Five      =   btn.initButton("5",    "fillRoundRect", 336,    94,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Six       =   btn.initButton("6",    "fillRoundRect", 408,    94,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Seven     =   btn.initButton("7",    "fillRoundRect", 264,    22,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Eight     =   btn.initButton("8",    "fillRoundRect", 336,    22,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Nine      =   btn.initButton("9",    "fillRoundRect", 408,    22,     60, 60,    5,   CUSTOM_BLUE,    true);
-    gfxButton btn_Back      =   btn.initBitmapButton(backArrow,         172,    220,    80, 80,         WHITE,          BLACK,  true);
-    gfxButton btn_Run       =   btn.initBitmapButton(rocket,            172,    20,     80, 80,         WHITE,          BLACK,  true);
-    gfxButton btn_Save      =   btn.initBitmapButton(save,              172,    120,    80, 80,         WHITE,          BLACK,  true);
+    gfxButton btn_Cancel    =   btn.initButton("X",    "fillRoundRect", 264,    238,    60, 60,    5,   WHITE,    true);
+    gfxButton btn_Minus     =   btn.initButton("-",    "fillRoundRect", 336,    238,    60, 60,    5,   WHITE,    true);
+    gfxButton btn_Zero      =   btn.initButton("0",    "fillRoundRect", 408,    238,    60, 60,    5,   WHITE,    true);
+    gfxButton btn_One       =   btn.initButton("1",    "fillRoundRect", 264,    166,    60, 60,    5,   WHITE,    true);
+    gfxButton btn_Two       =   btn.initButton("2",    "fillRoundRect", 336,    166,    60, 60,    5,   WHITE,    true);
+    gfxButton btn_Three     =   btn.initButton("3",    "fillRoundRect", 408,    166,    60, 60,    5,   WHITE,    true);
+    gfxButton btn_Four      =   btn.initButton("4",    "fillRoundRect", 264,    94,     60, 60,    5,   WHITE,    true);
+    gfxButton btn_Five      =   btn.initButton("5",    "fillRoundRect", 336,    94,     60, 60,    5,   WHITE,    true);
+    gfxButton btn_Six       =   btn.initButton("6",    "fillRoundRect", 408,    94,     60, 60,    5,   WHITE,    true);
+    gfxButton btn_Seven     =   btn.initButton("7",    "fillRoundRect", 264,    22,     60, 60,    5,   WHITE,    true);
+    gfxButton btn_Eight     =   btn.initButton("8",    "fillRoundRect", 336,    22,     60, 60,    5,   WHITE,    true);
+    gfxButton btn_Nine      =   btn.initButton("9",    "fillRoundRect", 408,    22,     60, 60,    5,   WHITE,    true);
+    gfxButton btn_Run       =   btn.initRGBBitmapButton(rgb_forward_80, 172,    20,     80, 80, true);
+    gfxButton btn_Save      =   btn.initRGBBitmapButton(rgb_save_80,    172,    120,    80, 80, true);
+    gfxButton btn_Back      =   btn.initRGBBitmapButton(rgb_back_80,    172,    220,    80, 80, true);
 
 
     gfxButton *btn_array[num_btns];
@@ -95,18 +95,18 @@ namespace target_screen {
         btn_Distance.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(targetMillimetres, 4));
         btn_Actual.writeTextTopCentre(Arimo_Regular_30, WHITE);
         btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
-        btn_Cancel.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Minus.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Zero.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_One.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Two.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Three.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Four.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Five.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Six.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Seven.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Eight.writeTextCentre(Arimo_Bold_36, WHITE);
-        btn_Nine.writeTextCentre(Arimo_Bold_36, WHITE);
+        btn_Cancel.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Minus.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Zero.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_One.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Two.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Three.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Four.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Five.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Six.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Seven.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Eight.writeTextCentre(Arimo_Bold_36, BLACK);
+        btn_Nine.writeTextCentre(Arimo_Bold_36, BLACK);
     }
 
 
@@ -192,7 +192,7 @@ namespace target_screen {
 
     void func_Back(bool active) {
         if (active && !ui.canEdit(routines::btn_targetPosition)) {
-            ui.populateScreen(routines::ui_Home);
+            ui.populateScreen(ui.previousScreen());
         }
     }
 
@@ -216,9 +216,9 @@ namespace target_screen {
             long nrSteps = atoi(targetValues);
             stepper1.stepsPerMovement(nrSteps);
             stepper1.calculateDistancePerMovement();
-            btn_Save.drawButton(CUSTOM_GREEN);
-            delay(250);
-            btn_Save.drawButton(WHITE);
+            btn_Save.drawNewBitmap(rgb_blank_80);
+            delay(150);
+            btn_Save.drawNewBitmap(rgb_save_80);
         }
     }
 

@@ -8,16 +8,16 @@ namespace stack_screen {
     #define num_btns 6
     gfxButton *btn_array[num_btns];
 
-    gfxButton btn_Manual    =   btn.initButton("Manual",    "fillRoundRect",    150,     35,    220,    110,     5,     WHITE,  true);
-    gfxButton btn_Auto      =   btn.initButton("Auto",      "fillRoundRect",    150,    175,    220,    110,     5,     WHITE,  true);
+    gfxButton btn_Manual    =   btn.initButton("Manual",    "fillRoundRect",    150,     35,    220,    110,     4,     WHITE,  true);
+    gfxButton btn_Auto      =   btn.initButton("Auto",      "fillRoundRect",    150,    175,    220,    110,     4,     WHITE,  true);
     // gfxButton btn_HomeRail  =   btn.initBitmapButton(home,          200,    230,    80,     80,     WHITE,  BLACK,  true);
 
 
     void initStackButtons() {
         btn_array[0] = &global::btn_Home;
-        btn_array[1] = &global::btn_Stack;
-        btn_array[2] = &global::btn_360;
-        btn_array[3] = &global::btn_3D;
+        btn_array[1] = &global::btn_Settings;
+        btn_array[2] = &global::btn_Target;
+        btn_array[3] = &global::btn_FlashPage;
         btn_array[4] = &btn_Manual;
         btn_array[5] = &btn_Auto;
         // btn_array[6] = &btn_HomeRail;

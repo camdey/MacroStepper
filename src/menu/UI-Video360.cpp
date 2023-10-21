@@ -10,8 +10,8 @@ namespace video_screen {
     gfxButton *btn_array[num_btns];
 
     gfxButton btn_PlayPause     =     btn.initBitmapButton(play,                30,     100,    120,    120,    CUSTOM_GREEN,   BLACK,  true    );
-    gfxButton btn_Speed         =     btn.initButton("RPM", "fillRoundRect",    160,    20, 160,    80, 15,     DARKGRAY,               true    );
-    gfxButton btn_Back          =     btn.initBitmapButton(backArrow,           200,    220,    80,     80,     WHITE,          BLACK,  true    );
+    gfxButton btn_Speed         =     btn.initButton("RPM", "fillRoundRect",    160,    20,     160,    80,     15, DARKGRAY,   true    );
+    gfxButton btn_Back          =     btn.initRGBBitmapButton(rgb_back_80,      200,    220,    80,     80,     true    );
     gfxButton btn_Direction     =     btn.initBitmapButton(dir_cw,              200,    120,    80,     80,     CUSTOM_GREEN,   BLACK,  true    );
     gfxButton btn_ArrowUp       =     btn.initBitmapButton(arrowUp,             350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true    );
     gfxButton btn_ArrowDown     =     btn.initBitmapButton(arrowDown,           350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true    );
@@ -100,7 +100,7 @@ namespace video_screen {
                 func_PlayPause(false); // reset PlayPause button
                 btn_PlayPause.setButtonActive(false); // reset button state
             }
-            ui.populateScreen(routines::ui_Orbis);
+            ui.populateScreen(ui.previousScreen());
         }
     }
 

@@ -51,28 +51,29 @@ void UserInterface::initButtons(unsigned long toggleDebounce, unsigned long mome
 
 
 void UserInterface::populateScreen(routines::Screens screen) {
+    ui.previousScreen(ui.activeScreen());
     tft.fillScreen(BLACK);
     delay(20); // see if this solves the superimposition of two different screens
     tft.fillScreen(BLACK);
     if (screen == routines::ui_Home) {
         populateHomeScreen();
     }
-    if (screen == routines::ui_Stack) {
+    else if (screen == routines::ui_Stack) {
         populateStackScreen();
     }
-    if (screen == routines::ui_Orbis) {
+    else if (screen == routines::ui_Orbis) {
         populateOrbisScreen();
     }
-    if (screen == routines::ui_Video360) {
+    else if (screen == routines::ui_Video360) {
         populateVideo360Screen();
     }
-    if (screen == routines::ui_Photo360) {
+    else if (screen == routines::ui_Photo360) {
         populatePhoto360Screen();
     }
-    if (screen == routines::ui_Photo360Config) {
+    else if (screen == routines::ui_Photo360Config) {
         populatePhoto360ConfigScreen();
     }
-    if (screen == routines::ui_Target) {
+    else if (screen == routines::ui_Target) {
         populateTargetScreen();
     }
     else if (screen == routines::ui_Flash) {

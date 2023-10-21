@@ -13,9 +13,9 @@ namespace orbis_screen {
 
     void initOrbisButtons() {
         btn_array[0] = &global::btn_Home;
-        btn_array[1] = &global::btn_Stack;
-        btn_array[2] = &global::btn_360;
-        btn_array[3] = &global::btn_3D;
+        btn_array[1] = &global::btn_Settings;
+        btn_array[2] = &global::btn_Target;
+        btn_array[3] = &global::btn_FlashPage;
         btn_array[4] = &btn_Video;
         btn_array[5] = &btn_Photo;
 
@@ -68,7 +68,7 @@ namespace orbis_screen {
 
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(routines::ui_Home);
+            ui.populateScreen(ui.previousScreen());
             rStick.maxVelocity(100000); // reset back to original value
         }
     }

@@ -8,11 +8,11 @@ namespace config_screen {
     #define num_btns 5
     gfxButton *btn_array[num_btns];
 
-    gfxButton btn_FlipScreen    =   btn.initBitmapButton(toggleOff,     240,    10,     100,    50,     CUSTOM_RED,     BLACK,  true);
-    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOff,     240,    70,     100,    50,     CUSTOM_RED,     BLACK,  true);
-    gfxButton btn_Stepper       =   btn.initBitmapButton(toggleOn,      240,    130,    100,    50,     CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_Thing2        =   btn.initBitmapButton(toggleOff,     240,    190,    100,    50,     CUSTOM_RED,     BLACK,  true);
-    gfxButton btn_Back          =   btn.initBitmapButton(backArrow,     380,    220,    80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_FlipScreen    =   btn.initBitmapButton(toggleOff,         240,    10,     100,    50,     CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOff,         240,    70,     100,    50,     CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_Stepper       =   btn.initBitmapButton(toggleOn,          240,    130,    100,    50,     CUSTOM_GREEN,   BLACK,  true);
+    gfxButton btn_Thing2        =   btn.initBitmapButton(toggleOff,         240,    190,    100,    50,     CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    380,    220,    80,     80,     true);
 
     void initConfigButtons() {
         btn_array[0] = &btn_FlipScreen;
@@ -60,7 +60,7 @@ namespace config_screen {
 
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(routines::ui_Home);
+            ui.populateScreen(ui.previousScreen());
         }
     }
 
