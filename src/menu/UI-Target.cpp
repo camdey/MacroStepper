@@ -112,7 +112,7 @@ namespace target_screen {
 
     void checkTargetButtons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }
@@ -216,9 +216,9 @@ namespace target_screen {
             long nrSteps = atoi(targetValues);
             stepper1.stepsPerMovement(nrSteps);
             stepper1.calculateDistancePerMovement();
-            btn_Save.drawNewBitmap(rgb_blank_80);
+            btn_Save.hideButton();
             delay(150);
-            btn_Save.drawNewBitmap(rgb_save_80);
+            btn_Save.drawButton();
         }
     }
 

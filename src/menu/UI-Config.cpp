@@ -8,11 +8,11 @@ namespace config_screen {
     #define num_btns 5
     gfxButton *btn_array[num_btns];
 
-    gfxButton btn_FlipScreen    =   btn.initBitmapButton(toggleOff,         240,    10,     100,    50,     CUSTOM_RED,     BLACK,  true);
-    gfxButton btn_FlashSensor   =   btn.initBitmapButton(toggleOff,         240,    70,     100,    50,     CUSTOM_RED,     BLACK,  true);
-    gfxButton btn_Stepper       =   btn.initBitmapButton(toggleOn,          240,    130,    100,    50,     CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_Thing2        =   btn.initBitmapButton(toggleOff,         240,    190,    100,    50,     CUSTOM_RED,     BLACK,  true);
-    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    380,    220,    80,     80,     true);
+    gfxButton btn_FlipScreen    =   btn.initRGBBitmapButton(rgb_toggle_off,         240,    10,     112,    50, true);
+    gfxButton btn_FlashSensor   =   btn.initRGBBitmapButton(rgb_toggle_off,         240,    70,     112,    50, true);
+    gfxButton btn_Stepper       =   btn.initRGBBitmapButton(rgb_toggle_on,          240,    130,    112,    50, true);
+    gfxButton btn_Thing2        =   btn.initRGBBitmapButton(rgb_toggle_off,         240,    190,    112,    50, true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,            380,    220,    80,     80, true);
 
     void initConfigButtons() {
         btn_array[0] = &btn_FlipScreen;
@@ -51,7 +51,7 @@ namespace config_screen {
 
     void checkConfigButtons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }
@@ -68,14 +68,12 @@ namespace config_screen {
     // invert screen
     void func_FlipScreen(bool btnActive) {
         if (btnActive) {
-            btn_FlipScreen.updateBitmap(toggleOn);
-            btn_FlipScreen.updateColour(CUSTOM_GREEN);
+            btn_FlipScreen.updateRGBBitmap(rgb_toggle_on);
             ui.rotateScreen(); // rotate screen, touch controls, and joystick
             ui.populateScreen(routines::ui_Config);
         }
         else if (!btnActive) {
-            btn_FlipScreen.updateBitmap(toggleOff);
-            btn_FlipScreen.updateColour(CUSTOM_RED);
+            btn_FlipScreen.updateRGBBitmap(rgb_toggle_off);
             ui.rotateScreen(); // rotate screen, touch controls, and joystick
             ui.populateScreen(routines::ui_Config);
         }
@@ -85,18 +83,14 @@ namespace config_screen {
     // enable/disable flash sensor reading
     void func_FlashSensor(bool btnActive) {
         if (btnActive) {
-            btn_FlashSensor.drawButton(BLACK);
-            btn_FlashSensor.updateBitmap(toggleOn);
-            btn_FlashSensor.updateColour(CUSTOM_GREEN);
-            btn_FlashSensor.drawButton();
+            btn_FlashSensor.updateRGBBitmap(rgb_toggle_on);
+            btn_FlashSensor.drawNewBitmap(rgb_toggle_on);
             camera.flashSensorEnabled(true);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
         else if (!btnActive) {
-            btn_FlashSensor.drawButton(BLACK);
-            btn_FlashSensor.updateBitmap(toggleOff);
-            btn_FlashSensor.updateColour(CUSTOM_RED);
-            btn_FlashSensor.drawButton();
+            btn_FlashSensor.updateRGBBitmap(rgb_toggle_off);
+            btn_FlashSensor.drawNewBitmap(rgb_toggle_off);
             camera.flashSensorEnabled(false);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
@@ -106,17 +100,13 @@ namespace config_screen {
     // enable/disable stepper motor
     void func_Stepper(bool btnActive) {
         if (btnActive) {
-            btn_Stepper.drawButton(BLACK);
-            btn_Stepper.updateBitmap(toggleOff);
-            btn_Stepper.updateColour(CUSTOM_RED);
-            btn_Stepper.drawButton();
+            btn_FlashSensor.updateRGBBitmap(rgb_toggle_off);
+            btn_FlashSensor.drawNewBitmap(rgb_toggle_off);
             stepper1.enabled(false);
         }
         else if (!btnActive) {
-            btn_Stepper.drawButton(BLACK);
-            btn_Stepper.updateBitmap(toggleOn);
-            btn_Stepper.updateColour(CUSTOM_GREEN);
-            btn_Stepper.drawButton();
+            btn_FlashSensor.updateRGBBitmap(rgb_toggle_on);
+            btn_FlashSensor.drawNewBitmap(rgb_toggle_on);
             stepper1.enabled(true);
         }
     }

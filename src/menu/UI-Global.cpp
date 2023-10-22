@@ -8,23 +8,17 @@
 #include "menu/UI-Photo360.h"
 
 namespace global {
-    gfxButton btn_Flash     =   btn.initBitmapButton(flashOff,    200,    20,     80,     80,     CUSTOM_RED, BLACK,  true);
-    gfxButton btn_Reset     =   btn.initBitmapButton(cancel,      200,    120,    80,     80,     BLACK,      BLACK,  true);
-    gfxButton btn_Home      =   btn.initRGBBitmapButton(rgb_home_70,        5,  5,      70,     70,     true);
-    gfxButton btn_Stack     =   btn.initRGBBitmapButton(rgb_autostack_70,   5,  85,     70,     70,     true);
-    gfxButton btn_360       =   btn.initRGBBitmapButton(rgb_360_70,         5,  165,    70,     70,     true);
-    gfxButton btn_3D        =   btn.initRGBBitmapButton(rgb_3D_70,          5,  245,    70,     70,     true);
-    gfxButton btn_Settings  =   btn.initRGBBitmapButton(rgb_settings_70,    5,  85,     70,     70,     true);
-    gfxButton btn_FlashPage =   btn.initRGBBitmapButton(rgb_flash_70,       5,  165,    70,     70,     true);
-    gfxButton btn_Target    =   btn.initRGBBitmapButton(rgb_target_70,      5,  245,    70,     70,     true);
+    gfxButton btn_Flash     =   btn.initRGBBitmapButton(rgb_flash_yellow_80,    200,    20,     80,     80,     true);
+    gfxButton btn_Reset     =   btn.initRGBBitmapButton(rgb_cancel_white_80,    200,    120,    80,     80,     true);
+    gfxButton btn_Home      =   btn.initRGBBitmapButton(rgb_home_70,            5,      5,      70,     70,     true);
+    gfxButton btn_Settings  =   btn.initRGBBitmapButton(rgb_settings_70,        5,      85,     70,     70,     true);
+    gfxButton btn_FlashPage =   btn.initRGBBitmapButton(rgb_flash_70,           5,      165,    70,     70,     true);
+    gfxButton btn_Target    =   btn.initRGBBitmapButton(rgb_target_70,          5,      245,    70,     70,     true);
 
     void initGlobalButtons() {
         btn_Flash.addToggle(func_Flash, 0);
         btn_Reset.addMomentary(func_Reset, 0);
         btn_Home.addMomentary(func_Home, 0);
-        btn_Stack.addMomentary(func_Stack, 0);
-        btn_360.addMomentary(func_Orbis, 0);
-        btn_3D.addMomentary(func_Orbis, 0);
         btn_Settings.addMomentary(func_Settings, 0);
         btn_FlashPage.addMomentary(func_FlashPage, 0);
         btn_Target.addMomentary(func_Target, 0);
@@ -33,18 +27,14 @@ namespace global {
 
     void func_Flash(bool btnActive) {
         if (btnActive) {
-            camera.shutterEnabled(true);
-            btn_Flash.updateBitmap(flashOn);
-            btn_Flash.updateColour(CUSTOM_GREEN);
-            btn_Flash.drawNewBitmap(flashOn, CUSTOM_GREEN);
-            // auto_screen::stackStatus(routines::newStep);
+            camera.shutterEnabled(false);
+            btn_Flash.updateRGBBitmap(rgb_flash_grey_80);
+            btn_Flash.drawNewBitmap(rgb_flash_grey_80);
         }
         else if (!btnActive) {
-            camera.shutterEnabled(false);
-            btn_Flash.updateBitmap(flashOff);
-            btn_Flash.updateColour(CUSTOM_RED);
-            btn_Flash.drawNewBitmap(flashOff, CUSTOM_RED);
-            // auto_screen::stackStatus(routines::newStep);
+            camera.shutterEnabled(true);
+            btn_Flash.updateRGBBitmap(rgb_flash_yellow_80);
+            btn_Flash.drawNewBitmap(rgb_flash_yellow_80);
         }
     }
 
@@ -54,21 +44,19 @@ namespace global {
         if (btnActive && stack.status() != routines::inactive) {
             stack.status(routines::inactive);
             stack.completedMovements(0);
-            btn_Reset.updateColour(BLACK);
-            btn_Reset.drawButton(BLACK);
+            btn_Reset.drawNewBitmap(rgb_cancel_white_80);
             stack.status(routines::inactive);
         }
         // if button pressed and photo360 active...
         else if (btnActive && photo360.status() != routines::inactive) {
             photo360.status(routines::inactive);
             photo360.completedPhotos(0);
-            btn_Reset.updateColour(BLACK);
-            btn_Reset.drawButton(BLACK);
+            btn_Reset.drawNewBitmap(rgb_cancel_white_80);
             stack.status(routines::inactive);
         }
         // if function called from elsewhere...
         else if (!btnActive && (stack.status() == routines::inactive || photo360.status() == routines::inactive)) {
-            btn_Reset.updateColour(CUSTOM_RED);
+            btn_Reset.drawNewBitmap(rgb_cancel_red_80);
         }
     }
 
@@ -88,20 +76,6 @@ namespace global {
     void func_Home(bool btnActive) {
         if (editingDisabled()) {
             ui.populateScreen(routines::ui_Home);
-        }
-    }
-
-
-    void func_Stack(bool btnActive) {
-        if (editingDisabled()) {
-            ui.populateScreen(routines::ui_Stack);
-        }
-    }
-
-
-    void func_Orbis(bool btnActive) {
-        if (editingDisabled()) {
-            ui.populateScreen(routines::ui_Orbis);
         }
     }
 

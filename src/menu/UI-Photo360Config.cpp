@@ -16,8 +16,8 @@ namespace photoconfig_screen {
     gfxButton btn_360           =   btn.initButton("Move 360",  "fillRoundRect",    0,        220,    160,    80,     15,   DARKGRAY,   true);
     gfxButton btn_Direction     =   btn.initBitmapButton(dir_cw,            200,    20,     80,     80,     CUSTOM_GREEN,   BLACK,  true);
     gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    200,    220,    80,     80,     true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,           350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,         350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
 
 
     void initPhoto360ConfigButtons() {
@@ -41,6 +41,8 @@ namespace photoconfig_screen {
         btn_90.addBorder(3, WHITE);
         btn_180.addBorder(3, WHITE);
         btn_360.addBorder(3, WHITE);
+
+        global::btn_Reset.hideButton();
     }
 
 
@@ -63,7 +65,7 @@ namespace photoconfig_screen {
 
     void checkPhoto360ConfigButtons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }
@@ -118,14 +120,14 @@ namespace photoconfig_screen {
 
     void func_Direction(bool btnActive) {
         if (btnActive) {
-            btn_Direction.drawButton(BLACK); // replace existing button
+            btn_Direction.hideButton();
             btn_Direction.updateBitmap(dir_ccw); // update bitmap image
             btn_Direction.updateColour(CUSTOM_RED); // change colour
             btn_Direction.drawButton(); // draw
             stepper2.rotateClockwise(false);
         }
         else if (!btnActive) {
-            btn_Direction.drawButton(BLACK); // replace existing button
+            btn_Direction.hideButton();
             btn_Direction.updateBitmap(dir_cw); // update bitmap image
             btn_Direction.updateColour(CUSTOM_GREEN); // change colour
             btn_Direction.drawButton(); // draw

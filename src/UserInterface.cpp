@@ -51,7 +51,10 @@ void UserInterface::initButtons(unsigned long toggleDebounce, unsigned long mome
 
 
 void UserInterface::populateScreen(routines::Screens screen) {
-    ui.previousScreen(ui.activeScreen());
+    if (screen != ui.activeScreen()) {
+        // ignore screen refreshes
+        ui.previousScreen(ui.activeScreen());
+    }
     tft.fillScreen(BLACK);
     delay(20); // see if this solves the superimposition of two different screens
     tft.fillScreen(BLACK);

@@ -14,11 +14,11 @@ namespace autoconfig_screen {
     gfxButton btn_Start         =   btn.initButton("START", "fillRoundRect",    0,  20,     160,    80,     15,     CUSTOM_GREEN,   true);
     gfxButton btn_End           =   btn.initButton("END",   "fillRoundRect",    0,  120,    160,    80,     15,     CUSTOM_RED,     true);
     gfxButton btn_Run           =   btn.initButton("RUN",   "fillRoundRect",    0,  220,    160,    80,     15,     CUSTOM_BLUE,    true);
-    gfxButton btn_Delay         =   btn.initBitmapButton(timer,             200,    20,     80,     80,     WHITE,          BLACK,  true);
+    gfxButton btn_Delay         =   btn.initRGBBitmapButton(rgb_delay_80,   200,    20,     80,     80,     true);
     gfxButton btn_DelayVal      =   btn.initTransparentButton(              280,    20,     60,     30,                     false);
     gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    200,    220,    80,     80,     true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,           350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,         350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
 
 
     void initAutoConfigButtons() {
@@ -43,6 +43,8 @@ namespace autoconfig_screen {
         btn_Start.addBorder(3, WHITE);
         btn_End.addBorder(3, WHITE);
         btn_Run.addBorder(3, WHITE);
+        // hide until needed
+        global::btn_Reset.hideButton();
     }
 
 
@@ -51,7 +53,9 @@ namespace autoconfig_screen {
 
         // draw buttons
         for (int i=0; i < num_btns; i++) {
-            btn_array[i]->drawButton();
+            if (!btn_array[i]->isHidden()) { // if button is not hidden, draw it
+                btn_array[i]->drawButton();
+            }
         }
 
         int currentPosition = stepper1.XACTUAL();
@@ -69,7 +73,7 @@ namespace autoconfig_screen {
 
     void checkAutoConfigButtons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }

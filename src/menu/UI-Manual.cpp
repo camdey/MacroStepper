@@ -17,10 +17,10 @@ namespace manual_screen {
     gfxButton btn_StepSize  =   btn.initButton("Step Size", "fillRoundRect",    0,  20,     160,    80,     15, DARKGRAY,   true);
     gfxButton btn_StepNr    =   btn.initButton("Step Nr.",  "fillRoundRect",    0,  120,    160,    80,     15, DARKGRAY,   false);
     gfxButton btn_RailPos   =   btn.initButton("Rail Pos.", "fillRoundRect",    0,  220,    160,    80,     15, DARKGRAY,   false);
-    gfxButton btn_Reset     =   btn.initBitmapButton(cancel,            200,    120,    80,     80,     WHITE,          BLACK,  true);
-    gfxButton btn_Back      =   btn.initRGBBitmapButton(rgb_back_80,    200,    220,    80,     80,     true);
-    gfxButton btn_ArrowUp   =   btn.initBitmapButton(arrowUp,           350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_ArrowDown =   btn.initBitmapButton(arrowDown,         350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_Reset     =   btn.initRGBBitmapButton(rgb_cancel_red_80,      200,    120,    80,     80, true);
+    gfxButton btn_Back      =   btn.initRGBBitmapButton(rgb_back_80,            200,    220,    80,     80, true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
 
 
     void initManualButtons() {
@@ -68,7 +68,7 @@ namespace manual_screen {
 
     void checkManualButtons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }

@@ -15,8 +15,8 @@ namespace photo_screen {
     gfxButton btn_Config        =   btn.initRGBBitmapButton(rgb_config_80,  200,    120,    80,     80,     true);
     gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    200,    220,    80,     80,     true);
     gfxButton btn_PlayPause     =   btn.initBitmapButton(play,              350,    100,    120,    120,    CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,           350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown,         350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
 
 
     void initPhoto360Buttons() {
@@ -39,8 +39,8 @@ namespace photo_screen {
         btn_ArrowDown.addMomentary(func_ArrowDown,      0 );
 
         // arrows are disabled by default, only enabled when editing step size
-        btn_ArrowUp.hideButton(true);
-        btn_ArrowDown.hideButton(true);
+        btn_ArrowUp.hideButton();
+        btn_ArrowDown.hideButton();
 
         btn_PhotoNr.addBorder(3, WHITE);
         btn_Delay.addBorder(3,    WHITE);
@@ -71,7 +71,7 @@ namespace photo_screen {
 
     void checkPhoto360Buttons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }
@@ -88,11 +88,6 @@ namespace photo_screen {
 
             btn_PhotoNr.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.requiredPhotos()));
-
-            // clear play/pause button
-            btn_PlayPause.drawButton(BLACK);
-            btn_ArrowUp.drawButton(CUSTOM_GREEN);
-            btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && photo360.status() == routines::inactive && !ui.canEdit(routines::btn_photo360Delay)) {
             ui.canEdit(routines::btn_arrows, false);
@@ -102,10 +97,6 @@ namespace photo_screen {
             // TODO would be nice to not re-write the top line on every arrow press
             btn_PhotoNr.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_PhotoNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.requiredPhotos()));
-
-            btn_ArrowUp.drawButton(BLACK);
-            btn_ArrowDown.drawButton(BLACK);
-            btn_PlayPause.drawButton();
         }
         else {
             // set back to off if conditions above not met
@@ -124,11 +115,6 @@ namespace photo_screen {
 
             btn_Delay.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_Delay.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(photo360.shutterDelay()));
-
-            // clear play/pause button
-            btn_PlayPause.drawButton(BLACK);
-            btn_ArrowUp.drawButton(CUSTOM_GREEN);
-            btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && !photo360.busy() && !ui.canEdit(routines::btn_photo360Nr)) {
             ui.canEdit(routines::btn_arrows, false);
@@ -137,10 +123,6 @@ namespace photo_screen {
 
             btn_Delay.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_Delay.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(photo360.shutterDelay()));
-
-            btn_ArrowUp.drawButton(BLACK);
-            btn_ArrowDown.drawButton(BLACK);
-            btn_PlayPause.drawButton();
         }
         else {
             // set back to off if conditions above not met
@@ -172,7 +154,7 @@ namespace photo_screen {
                 // else we must be resuming from a pause
                 photo360.status(routines::waitShutter);
             }
-            btn_PlayPause.drawButton(BLACK); // replace existing button
+            btn_PlayPause.hideButton(); // replace existing button
             btn_PlayPause.updateBitmap(pause); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
             btn_PlayPause.drawButton(); // draw
@@ -180,7 +162,7 @@ namespace photo_screen {
         }
         else if (!btnActive && !ui.canEdit(routines::btn_arrows)) {
             photo360.status(routines::paused);  // photo360 paused
-            btn_PlayPause.drawButton(BLACK);    // replace existing button
+            btn_PlayPause.hideButton();    // replace existing button
             btn_PlayPause.updateBitmap(play);   // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
             btn_PlayPause.drawButton();         // draw
@@ -196,7 +178,7 @@ namespace photo_screen {
     ***********************************************************************/
     void pausePhoto360() {
         // photo360Paused = true; // pause photo360
-        btn_PlayPause.drawButton(BLACK); // replace existing button
+        btn_PlayPause.hideButton(); // replace existing button
         btn_PlayPause.updateBitmap(play); // update bitmap image
         btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
         btn_PlayPause.drawButton(); // draw button
@@ -211,7 +193,7 @@ namespace photo_screen {
         photo360.completedPhotos(0);
         photo360.status(routines::inactive);
         // setTargetVelocity(STEALTH_CHOP_VMAX);
-        btn_PlayPause.drawButton(BLACK); // replace existing button
+        btn_PlayPause.hideButton(); // replace existing button
         btn_PlayPause.updateBitmap(play); // update to show play button
         btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
         btn_PlayPause.drawButton(); // draw button
@@ -267,8 +249,14 @@ namespace photo_screen {
 
 
     void hideArrows(bool hide) {
-        btn_ArrowUp.hideButton(hide);
-        btn_ArrowDown.hideButton(hide);
-        btn_PlayPause.hideButton(!hide); // PlayPause takes opposite state to arrow buttons
+        if (hide) {
+            btn_ArrowUp.hideButton();
+            btn_ArrowDown.hideButton();
+            btn_PlayPause.drawButton(); // PlayPause takes opposite state to arrow buttons
+        } else {
+            btn_PlayPause.hideButton(); // PlayPause takes opposite state to arrow buttons
+            btn_ArrowUp.drawButton(CUSTOM_GREEN);
+            btn_ArrowDown.drawButton(CUSTOM_RED);
+        }
     }
 }

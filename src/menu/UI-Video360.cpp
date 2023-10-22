@@ -13,8 +13,8 @@ namespace video_screen {
     gfxButton btn_Speed         =     btn.initButton("RPM", "fillRoundRect",    160,    20,     160,    80,     15, DARKGRAY,   true    );
     gfxButton btn_Back          =     btn.initRGBBitmapButton(rgb_back_80,      200,    220,    80,     80,     true    );
     gfxButton btn_Direction     =     btn.initBitmapButton(dir_cw,              200,    120,    80,     80,     CUSTOM_GREEN,   BLACK,  true    );
-    gfxButton btn_ArrowUp       =     btn.initBitmapButton(arrowUp,             350,    20,     120,    120,    CUSTOM_GREEN,   BLACK,  true    );
-    gfxButton btn_ArrowDown     =     btn.initBitmapButton(arrowDown,           350,    180,    120,    120,    CUSTOM_RED,     BLACK,  true    );
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
 
 
 
@@ -54,7 +54,7 @@ namespace video_screen {
 
     void checkVideo360Buttons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }
@@ -77,14 +77,14 @@ namespace video_screen {
 
     void func_Direction(bool btnActive) {
         if (btnActive) {
-            btn_Direction.drawButton(BLACK); // replace existing button
+            btn_Direction.hideButton(); // replace existing button
             btn_Direction.updateBitmap(dir_ccw); // update bitmap image
             btn_Direction.updateColour(CUSTOM_RED); // change colour
             btn_Direction.drawButton(); // draw
             stepper2.rotateClockwise(false);
         }
         else if (!btnActive) {
-            btn_Direction.drawButton(BLACK); // replace existing button
+            btn_Direction.hideButton(); // replace existing button
             btn_Direction.updateBitmap(dir_cw); // update bitmap image
             btn_Direction.updateColour(CUSTOM_GREEN); // change colour
             btn_Direction.drawButton(); // draw
@@ -109,14 +109,14 @@ namespace video_screen {
         // make sure VMAX is updated before starting
         video360.rpmToVmax();
         if (btnActive) {
-            btn_PlayPause.drawButton(BLACK); // replace existing button
+            btn_PlayPause.hideButton(); // replace existing button
             btn_PlayPause.updateBitmap(pause); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
             btn_PlayPause.drawButton(); // draw
             video360.status(routines::running);
         }
         else if (!btnActive) {
-            btn_PlayPause.drawButton(BLACK); // replace existing button
+            btn_PlayPause.hideButton(); // replace existing button
             btn_PlayPause.updateBitmap(play); // update bitmap image
             btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
             btn_PlayPause.drawButton(); // draw
