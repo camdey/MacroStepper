@@ -11,16 +11,15 @@ namespace auto_screen {
     gfxButton *btn_array[num_btns];
 
 
-    gfxButton btn_StepSize      =   btn.initButton("Step Size",     "fillRoundRect",    0,      20,     160,    80,     15, DARKGRAY,   true);
-    gfxButton btn_EstTime       =   btn.initButton("Est. Time",     "fillRoundRect",    0,      120,    160,    80,     15, DARKGRAY,   false);
-    gfxButton btn_Progress      =   btn.initButton("Progress",      "fillRoundRect",    0,      220,    160,    80,     15, DARKGRAY,   false);
+    gfxButton btn_StepSize      =   btn.initButton("Step Size",     "fillRoundRect",    0,      20,     160,    80,     5, DARKGRAY,   true);
+    gfxButton btn_EstTime       =   btn.initButton("Est. Time",     "fillRoundRect",    0,      120,    160,    80,     5, DARKGRAY,   false);
+    gfxButton btn_Progress      =   btn.initButton("Progress",      "fillRoundRect",    0,      220,    160,    80,     5, DARKGRAY,   false);
     gfxButton btn_StackStatus   =   btn.initTransparentButton("Started",                350,    200,    120,    120,    false);
-    gfxButton btn_Config        =   btn.initBitmapButton(cogWheel,  200,    120,    80,     80,     WHITE,          true);
-    gfxButton btn_Back          =   btn.initBitmapButton(backArrow, 200,    220,    80,     80,     WHITE,          true);
-    gfxButton btn_PlayPause     =   btn.initBitmapButton(play,      350,    100,    120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowUp       =   btn.initBitmapButton(arrowUp,   350,    20,     120,    120,    CUSTOM_GREEN,   true);
-    gfxButton btn_ArrowDown     =   btn.initBitmapButton(arrowDown, 350,    180,    120,    120,    CUSTOM_RED,     true);
-
+    gfxButton btn_Config        =   btn.initRGBBitmapButton(rgb_config_80,      200,    120,    80,     80,     true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,        200,    220,    80,     80,     true);
+    gfxButton btn_PlayPause     =   btn.initRGBBitmapButton(rgb_pause_100,       350,    100,    100,    100,    true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,     true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,     true);
 
     void initAutoButtons() {
         btn_array[0] = &btn_StepSize;
@@ -42,9 +41,9 @@ namespace auto_screen {
         btn_ArrowDown.addMomentary(func_ArrowDown,  0 );
 
         // arrows are disabled by default, only enabled when editing step size
-        btn_ArrowUp.hideButton(true);
-        btn_ArrowDown.hideButton(true);
-        btn_StackStatus.hideButton(true);
+        btn_ArrowUp.hideButton();
+        btn_ArrowDown.hideButton();
+        btn_StackStatus.hideButton();
 
         btn_StepSize.addBorder(3,   WHITE);
         btn_EstTime.addBorder(3,    WHITE);
@@ -77,7 +76,7 @@ namespace auto_screen {
 
     void checkAutoButtons(int touch_x, int touch_y) {
         for (int i=0; i < num_btns; i++) {
-            if (btn_array[i]->isTactile()) {
+            if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
         }
@@ -92,12 +91,6 @@ namespace auto_screen {
 
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
-
-            // clear play/pause button
-            btn_PlayPause.drawButton(BLACK);
-
-            btn_ArrowUp.drawButton(CUSTOM_GREEN);
-            btn_ArrowDown.drawButton(CUSTOM_RED);
         }
         else if (!btnActive && !stack.busy()) {
             ui.canEdit(routines::btn_arrows, false);
@@ -107,11 +100,6 @@ namespace auto_screen {
             // TODO would be nice to not re-write the top line on every arrow press
             btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
             btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
-
-            btn_ArrowUp.drawButton(BLACK);
-            btn_ArrowDown.drawButton(BLACK);
-
-            btn_PlayPause.drawButton();
         }
         else {
             // set back to off if conditions above not met
@@ -145,18 +133,16 @@ namespace auto_screen {
                     stack.status(routines::waitShutter);
                 }
                 // btn_StackStatus.hideButton(false); // show status
-                btn_PlayPause.drawButton(BLACK); // replace existing button
-                btn_PlayPause.updateBitmap(pause); // update bitmap image
-                btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
+                btn_PlayPause.hideButton();
+                btn_PlayPause.updateRGBBitmap(rgb_pause_100); // update bitmap image
                 btn_PlayPause.drawButton(); // draw
                 // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
             }
             else if (!btnActive && !ui.canEdit(routines::btn_arrows)) {
                 // autoStackPaused = true;    // autoStack paused
                 stack.status(routines::paused);
-                btn_PlayPause.drawButton(BLACK); // replace existing button
-                btn_PlayPause.updateBitmap(play); // update bitmap image
-                btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
+                btn_PlayPause.hideButton();
+                btn_PlayPause.updateRGBBitmap(rgb_play_100); // update bitmap image
                 btn_PlayPause.drawButton(); // draw
                 // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
             }
@@ -186,9 +172,15 @@ namespace auto_screen {
 
 
     void hideArrows(bool hide) {
-        btn_ArrowUp.hideButton(hide);
-        btn_ArrowDown.hideButton(hide);
-        btn_PlayPause.hideButton(!hide); // PlayPause takes opposite state to arrow buttons
+        if (hide) {
+            btn_ArrowUp.hideButton();
+            btn_ArrowDown.hideButton();
+            btn_PlayPause.drawButton(); // PlayPause takes opposite state to arrow buttons
+        } else {
+            btn_PlayPause.hideButton(); // PlayPause takes opposite state to arrow buttons
+            btn_ArrowUp.drawButton(CUSTOM_GREEN);
+            btn_ArrowDown.drawButton(CUSTOM_RED);
+        }
     }
 
 
@@ -196,10 +188,9 @@ namespace auto_screen {
     Used to display pause autostack when needing to be called from another file.
     ***********************************************************************/
     void displayPauseStack() {
-        btn_PlayPause.drawButton(BLACK); // replace existing button
-        btn_PlayPause.updateBitmap(play); // update bitmap image
-        btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
-        btn_PlayPause.drawButton(); // draw button
+        btn_PlayPause.hideButton();
+        btn_PlayPause.updateRGBBitmap(rgb_pause_100); // update bitmap image
+        btn_PlayPause.drawButton(); // draw
         btn_PlayPause.setButtonActive(false); // set button state to "pause" mode
     }
 
@@ -208,10 +199,9 @@ namespace auto_screen {
     Used to display reset autostack after completed or terminated stack.
     ***********************************************************************/
     void displayResetStack() {
-        btn_PlayPause.drawButton(BLACK); // replace existing button
-        btn_PlayPause.updateBitmap(play); // update to show play button
-        btn_PlayPause.updateColour(CUSTOM_GREEN); // update color
-        btn_PlayPause.drawButton(); // draw button
+        btn_PlayPause.hideButton();
+        btn_PlayPause.updateRGBBitmap(rgb_play_100); // update bitmap image
+        btn_PlayPause.drawButton(); // draw
         btn_PlayPause.setButtonActive(false);
     }
 

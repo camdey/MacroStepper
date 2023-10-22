@@ -195,7 +195,7 @@ void AutoStack::terminateAutoStack() {
     status(routines::inactive);
     auto_screen::displayResetStack();                       // update button and reset button bitmap
     auto_screen::estimateDuration();                        // update estimate
-    global::btn_Reset.updateColour(BLACK);                  // change reset button back to black
+    global::btn_Reset.drawNewBitmap(rgb_cancel_white_80);   // change reset button back to black
     camera.photoTaken(false);
     completedMovements(0);                                  // reset completed movements count
     _stepper.executedMovement(false);

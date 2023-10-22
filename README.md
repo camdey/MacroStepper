@@ -4,6 +4,7 @@ Author: Cam Dey
 Created: 2018-12-18
 
 v2.0: 2020-01-01
+
 v3.0: 2023-10-11 // refactor, introduces breaking changes
 
 

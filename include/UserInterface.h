@@ -28,6 +28,10 @@ class UserInterface {
         long lastCheckMillis() { return m_lastCheckMillis; }
         void initButtons(unsigned long toggleDebounce, unsigned long momentaryDebounce);
         void populateScreen(routines::Screens screen);
+        void previousScreen(routines::Screens screen) {
+            m_prevScreen = screen;
+        }
+        routines::Screens previousScreen() {return m_prevScreen; }
         void readTouchScreen(routines::Screens screen);
         void canEdit(routines::Buttons button, bool state) {
             if (button == routines::btn_flashOn) {
@@ -48,6 +52,8 @@ class UserInterface {
                 m_photo360Delay = state;
             } else if (button == routines::btn_photo360Nr) {
                 m_photo360Nr = state;
+            } else if (button == routines::btn_targetPosition) {
+                m_targetPosition = state;
             }
         }
         bool canEdit(routines::Buttons button) {
@@ -69,12 +75,15 @@ class UserInterface {
                 return m_photo360Delay;
             } else if (button == routines::btn_photo360Nr) {
                 return m_photo360Nr;
+            } else if (button == routines::btn_targetPosition) {
+                return m_targetPosition;
             }
             return false;
         }
 
     protected:
         routines::Screens m_screen      = routines::ui_Home;   // set current screen shown to user
+        routines::Screens m_prevScreen  = routines::ui_Home;   // set current screen shown to user
         bool m_screenRotated            = false;            // check whether screen has been rotated or not
         bool m_arrows                   = false;
         bool m_shutterDelay             = false;            // set shutter delay time
@@ -85,6 +94,7 @@ class UserInterface {
         bool m_flashOff                 = false;            // set flash off value
         bool m_photo360Delay            = false;            // set photo360 delay
         bool m_photo360Nr               = false;            // set photo360 required photos
+        bool m_targetPosition           = false;            // set target position
         long m_lastCheckMillis          = 0;
 
 };

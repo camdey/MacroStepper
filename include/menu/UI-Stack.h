@@ -11,7 +11,5 @@ namespace stack_screen {
     void func_Auto(bool btnActive);
     void func_Manual(bool btnActive);
     void func_HomeRail(bool btnActive);
-    void func_Target(bool btnActive);
-    void func_Back(bool btnActive);
 }
 #endif

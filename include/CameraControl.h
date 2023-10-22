@@ -54,7 +54,7 @@ class CameraControl {
         int m_flashThreshold        = 280;
         int m_flashOnValue          = 300;          // initial value for flash considered as being ready
         int m_flashOffValue         = 30;           // initial value for flash considered as recycling
-        bool m_shutterEnabled       = false;        // enable/disable shutter for taken a photo automatically after a step
+        bool m_shutterEnabled       = true;        // enable/disable shutter for taken a photo automatically after a step
         bool m_testingFlash         = false;        // flag for testing flash threshold
         bool m_flashSensorEnabled   = false;        // is flash bulb enabled, or only take photos without flash?
         long m_lastCheckMillis      = 0;            // store readings of millis() to use for checking conditions within loops every X milliseconds
