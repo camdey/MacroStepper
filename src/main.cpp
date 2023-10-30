@@ -51,6 +51,8 @@
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
 #include "Wire.h"
+// #include <SPI.h>
+#include "SdFat.h"
 
 
 TouchScreen             ts = TouchScreen(XP, YP, XM, YM, 300);
@@ -66,13 +68,25 @@ Joystick                xStick(stepper1, XSTICK_PIN, ZSTICK_PIN);
 Joystick                rStick(stepper2, RSTICK_PIN, ZSTICK_PIN);
 ledLight                led(LED_PIN, POT_PIN);
 UserInterface           ui;
+SdFat                   SD;
 
+#define SD_FAT_TYPE 3
+#define SD_CS_PIN SDCARD_SS_PIN
+File myFile;
+uint16_t settings_test[14400];
+File bMap;
+// unsigned  char bitmp[512];
+int bmp_index = 0;
 
 // ***** --- MAIN PROGRAM --- ***** //
 void setup(void) {
     Serial.begin(250000);
 	SPI.begin();
     tft.reset();
+
+    if (!SD.begin(SD_CS_PIN)) {
+        Serial.println("initialization failed!");
+    }
 
     pinMode(PIEZO_PIN, OUTPUT);
 	pinMode(EN_1_PIN, OUTPUT);
@@ -106,8 +120,29 @@ void setup(void) {
     rStick.restValLower(490);
     rStick.restValUpper(530);
 
-    btn.begin(&tft);
+    btn.begin(&tft, &SD);
     btn.setScreenSize(480, 320);
+
+    // delay(2000);
+    // Serial.println("read");
+    // myFile = sd.open("icons/rgb_settings_120.bmp");
+    // uint8_t ret = btn.drawBMPFromSD("/icons/rgb_settings_120.bmp", 0, 0);
+    // delay(1000);
+    // Serial.println(myFile);
+    // if (myFile) {
+    //     while (myFile.available()) {
+    //         Serial.println((uint16_t) myFile.read());
+    //         // settings_test[bmp_index] = (uint16_t) myFile.read();
+    //         // bmp_index++;
+    //     }
+    //     for (int i = 0; i < 512; i++) {
+    //         Serial.write(settings_test[i]);
+    //     }
+    //     myFile.close();
+    //     tft.drawRGBBitmap(0, 0, settings_test, 120, 120); //  Draw binary Bitmap (96 pixels *96 pixels  / 8) bytes
+    // }
+    // delay(3000);
+
     ui.initButtons(200, 75);
     ui.populateScreen(routines::ui_Home);
 

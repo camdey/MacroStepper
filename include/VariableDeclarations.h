@@ -9,6 +9,8 @@
 #include <MCUFRIEND_kbv.h>
 #include <gfxButton.h>
 #include "TimerFreeTone.h"
+// #include <SPI.h>
+#include "SdFat.h"
 #include <fonts/Arimo_Regular_10.h>
 #include <fonts/Arimo_Regular_16.h>
 #include <fonts/Arimo_Regular_18.h>
@@ -42,14 +44,8 @@
 #include <icons/ToggleOff.h>
 #include <icons/rgb_home_70.h>
 #include <icons/rgb_settings_70.h>
-#include <icons/rgb_settings_120.h>
-#include <icons/rgb_autostack_120.h>
-#include <icons/rgb_3D_120.h>
-#include <icons/rgb_360_120.h>
 #include <icons/rgb_flash_70.h>
-#include <icons/rgb_flash_120.h>
 #include <icons/rgb_target_70.h>
-#include <icons/rgb_target_120.h>
 #include <icons/rgb_save_80.h>
 #include <icons/rgb_back_80.h>
 #include <icons/rgb_forward_80.h>
@@ -69,6 +65,7 @@
 extern TouchScreen          ts;
 extern MCUFRIEND_kbv        tft;
 extern gfxButton            btn;
+extern SdFat                sd;
 
 // Definitions for some common 16-bit color values:
 #define	BLACK                       0x0000
@@ -153,10 +150,7 @@ extern gfxButton            btn;
 #define CS_1_PIN                    34
 #define EN_1_PIN                    37              // pin 36 is meant to be connected but not working on the Grand Central, 37 is tied to 36 and 36 does not connect to arduino
 #define R_1_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
-// handled by SPI library
-// #define MOSI_PIN                 ICSP4
-// #define MISO_PIN                 ICSP1
-// #define SCK_PIN                  ICSP3
+
 
 // stepper2 pins
 #define DIAG0_2_PIN                 24
@@ -166,10 +160,7 @@ extern gfxButton            btn;
 #define CS_2_PIN                    28
 #define EN_2_PIN                    42
 #define R_2_SENSE                   0.075f          // Watterott TMC5160 uses 0.075
-// handled by SPI library
-// #define MOSI_PIN                 ICSP4
-// #define MISO_PIN                 ICSP1
-// #define SCK_PIN                  ICSP3
+
 
 // misc hardware pins
 #define XSTICK_PIN                  A7              // joystick X-axis pin (controls fwd and rev)

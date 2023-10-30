@@ -22,11 +22,12 @@ class ledLight {
     int readDimmer() {                                          // get value from potentiometer for setting brightness
         int val = analogRead(dimmerPin());
         val = map(val, 0, 1023, 0, MAX_LED_VAL);
-        if (abs(val - m_previousVal) > 3) {
-            m_previousVal = val;
-        } else {
-            val = m_previousVal;
-        }
+        // if (abs(val - m_previousVal) > 1 || val == 0) {
+        //     m_previousVal = val;
+        // } else {
+        //     val = m_previousVal;
+        // }
+        m_previousVal = val;
         return val;
     }
     void updateBrightness() {                                   // update led brightness based on current potentiometer reading
