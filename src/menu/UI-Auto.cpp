@@ -7,31 +7,39 @@
 #include "menu/UI-Global.h"
 
 namespace auto_screen {
-    #define num_btns 10
+    #define num_btns 14
     gfxButton *btn_array[num_btns];
 
+    // 90 + 160 = 250
+    // 20 gap
+    // 270 + 80 = 350
+    // 20 gap
+    // 370 + 100 = 470
 
-    gfxButton btn_StepSize      =   btn.initButton("Step Size",     "fillRoundRect",    0,      20,     160,    80,     5, DARKGRAY,   true);
-    gfxButton btn_EstTime       =   btn.initButton("Est. Time",     "fillRoundRect",    0,      120,    160,    80,     5, DARKGRAY,   false);
-    gfxButton btn_Progress      =   btn.initButton("Progress",      "fillRoundRect",    0,      220,    160,    80,     5, DARKGRAY,   false);
-    gfxButton btn_StackStatus   =   btn.initTransparentButton("Started",                350,    200,    120,    120,    false);
-    gfxButton btn_Config        =   btn.initRGBBitmapButton(rgb_config_80,      200,    120,    80,     80,     true);
-    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,        200,    220,    80,     80,     true);
-    gfxButton btn_PlayPause     =   btn.initRGBBitmapButton(rgb_pause_100,       350,    100,    100,    100,    true);
-    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,     true);
-    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,     true);
+    gfxButton btn_StepSize      =   btn.initButton("Step Size",     "fillRoundRect",    90,      20,     160,    80,     5, WHITE,   true);
+    gfxButton btn_EstTime       =   btn.initButton("Est. Time",     "fillRoundRect",    90,      120,    160,    80,     5, WHITE,   false);
+    gfxButton btn_Progress      =   btn.initButton("Progress",      "fillRoundRect",    90,      220,    160,    80,     5, WHITE,   false);
+    gfxButton btn_Config        =   btn.initRGBBitmapButton(rgb_config_80,      270,    120,    80,     80,     true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,        270,    220,    80,     80,     true);
+    gfxButton btn_PlayPause     =   btn.initRGBBitmapButton(rgb_play_100,       370,    110,    100,    100,    true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   370,    35,     100,    90,     true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 370,    195,    100,    90,     true);
 
     void initAutoButtons() {
-        btn_array[0] = &btn_StepSize;
-        btn_array[1] = &btn_EstTime;
-        btn_array[2] = &btn_Progress;
-        btn_array[3] = &global::btn_Flash;
-        btn_array[4] = &btn_Config;
-        btn_array[5] = &btn_Back;
-        btn_array[6] = &btn_PlayPause;
-        btn_array[7] = &btn_ArrowUp;
-        btn_array[8] = &btn_ArrowDown;
-        btn_array[9] = &btn_StackStatus;
+        btn_array[0] = &global::btn_Home;
+        btn_array[1] = &global::btn_Settings;
+        btn_array[2] = &global::btn_Target;
+        btn_array[3] = &global::btn_FlashPage;
+        btn_array[4] = &global::btn_border;
+        btn_array[5] = &btn_StepSize;
+        btn_array[6] = &btn_EstTime;
+        btn_array[7] = &btn_Progress;
+        btn_array[8] = &global::btn_Flash;
+        btn_array[9] = &btn_Config;
+        btn_array[10] = &btn_Back;
+        btn_array[11] = &btn_PlayPause;
+        btn_array[12] = &btn_ArrowUp;
+        btn_array[13] = &btn_ArrowDown;
 
         btn_StepSize.addToggle(func_StepDistance,   0 );
         btn_Config.addMomentary(func_Config,        0 );
@@ -43,11 +51,10 @@ namespace auto_screen {
         // arrows are disabled by default, only enabled when editing step size
         btn_ArrowUp.hideButton();
         btn_ArrowDown.hideButton();
-        btn_StackStatus.hideButton();
 
-        btn_StepSize.addBorder(3,   WHITE);
-        btn_EstTime.addBorder(3,    WHITE);
-        btn_Progress.addBorder(3,   WHITE);
+        btn_StepSize.addBorder(3,   CUSTOM_GREY);
+        btn_EstTime.addBorder(3,    CUSTOM_GREY);
+        btn_Progress.addBorder(3,   CUSTOM_GREY);
     }
 
 
@@ -62,15 +69,12 @@ namespace auto_screen {
         }
 
         // draw text
-        btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
-        btn_EstTime.writeTextTopCentre(Arimo_Regular_30, WHITE);
+        btn_StepSize.writeTextTopCentre(Roboto_Medium_30, BLACK);
+        btn_StepSize.writeTextBottomCentre(Roboto_Black_30, BLACK, String(stepper1.distancePerMovement(), 4));
+        btn_EstTime.writeTextTopCentre(Roboto_Medium_30, BLACK);
         estimateDuration();
-        btn_Progress.writeTextTopCentre(Arimo_Regular_30, WHITE);
+        btn_Progress.writeTextTopCentre(Roboto_Medium_30, BLACK);
         printAutoStackProgress();
-        if (!btn_StackStatus.isHidden()) {
-            // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
-        }
     }
 
 
@@ -89,8 +93,8 @@ namespace auto_screen {
             ui.canEdit(routines::btn_distance, true);
             hideArrows(false); // show arrows, hide play/pause
 
-            btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stepper1.distancePerMovement(), 4));
         }
         else if (!btnActive && !stack.busy()) {
             ui.canEdit(routines::btn_arrows, false);
@@ -98,8 +102,8 @@ namespace auto_screen {
             hideArrows(true); // hide arrows, show play/pause
 
             // TODO would be nice to not re-write the top line on every arrow press
-            btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, BLACK);
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, BLACK, String(stepper1.distancePerMovement(), 4));
         }
         else {
             // set back to off if conditions above not met
@@ -157,7 +161,7 @@ namespace auto_screen {
         if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.incrementStepsPerMovement();
             stepper1.calculateDistancePerMovement();
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -166,7 +170,7 @@ namespace auto_screen {
         if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.decrementStepsPerMovement();
             stepper1.calculateDistancePerMovement();
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -178,8 +182,8 @@ namespace auto_screen {
             btn_PlayPause.drawButton(); // PlayPause takes opposite state to arrow buttons
         } else {
             btn_PlayPause.hideButton(); // PlayPause takes opposite state to arrow buttons
-            btn_ArrowUp.drawButton(CUSTOM_GREEN);
-            btn_ArrowDown.drawButton(CUSTOM_RED);
+            btn_ArrowUp.drawButton();
+            btn_ArrowDown.drawButton();
         }
     }
 
@@ -225,7 +229,7 @@ namespace auto_screen {
         // format time as "mm:ss" string
         sprintf_P(timeMinutesSeconds, PSTR("%02d:%02d"), minutes, seconds);
         // print to screen
-        btn_EstTime.writeTextBottomCentre(Arimo_Bold_30, WHITE, timeMinutesSeconds);
+        btn_EstTime.writeTextBottomCentre(Roboto_Black_30, BLACK, timeMinutesSeconds);
     }
 
 
@@ -239,6 +243,6 @@ namespace auto_screen {
         // format progress in "Completed / Total" string
         sprintf_P(autoStackProgress, PSTR("%02d/%02d"), stack.completedMovements(), stack.requiredMovements());
         // print to screen
-        btn_Progress.writeTextBottomCentre(Arimo_Bold_30, WHITE, autoStackProgress);
+        btn_Progress.writeTextBottomCentre(Roboto_Black_30, BLACK, autoStackProgress);
     }
 }

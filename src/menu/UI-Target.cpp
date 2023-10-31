@@ -89,12 +89,12 @@ namespace target_screen {
         }
 
         // draw text
-        btn_Target.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Target.writeTextBottomCentre(Arimo_Bold_30, WHITE, targetValues);
-        btn_Distance.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Distance.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(targetMillimetres, 4));
-        btn_Actual.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
+        btn_Target.writeTextTopCentre(Roboto_Medium_30, WHITE);
+        btn_Target.writeTextBottomCentre(Roboto_Black_30, WHITE, targetValues);
+        btn_Distance.writeTextTopCentre(Roboto_Medium_30, WHITE);
+        btn_Distance.writeTextBottomCentre(Roboto_Black_30, WHITE, String(targetMillimetres, 4));
+        btn_Actual.writeTextTopCentre(Roboto_Medium_30, WHITE);
+        btn_Actual.writeTextBottomCentre(Roboto_Black_30, WHITE, String(stepper1.XACTUAL()));
         btn_Cancel.writeTextCentre(Arimo_Bold_36, BLACK);
         btn_Minus.writeTextCentre(Arimo_Bold_36, BLACK);
         btn_Zero.writeTextCentre(Arimo_Bold_36, BLACK);
@@ -122,16 +122,16 @@ namespace target_screen {
     void func_Distance(bool active) {
         if (active) {
             ui.canEdit(routines::btn_targetPosition, true);
-            btn_Target.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Target.writeTextBottomCentre(Arimo_Bold_30, YELLOW, targetValues);
-            btn_Distance.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(targetMillimetres, 4));
-            btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL())); // update in case stepper has moved (e.g. due to joystick)
+            btn_Target.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+            btn_Target.writeTextBottomCentre(Roboto_Black_30, YELLOW, targetValues);
+            btn_Distance.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(targetMillimetres, 4));
+            btn_Actual.writeTextBottomCentre(Roboto_Black_30, WHITE, String(stepper1.XACTUAL())); // update in case stepper has moved (e.g. due to joystick)
         }
         else {
             ui.canEdit(routines::btn_targetPosition, false);
-            btn_Target.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Target.writeTextBottomCentre(Arimo_Bold_30, WHITE, targetValues);
-            btn_Distance.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(targetMillimetres, 4));
+            btn_Target.writeTextTopCentre(Roboto_Medium_30, WHITE);
+            btn_Target.writeTextBottomCentre(Roboto_Black_30, WHITE, targetValues);
+            btn_Distance.writeTextBottomCentre(Roboto_Black_30, WHITE, String(targetMillimetres, 4));
         }
     }
 
@@ -168,8 +168,8 @@ namespace target_screen {
 
             // calculate distance in mm
             targetMillimetres = atoi(targetValues)*(MICROSTEP_DIST/1000.0000);
-            btn_Target.writeTextBottomCentre(Arimo_Bold_30, YELLOW, targetValues);
-            btn_Distance.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(targetMillimetres, 4));
+            btn_Target.writeTextBottomCentre(Roboto_Black_30, YELLOW, targetValues);
+            btn_Distance.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(targetMillimetres, 4));
         }
     }
 
@@ -206,7 +206,7 @@ namespace target_screen {
             stepper1.VMAX(STEALTH_CHOP_VMAX);
             btn_Run.drawButton(CUSTOM_GREEN);
             btn_Run.setToggleActive(false); // reset button
-            btn_Actual.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
+            btn_Actual.writeTextBottomCentre(Roboto_Black_30, WHITE, String(stepper1.XACTUAL()));
         }
     }
 

@@ -61,13 +61,13 @@ namespace autoconfig_screen {
         int currentPosition = stepper1.XACTUAL();
 
         // draw text
-        btn_Start.writeTextTopCentre(Arimo_Regular_30,  WHITE);
-        btn_Start.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String(stack.startPosition()));
-        btn_End.writeTextTopCentre(Arimo_Regular_30,    WHITE);
-        btn_End.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(stack.endPosition()));
-        btn_Run.writeTextTopCentre(Arimo_Regular_30,    WHITE);
-        btn_Run.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(currentPosition));
-        btn_DelayVal.writeTextCentre(Arimo_Bold_30,     WHITE,  stack.getShutterDelaySeconds());
+        btn_Start.writeTextTopCentre(Roboto_Medium_30,  WHITE);
+        btn_Start.writeTextBottomCentre(Roboto_Black_30,  WHITE,  String(stack.startPosition()));
+        btn_End.writeTextTopCentre(Roboto_Medium_30,    WHITE);
+        btn_End.writeTextBottomCentre(Roboto_Black_30,    WHITE,  String(stack.endPosition()));
+        btn_Run.writeTextTopCentre(Roboto_Medium_30,    WHITE);
+        btn_Run.writeTextBottomCentre(Roboto_Black_30,    WHITE,  String(currentPosition));
+        btn_DelayVal.writeTextCentre(Roboto_Black_30,     WHITE,  stack.getShutterDelaySeconds());
     }
 
 
@@ -86,15 +86,15 @@ namespace autoconfig_screen {
             ui.canEdit(routines::btn_startPosition, true);
             stack.startPosition(stepper1.XACTUAL()); // set start position to current position
 
-            btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
+            btn_Start.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+            btn_Start.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stack.startPosition()));
         }
         else if (!btnActive && ui.canEdit(routines::btn_startPosition)) {
             ui.canEdit(routines::btn_arrows, false);
             ui.canEdit(routines::btn_startPosition, false);
 
-            btn_Start.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Start.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stack.startPosition()));
+            btn_Start.writeTextTopCentre(Roboto_Medium_30, WHITE);
+            btn_Start.writeTextBottomCentre(Roboto_Black_30, WHITE, String(stack.startPosition()));
         }
     }
 
@@ -105,15 +105,15 @@ namespace autoconfig_screen {
             ui.canEdit(routines::btn_endPosition, true);
             stack.endPosition(stepper1.XACTUAL()); // set end position to current position
 
-            btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.endPosition()));
+            btn_End.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+            btn_End.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stack.endPosition()));
         }
         else if (!btnActive && ui.canEdit(routines::btn_endPosition)) {
             ui.canEdit(routines::btn_arrows, false);
             ui.canEdit(routines::btn_endPosition, false);
 
-            btn_End.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_End.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stack.endPosition()));
+            btn_End.writeTextTopCentre(Roboto_Medium_30, WHITE);
+            btn_End.writeTextBottomCentre(Roboto_Black_30, WHITE, String(stack.endPosition()));
         }
     }
 
@@ -122,13 +122,13 @@ namespace autoconfig_screen {
         if (btnActive && (ui.canEdit(routines::btn_shutterDelay) + ui.canEdit(routines::btn_startPosition) + ui.canEdit(routines::btn_endPosition)) == 0) {
             int currentPosition = stepper1.XACTUAL();
 
-            btn_Run.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Run.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(currentPosition));
+            btn_Run.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+            btn_Run.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(currentPosition));
 
             stack.dryRun();
 
-            btn_Run.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Run.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(currentPosition));
+            btn_Run.writeTextTopCentre(Roboto_Medium_30, WHITE);
+            btn_Run.writeTextBottomCentre(Roboto_Black_30, WHITE, String(currentPosition));
             btn_Run.setToggleActive(false); // reset button state to false
         }
     }
@@ -140,14 +140,14 @@ namespace autoconfig_screen {
             ui.canEdit(routines::btn_shutterDelay, true);
 
             btn_Delay.drawButton(YELLOW);
-            btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, stack.getShutterDelaySeconds());
+            btn_DelayVal.writeTextCentre(Roboto_Black_30, YELLOW, stack.getShutterDelaySeconds());
         }
         else if (!btnActive && ui.canEdit(routines::btn_shutterDelay)) {
             ui.canEdit(routines::btn_arrows, false);
             ui.canEdit(routines::btn_shutterDelay, false);
 
             btn_Delay.drawButton(WHITE);
-            btn_DelayVal.writeTextCentre(Arimo_Bold_30, WHITE, stack.getShutterDelaySeconds());
+            btn_DelayVal.writeTextCentre(Roboto_Black_30, WHITE, stack.getShutterDelaySeconds());
         }
     }
 
@@ -216,8 +216,8 @@ namespace autoconfig_screen {
         }
         // get new value
         stack.startPosition(stepper1.XACTUAL());
-        btn_Start.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-        btn_Start.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.startPosition()));
+        btn_Start.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+        btn_Start.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stack.startPosition()));
         // reset AutoStack
         stack.status(routines::inactive);
     }
@@ -232,20 +232,20 @@ namespace autoconfig_screen {
         else if (!stack.runMax()) {
             stack.endPosition(stepper1.XACTUAL());
         }
-        btn_End.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-        btn_End.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stack.endPosition()));
+        btn_End.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+        btn_End.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stack.endPosition()));
     }
 
 
     // print the new shutterDelay value to screen
     void printShutterDelay() {
-        btn_DelayVal.writeTextCentre(Arimo_Bold_30, YELLOW, stack.getShutterDelaySeconds());
+        btn_DelayVal.writeTextCentre(Roboto_Black_30, YELLOW, stack.getShutterDelaySeconds());
     }
 
 
     // print current position of stepper under RUN text
     void printPosition() {
-        btn_Run.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Run.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.XACTUAL()));
+        btn_Run.writeTextTopCentre(Roboto_Medium_30, WHITE);
+        btn_Run.writeTextBottomCentre(Roboto_Black_30, WHITE, String(stepper1.XACTUAL()));
     }
 }

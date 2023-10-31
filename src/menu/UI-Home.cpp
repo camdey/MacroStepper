@@ -7,12 +7,12 @@ namespace home_screen {
     #define num_btns 6
     gfxButton *btn_array[num_btns];
 
-    gfxButton btn_Stack     =   btn.initSDBitmapButton("/icons/autostack_120.bmp",  20,     20,     true);
-    gfxButton btn_360       =   btn.initSDBitmapButton("/icons/360_120.bmp",        180,    20,     true);
-    gfxButton btn_3D        =   btn.initSDBitmapButton("/icons/3D_120.bmp",         340,    20,     true);
-    gfxButton btn_Target    =   btn.initSDBitmapButton("/icons/target_120.bmp",      20,     180,    true);
-    gfxButton btn_Flash     =   btn.initSDBitmapButton("/icons/flash_120.bmp",      180,    180,    true);
-    gfxButton btn_Settings  =   btn.initSDBitmapButton("/icons/settings_120.bmp",   340,    180,    true);
+    gfxButton btn_Stack     =   btn.initSDBitmapButton("/icons/autostack_100.bmp",  50,     40,     true);
+    gfxButton btn_360       =   btn.initSDBitmapButton("/icons/360_100.bmp",        190,    40,     true);
+    gfxButton btn_3D        =   btn.initSDBitmapButton("/icons/3D_100.bmp",         330,    40,     true);
+    gfxButton btn_Target    =   btn.initSDBitmapButton("/icons/target_100.bmp",     50,     180,    true);
+    gfxButton btn_Flash     =   btn.initSDBitmapButton("/icons/flash_100.bmp",      190,    180,    true);
+    gfxButton btn_Settings  =   btn.initSDBitmapButton("/icons/settings_100.bmp",   330,    180,    true);
 
 
     void initHomeButtons() {

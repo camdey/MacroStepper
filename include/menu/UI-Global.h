@@ -18,5 +18,6 @@ namespace global {
     extern gfxButton btn_Settings;
     extern gfxButton btn_FlashPage;
     extern gfxButton btn_Target;
+    extern gfxButton btn_border;
 }
 #endif

@@ -7,31 +7,36 @@
 
 
 namespace manual_screen {
-    #define num_btns 8
+    #define num_btns 13
     gfxButton *btn_array[num_btns];
     String stepNr;
     String railPos;
     int movementCount = 0;    // count of manual movements
 
 
-    gfxButton btn_StepSize  =   btn.initButton("Step Size", "fillRoundRect",    0,  20,     160,    80,     15, DARKGRAY,   true);
-    gfxButton btn_StepNr    =   btn.initButton("Step Nr.",  "fillRoundRect",    0,  120,    160,    80,     15, DARKGRAY,   false);
-    gfxButton btn_RailPos   =   btn.initButton("Rail Pos.", "fillRoundRect",    0,  220,    160,    80,     15, DARKGRAY,   false);
-    gfxButton btn_Reset     =   btn.initRGBBitmapButton(rgb_cancel_red_80,      200,    120,    80,     80, true);
-    gfxButton btn_Back      =   btn.initRGBBitmapButton(rgb_back_80,            200,    220,    80,     80, true);
-    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
-    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
+    gfxButton btn_StepSize  =   btn.initButton("Step Size", "fillRoundRect",    90,  20,     160,    80,     5, WHITE,   true);
+    gfxButton btn_StepNr    =   btn.initButton("Step Nr.",  "fillRoundRect",    90,  120,    160,    80,     5, WHITE,   false);
+    gfxButton btn_RailPos   =   btn.initButton("Rail Pos.", "fillRoundRect",    90,  220,    160,    80,     5, WHITE,   false);
+    gfxButton btn_Reset     =   btn.initRGBBitmapButton(rgb_cancel_red_80,      270,    120,    80,     80,     true);
+    gfxButton btn_Back      =   btn.initRGBBitmapButton(rgb_back_80,            270,    220,    80,     80,     true);
+    gfxButton btn_ArrowUp   =   btn.initRGBBitmapButton(rgb_arrow_up_100,       370,    35,     100,    90,     true);
+    gfxButton btn_ArrowDown =   btn.initRGBBitmapButton(rgb_arrow_down_100,     370,    195,    100,    90,     true);
 
 
     void initManualButtons() {
-        btn_array[0] = &btn_StepSize;
-        btn_array[1] = &btn_StepNr;
-        btn_array[2] = &btn_RailPos;
-        btn_array[3] = &global::btn_Flash;
-        btn_array[4] = &btn_Reset;
-        btn_array[5] = &btn_Back;
-        btn_array[6] = &btn_ArrowUp;
-        btn_array[7] = &btn_ArrowDown;
+        btn_array[0] = &global::btn_Home;
+        btn_array[1] = &global::btn_Settings;
+        btn_array[2] = &global::btn_Target;
+        btn_array[3] = &global::btn_FlashPage;
+        btn_array[4] = &global::btn_border;
+        btn_array[5] = &btn_StepSize;
+        btn_array[6] = &btn_StepNr;
+        btn_array[7] = &btn_RailPos;
+        btn_array[8] = &global::btn_Flash;
+        btn_array[9] = &btn_Reset;
+        btn_array[10] = &btn_Back;
+        btn_array[11] = &btn_ArrowUp;
+        btn_array[12] = &btn_ArrowDown;
 
         btn_StepSize.addToggle(func_StepDistance, 0);
         btn_Reset.addMomentary(func_Reset, 0);
@@ -39,9 +44,9 @@ namespace manual_screen {
         btn_ArrowUp.addMomentary(func_ArrowUp, 0);
         btn_ArrowDown.addMomentary(func_ArrowDown, 0);
 
-        btn_StepSize.addBorder(3, WHITE);
-        btn_StepNr.addBorder(3, WHITE);
-        btn_RailPos.addBorder(3, WHITE);
+        btn_StepSize.addBorder(3, CUSTOM_GREY);
+        btn_StepNr.addBorder(3, CUSTOM_GREY);
+        btn_RailPos.addBorder(3, CUSTOM_GREY);
     }
 
 
@@ -57,12 +62,12 @@ namespace manual_screen {
         }
 
         // draw text
-        btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
-        btn_StepNr.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_StepNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, stepNr);
-        btn_RailPos.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_RailPos.writeTextBottomCentre(Arimo_Bold_30, WHITE, railPos);
+        btn_StepSize.writeTextTopCentre(Roboto_Medium_30, BLACK);
+        btn_StepSize.writeTextBottomCentre(Roboto_Black_30, BLACK, String(stepper1.distancePerMovement(), 4));
+        btn_StepNr.writeTextTopCentre(Roboto_Medium_30, BLACK);
+        btn_StepNr.writeTextBottomCentre(Roboto_Black_30, BLACK, stepNr);
+        btn_RailPos.writeTextTopCentre(Roboto_Medium_30, BLACK);
+        btn_RailPos.writeTextBottomCentre(Roboto_Black_30, BLACK, railPos);
     }
 
 
@@ -80,16 +85,16 @@ namespace manual_screen {
             ui.canEdit(routines::btn_arrows, true);
             ui.canEdit(routines::btn_distance, true);
 
-            btn_StepSize.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, CUSTOM_RED);
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String(stepper1.distancePerMovement(), 4));
         }
         else {
             ui.canEdit(routines::btn_arrows, false);
             ui.canEdit(routines::btn_distance, false);
 
             // TODO would be nice to not re-write the top line on every arrow press
-            btn_StepSize.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, BLACK);
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, BLACK, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -98,7 +103,7 @@ namespace manual_screen {
         if (btnActive) {
             movementCount = 0; // reset
             stepNr = String(movementCount); // get latest value
-            btn_StepNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, stepNr);
+            btn_StepNr.writeTextBottomCentre(Roboto_Black_30, BLACK, stepNr);
         }
     }
 
@@ -116,7 +121,7 @@ namespace manual_screen {
             if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.incrementStepsPerMovement();
                 stepper1.calculateDistancePerMovement();
-                btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+                btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String(stepper1.distancePerMovement(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!ui.canEdit(routines::btn_distance)) {
@@ -140,7 +145,7 @@ namespace manual_screen {
             if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.decrementStepsPerMovement();
                 stepper1.calculateDistancePerMovement();
-                btn_StepSize.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+                btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String(stepper1.distancePerMovement(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!ui.canEdit(routines::btn_distance)) {
@@ -162,7 +167,7 @@ namespace manual_screen {
     void printPosition() {
         // print new position of rail
         railPos = String(stepper1.XACTUAL()*(MICROSTEP_DIST/1000), 5);
-        btn_RailPos.writeTextBottomCentre(Arimo_Bold_30, WHITE, railPos);
+        btn_RailPos.writeTextBottomCentre(Roboto_Black_30, BLACK, railPos);
     }
 
 
@@ -171,7 +176,7 @@ namespace manual_screen {
         // increment movementCount and print to screen
         movementCount++;
         stepNr = String(movementCount);
-        btn_StepNr.writeTextBottomCentre(Arimo_Bold_30, WHITE, stepNr);
+        btn_StepNr.writeTextBottomCentre(Roboto_Black_30, BLACK, stepNr);
     }
 
 }

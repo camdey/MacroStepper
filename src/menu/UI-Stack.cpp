@@ -5,7 +5,7 @@
 #include "menu/UI-Global.h"
 
 namespace stack_screen {
-    #define num_btns 6
+    #define num_btns 7
     gfxButton *btn_array[num_btns];
 
     gfxButton btn_Manual    =   btn.initButton("Manual",    "fillRoundRect",    150,     35,    220,    110,     4,     WHITE,  true);
@@ -18,8 +18,9 @@ namespace stack_screen {
         btn_array[1] = &global::btn_Settings;
         btn_array[2] = &global::btn_Target;
         btn_array[3] = &global::btn_FlashPage;
-        btn_array[4] = &btn_Manual;
-        btn_array[5] = &btn_Auto;
+        btn_array[4] = &global::btn_border;
+        btn_array[5] = &btn_Manual;
+        btn_array[6] = &btn_Auto;
         // btn_array[6] = &btn_HomeRail;
 
         btn_Manual.addMomentary(func_Manual, 0);
@@ -33,7 +34,6 @@ namespace stack_screen {
 
     void populateStackScreen() {
         ui.activeScreen(routines::ui_Stack);
-        tft.fillRect(80, 0, 5, 320, WHITE);
         // draw buttons
         for (int i=0; i < num_btns; i++) {
             btn_array[i]->drawButton();

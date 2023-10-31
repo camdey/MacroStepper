@@ -14,9 +14,9 @@ namespace flash_screen {
     gfxButton btn_FlashOff      =   btn.initButton("Off Value",     "fillRoundRect",    0,      20,     160,    80,     15,     CUSTOM_RED,     true);
     gfxButton btn_FlashOn       =   btn.initButton("On Value",      "fillRoundRect",    0,      120,    160,    80,     15,     CUSTOM_GREEN,   true);
     gfxButton btn_Threshold     =   btn.initButton("Threshold",     "fillRoundRect",    320,    20,     160,    80,     15,     CUSTOM_BLUE,    true);
-    gfxButton btn_FlashTest     =   btn.initTransparentButton(              320,    120,    160,    80, true);
-    gfxButton btn_FlashSensor   =   btn.initBitmapButton(flashBulb,         200,    20,     80,     80, CUSTOM_RED, BLACK,  true);
-    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    200,    220,    80,     80, true);
+    gfxButton btn_FlashTest     =   btn.initTransparentButton(  320,    120,    160,    80, true);
+    gfxButton btn_FlashSensor   =   btn.initRGBBitmapButton(rgb_flash_sensor_off_80,    200,    20,     80,     80, true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,                200,    220,    80,     80, true);
 
     void initFlashButtons() {
         btn_array[0] = &btn_FlashOff;
@@ -46,14 +46,14 @@ namespace flash_screen {
             btn_array[i]->drawButton();
         }
         // draw text
-        btn_FlashOff.writeTextTopCentre(Arimo_Regular_30,   WHITE);
-        btn_FlashOff.writeTextBottomCentre(Arimo_Bold_30,   WHITE,  String(camera.flashOffValue()));
-        btn_FlashOn.writeTextTopCentre(Arimo_Regular_30,    WHITE);
-        btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30,    WHITE,  String(camera.flashOnValue()));
-        btn_Threshold.writeTextTopCentre(Arimo_Regular_30,  WHITE);
-        btn_Threshold.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String(camera.flashThreshold()));
-        btn_FlashTest.writeTextTopCentre(Arimo_Bold_30,     WHITE,  String("TEST"));
-        btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30,  WHITE,  String("FLASH"));
+        btn_FlashOff.writeTextTopCentre(Roboto_Medium_30,   WHITE);
+        btn_FlashOff.writeTextBottomCentre(Roboto_Black_30,   WHITE,  String(camera.flashOffValue()));
+        btn_FlashOn.writeTextTopCentre(Roboto_Medium_30,    WHITE);
+        btn_FlashOn.writeTextBottomCentre(Roboto_Black_30,    WHITE,  String(camera.flashOnValue()));
+        btn_Threshold.writeTextTopCentre(Roboto_Medium_30,  WHITE);
+        btn_Threshold.writeTextBottomCentre(Roboto_Black_30,  WHITE,  String(camera.flashThreshold()));
+        btn_FlashTest.writeTextTopCentre(Roboto_Black_30,     WHITE,  String("TEST"));
+        btn_FlashTest.writeTextBottomCentre(Roboto_Black_30,  WHITE,  String("FLASH"));
     }
 
 
@@ -69,13 +69,13 @@ namespace flash_screen {
         if (btnActive) {
             ui.canEdit(routines::btn_flashOff, true);
             ui.canEdit(routines::btn_shutterDelay, true);
-            btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, YELLOW, String(camera.flashOffValue()));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
+            btn_FlashOff.writeTextBottomCentre( Roboto_Black_30, YELLOW, String(camera.flashOffValue()));
+            btn_Threshold.writeTextBottomCentre(Roboto_Black_30, WHITE, String(camera.flashThreshold()));
         }
         else {
             ui.canEdit(routines::btn_flashOff, false);
-            btn_FlashOff.writeTextBottomCentre( Arimo_Bold_30, WHITE, String(camera.flashOffValue()));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
+            btn_FlashOff.writeTextBottomCentre( Roboto_Black_30, WHITE, String(camera.flashOffValue()));
+            btn_Threshold.writeTextBottomCentre(Roboto_Black_30, WHITE, String(camera.flashThreshold()));
         }
     }
 
@@ -83,26 +83,28 @@ namespace flash_screen {
     void func_FlashOn(bool btnActive) {
         if (btnActive) {
             ui.canEdit(routines::btn_flashOn, true);
-            btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(camera.flashOnValue()));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
+            btn_FlashOn.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(camera.flashOnValue()));
+            btn_Threshold.writeTextBottomCentre(Roboto_Black_30, WHITE, String(camera.flashThreshold()));
         }
         else {
             ui.canEdit(routines::btn_flashOn, false);
-            btn_FlashOn.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashOffValue()));
-            btn_Threshold.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(camera.flashThreshold()));
+            btn_FlashOn.writeTextBottomCentre(Roboto_Black_30, WHITE, String(camera.flashOffValue()));
+            btn_Threshold.writeTextBottomCentre(Roboto_Black_30, WHITE, String(camera.flashThreshold()));
         }
     }
 
 
     void func_FlashSensor(bool btnActive) {
         if (btnActive) {
-            btn_FlashSensor.updateColour(CUSTOM_GREEN);
+            btn_FlashSensor.hideButton();
+            btn_FlashSensor.updateRGBBitmap(rgb_flash_sensor_on_80);
             btn_FlashSensor.drawButton();
             camera.flashSensorEnabled(true);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
         }
         else if (!btnActive) {
-            btn_FlashSensor.updateColour(CUSTOM_RED);
+            btn_FlashSensor.hideButton();
+            btn_FlashSensor.updateRGBBitmap(rgb_flash_sensor_off_80);
             btn_FlashSensor.drawButton();
             camera.flashSensorEnabled(false);
             // auto_screen::stackStatus(newStep); // always reset in case switched mid-procedure
@@ -118,8 +120,8 @@ namespace flash_screen {
                 camera.shutterEnabled(true);
             }
             // print as yellow until result returned
-            btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, YELLOW, String("TEST"));
-            btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String("FLASH"));
+            btn_FlashTest.writeTextTopCentre(Roboto_Black_30, YELLOW, String("TEST"));
+            btn_FlashTest.writeTextBottomCentre(Roboto_Black_30, YELLOW, String("FLASH"));
 
             // trigger shutter
             camera.triggerShutter(true);
@@ -132,16 +134,16 @@ namespace flash_screen {
 
             // check result
             if (!camera.photoTaken()) {
-                btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, CUSTOM_RED, String("TEST"));
-                btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, CUSTOM_RED, String("FLASH"));
+                btn_FlashTest.writeTextTopCentre(Roboto_Black_30, CUSTOM_RED, String("TEST"));
+                btn_FlashTest.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String("FLASH"));
                 // reset stackProcedureStage if active
                 if (stack.status() != routines::inactive) {
                     stack.status(routines::newShutter);
                 }
             }
             else if (camera.photoTaken()) {
-                btn_FlashTest.writeTextTopCentre(Arimo_Bold_30, CUSTOM_GREEN, String("TEST"));
-                btn_FlashTest.writeTextBottomCentre(Arimo_Bold_30, CUSTOM_GREEN, String("FLASH"));
+                btn_FlashTest.writeTextTopCentre(Roboto_Black_30, CUSTOM_GREEN, String("TEST"));
+                btn_FlashTest.writeTextBottomCentre(Roboto_Black_30, CUSTOM_GREEN, String("FLASH"));
                 if (stack.status() != routines::inactive) {
                     stack.status(routines::newMovement);
                 }

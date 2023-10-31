@@ -14,10 +14,10 @@ namespace photoconfig_screen {
     gfxButton btn_90            =   btn.initButton("Move 90",   "fillRoundRect",    0,        20,     160,    80,     15,   DARKGRAY,   true);
     gfxButton btn_180           =   btn.initButton("Move 180",  "fillRoundRect",    0,        120,    160,    80,     15,   DARKGRAY,   true);
     gfxButton btn_360           =   btn.initButton("Move 360",  "fillRoundRect",    0,        220,    160,    80,     15,   DARKGRAY,   true);
-    gfxButton btn_Direction     =   btn.initBitmapButton(dir_cw,            200,    20,     80,     80,     CUSTOM_GREEN,   BLACK,  true);
-    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,    200,    220,    80,     80,     true);
-    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
-    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
+    gfxButton btn_Direction     =   btn.initRGBBitmapButton(rgb_rotate_cw_80,   200,    20,     80,     80,     true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,        200,    220,    80,     80,     true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,     true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,     true);
 
 
     void initPhoto360ConfigButtons() {
@@ -57,9 +57,9 @@ namespace photoconfig_screen {
         }
 
         // draw text
-        btn_90.writeTextCentre(Arimo_Regular_30, WHITE);
-        btn_180.writeTextCentre(Arimo_Regular_30, WHITE);
-        btn_360.writeTextCentre(Arimo_Regular_30, WHITE);
+        btn_90.writeTextCentre(Roboto_Medium_30, WHITE);
+        btn_180.writeTextCentre(Roboto_Medium_30, WHITE);
+        btn_360.writeTextCentre(Roboto_Medium_30, WHITE);
     }
 
 
@@ -120,16 +120,14 @@ namespace photoconfig_screen {
 
     void func_Direction(bool btnActive) {
         if (btnActive) {
-            btn_Direction.hideButton();
-            btn_Direction.updateBitmap(dir_ccw); // update bitmap image
-            btn_Direction.updateColour(CUSTOM_RED); // change colour
+            btn_Direction.hideButton(); // replace existing button
+            btn_Direction.updateRGBBitmap(rgb_rotate_ccw_80); // update bitmap image
             btn_Direction.drawButton(); // draw
             stepper2.rotateClockwise(false);
         }
         else if (!btnActive) {
-            btn_Direction.hideButton();
-            btn_Direction.updateBitmap(dir_cw); // update bitmap image
-            btn_Direction.updateColour(CUSTOM_GREEN); // change colour
+            btn_Direction.hideButton(); // replace existing button
+            btn_Direction.updateRGBBitmap(rgb_rotate_cw_80); // update bitmap image
             btn_Direction.drawButton(); // draw
             stepper2.rotateClockwise(true);
         }

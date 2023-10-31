@@ -25,23 +25,19 @@
 #include <fonts/Arimo_Bold_30.h>
 #include <fonts/Arimo_Bold_36.h>
 #include <fonts/Arimo_Bold_40.h>
+#include <fonts/Roboto_30.h>
+#include <fonts/Roboto_34.h>
+#include <fonts/Roboto_38.h>
+#include <fonts/Roboto_Black_30.h>
+#include <fonts/Roboto_Black_34.h>
+#include <fonts/Roboto_Black_38.h>
+#include <fonts/Roboto_Medium_30.h>
+#include <fonts/Roboto_Medium_34.h>
+#include <fonts/Roboto_Medium_38.h>
 #include <fonts/Syncopate_Bold_36.h>
 #include <fonts/Permanent_Marker_Regular_36.h>
 #include <fonts/Lato_Black_34.h>
 #include <fonts/Lato_Black_40.h>
-#include <icons/ArrowUp.h>
-#include <icons/ArrowDown.h>
-#include <icons/DirectionCW.h>
-#include <icons/DirectionCCW.h>
-#include <icons/FlashBulb.h>
-#include <icons/Play.h>
-#include <icons/Pause.h>
-#include <icons/RotateScreen.h>
-#include <icons/Save.h>
-#include <icons/Target.h>
-#include <icons/Timer.h>
-#include <icons/ToggleOn.h>
-#include <icons/ToggleOff.h>
 #include <icons/rgb_home_70.h>
 #include <icons/rgb_settings_70.h>
 #include <icons/rgb_flash_70.h>
@@ -52,8 +48,10 @@
 #include <icons/rgb_config_80.h>
 #include <icons/rgb_cancel_white_80.h>
 #include <icons/rgb_cancel_red_80.h>
-#include <icons/rgb_flash_yellow_80.h>
-#include <icons/rgb_flash_grey_80.h>
+#include <icons/rgb_flash_on_80.h>
+#include <icons/rgb_flash_off_80.h>
+#include <icons/rgb_flash_sensor_on_80.h>
+#include <icons/rgb_flash_sensor_off_80.h>
 #include <icons/rgb_delay_80.h>
 #include <icons/rgb_toggle_on_112_50.h>
 #include <icons/rgb_toggle_off_112_50.h>
@@ -61,6 +59,8 @@
 #include <icons/rgb_arrow_down_100.h>
 #include <icons/rgb_play_100.h>
 #include <icons/rgb_pause_100.h>
+#include <icons/rgb_rotate_cw_80.h>
+#include <icons/rgb_rotate_ccw_80.h>
 
 extern TouchScreen          ts;
 extern MCUFRIEND_kbv        tft;
@@ -86,6 +86,7 @@ extern SdFat                sd;
 #define CUSTOM_GREY                 0xCE7A
 #define CUSTOM_GREY_LITE            0xDEFB
 #define CUSTOM_YELLOW               0xFF46
+#define CUSTOM_PURPLE               0x9813
 
 // microsteps and positions
 #define AUTOSTACK_MOTOR_STEPS       400                 // number of steps per revolution for the autostack stepper

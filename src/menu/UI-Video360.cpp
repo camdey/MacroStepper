@@ -9,12 +9,13 @@ namespace video_screen {
     #define num_btns 6
     gfxButton *btn_array[num_btns];
 
-    gfxButton btn_PlayPause     =     btn.initBitmapButton(play,                30,     100,    120,    120,    CUSTOM_GREEN,   BLACK,  true    );
-    gfxButton btn_Speed         =     btn.initButton("RPM", "fillRoundRect",    160,    20,     160,    80,     15, DARKGRAY,   true    );
-    gfxButton btn_Back          =     btn.initRGBBitmapButton(rgb_back_80,      200,    220,    80,     80,     true    );
-    gfxButton btn_Direction     =     btn.initBitmapButton(dir_cw,              200,    120,    80,     80,     CUSTOM_GREEN,   BLACK,  true    );
-    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,    true);
-    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,    true);
+
+    gfxButton btn_Speed         =   btn.initButton("RPM", "fillRoundRect",      160,    20,     160,    80,     15, DARKGRAY,   true);
+    gfxButton btn_PlayPause     =   btn.initRGBBitmapButton(rgb_play_100,       30,     100,    100,    100,    true);
+    gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,        200,    220,    80,     80,     true);
+    gfxButton btn_Direction     =   btn.initRGBBitmapButton(rgb_rotate_cw_80,   200,    120,    80,     80,     true);
+    gfxButton btn_ArrowUp       =   btn.initRGBBitmapButton(rgb_arrow_up_100,   350,    35,     100,    90,     true);
+    gfxButton btn_ArrowDown     =   btn.initRGBBitmapButton(rgb_arrow_down_100, 350,    195,    100,    90,     true);
 
 
 
@@ -47,8 +48,8 @@ namespace video_screen {
         }
 
         // draw text
-        btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
-        btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(video360.revsPerMinute()/10.00, 1));
+        btn_Speed.writeTextTopCentre(Roboto_Medium_30, WHITE);
+        btn_Speed.writeTextBottomCentre(Roboto_Black_30, WHITE, String(video360.revsPerMinute()/10.00, 1));
     }
 
 
@@ -64,13 +65,13 @@ namespace video_screen {
     void func_Speed(bool btnActive) {
         if (btnActive ) {
             ui.canEdit(routines::btn_arrows, true);
-            btn_Speed.writeTextTopCentre(Arimo_Regular_30, YELLOW);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
+            btn_Speed.writeTextTopCentre(Roboto_Medium_30, YELLOW);
+            btn_Speed.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
         }
         else if (!btnActive) {
             ui.canEdit(routines::btn_arrows, false);
-            btn_Speed.writeTextTopCentre(Arimo_Regular_30, WHITE);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, WHITE, String(video360.revsPerMinute()/10.00, 1));
+            btn_Speed.writeTextTopCentre(Roboto_Medium_30, WHITE);
+            btn_Speed.writeTextBottomCentre(Roboto_Black_30, WHITE, String(video360.revsPerMinute()/10.00, 1));
         }
     }
 
@@ -78,15 +79,13 @@ namespace video_screen {
     void func_Direction(bool btnActive) {
         if (btnActive) {
             btn_Direction.hideButton(); // replace existing button
-            btn_Direction.updateBitmap(dir_ccw); // update bitmap image
-            btn_Direction.updateColour(CUSTOM_RED); // change colour
+            btn_Direction.updateRGBBitmap(rgb_rotate_ccw_80); // update bitmap image
             btn_Direction.drawButton(); // draw
             stepper2.rotateClockwise(false);
         }
         else if (!btnActive) {
             btn_Direction.hideButton(); // replace existing button
-            btn_Direction.updateBitmap(dir_cw); // update bitmap image
-            btn_Direction.updateColour(CUSTOM_GREEN); // change colour
+            btn_Direction.updateRGBBitmap(rgb_rotate_cw_80); // update bitmap image
             btn_Direction.drawButton(); // draw
             stepper2.rotateClockwise(true);
         }
@@ -110,15 +109,13 @@ namespace video_screen {
         video360.rpmToVmax();
         if (btnActive) {
             btn_PlayPause.hideButton(); // replace existing button
-            btn_PlayPause.updateBitmap(pause); // update bitmap image
-            btn_PlayPause.updateColour(CUSTOM_BLUE); // change colour
+            btn_PlayPause.updateRGBBitmap(rgb_pause_100); // update bitmap image
             btn_PlayPause.drawButton(); // draw
             video360.status(routines::running);
         }
         else if (!btnActive) {
             btn_PlayPause.hideButton(); // replace existing button
-            btn_PlayPause.updateBitmap(play); // update bitmap image
-            btn_PlayPause.updateColour(CUSTOM_GREEN); // change colour
+            btn_PlayPause.updateRGBBitmap(rgb_play_100); // update bitmap image
             btn_PlayPause.drawButton(); // draw
             video360.status(routines::stopping);
         }
@@ -128,7 +125,7 @@ namespace video_screen {
     void func_ArrowUp(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_arrows)) {
             video360.revsPerMinute(video360.revsPerMinute()+1);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
+            btn_Speed.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
             video360.rpmToVmax();
         }
     }
@@ -137,7 +134,7 @@ namespace video_screen {
     void func_ArrowDown(bool btnActive) {
         if (btnActive && ui.canEdit(routines::btn_arrows)) {
             video360.revsPerMinute(video360.revsPerMinute()-1);
-            btn_Speed.writeTextBottomCentre(Arimo_Bold_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
+            btn_Speed.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(video360.revsPerMinute()/10.00, 1));
             video360.rpmToVmax();
         }
     }
