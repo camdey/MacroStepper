@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
-#include "MiscFunctions.h"
 #include "StatusEnums.h"
+#include "HelperFunctions.h"
 
 
 class AutoStack {
@@ -76,7 +76,12 @@ class AutoStack {
             bool isBusy = (status() != routines::inactive);
             return isBusy;
         }
-
+        void markStart(bool mark) { m_markStart = mark; }
+        bool markStart() { return m_markStart; }
+        void markEnd(bool mark) { m_markEnd = mark; }
+        bool markEnd() { return m_markEnd; }
+        void maxBackgroundLED(bool setMax) { m_maxBackgroundLED = setMax; }
+        bool maxBackgroundLED() { return m_maxBackgroundLED; }
     
     protected:
 
@@ -89,6 +94,10 @@ class AutoStack {
         int m_completedMovements    = 0;        // number of completed movements (multiples of steps) within an AutoStack procedure
         int m_requiredMovements     = 0;        // number of movements (multiples of steps) required for an AutoStack procedure
         bool m_runMax               = false;    // whether autostack should keep moving and taking photos until told to stop
+        bool m_markStart            = true;     // whether to mark the start of a stack by dimming the background led
+        bool m_markEnd              = true;     // whether to mark the end of a stack by dimming the background led
+        bool m_maxBackgroundLED     = true;     // whether to set the abckground led to full brightness for the stack
+
 };
 
 extern AutoStack    stack;

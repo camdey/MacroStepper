@@ -51,9 +51,14 @@ void UserInterface::initButtons(unsigned long toggleDebounce, unsigned long mome
 
 
 void UserInterface::populateScreen(routines::Screens screen) {
+    // set previous screen but ignore screen refreshes, e.g. when rotating screen
     if (screen != ui.activeScreen()) {
-        // ignore screen refreshes
         ui.previousScreen(ui.activeScreen());
+        // ignore target, flash, and config pages to prevent loop of where user accesses these pages from the side menu and then the back button
+        // on that page circles them between that page and the flash/target/config page
+        // if (ui.activeScreen() != routines::ui_Target && ui.activeScreen() != routines::ui_Flash && ui.activeScreen() != routines::ui_Config) {
+        //     ui.previousScreen(ui.activeScreen());
+        // }
     }
     tft.fillScreen(BLACK);
     delay(20); // see if this solves the superimposition of two different screens

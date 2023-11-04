@@ -3,6 +3,7 @@
 #include "AutoStack.h"
 #include "StepperControl.h"
 #include "StatusEnums.h"
+#include "Piezo.h"
 #include "UserInterface.h"
 #include "CameraControl.h"
 #include "menu/UI-Global.h"
@@ -104,7 +105,7 @@ void Photo360::terminatePhoto360() {
     camera.photoTaken(false);
     completedPhotos(0);                                     // reset completed movements count
     _stepper.executedMovement(false);
-    produceTone(4, 300, 200);                               // sound 4 tones for 300ms separated by a 200ms delay
+    piezo.produceTone(4000, 4, 300, 200);                               // sound 4 tones for 300ms separated by a 200ms delay
     // change max velocity back to normal
     _stepper.targetVelocity(STEALTH_CHOP_VMAX);
 }

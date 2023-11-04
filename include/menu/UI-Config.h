@@ -10,7 +10,8 @@ namespace config_screen {
         void checkConfigButtons(int touch_x, int touch_y);
         void func_Back(bool btnActive);
         void func_FlipScreen(bool btnActive);
-        void func_FlashSensor(bool btnActive);
+        void func_Piezo(bool btnActive);
+        void func_LED(bool btnActive);
         void func_Stepper(bool btnActive);
 }
 #endif

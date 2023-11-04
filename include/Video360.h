@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
-#include "MiscFunctions.h"
 #include "StatusEnums.h"
 
 class Video360 {

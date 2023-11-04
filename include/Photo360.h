@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
-#include "MiscFunctions.h"
 #include "StatusEnums.h"
+#include "HelperFunctions.h"
 
 #define photoCountArraySize 20 // need to ensure we don't go out of bounds
 

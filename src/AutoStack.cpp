@@ -1,10 +1,11 @@
 #include "VariableDeclarations.h"
-#include "MiscFunctions.h"
 #include "AutoStack.h"
 #include "StepperControl.h"
 #include "CameraControl.h"
 #include "StatusEnums.h"
+#include "LedControl.h"
 #include "UserInterface.h"
+#include "Piezo.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
@@ -12,20 +13,36 @@
 
 
 void AutoStack::init() {
-    _stepper.readyStealthChop();
-    _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
-    goToStart();
-    completedMovements(0);
-    _stepper.executedMovement(false);
-    camera.photoTaken(false);
-    lastMovementMillis(millis());
-    global::func_Reset(false);                      // change reset button to red
-    if (camera.shutterEnabled()) {
-        status(routines::newShutter);               // reset status so we take a photo on the next loop
-    } else {
-        status(routines::newMovement);              // set to new movement if shutter isnt enabled
+    if (status() == routines::start) {                  // move to start position if beginning AutoStack
+        _stepper.slaveSelected(true);
+        _stepper.enabled(true);
+        _stepper.readyStealthChop();
+        _stepper.targetVelocity(10000);                 // reduce max velocity to minimize vibration
+        goToStart();
+        completedMovements(0);
+
+        if (markStart()) {
+            led.setBrightness(0);
+            if (camera.flashSensorEnabled()) {
+                camera.flashSensorEnabled(false);
+                camera.triggerShutter(true);
+                camera.flashSensorEnabled(true);
+            } else {
+                camera.triggerShutter(true);
+            }
+            led.updateBrightness();
+        }
+
+        _stepper.executedMovement(false);
+        camera.photoTaken(false);
+        lastMovementMillis(millis());
+        global::func_Reset(false);                      // change reset button to red
+        if (camera.shutterEnabled()) {
+            status(routines::newShutter);               // reset status so we take a photo on the next loop
+        } else {
+            status(routines::newMovement);              // set to new movement if shutter isnt enabled
+        }
     }
-    // auto_screen::status(start);
 }
 
 /***********************************************************************
@@ -39,12 +56,6 @@ another Movement attempted. When all Movements required are completed,
 the autoStack will be completed and ceased to be called.
 ***********************************************************************/
 void AutoStack::run() {
-    if (status() == routines::start) {                  // move to start position if beginning AutoStack
-        _stepper.slaveSelected(true);
-        _stepper.enabled(true);
-        init();
-    }
-
     // make sure to disable/enable pins 
     if (stack.status() == routines::paused) {
         // disable spi pin while paused
@@ -190,16 +201,28 @@ void AutoStack::overshootPosition(long startPosition, int numberOfSteps) {
 // clean up variables etc after completing AutoStack sequence
 void AutoStack::terminateAutoStack() {
     if (ui.activeScreen() != routines::ui_Auto) {
-        ui.populateScreen(routines::ui_Auto);                             // go back to Auto screen if not already on it
+        ui.populateScreen(routines::ui_Auto);           // go back to Auto screen if not already on it
+    }
+    // take photo with dark bg to mark end of stack
+    if (markEnd()) {
+        led.setBrightness(0);
+        if (camera.flashSensorEnabled()) {
+            camera.flashSensorEnabled(false);
+            camera.triggerShutter(true);
+            camera.flashSensorEnabled(true);
+        } else {
+            camera.triggerShutter(true);
+        }
+        led.updateBrightness();
     }
     status(routines::inactive);
-    auto_screen::displayResetStack();                       // update button and reset button bitmap
-    auto_screen::estimateDuration();                        // update estimate
-    global::btn_Reset.hideButton();   // change reset button back to black
+    auto_screen::displayResetStack();                   // update button and reset button bitmap
+    auto_screen::estimateDuration();                    // update estimate
+    global::btn_Reset.hideButton();                     // change reset button back to black
     camera.photoTaken(false);
-    completedMovements(0);                                  // reset completed movements count
+    completedMovements(0);                              // reset completed movements count
     _stepper.executedMovement(false);
-    produceTone(4, 300, 200);                               // sound 4 tones for 300ms separated by a 200ms delay
+    piezo.produceTone(4000, 4, 300, 200);               // sound 4 tones for 300ms separated by a 200ms delay
     // change max velocity back to normal
     _stepper.targetVelocity(STEALTH_CHOP_VMAX);
 }

@@ -29,7 +29,6 @@
 #include "gfxButton.h"                      // my library for adding/controlling TFT buttons
 // project definitions and functions
 #include "JoystickControl.h"                // joystick control functions
-#include "MiscFunctions.h"                  // miscellaneous functions
 #include "CameraControl.h"                 // functions relating to the camera shutter and flash
 #include "StepperControl.h"                 // functions for controlling the stepper motor
 #include "LedControl.h"
@@ -39,6 +38,7 @@
 #include "VariableDeclarations.h"           // external variable declarations
 #include "UserInterface.h"
 #include "StatusEnums.h"                    // enums containing statuses for various routines, namespace routines::
+#include "Piezo.h"
 #include "menu/UI-Home.h"
 #include "menu/UI-Stack.h"
 #include "menu/UI-Orbis.h"
@@ -51,7 +51,6 @@
 #include "menu/UI-Auto.h"
 #include "menu/UI-AutoConfig.h"
 #include "Wire.h"
-// #include <SPI.h>
 #include "SdFat.h"
 
 
@@ -69,14 +68,8 @@ Joystick                rStick(stepper2, RSTICK_PIN, ZSTICK_PIN);
 ledLight                led(LED_PIN, POT_PIN);
 UserInterface           ui;
 SdFat                   SD;
+Piezo                   piezo;
 
-#define SD_FAT_TYPE 3
-#define SD_CS_PIN SDCARD_SS_PIN
-File myFile;
-uint16_t settings_test[14400];
-File bMap;
-// unsigned  char bitmp[512];
-int bmp_index = 0;
 
 // ***** --- MAIN PROGRAM --- ***** //
 void setup(void) {
@@ -122,26 +115,6 @@ void setup(void) {
 
     btn.begin(&tft, &SD);
     btn.setScreenSize(480, 320);
-
-    // delay(2000);
-    // Serial.println("read");
-    // myFile = sd.open("icons/rgb_settings_120.bmp");
-    // uint8_t ret = btn.drawBMPFromSD("/icons/rgb_settings_120.bmp", 0, 0);
-    // delay(1000);
-    // Serial.println(myFile);
-    // if (myFile) {
-    //     while (myFile.available()) {
-    //         Serial.println((uint16_t) myFile.read());
-    //         // settings_test[bmp_index] = (uint16_t) myFile.read();
-    //         // bmp_index++;
-    //     }
-    //     for (int i = 0; i < 512; i++) {
-    //         Serial.write(settings_test[i]);
-    //     }
-    //     myFile.close();
-    //     tft.drawRGBBitmap(0, 0, settings_test, 120, 120); //  Draw binary Bitmap (96 pixels *96 pixels  / 8) bytes
-    // }
-    // delay(3000);
 
     ui.initButtons(200, 75);
     ui.populateScreen(routines::ui_Home);
@@ -207,9 +180,7 @@ void loop() {
         xStick.lastCheckMillis(millis());
     }
 
-    if (millis() - led.lastCheckMillis() >= 300) {
-        // only updates if value has changed
+    if (millis() - led.lastCheckMillis() >= 50) {
         led.updateBrightness();
-        // Serial.print("pot val: "); Serial.println(led.readDimmer());
     }
 }

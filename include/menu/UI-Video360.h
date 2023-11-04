@@ -15,6 +15,7 @@ namespace video_screen {
     void func_PlayPause(bool btnActive);
     void func_ArrowUp(bool btnActive);
     void func_ArrowDown(bool btnActive);
+    void hideArrows(bool hide);
 }
 
 #endif

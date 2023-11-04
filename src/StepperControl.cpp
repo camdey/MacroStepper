@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "VariableDeclarations.h"
 #include "StepperControl.h"
-#include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "AutoStack.h"
 #include "CameraControl.h"

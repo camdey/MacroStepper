@@ -1,7 +1,9 @@
-#include "MiscFunctions.h"
+
+
 #include "StepperControl.h"
 #include "JoystickControl.h"
 #include "UserInterface.h"
+#include "Piezo.h"
 #include "menu/UI-Manual.h"
 #include "menu/UI-AutoConfig.h"
 
@@ -84,12 +86,12 @@ void Joystick::motion(bool btnTrigger) {
         if (_stepper.homed()) {
             if (dir == 0 && _stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
                 Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of rear end stop): "); Serial.println(_stepper.XACTUAL());
-                produceTone(1, 250, 0);
+                piezo.produceTone(4000, 4, 300, 200); 
                 break;
             }
             else if (dir == 1 && MAX_RAIL_POSITION - _stepper.XACTUAL() <= SAFE_ZONE_BUFFER) {
                 Serial.print("WARNING: hit SAFE_ZONE_BUFFER (within 2mm of front end stop): "); Serial.println(_stepper.XACTUAL());
-                produceTone(1, 250, 0);
+                piezo.produceTone(4000, 4, 300, 200); 
                 break;
             }
         }

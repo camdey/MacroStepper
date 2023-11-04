@@ -19,28 +19,34 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         int chipSelectPin() {return m_chipSelectPin;}
         void executedMovement(bool executed) {m_executedMovement = executed;}
         bool executedMovement() {return m_executedMovement;}
+        void shutdown(bool shutdown) { m_shutdown = shutdown; }
+        bool shutdown() { return m_shutdown; }
         void enabled(bool enable) {
-            if (enable) {
-                delay(10);
-                digitalWrite(enablePin(), LOW); // enable
-                delay(10);
-            } else if (!enable) {
-                delay(10);
-                digitalWrite(enablePin(), HIGH); // disable
-                delay(10);
+            if (!shutdown()) {
+                if (enable) {
+                    delay(10);
+                    digitalWrite(enablePin(), LOW); // enable
+                    delay(10);
+                } else if (!enable) {
+                    delay(10);
+                    digitalWrite(enablePin(), HIGH); // disable
+                    delay(10);
+                }
+                m_enabled = enable;
             }
-            m_enabled = enable;
         }
         bool enabled() {return m_enabled;}
         void rotateClockwise (bool clockwise) {m_rotateClockwise = clockwise;}
         bool rotateClockwise() {return m_rotateClockwise;}
         void slaveSelected(bool selected) {
-            if (selected) {
-                digitalWrite(chipSelectPin(), LOW);
-            } else if (!selected) {
-                digitalWrite(chipSelectPin(), HIGH);
+            if (!shutdown()) {
+                if (selected) {
+                    digitalWrite(chipSelectPin(), LOW);
+                } else if (!selected) {
+                    digitalWrite(chipSelectPin(), HIGH);
+                }
+                m_slaveSelected = selected;
             }
-            m_slaveSelected = selected;
         }
         bool slaveSelected() {return m_slaveSelected;}
         void stallGuardActive(bool active) {m_stallGuardActive = active;}
@@ -88,6 +94,7 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
         long m_targetVelocity           = 200000;       // target velocity = VMAX for TMC5160
         bool m_executedMovement         = false;        // whether the stepper successfully executed a movement or if it was deferred
         bool m_enabled                  = true;         // if the stepper is enabled
+        bool m_shutdown                 = false;        // shutdown steppers until switched back on in settings
         bool m_rotateClockwise          = true;         // stepper rotation direction
         bool m_slaveSelected            = false;        // if the stepper is the currently selected slave device
         bool m_stallGuardActive         = false;        // if stallGuard has been configured

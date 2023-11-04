@@ -1,4 +1,3 @@
-#include "MiscFunctions.h"
 #include "CameraControl.h"
 #include "StepperControl.h"
 #include "UserInterface.h"
@@ -85,8 +84,8 @@ namespace manual_screen {
             ui.canEdit(routines::btn_arrows, true);
             ui.canEdit(routines::btn_distance, true);
 
-            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, CUSTOM_RED);
-            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, CUSTOM_BLUE_DARK);
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_BLUE_DARK, String(stepper1.distancePerMovement(), 4));
         }
         else {
             ui.canEdit(routines::btn_arrows, false);
@@ -110,7 +109,8 @@ namespace manual_screen {
 
     void func_Back(bool btnActive) {
         if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(ui.previousScreen());
+            // ui.populateScreen(ui.previousScreen());
+            ui.populateScreen(routines::ui_Stack);
         }
     }
 
@@ -121,7 +121,7 @@ namespace manual_screen {
             if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.incrementStepsPerMovement();
                 stepper1.calculateDistancePerMovement();
-                btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String(stepper1.distancePerMovement(), 4));
+                btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_BLUE_DARK, String(stepper1.distancePerMovement(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!ui.canEdit(routines::btn_distance)) {
@@ -145,7 +145,7 @@ namespace manual_screen {
             if (ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
                 stepper1.decrementStepsPerMovement();
                 stepper1.calculateDistancePerMovement();
-                btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_RED, String(stepper1.distancePerMovement(), 4));
+                btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_BLUE_DARK, String(stepper1.distancePerMovement(), 4));
             }
             // if not setting step size, move the stepper forward
             else if (!ui.canEdit(routines::btn_distance)) {

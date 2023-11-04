@@ -1,10 +1,10 @@
-#include "MiscFunctions.h"
 #include "StepperControl.h"
 #include "AutoStack.h"
 #include "CameraControl.h"
 #include "UserInterface.h"
 #include "menu/UI-AutoConfig.h"
 #include "menu/UI-Global.h"
+#include "Piezo.h"
 
 namespace autoconfig_screen {
     #define num_btns 9

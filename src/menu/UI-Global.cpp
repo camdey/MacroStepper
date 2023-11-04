@@ -62,41 +62,42 @@ namespace global {
     }
 
 
-    bool editingDisabled() {
+    bool editingEnabled() {
+        bool canEdit = false;
         for (int i = routines::enum_first+1; i != routines::enum_last; i++) {
             routines::Buttons e = static_cast<routines::Buttons>(i);
             if (ui.canEdit(e)) {
-                return false;
-            } else {
-                return true;
+                canEdit = true;
+                break;
             }
         }
+        return canEdit;
     }
 
 
     void func_Home(bool btnActive) {
-        if (editingDisabled()) {
+        if (!editingEnabled()) {
             ui.populateScreen(routines::ui_Home);
         }
     }
 
 
     void func_Settings(bool btnActive) {
-        if (editingDisabled()) {
+        if (!editingEnabled()) {
             ui.populateScreen(routines::ui_Config);
         }
     }
 
 
     void func_FlashPage(bool btnActive) {
-        if (editingDisabled()) {
+        if (!editingEnabled()) {
             ui.populateScreen(routines::ui_Flash);
         }
     }
 
 
     void func_Target(bool btnActive) {
-        if (editingDisabled()) {
+        if (!editingEnabled()) {
             ui.populateScreen(routines::ui_Target);
         }
     }

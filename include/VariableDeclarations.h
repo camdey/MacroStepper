@@ -83,6 +83,7 @@ extern SdFat                sd;
 #define CUSTOM_RED                  0xFBCC
 #define CUSTOM_RED_LITE             0xFCD1
 #define CUSTOM_BLUE                 0x4EDE
+#define CUSTOM_BLUE_DARK            0x243F
 #define CUSTOM_GREY                 0xCE7A
 #define CUSTOM_GREY_LITE            0xDEFB
 #define CUSTOM_YELLOW               0xFF46
@@ -173,5 +174,7 @@ extern SdFat                sd;
 #define SHUTTER_PIN                 48              // pin for pulling camera focus and shutter to GND via opto
 #define LED_PIN                     12              // pin for outputting PWM signal for LED light
 
+#define SD_FAT_TYPE 3
+#define SD_CS_PIN SDCARD_SS_PIN
 
 #endif

@@ -1,10 +1,10 @@
-#include "MiscFunctions.h"
 #include "CameraControl.h"
 #include "AutoStack.h"
 #include "StatusEnums.h"
 #include "UserInterface.h"
 #include "menu/UI-Auto.h"
 #include "menu/UI-Global.h"
+#include "HelperFunctions.h"
 
 namespace auto_screen {
     #define num_btns 14
@@ -93,8 +93,8 @@ namespace auto_screen {
             ui.canEdit(routines::btn_distance, true);
             hideArrows(false); // show arrows, hide play/pause
 
-            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, YELLOW);
-            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextTopCentre(Roboto_Medium_30, CUSTOM_BLUE_DARK);
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_BLUE_DARK, String(stepper1.distancePerMovement(), 4));
         }
         else if (!btnActive && !stack.busy()) {
             ui.canEdit(routines::btn_arrows, false);
@@ -133,6 +133,7 @@ namespace auto_screen {
                 // autoStackPaused = false;
                 if (stack.status() == routines::inactive) {
                     stack.status(routines::start);
+                    stack.init(); // begin stack
                 } else if (stack.status() == routines::paused) {
                     stack.status(routines::waitShutter);
                 }
@@ -161,7 +162,7 @@ namespace auto_screen {
         if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.incrementStepsPerMovement();
             stepper1.calculateDistancePerMovement();
-            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_BLUE_DARK, String(stepper1.distancePerMovement(), 4));
         }
     }
 
@@ -170,7 +171,7 @@ namespace auto_screen {
         if (btnActive && ui.canEdit(routines::btn_distance) && ui.canEdit(routines::btn_arrows)) {
             stepper1.decrementStepsPerMovement();
             stepper1.calculateDistancePerMovement();
-            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, YELLOW, String(stepper1.distancePerMovement(), 4));
+            btn_StepSize.writeTextBottomCentre(Roboto_Black_30, CUSTOM_BLUE_DARK, String(stepper1.distancePerMovement(), 4));
         }
     }
 

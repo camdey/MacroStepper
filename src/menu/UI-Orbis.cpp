@@ -64,12 +64,4 @@ namespace orbis_screen {
             ui.populateScreen(routines::ui_Photo360);
         }
     }
-
-
-    void func_Back(bool btnActive) {
-        if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-            ui.populateScreen(ui.previousScreen());
-            rStick.maxVelocity(100000); // reset back to original value
-        }
-    }
 }
