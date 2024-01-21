@@ -105,7 +105,8 @@ extern SdFat                sd;
 #define MAX_STEPS_PER_MOVEMENT      16000               // maximum number of steps allowed per movement. 16000 = 5mm
 #define STACK_DWELL_TIME            250                 // time between movements in an AutoStack to give the rail a moment to settle
 #define SHUTTER_PULL_TIME           800                 // time the shutter is pulled low to ensure successful triggering
-#define MAX_LED_VAL                 570                 // max dimmer value to send to pwm to keep current of driver at 1.2A or below (60% of 2A)
+#define MIN_LED_PWM                 0                   // LDD-1500HW LED driver PWM "off" is below 0.8v || 256*(0.8/3.3) = 62 *** for whatever reason, the driver dims across the full 0-255 range
+#define MAX_LED_PWM                 255                 // LDD-1500HW LED driver PWM "on" is above 2.5v || 256*(2.5/3.3) = 194 *** for whatever reason, the driver dims across the full 0-255 range
 #define STEPS_PER_VMAX              727                 // number of steps per second for every 1000 VMAX
 
 //=====definitions for touch screen coordinates=====//

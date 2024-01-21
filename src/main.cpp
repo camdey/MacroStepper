@@ -107,6 +107,7 @@ void setup(void) {
 
     stepper2.slaveSelected(false);
     stepper2.enabled(false);
+    rStick.maxVelocity(2000); //set vmax to 2000 for rStick
     
     digitalWrite(SHUTTER_PIN, LOW);
 
@@ -182,5 +183,6 @@ void loop() {
 
     if (millis() - led.lastCheckMillis() >= 50) {
         led.updateBrightness();
+        // Serial.print("led: "); Serial.println(led.convertToPWM(led.readDimmer()));
     }
 }

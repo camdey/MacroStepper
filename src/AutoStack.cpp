@@ -36,7 +36,9 @@ void AutoStack::init() {
         _stepper.executedMovement(false);
         camera.photoTaken(false);
         lastMovementMillis(millis());
-        global::func_Reset(false);                      // change reset button to red
+        if (ui.activeScreen() == routines::ui_AutoConfig) {
+            global::func_Reset(false);                      // change reset button to red
+        }
         if (camera.shutterEnabled()) {
             status(routines::newShutter);               // reset status so we take a photo on the next loop
         } else {
@@ -218,7 +220,9 @@ void AutoStack::terminateAutoStack() {
     status(routines::inactive);
     auto_screen::displayResetStack();                   // update button and reset button bitmap
     auto_screen::estimateDuration();                    // update estimate
-    global::btn_Reset.hideButton();                     // change reset button back to black
+    if (ui.activeScreen() == routines::ui_AutoConfig) {
+        global::btn_Reset.hideButton();                     // change reset button back to black
+    }
     camera.photoTaken(false);
     completedMovements(0);                              // reset completed movements count
     _stepper.executedMovement(false);

@@ -129,19 +129,15 @@ namespace auto_screen {
     void func_PlayPause(bool btnActive) {
         if (stack.requiredMovements() > 0) {
             if (btnActive && !ui.canEdit(routines::btn_arrows)) {
-                // autoStackInitiated = true;     // start autoStack sequence
-                // autoStackPaused = false;
+                btn_PlayPause.hideButton();
+                btn_PlayPause.updateRGBBitmap(rgb_pause_100); // update bitmap image
+                btn_PlayPause.drawButton(); // draw
                 if (stack.status() == routines::inactive) {
                     stack.status(routines::start);
                     stack.init(); // begin stack
                 } else if (stack.status() == routines::paused) {
                     stack.status(routines::waitShutter);
                 }
-                // btn_StackStatus.hideButton(false); // show status
-                btn_PlayPause.hideButton();
-                btn_PlayPause.updateRGBBitmap(rgb_pause_100); // update bitmap image
-                btn_PlayPause.drawButton(); // draw
-                // btn_StackStatus.writeTextCentre(Arimo_Bold_20, WHITE);
             }
             else if (!btnActive && !ui.canEdit(routines::btn_arrows)) {
                 // autoStackPaused = true;    // autoStack paused

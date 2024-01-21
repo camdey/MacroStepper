@@ -89,7 +89,7 @@ class TMC5160Stepper_Ext: public TMC5160Stepper {
     protected:
         int m_enablePin;                                // Arduino pin for the stepper enable pin
         int m_chipSelectPin;                            // Arduino pin for the stepper chip select
-        float m_distancePerMovement                = 5.0000;       // distance travelled per movement in micrometres, default to 5um
+        float m_distancePerMovement     = 5.0000;       // distance travelled per movement in micrometres, default to 5um
         int m_stepsPerMovement          = 16;           // number of microsteps to travel a specified distance, default to 16 (1 full step or 5um)
         long m_targetVelocity           = 200000;       // target velocity = VMAX for TMC5160
         bool m_executedMovement         = false;        // whether the stepper successfully executed a movement or if it was deferred

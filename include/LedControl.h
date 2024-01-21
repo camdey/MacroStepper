@@ -36,16 +36,19 @@ class ledLight {
         m_counter++;
 
         val = m_readingsTotal / nrReadings;
-        val = map(val, 0, 1023, 0, MAX_LED_VAL);
         return val;
+    }
+    int convertToPWM(int val) {
+        int pwmVal = map(val, 0, 1023, MIN_LED_PWM, MAX_LED_PWM);
+        return pwmVal;
     }
     void updateBrightness() {                                   // update led brightness based on current potentiometer reading
         if (enabled()) {
             if (stack.busy() && stack.maxBackgroundLED()) {
                 // set led to max if in a stack and maxBackgroundLED = true
-                setBrightness(map(MAX_LED_VAL, 0, 1023, 0, 255));
+                setBrightness(255);
             } else {
-                m_brightness = map(readDimmer(), 0, 1023, 0, 255);
+                m_brightness = convertToPWM(readDimmer());
                 if (m_brightness != m_previousBrightness) {
                     analogWrite(pwmPin(), m_brightness);
                     m_previousBrightness = m_brightness;

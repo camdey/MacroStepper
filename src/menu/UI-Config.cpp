@@ -2,6 +2,7 @@
 #include "UserInterface.h"
 #include "Piezo.h"
 #include "LedControl.h"
+#include "AutoStack.h"
 #include "menu/UI-Config.h"
 #include "menu/UI-Auto.h"
 #include "HelperFunctions.h"
@@ -10,37 +11,45 @@
 // add debug page with readouts of sensor values
 
 namespace config_screen {
-    #define num_btns 5
-    gfxButton *btn_array[num_btns];
 
     gfxButton btn_FlipScreen    =   btn.initRGBBitmapButton(rgb_toggle_off,         240,    10,     112,    50, true);
     gfxButton btn_Piezo         =   btn.initRGBBitmapButton(rgb_toggle_on,          240,    70,     112,    50, true);
     gfxButton btn_Stepper       =   btn.initRGBBitmapButton(rgb_toggle_off,         240,    130,    112,    50, true);
     gfxButton btn_LED           =   btn.initRGBBitmapButton(rgb_toggle_on,          240,    190,    112,    50, true);
+    gfxButton btn_markStack     =   btn.initRGBBitmapButton(rgb_toggle_on,          240,    250,    112,    50, true);
     gfxButton btn_Back          =   btn.initRGBBitmapButton(rgb_back_80,            380,    220,    80,     80, true);
 
+    gfxButton *btn_array[] = {
+        &btn_FlipScreen,
+        &btn_Piezo,
+        &btn_Stepper,
+        &btn_LED,
+        &btn_markStack,
+        &btn_Back
+    };
+
     void initConfigButtons() {
-        btn_array[0] = &btn_FlipScreen;
-        btn_array[1] = &btn_Piezo;
-        btn_array[2] = &btn_Stepper;
-        btn_array[3] = &btn_LED;
-        btn_array[4] = &btn_Back;
 
         btn_Back.addMomentary(func_Back, 0);
         btn_FlipScreen.addToggle(func_FlipScreen, 0);
         btn_Piezo.addToggle(func_Piezo, 0);
         btn_Stepper.addToggle(func_Stepper, 0);
+        btn_markStack.addToggle(func_markStack, 0);
         btn_LED.addToggle(func_LED, 0);
 
-        // btn_Stepper.setToggleActive(false); // init as active
-        // btn_Piezo.setToggleActive(false); // init as inactive
+    }
+
+
+    int nrButtons() {
+        int nr = sizeof(btn_array) / sizeof(btn_array[0]);
+        return nr;
     }
 
 
     void populateConfigScreen() {
         ui.activeScreen(routines::ui_Config);
         // draw buttons
-        for (int i=0; i < num_btns; i++) {
+        for (int i=0; i < nrButtons(); i++) {
             btn_array[i]->drawButton();
         }
         // draw text
@@ -54,11 +63,13 @@ namespace config_screen {
         tft.print("Shutdown Motors");
         tft.setCursor(5,220);
         tft.print("Enable LED");
+        tft.setCursor(5,280);
+        tft.print("Mark AutoStack");
     }
 
 
     void checkConfigButtons(int touch_x, int touch_y) {
-        for (int i=0; i < num_btns; i++) {
+        for (int i=0; i < nrButtons(); i++) {
             if (btn_array[i]->isTactile() && !btn_array[i]->isHidden()) {
                 btn_array[i]->contains(touch_x, touch_y);
             }
@@ -133,6 +144,24 @@ namespace config_screen {
             btn_LED.updateRGBBitmap(rgb_toggle_on);
             btn_LED.drawNewBitmap(rgb_toggle_on);
             led.enabled(true);
+        }
+    }
+
+
+    // enable/disable marking the beginning and end of an autostack
+    void func_markStack(bool btnActive) {
+        if (btnActive) {
+            btn_markStack.updateRGBBitmap(rgb_toggle_off);
+            btn_markStack.drawNewBitmap(rgb_toggle_off);
+            stack.markStart(false);
+            stack.markEnd(false);
+
+        }
+        else if (!btnActive) {
+            btn_markStack.updateRGBBitmap(rgb_toggle_on);
+            btn_markStack.drawNewBitmap(rgb_toggle_on);
+            stack.markStart(true);
+            stack.markEnd(true);
         }
     }
 }
